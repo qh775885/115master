@@ -27,8 +27,3 @@ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like 
 - [ ] 播放页一键收藏
 - [ ] 外挂字幕
 - [ ] 在线搜索字幕
-
-## 优化 TODO
-
-- [ ] 点击播放后，切换 Tab 到 New Tab
-
