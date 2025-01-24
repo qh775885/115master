@@ -1,0 +1,12 @@
+.xgplayer.xgplayer-pc .xgplayer-progress.active .xgplayer-progress-outer {
+  height: 8px;
+}
+
+.xgplayer .xg-inner-controls {
+  height: 70px;
+}
+
+.xgplayer .xg-left-grid,
+.xgplayer .xg-right-grid {
+  align-items: center;
+}
