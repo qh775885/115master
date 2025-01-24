@@ -17,10 +17,6 @@ Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like 
 
 否则将无法播放
 
-## 已知问题
-
-- 播放器种快速拖拽进度，可能由于 `Limit` 导致网络错误，刷新即可
-
 ## 线路图
 
 - [ ] 播放器支持播放列表
