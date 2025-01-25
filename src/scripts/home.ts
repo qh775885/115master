@@ -1,6 +1,8 @@
 import { GM_openInTab, GM_setValue } from '$';
 import $ from 'jquery';
 import GM_VALUE_KEY from '../constants/gm.value.key';
+import { getAvNumber } from '../utils/getNumber';
+import { PlayingVideoInfo } from '../types/player';
 
 class HomeScript {
 
@@ -32,14 +34,18 @@ class HomeScript {
                 $El.find('.file-opr').prepend('<a href="javascript:;" class=' + button.class + ' title=' + button.title + '><span>' + button.text + '</span></a>');
             });
             $El.not('.name').click(function () {
-                const playingVideoInfo = {
-                    pickCode: $El.attr('pick_code'),
-                    title: $El.attr('title'),
+                const title = $El.attr('title')!
+                const playingVideoInfo: PlayingVideoInfo = {
+                    pickCode: $El.attr('pick_code')!,
+                    title,
+                    avNumber: getAvNumber(title),
+                    url: $El.attr('url')!,
+                    fileToken: $El.attr('file_token')!
                 }
 
                 console.log('即将播放', playingVideoInfo);
                 GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
-                const url = `https://115.com/web/lixian/?pick_code=${playingVideoInfo.pickCode}`
+                const url = `https://115.com/web/lixian/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
                 GM_openInTab(url, {
                     active: true
                 })
