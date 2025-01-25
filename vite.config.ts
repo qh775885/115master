@@ -21,6 +21,8 @@ export default defineConfig({
         namespace: 'npm/vite-plugin-monkey',
         include: ['https://115.com/*'],
         exclude: ['https://*.115.com/bridge*', 'https://*.115.com/static*'],
+        // 自动允许脚本跨域访问的域名
+        connect: ['webapi.115.com','proapi.115.com','subtitlecat.com'],
       },
       build: {
         externalGlobals: {
