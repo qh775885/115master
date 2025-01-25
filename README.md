@@ -12,11 +12,14 @@
 
 ## 使用
 
-通过 [115master/releases](https://github.com/cbingb666/115master/releases) 下载 `115master.user.js` 文件，并导入到 tempermonkey 中
+安装 [Tempermonkey](https://www.tampermonkey.net/) 后，通过 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装脚本。
+
+或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
+
 
 ## 兼容性注意事项
 
-如果使用 Chrome 浏览器下，需安装 [User Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 扩展 ，并配置 `User-Agent` 为:
+如果使用 Chrome 浏览器，请安装 [User Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 扩展 ，并配置 `User-Agent` 为:
 
 ```txt
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
