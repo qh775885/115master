@@ -1,12 +1,27 @@
+/* 进度条 */
 .xgplayer.xgplayer-pc .xgplayer-progress.active .xgplayer-progress-outer {
   height: 8px;
 }
 
+/* 控制栏 */
 .xgplayer .xg-inner-controls {
   height: 70px;
 }
 
+/* 控制栏左侧 */
 .xgplayer .xg-left-grid,
 .xgplayer .xg-right-grid {
   align-items: center;
+}
+
+/* 字幕选项 */
+.xgplayer .xg-options-list {
+  width: 200px;
+}
+
+/* 字幕选项 - 缩略文字 */
+.xgplayer .xg-options-list li {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
