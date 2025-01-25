@@ -10,12 +10,11 @@
 - ⌨️ 长按 `➡️` (Right) 键，倍速播放
 - 🖼️ 画中画
 
-## 使用
+## 安装
 
 安装 [Tempermonkey](https://www.tampermonkey.net/) 后，通过 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装脚本。
 
 或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
-
 
 ## 兼容性注意事项
 
