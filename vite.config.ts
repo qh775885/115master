@@ -23,6 +23,7 @@ export default defineConfig({
         exclude: ['https://*.115.com/bridge*', 'https://*.115.com/static*'],
         // 自动允许脚本跨域访问的域名
         connect: ['webapi.115.com','proapi.115.com','subtitlecat.com'],
+        require: ['https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js']
       },
       build: {
         externalGlobals: {
