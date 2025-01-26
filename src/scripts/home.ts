@@ -18,6 +18,7 @@ class HomeScript {
 
 
     addFileListItemHouverMenu() {
+        
         document.addEventListener('mouseover', (event) => {
             const target = event.target as HTMLElement;
             const listItem = target.closest('li[file_type="1"]');
@@ -29,14 +30,36 @@ class HomeScript {
 
             const buttons = [
                 {
-                    class: 'master-player',
-                    title: '使用Master播放视频',
-                    text: '🚀 Master播放'
+                    class: '115-player',
+                    title: '使用115播放视频',
+                    text: '🏁115播放'
                 }
             ];
 
             const fileOpr = listItem.querySelector('.file-opr');
             if (!fileOpr) return;
+
+            const openVideo = (event: Event) => {
+                const mouseEvent = event as MouseEvent;
+                mouseEvent.preventDefault();
+                mouseEvent.stopPropagation();
+                mouseEvent.stopImmediatePropagation();
+                const playingVideoInfo: PlayingVideoInfo = {
+                    pickCode: listItem.getAttribute('pick_code')!,
+                    title: listItem.getAttribute('title')!,
+                    avNumber: getAvNumber(listItem.getAttribute('title')!) || undefined,
+                }
+    
+                console.log('即将播放', playingVideoInfo);
+                GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
+                const url = `https://115.com/web/lixian/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
+                GM_openInTab(url, {
+                    active: true
+                });
+            }
+
+            listItem.addEventListener('dblclick', openVideo);
+            listItem.querySelector('.file-name')?.addEventListener('click', openVideo);
 
             buttons.forEach(button => {
                 const link = document.createElement('a');
@@ -54,21 +77,12 @@ class HomeScript {
                     e.preventDefault();
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                    
-                    const playingVideoInfo: PlayingVideoInfo = {
-                        pickCode: listItem.getAttribute('pick_code')!,
-                        title: listItem.getAttribute('title')!,
-                        avNumber: getAvNumber(listItem.getAttribute('title')!),
-                        url: listItem.getAttribute('url')!,
-                        fileToken: listItem.getAttribute('file_token')!
-                    }
 
-                    console.log('即将播放', playingVideoInfo);
-                    GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
-                    const url = `https://115.com/web/lixian/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
-                    GM_openInTab(url, {
+                    GM_openInTab(`https://v.anxia.com/?pickcode=${listItem.getAttribute('pick_code')}&share_id=0`, {
                         active: true
-                    });
+                    })
+                    
+                    
                 });
             });
         });

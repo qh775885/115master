@@ -2,6 +2,10 @@ import axios from 'axios';
 import md5 from 'blueimp-md5';
 import bigInt from 'big-integer';
 import { GM_xmlhttpRequest } from '$';
+import { USER_AGENT_115 } from '../constants/useragent';
+import { resolve } from 'path';
+import { M3u8Item, VideoSource } from '../types/player';
+import { qualityCodeMap } from '../constants/quality';
 
 axios.defaults.withCredentials = true
 
@@ -211,16 +215,6 @@ class Drive115 {
         this.crypto115 = new Crypto115();
     }
 
-    async getFileDownloadUrl(pickcode: string): Promise<DownloadResult> {
-        try {
-            const res = await this.getDownloadUrlByNormal(pickcode);
-            return res;
-        } catch (error) {
-            console.error('获取下载链接失败:', error);
-            return await this.getDownloadUrlByPro(pickcode);
-        }
-    }
-
     private getDownloadUrlByNormal(pickcode: string): Promise<DownloadResult> {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
@@ -268,7 +262,7 @@ class Drive115 {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     // 一定要带上 user-agent，否则不返回 set-cookie
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3'
+                    'User-Agent': USER_AGENT_115
                 },
                 data: data,
                 onload: (response) => {
@@ -301,6 +295,96 @@ class Drive115 {
                 onerror: (error) => {
                     reject(error);
                 }
+            });
+        });
+    }
+
+    async getFileDownloadUrl(pickcode: string): Promise<DownloadResult> {
+        try {
+            const res = await this.getDownloadUrlByNormal(pickcode);
+            return res;
+        } catch (error) {
+            console.error('获取下载链接失败:', error);
+            return await this.getDownloadUrlByPro(pickcode);
+        }
+    }
+
+    async getOriginFileUrl(pickcode: string, fileId: string): Promise<DownloadResult> {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                url: `http://proapi.115.com/app/chrome/down?method=get_file_url&pickcode=${pickcode}`,
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT_115
+                },
+                onload: (response) => {
+                    const res = JSON.parse(response.response);
+                    if (res.state) {
+                        const url = res.data[fileId].url.url;
+                        resolve({
+                            url
+                        })
+                    } else {
+                        reject(new Error('获取原文件地址失败: ' + JSON.stringify(res)));
+                    }
+                },
+                onerror: (error) => {
+                    reject(error)
+                }
+            })
+        })
+    }
+
+    getM3u8RootUrl(pickcode: string): string{
+        return `https://115.com/api/video/m3u8/${pickcode}.m3u8`
+    }
+
+    async parseM3u8Url(url: string): Promise<M3u8Item[]> {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                url,
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT_115
+                },
+                onload: (response) => {
+                    if (response.status === 200) {
+                        const htmlText = response.responseText;
+                        console.log('htmlText', htmlText);
+
+                        const lines = htmlText.split('\n');
+                        let m3u8List: M3u8Item[] = [];
+
+
+
+                        htmlText.split('\n').forEach((line, index) => {
+                            if (line.includes('NAME="')) {
+                                const extXStreamInf = line.match(/#EXT-X-STREAM-INF/);
+                                if (extXStreamInf) {
+                                    const name = line.match(/NAME="([^"]*)"/)?.[1] ?? ''
+                                    const url = lines[index + 1]?.trim();
+                                    m3u8List.push({
+                                        name,
+                                        quality: qualityCodeMap[name as keyof typeof qualityCodeMap],
+                                        url
+                                    });
+                                }
+                            }
+                        })
+                        
+                        // 按照 UD HD BD 排序
+                        m3u8List.sort((a, b) => {
+                            return b.quality - a.quality;
+                        });
+
+                        resolve(m3u8List); // 返回最高质量的m3u8
+                    } else {
+                        reject(new Error('Failed to get m3u8 url'));
+                    }
+                },
+                onerror: (error) => reject(error)
             });
         });
     }

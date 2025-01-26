@@ -26,7 +26,8 @@ export default defineConfig({
       },
       build: {
         externalGlobals: {
-          vue: cdn.jsdelivr('Vue', 'dist/vue.global.prod.js'),
+          // vue: cdn.jsdelivr('Vue', 'dist/vue.global.prod.js'),
+          // hls: cdn.jsdelivr('Hls', 'dist/hls.min.js'),
         },
       },
     }),
