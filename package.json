@@ -1,7 +1,7 @@
 {
   "name": "115master",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,14 +11,15 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@types/jquery": "^3.5.32",
+    "@types/dplayer": "^1.25.5",
     "axios": "^1.7.9",
     "big-integer": "^1.6.52",
     "blueimp-md5": "^2.19.0",
-    "jquery": "^3.7.1",
+    "dplayer": "^1.27.1",
+    "hls.js": "^1.5.20",
     "minimatch": "^10.0.1",
-    "vue": "^3.5.13",
-    "xgplayer": "3.0.0-alpha.146"
+    "video.js": "^8.21.0",
+    "vue": "^3.5.13"
   },
   "devDependencies": {
     "@types/axios": "^0.14.4",

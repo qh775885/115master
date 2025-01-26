@@ -1,10 +1,9 @@
 import { GM_xmlhttpRequest } from "$";
 import { proxySubTitleFile } from "./corsProxy";
-import { getAvNumber } from "./getNumber";
 interface Item {
     title: string;
-    url?: string;
-    stringContent?: string;
+    url: string;
+    // stringContent?: string;
     downloads: number;
     comment: 1 | -1 | 0;
     originLanguage: string;
@@ -86,17 +85,19 @@ class Subtitlecat {
                         .filter(item => item.title.match(new RegExp(`\\b${keyword}`, 'i')))
                         .map(async (item) => {
                             let url = await this.fetchSubtitleUrl(`${this.domain}/${item.href}`, language);
-                            const stringContent = url ? await proxySubTitleFile(this.domain + url) : undefined;
-                            console.log(url, stringContent);
+                            const proxyUrl = url ? await proxySubTitleFile(this.domain + url) : undefined;
+                            console.dir(url);
+                            console.log('字幕 URL:', url);
+                            console.log('字幕语言:', language);
                             return {
                                 ...item,
-                                url: stringContent ? undefined : url,
-                                stringContent
+                                url: proxyUrl!,
+                                // stringContent
                             };
                         });
 
                     const results = (await Promise.all(promises))
-                        .filter(item => item.url !== undefined || item.stringContent !== undefined)
+                        .filter(item => item.url !== undefined)
                         .sort((a, b) => {
                             // 首先按照 comment 倒序排序
                             if (b.comment !== a.comment) {

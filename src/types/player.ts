@@ -1,7 +1,18 @@
-export type PlayingVideoInfo = {
-    pickCode: string;
-    title: string;
+export interface VideoSource {
+    name: string;
     url: string;
-    fileToken: string;
-    avNumber?: string | null;
+    type?: string;
+    quality: number;
+}
+
+export interface PlayingVideoInfo {
+    title: string;
+    pickCode: string;
+    avNumber?: string;
+}
+
+export type M3u8Item = {
+    name: string;
+    url: string;
+    quality: number;
 }
