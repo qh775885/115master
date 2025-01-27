@@ -41,3 +41,12 @@ export const convertSrtToVtt = (srt: string): string => {
 
     return vtt;
 }
+
+/**
+ * 将vtt格式转换为blob url
+ * @param vtt vtt格式的字幕内容
+ */
+export const vttToBlobUrl = (vtt: string): string => {
+    const blob = new Blob([vtt], { type: 'text/vtt; charset=utf-8' });
+    return URL.createObjectURL(blob);
+}

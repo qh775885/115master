@@ -2,13 +2,13 @@ import { GM_getValue } from "$";
 import GM_VALUE_KEY from "../constants/gm.value.key";
 import DPlayer, { DPlayerOptions } from 'dplayer';
 import drive115 from "../utils/download-url";
-import Subtitlecat from "../utils/subtitlecat";
+import {SubtitleCat} from "../utils/subtitlecat";
 import { PlayingVideoInfo } from "../types/player";
 
 class playerScript {
     private player: DPlayer | null = null;
     private playingVideoInfo: PlayingVideoInfo = GM_getValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO) as PlayingVideoInfo;
-    private subtitlecat: Subtitlecat = new Subtitlecat();
+    private subtitlecat: SubtitleCat = new SubtitleCat();
 
     constructor() {
         this.init();
@@ -243,6 +243,8 @@ class playerScript {
         }
 
         const zhSubtitles = await this.subtitlecat.fetchSubtitle(this.playingVideoInfo.avNumber, 'zh-CN');
+
+        console.log(zhSubtitles);
         
         if (this.player && zhSubtitles.length > 0) {
             const video = this.player.video as HTMLVideoElement;
