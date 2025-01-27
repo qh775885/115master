@@ -6,7 +6,7 @@ import { SubtitleCat } from "../utils/subtitlecat";
 import { PlayingVideoInfo } from "../types/player";
 
 class PlayerScript {
-    private player: DPlayer | null = null;
+    private dp: DPlayer | null = null;
     private playingVideoInfo: PlayingVideoInfo;
     private subtitlecat: SubtitleCat;
 
@@ -101,26 +101,28 @@ class PlayerScript {
             playbackSpeed: [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3, 5, 10],
         };
 
-        this.player = new DPlayer(options);
+        this.dp = new DPlayer(options);
     }
 
     private setupPlayerEvents() {
-        if (!this.player) return;
+        if (!this.dp) return;
         
-        this.player.video.addEventListener('dblclick', () => {
-            if (!this.player) return;
+        this.dp.video.addEventListener('dblclick', () => {
+            if (!this.dp) return;
             
             if (document.fullscreenElement) {
-                this.player.fullScreen.cancel('browser');
+                this.dp.fullScreen.cancel('browser');
             } else {
-                this.player.fullScreen.request('browser');
+                this.dp.fullScreen.request('browser');
             }
         });
     }
 
     // 字幕相关方法
     private async initializeSubtitles() {
-        if (!this.playingVideoInfo.avNumber || !this.player) return;
+        if (!this.playingVideoInfo.avNumber || !this.dp) return;
+
+        this.dp.notice('🔍 正在搜索字幕...', 3000, 0.5);
 
         const subtitles = await this.subtitlecat.fetchSubtitle(
             this.playingVideoInfo.avNumber, 
@@ -130,13 +132,15 @@ class PlayerScript {
         if (subtitles.length > 0) {
             this.addSubtitleTracks(subtitles);
             this.setupSubtitleControls();
+        } else {
+            this.dp.notice('🚫 未找到匹配的字幕', 3000, 0.8);
         }
     }
 
     private addSubtitleTracks(subtitles: any[]) {
-        if (!this.player) return;
+        if (!this.dp) return;
 
-        const video = this.player.video as HTMLVideoElement;
+        const video = this.dp.video as HTMLVideoElement;
         subtitles.forEach((sub, index) => {
             const track = document.createElement('track');
             track.kind = 'subtitles';
@@ -149,15 +153,16 @@ class PlayerScript {
 
         if (video.textTracks.length > 0) {
             video.textTracks[0].mode = 'showing';
+            this.dp.notice(`✅ 字幕加载完成，共 ${video.textTracks.length} 条`, 2000, 0.8);
         }
     }
 
     private setupSubtitleControls() {
-        if (!this.player) return;
+        if (!this.dp) return;
         
         const button = this.createSubtitleButton();
         if (button) {
-            this.updateSubtitleMenu((this.player.video as HTMLVideoElement).textTracks);
+            this.updateSubtitleMenu((this.dp.video as HTMLVideoElement).textTracks);
         }
     }
 
@@ -199,6 +204,7 @@ class PlayerScript {
             tracks[i].mode = i === index ? 'showing' : 'hidden';
         }
         this.updateSubtitleMenu(tracks);
+        this.dp!.notice(`✅ 已切换字幕: ${tracks[index].label}`, 2000, 0.8);
     }
 
     // HTML 模板方法
