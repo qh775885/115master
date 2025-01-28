@@ -1,23 +1,44 @@
 import { GM_xmlhttpRequest } from "$";
-import { proxySubTitleFile } from "./corsProxy";
-interface Item {
+import { vttToBlobUrl } from "./subtitle";
+import { convertSrtToVtt } from "./subtitle";
+
+interface SubtitleSearchResult {
     title: string;
-    url: string;
-    // stringContent?: string;
+    href: string;
     downloads: number;
     comment: 1 | -1 | 0;
     originLanguage: string;
     targetLanguage: string;
 }
 
-class Subtitlecat {
+interface ProcessedSubtitle {
+    title: string;
+    url: string;
+    downloads: number;
+    comment: 1 | -1 | 0;
+    originLanguage: string;
+    targetLanguage: string;
+    vvtText: string;
+}
+
+export class SubtitleCat {
     private domain = 'https://subtitlecat.com';
     constructor() {
-        this.init();
     }
-
-    init() {
-        console.log('Subtitlecat init');
+ 
+    getSubtitleText(url: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                url: url,
+                method: 'GET',
+                onload: (response) => {
+                    resolve(response.responseText);
+                },
+                onerror: (error) => {
+                    reject(error);
+                }
+            });
+        });
     }
 
     fetchSubtitleUrl(url: string, language: string): Promise<string | undefined> {
@@ -39,82 +60,116 @@ class Subtitlecat {
         })
     }
 
-    fetchSubtitle(keyword: string, language: string): Promise<Item[]> {
+    private parseSubtitleRow(row: Element, language: string): SubtitleSearchResult {
+        const firstTd = row.querySelector('td:first-child');
+        const link = firstTd?.querySelector('a');
+        const title = link?.textContent || '';
+        const href = link?.getAttribute('href') || '';
+
+        // 从第一个td提取原始语言
+        const langMatch = firstTd?.textContent?.match(/translated from (\w+)/);
+        const originLanguage = langMatch ? langMatch[1] : '';
+
+        // 提取评价
+        const hasThumbsDown = row.querySelector('td:nth-child(2) .fa-thumbs-down') !== null;
+        const hasThumbsUp = row.querySelector('td:nth-child(2) .fa-thumbs-up') !== null;
+        const comment = hasThumbsDown ? -1 as const : (hasThumbsUp ? 1 as const : 0 as const);
+
+        // 提取下载次数
+        const downloadsText = row.querySelector('td:nth-child(3)')?.textContent || '';
+        const downloadsMatch = downloadsText.match(/\d+/);
+        const downloads = downloadsMatch ? parseInt(downloadsMatch[0]) : 0;
+
+        return {
+            title,
+            href,
+            downloads,
+            comment,
+            originLanguage,
+            targetLanguage: language
+        };
+    }
+
+    private async processSubtitleItem(item: SubtitleSearchResult): Promise<ProcessedSubtitle | undefined> {
+        const url = await this.fetchSubtitleUrl(`${this.domain}/${item.href}`, item.targetLanguage);
+        if (!url) return undefined;
+
+        const subtitleText = await this.getSubtitleText(this.domain + url);
+        const vttText = convertSrtToVtt(subtitleText);
+        const blobUrl = vttToBlobUrl(vttText);
+
+        return {
+            ...item,
+            url: blobUrl!,
+            vvtText: vttText
+        };
+    }
+
+    private sortResults(results: ProcessedSubtitle[]): ProcessedSubtitle[] {
+        return results.sort((a, b) => {
+            if (b.comment !== a.comment) {
+                return b.comment - a.comment;
+            }
+            return b.downloads - a.downloads;
+        });
+    }
+
+    async fetchSubtitle(keyword: string, language: string): Promise<ProcessedSubtitle[]> {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
                 url: `${this.domain}/index.php?search=${keyword}`,
                 method: 'GET',
                 onload: async (response) => {
-                    console.log(response);
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(response.response, 'text/html');
-                    const rows = doc.querySelectorAll('.sub-table tbody tr');
+                    try {
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(response.response, 'text/html');
+                        const rows = Array.from(doc.querySelectorAll('.sub-table tbody tr')).slice(0, 5);
+                        
+                        console.log('找到的行数:', rows.length);
 
-                    const promises = Array.from(rows).slice(0, 5)
-                        .map((item) => {
-                            const firstTd = item.querySelector('td:first-child');
-                            const link = firstTd?.querySelector('a');
-                            const title = link?.textContent || '';
-                            const href = link?.getAttribute('href') || '';
+                        // 解析搜索结果并过滤
+                        const searchResults = rows
+                            .map(row => this.parseSubtitleRow(row, language))
+                            .filter(item => {
+                                console.log('正在过滤标题:', item.title);
+                                console.log('关键词:', keyword);
+                                // 使用更宽松的匹配条件
+                                const match = item.title.toLowerCase().includes(keyword.toLowerCase());
+                                console.log('是否匹配:', match);
+                                return match;
+                            });
 
-                            // 从第一个td提取原始语言
-                            const langMatch = firstTd?.textContent?.match(/translated from (\w+)/);
-                            const originLanguage = langMatch ? langMatch[1] : '';
+                        console.log('过滤后的搜索结果:', searchResults);
 
-                            // 提取评价
-                            const hasThumbsDown = item.querySelector('td:nth-child(2) .fa-thumbs-down') !== null;
-                            const hasThumbsUp = item.querySelector('td:nth-child(2) .fa-thumbs-up') !== null;
-                            const comment = hasThumbsDown ? -1 as const : (hasThumbsUp ? 1 as const : 0 as const);
+                        // 处理每个字幕项
+                        const processedResults = await Promise.all(
+                            searchResults.map(async item => {
+                                console.log('处理字幕项:', item.title);
+                                const result = await this.processSubtitleItem(item);
+                                console.log('处理结果:', result ? '成功' : '失败');
+                                return result;
+                            })
+                        );
 
-                            // 提取下载次数
-                            const downloadsText = item.querySelector('td:nth-child(3)')?.textContent || '';
-                            const downloadsMatch = downloadsText.match(/\d+/);
-                            const downloads = downloadsMatch ? parseInt(downloadsMatch[0]) : 0;
+                        // 过滤掉未成功处理的项并排序
+                        const finalResults = this.sortResults(
+                            processedResults.filter((item): item is ProcessedSubtitle => item !== undefined)
+                        );
 
-                            console.log('search to subtitle', title);
+                        console.log('最终结果数量:', finalResults.length);
+                        console.log('最终结果:', finalResults);
 
-                            return {
-                                title,
-                                href,
-                                downloads,
-                                comment,
-                                originLanguage,
-                                targetLanguage: language
-                            };
-                        })
-                        .filter(item => item.title.match(new RegExp(`\\b${keyword}`, 'i')))
-                        .map(async (item) => {
-                            let url = await this.fetchSubtitleUrl(`${this.domain}/${item.href}`, language);
-                            const proxyUrl = url ? await proxySubTitleFile(this.domain + url) : undefined;
-                            console.dir(url);
-                            console.log('字幕 URL:', url);
-                            console.log('字幕语言:', language);
-                            return {
-                                ...item,
-                                url: proxyUrl!,
-                                // stringContent
-                            };
-                        });
-
-                    const results = (await Promise.all(promises))
-                        .filter(item => item.url !== undefined)
-                        .sort((a, b) => {
-                            // 首先按照 comment 倒序排序
-                            if (b.comment !== a.comment) {
-                                return b.comment - a.comment;
-                            }
-                            // comment 相同时按照 downloads 倒序排序
-                            return b.downloads - a.downloads;
-                        });
-
-                    resolve(results);
+                        resolve(finalResults);
+                    } catch (error) {
+                        console.error('处理过程中出错:', error);
+                        reject(error);
+                    }
                 },
                 onerror: (error) => {
+                    console.error('请求失败:', error);
                     reject(error);
                 }
-            })
-        })
+            });
+        });
     }
 }
-
-export default Subtitlecat;
