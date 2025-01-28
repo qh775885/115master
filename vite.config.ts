@@ -23,9 +23,13 @@ export default defineConfig({
         exclude: ['https://*.115.com/bridge*', 'https://*.115.com/static*'],
         // 自动允许脚本跨域访问的域名
         connect: ['webapi.115.com','proapi.115.com','subtitlecat.com'],
-        require: ['https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js']
+        require: ['https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js'],
+        downloadURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.user.js',
+        updateURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.meta.js'
       },
       build: {
+        fileName: '115master.user.js',
+        metaFileName: '115master.meta.js',
         externalGlobals: {
           // vue: cdn.jsdelivr('Vue', 'dist/vue.global.prod.js'),
           // hls: cdn.jsdelivr('Hls', 'dist/hls.min.js'),
