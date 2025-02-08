@@ -18,7 +18,7 @@ class PlayerScript {
 
     private async init() {
         if (!this.validateVideoInfo()) return;
-        
+
         this.setupPlayerUI();
         await this.initializePlayer();
         await this.initializeSubtitles();
@@ -35,13 +35,22 @@ class PlayerScript {
     // UI 相关方法
     private setupPlayerUI() {
         this.clearDocument();
+        this.injectFavicon();
         this.injectStyles();
         this.injectHLSScript();
     }
 
     private clearDocument() {
         document.body.innerHTML = '<div id="dplayer"></div>';
-        document.title = this.playingVideoInfo.title;
+        document.title = `${this.playingVideoInfo.title}`;
+    }
+
+    private injectFavicon() {
+        const link = document.createElement('link');
+        link.id = 'favicon';
+        link.rel = 'icon';
+        link.href = 'https://115.com/favicon.ico';
+        document.head.appendChild(link);
     }
 
     private injectStyles() {
@@ -52,7 +61,7 @@ class PlayerScript {
 
     private injectHLSScript() {
         // @ts-ignore
-        if(window?.Hls) return;
+        if (window?.Hls) return;
         const hls = document.createElement('script');
         hls.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
         document.head.appendChild(hls);
@@ -110,10 +119,10 @@ class PlayerScript {
 
     private setupPlayerEvents() {
         if (!this.dp) return;
-        
+
         this.dp.video.addEventListener('dblclick', () => {
             if (!this.dp) return;
-            
+
             if (document.fullscreenElement) {
                 this.dp.fullScreen.cancel('browser');
             } else {
@@ -129,7 +138,7 @@ class PlayerScript {
         this.dp.notice('🔍 正在搜索字幕...', 3000, 0.5);
 
         const subtitles = await this.subtitlecat.fetchSubtitle(
-            this.playingVideoInfo.avNumber, 
+            this.playingVideoInfo.avNumber,
             'zh-CN'
         );
 
@@ -163,7 +172,7 @@ class PlayerScript {
 
     private setupSubtitleControls() {
         if (!this.dp) return;
-        
+
         const button = this.createSubtitleButton();
         if (button) {
             this.updateSubtitleMenu((this.dp.video as HTMLVideoElement).textTracks);
