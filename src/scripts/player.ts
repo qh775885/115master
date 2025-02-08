@@ -51,6 +51,8 @@ class PlayerScript {
     }
 
     private injectHLSScript() {
+        // @ts-ignore
+        if(window?.Hls) return;
         const hls = document.createElement('script');
         hls.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
         document.head.appendChild(hls);
@@ -64,9 +66,11 @@ class PlayerScript {
     }
 
     private async getVideoQualities() {
-        const { url: downloadUrl } = await drive115.getFileDownloadUrl(this.playingVideoInfo.pickCode);
+        const { url: downloadUrl, fileToken } = await drive115.getFileDownloadUrl(this.playingVideoInfo.pickCode);
         const m3u8RootUrl = drive115.getM3u8RootUrl(this.playingVideoInfo.pickCode);
         const m3u8List = await drive115.parseM3u8Url(m3u8RootUrl);
+
+        console.log('fileToken', fileToken);
 
         const qualities = m3u8List.map(item => ({
             name: `${item.quality}p`,

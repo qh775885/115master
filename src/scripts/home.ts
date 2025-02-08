@@ -52,7 +52,7 @@ class HomeScript {
     
                 console.log('即将播放', playingVideoInfo);
                 GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
-                const url = `https://115.com/web/lixian/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
+                const url = `https://dl.115cdn.net/fuckkk/player/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
                 GM_openInTab(url, {
                     active: true
                 });

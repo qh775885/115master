@@ -1,6 +1,6 @@
 const ROUTE_MATCH = {
   HOME: '*://115.com/?*',
-  DPLAYER: '*://115.com/web/lixian/*',
+  DPLAYER: '*://dl.115cdn.net/fuckkk/player/*',
 };
 
 export default ROUTE_MATCH;
