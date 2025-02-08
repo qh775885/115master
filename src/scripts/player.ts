@@ -1,9 +1,11 @@
 import { GM_getValue } from "$";
 import GM_VALUE_KEY from "../constants/gm.value.key";
-import DPlayer, { DPlayerOptions } from 'dplayer';
+import { DPlayerOptions } from 'dplayer';
+import DPlayer from 'dplayer';
 import drive115 from "../utils/download-url";
 import { SubtitleCat } from "../utils/subtitlecat";
 import { PlayingVideoInfo } from "../types/player";
+import { qualityNumMap } from "../constants/quality";
 
 class PlayerScript {
     private dp: DPlayer | null = null;
@@ -82,7 +84,7 @@ class PlayerScript {
         console.log('fileToken', fileToken);
 
         const qualities = m3u8List.map(item => ({
-            name: `${item.quality}p`,
+            name: qualityNumMap[item.quality as unknown as keyof typeof qualityNumMap],
             url: item.url,
             type: 'hls',
         }));
@@ -119,6 +121,11 @@ class PlayerScript {
 
     private setupPlayerEvents() {
         if (!this.dp) return;
+
+        // @ts-ignore
+        this.dp.on('error', () => {
+            this.dp?.switchQuality(this.dp.qualityIndex + 1);
+        });
 
         this.dp.video.addEventListener('dblclick', () => {
             if (!this.dp) return;

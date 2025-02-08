@@ -1,13 +1,10 @@
-import axios from 'axios';
 import md5 from 'blueimp-md5';
 import bigInt from 'big-integer';
 import { GM_xmlhttpRequest } from '$';
 import { USER_AGENT_115 } from '../constants/useragent';
-import { resolve } from 'path';
-import { M3u8Item, VideoSource } from '../types/player';
-import { qualityCodeMap } from '../constants/quality';
+import { M3u8Item } from '../types/player';
+import { qualityCodeMap, qualityNumMap } from '../constants/quality';
 
-axios.defaults.withCredentials = true
 
 interface DownloadResult {
     url: string;
@@ -357,8 +354,6 @@ class Drive115 {
                         const lines = htmlText.split('\n');
                         let m3u8List: M3u8Item[] = [];
 
-
-
                         htmlText.split('\n').forEach((line, index) => {
                             if (line.includes('NAME="')) {
                                 const extXStreamInf = line.match(/#EXT-X-STREAM-INF/);
@@ -367,7 +362,7 @@ class Drive115 {
                                     const url = lines[index + 1]?.trim();
                                     m3u8List.push({
                                         name,
-                                        quality: qualityCodeMap[name as keyof typeof qualityCodeMap],
+                                        quality: qualityCodeMap[name as unknown as keyof typeof qualityCodeMap],
                                         url
                                     });
                                 }
@@ -378,6 +373,8 @@ class Drive115 {
                         m3u8List.sort((a, b) => {
                             return b.quality - a.quality;
                         });
+
+                        console.log('m3u8List', m3u8List);
 
                         resolve(m3u8List); // 返回最高质量的m3u8
                     } else {

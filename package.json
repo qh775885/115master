@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@types/dplayer": "^1.25.5",
-    "axios": "^1.7.9",
     "big-integer": "^1.6.52",
     "blueimp-md5": "^2.19.0",
     "dplayer": "^1.27.1",
@@ -22,7 +21,6 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.4",
     "@types/big-integer": "^0.0.35",
     "@types/blueimp-md5": "^2.18.2",
     "@types/jest": "^29.5.14",

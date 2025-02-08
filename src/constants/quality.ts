@@ -1,20 +1,17 @@
 export const qualityNumMap = {
-    2880: 'SuperBD',
-    2160: 'BD',
-    1080: 'UD',
-    720: 'HD',
+    360: '360P',
+    480: '480P',
+    720: '720P',
+    1080: '1080P',
+    2160: '4K',
+    9999: '原画',
 }
 
 export const qualityCodeMap = {
-    SuperBD: 2880,
-    BD: 2160,
-    UD: 1080,
+    SG: 360,
+    SD: 480,
     HD: 720,
-}
-
-export const qualityNumMapCn = {
-    2880: '极致原画',
-    2160: '蓝光',
-    1080: '超清',
-    720: '高清',
+    UD: 1080,
+    BD: 2160,
+    YH: 9999,
 }
