@@ -3,8 +3,8 @@ import './style.css';
 // import App from './App.vue';
 import { minimatch } from 'minimatch';
 import ROUTE_MATCH from './constants/route.match';
-import HomeScript from './scripts/home';
-import playerScript from './scripts/player';
+import HomeScript from './pageScirpt/home';
+import playerScript from './pageScirpt/player';
 import versionOutput from './utils/version-output';
 
 versionOutput()

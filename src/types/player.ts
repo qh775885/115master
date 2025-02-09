@@ -9,6 +9,7 @@ export interface PlayingVideoInfo {
     title: string;
     pickCode: string;
     avNumber?: string;
+    cid: string;
 }
 
 export type M3u8Item = {

@@ -22,7 +22,7 @@ export default defineConfig({
         include: ['https://115.com/*', 'https://dl.115cdn.net/fuckkk/*'],
         exclude: ['https://*.115.com/bridge*', 'https://*.115.com/static*'],
         // 自动允许脚本跨域访问的域名
-        connect: ['115.com','webapi.115.com','proapi.115.com','subtitlecat.com','dl.115cdn.net'],
+        connect: ['115.com', 'webapi.115.com', 'proapi.115.com', 'subtitlecat.com', 'dl.115cdn.net', 'v.anxia.com'],
         require: ['https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js'],
         downloadURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.user.js',
         updateURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.meta.js'

@@ -3,17 +3,24 @@ import bigInt from 'big-integer';
 import { GM_xmlhttpRequest } from '$';
 import { USER_AGENT_115 } from '../constants/useragent';
 import { M3u8Item } from '../types/player';
-import { qualityCodeMap, qualityNumMap } from '../constants/quality';
+import { qualityCodeMap } from '../constants/quality';
 
-
-interface DownloadResult {
+export interface DownloadResult {
     url: string;
     fileToken?: string;
 }
 
-interface M115EncodeResult {
+export interface M115EncodeResult {
     data: string;
     key: number[];
+}
+
+export interface PlaylistItem {
+    cid: string;
+    // 文件名
+    n: string;
+    // pickcode
+    pc: string;
 }
 
 class MyRsa {
@@ -333,7 +340,7 @@ class Drive115 {
         })
     }
 
-    getM3u8RootUrl(pickcode: string): string{
+    getM3u8RootUrl(pickcode: string): string {
         return `https://115.com/api/video/m3u8/${pickcode}.m3u8`
     }
 
@@ -368,7 +375,7 @@ class Drive115 {
                                 }
                             }
                         })
-                        
+
                         // 按照 UD HD BD 排序
                         m3u8List.sort((a, b) => {
                             return b.quality - a.quality;
@@ -384,6 +391,53 @@ class Drive115 {
                 onerror: (error) => reject(error)
             });
         });
+    }
+
+    async getPlaylist(cid: string, offset: number = 0): Promise<PlaylistItem[]> {
+        const obj = {
+            aid: 1,
+            cid: cid,
+            offset: offset,
+            limit: 115,
+            show_dir: 0,
+            nf: "",
+            qid: 0,
+            //stdir:1,
+            type: 4,
+            source: "",
+            format: "json",
+            star: "",
+            is_q: "",
+            is_share: "",
+            r_all: 1,
+            o: 'file_name',
+            asc: 1,
+            cur: 1,
+            natsort: 1
+        }
+        // @ts-ignore
+        const params = new URLSearchParams(obj);
+        return new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+                url: `https://v.anxia.com/webapi/files?${params.toString()}`,
+                method: 'GET',
+                responseType: 'json',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                onload: (response) => {
+                    const res = response.response;
+                    if (res.state) {
+                        resolve(res.data)
+                    } else {
+                        reject(new Error('获取播放列表失败: ' + JSON.stringify(res)));
+                    }
+                },
+                onerror: (error) => {
+                    console.error('获取播放列表失败:', error);
+                }
+            })
+        })
     }
 }
 

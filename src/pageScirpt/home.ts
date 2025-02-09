@@ -1,7 +1,7 @@
-import { GM_openInTab, GM_setValue } from '$';
-import GM_VALUE_KEY from '../constants/gm.value.key';
+import { GM_openInTab } from '$';
 import { getAvNumber } from '../utils/getNumber';
 import { PlayingVideoInfo } from '../types/player';
+import { goToPlayer } from '../utils/route';
 
 class HomeScript {
 
@@ -48,14 +48,12 @@ class HomeScript {
                     pickCode: listItem.getAttribute('pick_code')!,
                     title: listItem.getAttribute('title')!,
                     avNumber: getAvNumber(listItem.getAttribute('title')!) || undefined,
+                    cid: listItem.getAttribute('cid')!,
                 }
     
                 console.log('即将播放', playingVideoInfo);
-                GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
-                const url = `https://dl.115cdn.net/fuckkk/player/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
-                GM_openInTab(url, {
-                    active: true
-                });
+
+                goToPlayer(playingVideoInfo, true)
             }
 
             listItem.addEventListener('dblclick', openVideo);
