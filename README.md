@@ -27,6 +27,12 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
 
+如果使用其他浏览器，请使用 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为 `115 浏览器`。
+
+```txt
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
+```
+
 ## 线路图
 
 - [ ] 根据字幕自动生成剧情点
