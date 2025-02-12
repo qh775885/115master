@@ -21,6 +21,8 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 ## 安装
 
+⚠️⚠️⚠️ 请使用 【115 浏览器】安装本脚本 ⚠️⚠️⚠️
+
 安装 [Tempermonkey](https://www.tampermonkey.net/) 后，通过 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装脚本。
 
 或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
