@@ -4,6 +4,11 @@
 
 Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请给个 Star 支持一下，谢谢。
 
+![player](./docs/images/player.png)
+![quality](./docs/images/quality.png)
+![subtitle](./docs/images/subtitle.png)
+![javInfo](./docs/images/javInfo.png)
+
 ## 功能
 
 - 🎨 `Ultra原画` 增强
