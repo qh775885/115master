@@ -1,35 +1,45 @@
-import { PlayingVideoInfo } from '../../types/player';
-import drive115, { PlaylistItem } from './../../utils/drive115';
-import type DPlayer from 'dplayer';
+import { PlayingVideoInfo } from '../../../types/player';
 import './playlist.css';
-import { getAvNumber } from '../../utils/getNumber';
-import { iconOpenPlaylist, iconPrve, iconNext } from '../icons/icons';
+import { getAvNumber } from '../../../utils/getNumber';
+import { iconOpenPlaylist, iconPrve, iconNext } from '../../icons/icons';
+import { Entity } from '../../../utils/drive115';
+import { PlayerPlugin } from '../index';
+import { Player } from '../..';
 
-type ChangeVideoEvent = (playingVideoInfo: PlayingVideoInfo) => void;
+interface State {
+    playingVideoInfo?: PlayingVideoInfo;
+    playlist: Entity.PlaylistItem[];
+}
 
-export class Playlist {
-    private dp: DPlayer;
-    private playingVideoInfo: PlayingVideoInfo;
-    private changeVideo: ChangeVideoEvent;
+/**
+ * 播放列表插件
+ */
+export class Playlist extends PlayerPlugin<State> {
+    static pluginName = 'playlist';
     private prevButton?: HTMLElement;
     private nextButton?: HTMLElement;
-    private playlistItems: PlaylistItem[] = [];
+    private changeVideoCallback: (playingVideoInfo: PlayingVideoInfo) => void = () => {};
 
-    constructor(options: {
-        dp: DPlayer,
-        playingVideoInfo: PlayingVideoInfo
-        changeVideo: ChangeVideoEvent
-    }) {
-        this.dp = options.dp;
-        this.playingVideoInfo = options.playingVideoInfo;
-        this.changeVideo = options.changeVideo;
-        this.init();
+    constructor(player: Player) {
+        super(player, {
+            playingVideoInfo: undefined,
+            playlist: [],
+        });
     }
 
-    private init() {
-        this.initList();
-        this.initOpenListButton();
-        this.initChahgePageButton();
+    mount() {
+        this.initList()
+        this.initChahgePageButton()
+        this.initOpenListButton()
+    }
+
+    destroy(): void {
+
+    }
+
+    onStateChange(): void {
+        this.updateList(this.state.playlist);
+        this.updateNavigationButtons();
     }
 
     private initOpenListButton() {
@@ -43,18 +53,18 @@ export class Playlist {
             e.stopPropagation();
         });
 
-        const rightIcons = this.dp?.template.controller?.querySelector('.dplayer-icons-right');
+        const rightIcons = this.player?.template.controller?.querySelector('.dplayer-icons-right');
         const firstChild = rightIcons?.firstChild;
         if (firstChild) {
             rightIcons?.insertBefore(button, firstChild);
         }
-        console.log('this.dp', this.dp);
+        console.log('this.player', this.player);
         button.addEventListener('click', this.onButtonClick.bind(this));
 
         // 除了点击button和播放列表，其他地方点击都关闭播放列表
         const handleDocumentClick = (e: MouseEvent) => {
             const target = e.target as Node;
-            const list = this.dp?.container.querySelector('.dplayer-playlist-list');
+            const list = this.player?.container.querySelector('.dplayer-playlist-list');
 
             // 如果点击的是播放列表或按钮，直接返回
             if (button.contains(target) || list?.contains(target)) {
@@ -92,7 +102,7 @@ export class Playlist {
         nextButton.addEventListener('click', this.onNextClick.bind(this));
 
         // 获取播放按钮元素
-        const playButton = this.dp?.template.controller?.querySelector('.dplayer-play-icon');
+        const playButton = this.player?.template.controller?.querySelector('.dplayer-play-icon');
         
         if (playButton) {
             // 在播放按钮前插入上一集按钮
@@ -108,7 +118,7 @@ export class Playlist {
     private initList() {
         const list = document.createElement('div');
         list.className = 'dplayer-playlist-list';
-        list.innerHTML = this.getListHTML([]);
+        list.innerHTML = this.renderList(this.state.playlist);
 
         // 阻止播放列表上的点击事件穿透
         list.addEventListener('mousedown', (e: MouseEvent) => {
@@ -118,20 +128,19 @@ export class Playlist {
         // 添加列表项点击事件
         list.addEventListener('click', this.onListItemClick.bind(this));
 
-        this.dp?.container.appendChild(list);
-        this.fetchPlaylist();
+        this.player?.container.appendChild(list);
+        this.updateList(this.state.playlist);
+        this.updateNavigationButtons();
     }
 
-    private getListHTML(playlistItems: PlaylistItem[]): string {
+    private renderList(playlistItems: Entity.PlaylistItem[]): string {
         return `
             ${playlistItems.map((item, index) => {
-            const isPlaying = item.pc === this.playingVideoInfo.pickCode;
+            const isPlaying = item.pc === this.state?.playingVideoInfo?.pickCode;
             return `
                     <div class="dplayer-playlist-list-item ${isPlaying ? 'playing' : ''}" 
-                         data-index="${index}" 
-                         data-pc="${item.pc}"
-                         data-cid="${item.cid}"
-                         data-n="${item.n}">
+                         data-index="${index}"
+                    >
                          <div class="dplayer-playlist-list-item-index">
                             ${index + 1}
                          </div>
@@ -145,17 +154,10 @@ export class Playlist {
         `;
     }
 
-    private async fetchPlaylist() {
-        this.playlistItems = await drive115.getPlaylist(this.playingVideoInfo.cid, 0);
-        console.log('playlistItems', this.playlistItems);
-        this.updateList(this.playlistItems);
-        this.updateNavigationButtons();
-    }
-
-    private updateList(playlistItems: PlaylistItem[]) {
-        const list = this.dp?.container.querySelector('.dplayer-playlist-list');
+    private updateList(playlistItems: Entity.PlaylistItem[]) {
+        const list = this.player?.container.querySelector('.dplayer-playlist-list');
         if (list) {
-            list.innerHTML = this.getListHTML(playlistItems);
+            list.innerHTML = this.renderList(playlistItems);
         }
     }
 
@@ -189,24 +191,33 @@ export class Playlist {
     private onListItemClick(e: MouseEvent) {
         const target = e.target as HTMLElement;
         const item = target.closest('.dplayer-playlist-list-item') as HTMLElement;
+        const index = item.dataset.index as unknown as number;
         if (item) {
-            const dataset = item.dataset;
-            if (dataset.pc && dataset.pc !== this.playingVideoInfo.pickCode) {
-                const playingVideoInfo = {
-                    pickCode: dataset.pc,
-                    title: item.dataset.n || '',
-                    avNumber: getAvNumber(item.dataset.n || '') || undefined,
-                    cid: item.dataset.cid || ''
-                }
-                this.changeVideo(playingVideoInfo);
+            const itemData = this.state.playlist[index];
+            if (itemData.pc && itemData.pc !== this.state.playingVideoInfo?.pickCode) {
+                this.onChangeIndex(index)
             }
         }
     }
 
-    private updateNavigationButtons() {
-        if (!this.playlistItems.length) return;
+    private onChangeIndex(index: number) {
+        const itemData = this.state.playlist[index];
+        const playingVideoInfo = {
+            pickCode: itemData.pc,
+            title: itemData.n,
+            avNumber: getAvNumber(itemData.n || '') || undefined,
+            cid: itemData.cid || '',
+            size: itemData.size,
+            createTime: itemData.createTime
+        }
+        this.changeVideoCallback(playingVideoInfo)
+    }
 
-        const currentIndex = this.playlistItems.findIndex(item => item.pc === this.playingVideoInfo.pickCode);
+
+    private updateNavigationButtons() {
+        if (!this.state.playlist.length) return;
+
+        const currentIndex = this.state.playlist.findIndex(item => item.pc === this.state.playingVideoInfo?.pickCode);
         
         // 更新上一集按钮状态
         if (this.prevButton) {
@@ -219,7 +230,7 @@ export class Playlist {
 
         // 更新下一集按钮状态
         if (this.nextButton) {
-            if (currentIndex >= this.playlistItems.length - 1) {
+            if (currentIndex >= this.state.playlist.length - 1) {
                 this.nextButton.classList.add('disabled');
             } else {
                 this.nextButton.classList.remove('disabled');
@@ -228,36 +239,26 @@ export class Playlist {
     }
 
     private async onPrevClick() {
-        if (!this.playlistItems.length) return;
+        if (!this.state.playlist.length) return;
         
-        const currentIndex = this.playlistItems.findIndex(item => item.pc === this.playingVideoInfo.pickCode);
-        
+        const currentIndex = this.state.playlist.findIndex(item => item.pc === this.state.playingVideoInfo?.pickCode);
+
         if (currentIndex > 0) {
-            const prevItem = this.playlistItems[currentIndex - 1];
-            const playingVideoInfo = {
-                pickCode: prevItem.pc,
-                title: prevItem.n,
-                avNumber: getAvNumber(prevItem.n) || undefined,
-                cid: prevItem.cid
-            };
-            this.changeVideo(playingVideoInfo);
+            this.onChangeIndex(currentIndex - 1);
         }
     }
 
     private async onNextClick() {
-        if (!this.playlistItems.length) return;
+        if (!this.state.playlist.length) return;
         
-        const currentIndex = this.playlistItems.findIndex(item => item.pc === this.playingVideoInfo.pickCode);
+        const currentIndex = this.state.playlist.findIndex(item => item.pc === this.state.playingVideoInfo?.pickCode);
         
-        if (currentIndex < this.playlistItems.length - 1) {
-            const nextItem = this.playlistItems[currentIndex + 1];
-            const playingVideoInfo = {
-                pickCode: nextItem.pc,
-                title: nextItem.n,
-                avNumber: getAvNumber(nextItem.n) || undefined,
-                cid: nextItem.cid
-            };
-            this.changeVideo(playingVideoInfo);
+        if (currentIndex < this.state.playlist.length - 1) {
+            this.onChangeIndex(currentIndex + 1);
         }
+    }
+
+    onChangeVideo(cb: (playingVideoInfo: PlayingVideoInfo) => void) {
+        this.changeVideoCallback = cb;
     }
 }

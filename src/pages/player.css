@@ -72,5 +72,19 @@
 }
 
 .subtitle-menu-item.active {
-    color: rgb(0, 132, 255);
+    color: #0084ff;
+}
+
+#dplayer .dplayer-controller .dplayer-bar-wrap .dplayer-bar-preview {
+    background-size: cover;
+}
+
+.dplayer.dplayer-hide-controller .dplayer-controller {
+    opacity: 0.5;
+    transform: translateY(calc(100% + 16px)) !important;
+}
+
+.dplayer.dplayer-hide-controller .dplayer-controller:hover {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
 }
