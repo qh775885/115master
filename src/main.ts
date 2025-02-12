@@ -3,8 +3,8 @@ import './style.css';
 // import App from './App.vue';
 import { minimatch } from 'minimatch';
 import ROUTE_MATCH from './constants/route.match';
-import HomeScript from './scripts/home';
-import playerScript from './scripts/player';
+import HomePage from './pages/home';
+import PlayerPage from './pages/player';
 import versionOutput from './utils/version-output';
 
 versionOutput()
@@ -19,9 +19,9 @@ versionOutput()
 
 
 if (minimatch(window.location.href, ROUTE_MATCH.HOME)) {
-  new HomeScript()
+  new HomePage()
 }
 
 if (minimatch(window.location.href, ROUTE_MATCH.DPLAYER)) {
-  new playerScript()
+  new PlayerPage()
 }

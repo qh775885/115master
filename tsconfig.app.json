@@ -26,10 +26,13 @@
     
     "composite": true,
 
+    "esModuleInterop": true,
+
     /* 添加类型配置 */
     "typeRoots": [
       "./src/types"
     ],
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/**/*.d.ts", "src/utils/clip.js"],
+  "exclude": ["src/**/__tests__/**"]
 }

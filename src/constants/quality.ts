@@ -8,7 +8,7 @@ export const qualityNumMap = {
 }
 
 export const qualityCodeMap = {
-    SG: 360,
+    '3G': 360,
     SD: 480,
     HD: 720,
     UD: 1080,

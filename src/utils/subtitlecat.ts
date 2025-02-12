@@ -11,7 +11,7 @@ interface SubtitleSearchResult {
     targetLanguage: string;
 }
 
-interface ProcessedSubtitle {
+export interface ProcessedSubtitle {
     title: string;
     url: string;
     downloads: number;
@@ -173,3 +173,5 @@ export class SubtitleCat {
         });
     }
 }
+
+export const subtitlecat = new SubtitleCat();

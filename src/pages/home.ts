@@ -1,7 +1,8 @@
-import { GM_openInTab, GM_setValue } from '$';
-import GM_VALUE_KEY from '../constants/gm.value.key';
+import { GM_openInTab } from '$';
 import { getAvNumber } from '../utils/getNumber';
 import { PlayingVideoInfo } from '../types/player';
+import { goToPlayer } from '../utils/route';
+import { VOD_URL_115 } from '../constants/115';
 
 class HomeScript {
 
@@ -16,9 +17,7 @@ class HomeScript {
         this.addFileListItemHouverMenu()
     }
 
-
     addFileListItemHouverMenu() {
-        
         document.addEventListener('mouseover', (event) => {
             const target = event.target as HTMLElement;
             const listItem = target.closest('li[file_type="1"]');
@@ -48,14 +47,13 @@ class HomeScript {
                     pickCode: listItem.getAttribute('pick_code')!,
                     title: listItem.getAttribute('title')!,
                     avNumber: getAvNumber(listItem.getAttribute('title')!) || undefined,
+                    cid: listItem.getAttribute('cid')!,
+                    size: parseInt(listItem.getAttribute('file_size')!),
                 }
-    
+
                 console.log('即将播放', playingVideoInfo);
-                GM_setValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO, playingVideoInfo)
-                const url = `https://dl.115cdn.net/fuckkk/player/?pick_code=${playingVideoInfo.pickCode}&avNumber=${playingVideoInfo.avNumber}&title=${playingVideoInfo.title}`
-                GM_openInTab(url, {
-                    active: true
-                });
+
+                goToPlayer(playingVideoInfo, true)
             }
 
             listItem.addEventListener('dblclick', openVideo);
@@ -78,11 +76,11 @@ class HomeScript {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
 
-                    GM_openInTab(`https://v.anxia.com/?pickcode=${listItem.getAttribute('pick_code')}&share_id=0`, {
+                    GM_openInTab(new URL(`/?pickcode=${listItem.getAttribute('pick_code')}&share_id=0`, VOD_URL_115).href, {
                         active: true
                     })
-                    
-                    
+
+
                 });
             });
         });
