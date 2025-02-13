@@ -23,15 +23,19 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 ⚠️⚠️⚠️ 请使用 【115 浏览器】安装本脚本 ⚠️⚠️⚠️
 
-安装 [Tempermonkey](https://www.tampermonkey.net/) 后，通过 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装脚本。
+1. 安装 [Tempermonkey](https://www.tampermonkey.net/) 后。
 
-或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
+2. 通过 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装 【115Master】脚本。或者在 [releases](https://github.com/cbingb666/115master/releases) 查看其他版本
 
-如果使用其他浏览器，请使用 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为 `115 浏览器`。
+3. 如果使用其他浏览器或 115 浏览器最新版本（35.x.x.x+），请使用 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为如下：
 
 ```txt
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
 ```
+
+填入 `User-Agent` 后，点击 `Apple（all tabs）` 刷新 115 网盘页面即可生效。
+
+![user-agent](./docs/images/useragent.png)
 
 ## 线路图
 
