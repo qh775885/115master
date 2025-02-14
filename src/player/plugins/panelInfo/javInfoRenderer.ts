@@ -38,6 +38,8 @@ export class JavInfoRenderer {
     }
 
     render(javInfos: JavInfo[]): string {
+        
+        
         const sources = [...new Set(javInfos.map(info => info.source))];
 
         if (sources.length === 0) {
@@ -166,7 +168,7 @@ export class JavInfoRenderer {
         return infos.map(info => `
             <div class="dplayer-panel-preview">
                 ${[{ raw: info.cover }, ...info.preview ?? []].map((img, index) => `
-                    <a href="${img.raw}" class="dplayer-panel-preview-item"
+                    <a href="${img.raw}" class="dplayer-panel-preview-item" onclick="event.preventDefault();"
                         data-cropped="true'
                         target="_blank">
                         <img src="${img.raw}" 

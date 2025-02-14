@@ -2,7 +2,7 @@ import { PlayerPlugin } from "..";
 import { Player } from "../..";
 import { getSegmentsWithDuration, m3u8Tumbnail } from "../../../utils/clip";
 import './thumbnails.css';
-import { throttle } from 'lodash';
+import throttle from 'lodash/throttle';
 import { calculateFitSize } from "./utils";
 
 type TumbnailsState = {

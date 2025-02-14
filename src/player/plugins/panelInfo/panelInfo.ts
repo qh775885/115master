@@ -34,6 +34,7 @@ export class PanelInfo extends PlayerPlugin<State> {
         });
 
         this.javInfoRenderer = new JavInfoRenderer(this.player);
+        this.javInfoRenderer?.registerPreviewImages();
     }
 
     mount() {
@@ -54,6 +55,7 @@ export class PanelInfo extends PlayerPlugin<State> {
 
     onStateChange() {
         this.renderPanelContent();
+        this.javInfoRenderer?.registerPreviewImages();
     }
 
     private initPanel() {
@@ -149,7 +151,6 @@ export class PanelInfo extends PlayerPlugin<State> {
         if (!this.currentPaused) {
             this.player.video.pause();
         }
-        this.javInfoRenderer?.registerPreviewImages();
     }
 
     private toggle() {

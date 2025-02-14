@@ -7,7 +7,22 @@ import HomePage from './pages/home';
 import PlayerPage from './pages/player';
 import versionOutput from './utils/version-output';
 
-versionOutput()
+const main = () => {
+  versionOutput()
+  if (minimatch(window.location.href, ROUTE_MATCH.HOME)) {
+    new HomePage()
+  }
+  
+  if (minimatch(window.location.href, ROUTE_MATCH.DPLAYER)) {
+    new PlayerPage()
+  }
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  main()
+} else {
+  window.addEventListener('DOMContentLoaded', main)
+}
 
 // createApp(App).mount(
 //   (() => {
@@ -18,10 +33,3 @@ versionOutput()
 // );
 
 
-if (minimatch(window.location.href, ROUTE_MATCH.HOME)) {
-  new HomePage()
-}
-
-if (minimatch(window.location.href, ROUTE_MATCH.DPLAYER)) {
-  new PlayerPage()
-}

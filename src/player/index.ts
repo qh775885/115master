@@ -142,6 +142,7 @@ export class Player extends DPlayer {
      */
     private setEvents() {
         this.template.videoWrap.addEventListener('click', this.handleVideoWrapClick.bind(this));
+        this.template.videoWrap.addEventListener('dblclick', this.handleVideoWrapDblClick.bind(this));
         this.container.addEventListener('mousemove', this.setAutoHide.bind(this));
         document.addEventListener('keydown', this.handleKeyDown.bind(this), true);
         this.on('error', this.autoNextVideo.bind(this));
@@ -168,28 +169,22 @@ export class Player extends DPlayer {
     }
 
     /**
-     * 视频容器点击事件
-     * @description 视频容器点击事件，用于全屏切换和播放暂停切换
-     * @param e 事件对象
+     * 处理单击事件
      */
     private handleVideoWrapClick(e: MouseEvent) {
         e.stopPropagation();
+        this.toggle();
+    }
 
-        if (this.videoWrapClickTimer) {
-            window.clearTimeout(this.videoWrapClickTimer!);
-            this.videoWrapClickTimer = null;
-            if (document.fullscreenElement) {
-                this.fullScreen.cancel('browser');
-            } else {
-                this.fullScreen.request('browser');
-            }
-            return
+    /**
+     * 处理双击事件
+     */
+    private handleVideoWrapDblClick(e: MouseEvent) {
+        e.stopPropagation();
+        if (document.fullscreenElement) {
+            this.fullScreen.cancel('browser');
+        } else {
+            this.fullScreen.request('browser');
         }
-
-        this.videoWrapClickTimer = window.setTimeout(() => {
-            window.clearTimeout(this.videoWrapClickTimer!);
-            this.videoWrapClickTimer = null;
-            this?.toggle();
-        }, 350)
     }
 }

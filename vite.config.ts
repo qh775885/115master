@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
-import monkey from 'vite-plugin-monkey';
+import monkey, { cdn, util } from 'vite-plugin-monkey';
 
 const icons = {
   prod: 'https://115.com/favicon.ico',
@@ -18,7 +18,12 @@ export default defineConfig({
       userscript: {
         name: '115Master',
         icon: isProd ? icons.prod : icons.dev,
-        namespace: 'npm/vite-plugin-monkey',
+        namespace: '115Master',
+        homepage: 'https://github.com/cbingb666/115master',
+        author: 'cbingb666',
+        description: '115网盘魔法优化: 画质增强 | 视频缩略图 | 在线字幕 | 内置 Jav 信息',
+        supportURL: 'https://github.com/cbingb666/115master/issues',
+        "run-at": "document-start",
         include: ['https://115.com/*', 'https://dl.115cdn.net/fuckkk/*'],
         exclude: ['https://*.115.com/bridge*', 'https://*.115.com/static*'],
         // 自动允许脚本跨域访问的域名
@@ -35,7 +40,9 @@ export default defineConfig({
           'javdb.com',
           'jdbstatic.com'
         ],
-        require: ['https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js'],
+        resource: {
+          'icon': 'https://115.com/favicon.ico',
+        },
         downloadURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.user.js',
         updateURL: 'https://github.com/cbingb666/115master/releases/latest/download/115master.meta.js'
       },
@@ -44,8 +51,9 @@ export default defineConfig({
         fileName: '115master.user.js',
         metaFileName: '115master.meta.js',
         externalGlobals: {
-          // vue: cdn.jsdelivr('Vue', 'dist/vue.global.prod.js'),
-          // hls: cdn.jsdelivr('Hls', 'dist/hls.min.js'),
+          'hls.js': cdn.jsdelivr('Hls', 'dist/hls.min.js'),
+          'photoswipe': cdn.jsdelivr('photoswipe', 'dist/umd/photoswipe.umd.min.js').concat(util.dataUrl(';window.photoswipe=PhotoSwipe;')),
+          'dplayer': cdn.jsdelivr('dplayer', 'dist/DPlayer.min.js').concat(util.dataUrl(';window.dplayer=DPlayer;')),
         },
       },
     }),
