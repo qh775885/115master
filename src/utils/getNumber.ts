@@ -1,3 +1,7 @@
+import { AppLogger } from "./logger";
+
+const logger = new AppLogger('getAvNumber');
+
 /**
  * 提取番号
  * @param filename 文件名
@@ -6,20 +10,19 @@
 export function getAvNumber(filename: string): string | null {
     // 移除文件扩展名和路径
     const name = filename;
-    // console.log(name);
     // 清理文件名中的干扰字符
     const cleanName = name
-        
+
         // 清楚域名(hjd2048.com)
-        .replace(/^\[?[a-zA-Z0-9]+\.[a-zA-Z]+\]?@?/g,'')
+        .replace(/^\[?[a-zA-Z0-9]+\.[a-zA-Z]+\]?@?/g, '')
         // 移除文件扩展名(.mp4)
-        .replace(/\.[^\s]+$/,'')
+        .replace(/\.[^\s]+$/, '')
         // 清除中文
-        .replace(/[\u4E00-\u9FA5]/g,'')
+        .replace(/[\u4E00-\u9FA5]/g, '')
         // 清除日语
-        .replace(/[\u3040-\u309F\u30A0-\u30FF]/g,'')
-        
-    console.log(`name:${name} -> cleanName:${cleanName}`);
+        .replace(/[\u3040-\u309F\u30A0-\u30FF]/g, '')
+
+    logger.log('清理干扰字符', `before:${name} -> after:${cleanName}`);
 
     // 常见的番号格式正则表达式
     const patterns = [
@@ -96,12 +99,6 @@ export function getAvNumber(filename: string): string | null {
             name: '标准格式：字母-数字',
             pattern: /([a-zA-Z]{2,5})-?(\d{2,5})(?:c|-c)?/i,
             format: (m: RegExpMatchArray) => {
-                // 确保捕获到完整的数字部分
-                // const fullMatch = cleanName.match(new RegExp(`${m[1]}-?\\d+`, 'i'));
-                // if (fullMatch) {
-                //     const numbers = fullMatch[0].match(/\d+/)?.[0] || m[2];
-                //     return `${m[1].toUpperCase()}-${numbers}`;
-                // }
                 return `${m[1].toUpperCase()}-${m[2]}`;
             }
         }
@@ -111,16 +108,12 @@ export function getAvNumber(filename: string): string | null {
     for (const { name, pattern, format } of patterns) {
         const match = cleanName.match(pattern);
         if (match) {
-            console.log('match pattern', filename, name, pattern);
+            logger.log('match name', name);
+            logger.log('match regexp', pattern.toString());
             const result = format(match);
-            // // 如果结果看起来不完整，继续尝试下一个模式
-            // if (result.match(/^[A-Z]+-\d{1,2}$/)) {
-            //     continue;
-            // }
             return result;
         }
     }
-    console.log('match pattern', filename, 'not found');
-
+    logger.log('找不到番号');
     return null;
 }

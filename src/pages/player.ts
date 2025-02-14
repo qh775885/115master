@@ -17,6 +17,7 @@ import { goToPlayer } from "../utils/route";
 import { Tumbnails } from "../player/plugins/thumbnails/thumbnails";
 import { DPlayerOptions } from "dplayer";
 import { imgTumnailsBlank } from "../player/images/imgBlank";
+import { AppLogger } from "../utils/logger";
 
 type VideoSources = {
     name: string;
@@ -25,7 +26,7 @@ type VideoSources = {
 }
 
 class PlayerPage {
-
+    logger = new AppLogger('PlayerPage');
     /**
      * 状态
      */
@@ -99,6 +100,7 @@ class PlayerPage {
 
             await moduleImportPromise
             this.player = new Player(playerOptions);
+            
             this.player.registerPlugin(Subtitle);
             this.player.registerPlugin(Playlist);
             this.player.registerPlugin(PanelInfo);
@@ -171,8 +173,8 @@ class PlayerPage {
         const { data, path } = await drive115.getFiles(this.state.playingVideoInfo.cid, 0);
         this.state.playlist = data;
         this.state.filePath = path;
-        console.log('playlist', this.state.playlist);
-        console.log('filePath', this.state.filePath);
+        this.logger.log('fetchFilesInfo filePath', this.state.filePath);
+        this.logger.log('fetchFilesInfo playlist', this.state.playlist);
     }
 
     // 获取字幕
@@ -192,7 +194,7 @@ class PlayerPage {
         const PromiseList = JavClassList.map(JavClass => new JavClass(GMRequestInstance).getInfoByAvNumber(this.state.playingVideoInfo.avNumber!));
         const javInfos = await Promise.allSettled(PromiseList);
         this.state.javInfos = javInfos.map(i => i.status === 'fulfilled' ? i.value : undefined).filter(i => !!i);
-        console.log('javInfos', this.state.javInfos);
+        this.logger.log('fetchJavInfo javInfos', this.state.javInfos);
     }
 
     // 获取视频
@@ -221,6 +223,8 @@ class PlayerPage {
                 type: 'hls',
             })));
         }
+
+        this.logger.log('fetchVideoSources videoSources', this.state.videoSources);
     }
 
     // 切换视频

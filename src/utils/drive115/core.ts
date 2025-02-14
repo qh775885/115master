@@ -6,6 +6,7 @@ import { NORMAL_URL_115, PRO_API_URL_115, VOD_URL_115, WEB_API_URL_115 } from '.
 import { IRequest } from '../request/types';
 import { Crypto115 } from './crypto';
 import { NormalApi, ProApi, VodApi, WebApi } from './api';
+import { AppLogger } from '../logger';
 
 export interface DownloadResult {
     url: string;
@@ -13,6 +14,8 @@ export interface DownloadResult {
 }
 
 export class Drive115Core {
+    private logger = new AppLogger('Drive115Core');
+
     private crypto115: Crypto115;
     private BASE_URL = NORMAL_URL_115;
     private WEB_API_URL = WEB_API_URL_115;
@@ -34,7 +37,7 @@ export class Drive115Core {
         );
 
         const data = response.data;
-        console.log('普通方式获取响应:', data);
+        this.logger.log('普通方式获取响应:', data);
 
         if (!data.state || !data.file_url) {
             throw new Error('服务器返回数据格式错误: ' + JSON.stringify(data));
@@ -51,7 +54,7 @@ export class Drive115Core {
         const encoded = this.crypto115.m115_encode(src, tm);
 
         const data = `data=${encodeURIComponent(encoded.data)}`;
-        console.log('发送加密数据:', data);
+        this.logger.log('发送加密数据:', data);
 
         const response = await this.iRequest.post<ProApi.Res.FilesAppChromeDownurl>(
             new URL(`/app/chrome/downurl?t=${tm}`, this.PRO_API_URL).href,
@@ -65,7 +68,7 @@ export class Drive115Core {
         );
 
         const responseData = response.data;
-        console.log('Pro方式响应:', responseData);
+        this.logger.log('Pro方式响应:', responseData);
 
         if (!responseData.state) {
             throw new Error('获取下载地址失败: ' + JSON.stringify(responseData));
@@ -85,11 +88,12 @@ export class Drive115Core {
 
     async getFileDownloadUrl(pickcode: string): Promise<DownloadResult> {
         try {
+            return await this.getDownloadUrlByPro(pickcode);
+        } catch (error) {
+            console.warn('第一种获取下载链接失败', error);
+            this.logger.log('开始使用第二种方式获取下载链接', error);
             const res = await this.getDownloadUrlByNormal(pickcode);
             return res;
-        } catch (error) {
-            console.error('获取下载链接失败:', error);
-            return await this.getDownloadUrlByPro(pickcode);
         }
     }
 
@@ -147,8 +151,7 @@ export class Drive115Core {
 
         // 按照 UD HD BD 排序
         m3u8List.sort((a, b) => b.quality - a.quality);
-        console.log('m3u8List', m3u8List);
-
+        this.logger.log('m3u8List result', m3u8List);
         return m3u8List;
     }
 

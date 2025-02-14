@@ -27,7 +27,7 @@ export class PanelInfo extends PlayerPlugin<State> {
     private javInfoRenderer: JavInfoRenderer | null = null;
 
     constructor(player: Player) {
-        super(player, {
+        super(PanelInfo.pluginName, player, {
             playingVideoInfo: undefined,
             javInfos: [],
             filePath: [],

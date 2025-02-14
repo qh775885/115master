@@ -31,7 +31,6 @@ export class JavDB extends Jav {
 
     async parseInfoBefore(dom: Document): Promise<Document> {
         const labels = this.getLabels(dom);
-        console.log('labels', labels);
         this.labels = labels;
         return dom;
     }

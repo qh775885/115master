@@ -24,7 +24,7 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
     private thumbnailWidth: number = 0;
     private thumbnailHeight: number = 0;
     constructor(player: Player) {
-        super(player, {
+        super(Tumbnails.pluginName, player, {
             intervalSeconds: 60,
             samplesPerSegment: 10,
             maxWidth: 540,
