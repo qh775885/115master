@@ -31,6 +31,11 @@ export class Logger {
             console.log(...args);
         }
     }
+
+    error(logName: string, msg: unknown): void {
+        console.log(...this.formatMessage(logName));
+        console.error(msg);
+    }
 }
 
 export class AppLogger extends Logger {

@@ -170,8 +170,8 @@ class PlayerPage {
 
     // 获取文件列表信息
     private async fetchFilesInfo() {
-        const { data, path } = await drive115.getFiles(this.state.playingVideoInfo.cid, 0);
-        this.state.playlist = data;
+        const { data, path } = await drive115.getPlaylist(this.state.playingVideoInfo.cid, this.state.playingVideoInfo.pickCode, 0);
+        this.state.playlist = data.filter(i => i.play_long > 0);
         this.state.filePath = path;
         this.logger.log('fetchFilesInfo filePath', this.state.filePath);
         this.logger.log('fetchFilesInfo playlist', this.state.playlist);

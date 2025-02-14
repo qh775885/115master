@@ -2,7 +2,7 @@
 import { USER_AGENT_115 } from '../../constants/useragent';
 import { M3u8Item } from '../../types/player';
 import { qualityCodeMap } from '../../constants/quality';
-import { NORMAL_URL_115, PRO_API_URL_115, VOD_URL_115, WEB_API_URL_115 } from '../../constants/115';
+import { NORMAL_URL_115, PRO_API_URL_115, VOD_HOST_155, VOD_URL_115, WEB_API_URL_115 } from '../../constants/115';
 import { IRequest } from '../request/types';
 import { Crypto115 } from './crypto';
 import { NormalApi, ProApi, VodApi, WebApi } from './api';
@@ -155,8 +155,43 @@ export class Drive115Core {
         return m3u8List;
     }
 
-    async getFiles(cid: string, offset: number = 0) {
-        const obj = {
+    async apsNatsortFiles(params: VodApi.Req.VodApiFilesReq) {
+        const response = await this.iRequest.get<VodApi.Res.VodApiFiles>(
+            new URL(`/aps/natsort/files.php`, this.VOD_URL_115).href,
+            {
+                params,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT_115,
+                    'host': VOD_HOST_155,
+                    'referer': `${this.VOD_URL_115}/?pickcode=${params.pickcode}&share_id=0`,
+                },
+            }
+        );
+
+        return response;
+    }
+
+    async webapiFiles(params: VodApi.Req.VodApiFilesReq) {
+        const response = await this.iRequest.get<VodApi.Res.VodApiFiles>(
+            new URL(`/webapi/files`, this.VOD_URL_115).href,
+            {
+                params,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'User-Agent': USER_AGENT_115,
+                    referer: `${this.VOD_URL_115}/?pickcode=${params.pickcode}&share_id=0`,
+                    'host': VOD_HOST_155,
+                },
+            }
+        );
+
+        return response;
+    }
+
+    async getPlaylist(cid: string, pickcode: string, offset: number = 0) {
+        const obj: VodApi.Req.VodApiFilesReq = {
+            pickcode,
             aid: 1,
             cid: cid,
             offset: offset,
@@ -177,26 +212,20 @@ export class Drive115Core {
             natsort: 1
         };
 
-        // @ts-ignore
-        const params = new URLSearchParams(obj);
-        const response = await this.iRequest.get<VodApi.Res.VodApiFiles>(
-            new URL(`/webapi/files?${params.toString()}`, this.VOD_URL_115).href,
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'User-Agent': USER_AGENT_115,
-                },
+        try {
+            const response = await this.webapiFiles(obj);
+            if (response.data.state) {
+                return response.data;
             }
-        );
-
-        if (response.status !== 200) {
-            throw new Error('获取播放列表失败: ' + JSON.stringify(response));
+            throw new Error('webapiFiles 获取播放列表失败');
+        } catch (error) {
+            this.logger.log('获取webapiFiles失败，尝试使用apsNatsortFiles获取');
+            const response = await this.apsNatsortFiles(obj);
+            if (response.data.state) {
+                return response.data;
+            }
+            throw new Error('apsNatsortFiles 获取播放列表失败');
         }
 
-        if (!response.data.state) {
-            throw new Error('获取播放列表失败: ' + JSON.stringify(response));
-        }
-
-        return response.data;
     }
 }
