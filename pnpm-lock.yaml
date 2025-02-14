@@ -8,15 +8,6 @@ importers:
 
   .:
     dependencies:
-      '@types/dplayer':
-        specifier: ^1.25.5
-        version: 1.25.5
-      '@types/lodash':
-        specifier: ^4.17.15
-        version: 4.17.15
-      '@types/m3u8-parser':
-        specifier: ^7.2.0
-        version: 7.2.0
       '@webav/av-canvas':
         specifier: ^1.0.15
         version: 1.0.15
@@ -72,9 +63,18 @@ importers:
       '@types/blueimp-md5':
         specifier: ^2.18.2
         version: 2.18.2
+      '@types/dplayer':
+        specifier: ^1.25.5
+        version: 1.25.5
       '@types/jest':
         specifier: ^29.5.14
         version: 29.5.14
+      '@types/lodash':
+        specifier: ^4.17.15
+        version: 4.17.15
+      '@types/m3u8-parser':
+        specifier: ^7.2.0
+        version: 7.2.0
       '@vitejs/plugin-vue':
         specifier: ^5.2.1
         version: 5.2.1(vite@6.0.11(@types/node@22.10.10))(vue@3.5.13(typescript@5.7.3))

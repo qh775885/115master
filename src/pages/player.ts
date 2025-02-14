@@ -73,17 +73,20 @@ class PlayerPage {
      * 初始化
      */
     private async init() {
-        this.state.playingVideoInfo = GM_getValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO) as PlayingVideoInfo;
         this.restDocument();
         this.injectFavicon();
-        this.injectHLSScript();
+
+        const moduleImportPromise = import('hls.js').then(module => {
+            window.Hls = module.default;
+        });
+        this.state.playingVideoInfo = GM_getValue(GM_VALUE_KEY.PLAYING_VIDEO_INFO) as PlayingVideoInfo;
         this.elements.playerContainer = document.getElementById('dplayer') as HTMLElement;
 
         const fetchVideoSourcesPromise = this.fetchVideoSources();
 
         await fetchVideoSourcesPromise;
 
-        fetchVideoSourcesPromise.then(() => {
+        fetchVideoSourcesPromise.then(async () => {
             const playerOptions: DPlayerOptions = {
                 container: this.elements.playerContainer!,
                 video: {
@@ -94,6 +97,7 @@ class PlayerPage {
                 },
             };
 
+            await moduleImportPromise
             this.player = new Player(playerOptions);
             this.player.registerPlugin(Subtitle);
             this.player.registerPlugin(Playlist);
@@ -148,9 +152,9 @@ class PlayerPage {
 
     // 清除文档
     private restDocument() {
+        document.body.classList.add('player-body');
         document.body.innerHTML = '<div id="dplayer"></div>';
         document.title = `${this.state.playingVideoInfo.title}`;
-        document.body.classList.add('player-body');
     }
 
     // 注入favicon
@@ -160,21 +164,6 @@ class PlayerPage {
         link.rel = 'icon';
         link.href = 'https://115.com/favicon.ico';
         document.head.appendChild(link);
-    }
-
-    // 注入hls脚本
-    private injectHLSScript() {
-        // @ts-ignore
-        if (window?.Hls) return;
-        const hls = document.createElement('script');
-        hls.src = 'https://cdn.jsdelivr.net/npm/hls.js@latest';
-        document.head.appendChild(hls);
-
-        // 注入dash脚本
-        // @ts-ignore
-        const dash = document.createElement('script');
-        dash.src = 'https://cdn.jsdelivr.net/npm/dashjs@latest';
-        document.head.appendChild(dash);
     }
 
     // 获取文件列表信息
