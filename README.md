@@ -33,7 +33,7 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
 ```
 
-填入 `User-Agent` 后，点击 `Apple（all tabs）` 刷新 115 网盘页面即可生效。
+填入 `User-Agent` 后，点击 `Apply（all tabs）` 刷新 115 网盘页面即可生效。
 
 ![user-agent](./docs/images/useragent.png)
 

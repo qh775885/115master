@@ -24,7 +24,6 @@ export class JavBus extends Jav {
         }
 
         const labels = this.getLabels(dom);
-        console.log('labels', labels);
         this.labels = labels;
         return dom;
     }

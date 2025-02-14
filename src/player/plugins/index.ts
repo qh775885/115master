@@ -1,24 +1,29 @@
 import { Player } from "..";
+import { AppLogger } from "../../utils/logger";
 
 /**
  * 播放器插件基类
  * @description 播放器插件基类，所有插件必须继承此类
  */
 export abstract class PlayerPlugin<State> {
+
     /**
-     * 插件名称
+     * 日志
      */
-    static pluginName: string;
+    logger: AppLogger | undefined;
 
     /**
      * 状态
      */
     state: State = {} as State;
 
-    constructor(protected player: Player, state: State) {
+    constructor(pluginName: string, protected player: Player, state: State) {
+        this.logger = new AppLogger(pluginName);
+        this.logger?.log('初始化');
         this.state = state
         this.player = player
         this.mount();
+        this.logger?.log('已挂载');
     }
 
     /**

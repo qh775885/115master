@@ -1,14 +1,17 @@
-// import { createApp } from 'vue';
+
+debugInfo.bootstrapInfo();
+
 import './style.css';
-// import App from './App.vue';
 import { minimatch } from 'minimatch';
 import ROUTE_MATCH from './constants/route.match';
 import HomePage from './pages/home';
 import PlayerPage from './pages/player';
-import versionOutput from './utils/version-output';
+import { debugInfo } from './utils/debugInfo';
+import { checkUserAgent } from './utils/checkUserAgent';
+
+checkUserAgent();
 
 const main = () => {
-  versionOutput()
   if (minimatch(window.location.href, ROUTE_MATCH.HOME)) {
     new HomePage()
   }
@@ -23,13 +26,3 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
   window.addEventListener('DOMContentLoaded', main)
 }
-
-// createApp(App).mount(
-//   (() => {
-//     const app = document.createElement('div');
-//     document.body.append(app);
-//     return app;
-//   })(),
-// );
-
-

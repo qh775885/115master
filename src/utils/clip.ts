@@ -3,8 +3,11 @@ import MP4Box from "mp4box";
 import { DataStream } from "mp4box";
 import { Parser } from 'm3u8-parser';
 import Mux from 'mux.js';
+import { AppLogger } from "./logger";
 
 type VideoTrack = any
+
+const logger = new AppLogger('clip');
 
 // 从segments中提取指定间隔的片段
 const extractSegmentsByInterval = (
@@ -30,7 +33,7 @@ const extractSegmentsByInterval = (
     expectedSegments = numberOfGroups;
     // 重新计算间隔时间
     intervalSeconds = Math.ceil(totalDuration / expectedSegments);
-    console.log(`Adjusted interval to ${intervalSeconds}s to get ${expectedSegments} segments`);
+    logger.log(`Adjusted interval to ${intervalSeconds}s to get ${expectedSegments} segments`);
   }
 
   // 计算每个片段应该包含的原始片段数量
@@ -53,13 +56,11 @@ const extractSegmentsByInterval = (
 const getSegments = async (m3u8url: string, intervalSeconds?: number) => {
   const response = await fetch(m3u8url);
   const m3u8Text = await response.text();
-
   const parser = new Parser();
   parser.push(m3u8Text);
   parser.end();
 
   const manifest = parser.manifest;
-  console.log('manifest', manifest);
 
   if (intervalSeconds) {
     // 按间隔提取片段
@@ -96,7 +97,6 @@ export const m3u8Clip = (m3u8url: string, options: ClipOptions = {}): Promise<Vi
 
   return new Promise(async (resolve, reject) => {
     const segments = specificSegment ? [specificSegment] : await getSegments(m3u8url, intervalSeconds);
-    console.log('segments', segments);
 
     // 处理单个片段
     const processSegment = async (segmentUrl: string): Promise<VideoFrame[]> => {
@@ -208,6 +208,7 @@ export const m3u8Clip = (m3u8url: string, options: ClipOptions = {}): Promise<Vi
       };
 
       const frames = await processSegments(segments);
+      logger.log('frames');
       resolve(frames);
     } catch (error) {
       console.error('Error processing m3u8:', error);

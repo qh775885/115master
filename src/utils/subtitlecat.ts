@@ -1,4 +1,5 @@
 import { GM_xmlhttpRequest } from "$";
+import { AppLogger } from "./logger";
 import { vttToBlobUrl } from "./subtitle";
 import { convertSrtToVtt } from "./subtitle";
 
@@ -23,6 +24,7 @@ export interface ProcessedSubtitle {
 
 export class SubtitleCat {
     private domain = 'https://subtitlecat.com';
+    logger = new AppLogger('Utils SubtitleCat');
     constructor() {
     }
  
@@ -125,28 +127,23 @@ export class SubtitleCat {
                         const doc = parser.parseFromString(response.response, 'text/html');
                         const rows = Array.from(doc.querySelectorAll('.sub-table tbody tr')).slice(0, 5);
                         
-                        console.log('找到的行数:', rows.length);
+                        this.logger.log('fetchSubtitle', `找到${rows.length}个疑似结果`);
 
                         // 解析搜索结果并过滤
                         const searchResults = rows
                             .map(row => this.parseSubtitleRow(row, language))
                             .filter(item => {
-                                console.log('正在过滤标题:', item.title);
-                                console.log('关键词:', keyword);
                                 // 使用更宽松的匹配条件
                                 const match = item.title.toLowerCase().includes(keyword.toLowerCase());
-                                console.log('是否匹配:', match);
+                                this.logger.log('fetchSubtitle', `${item.title} ${match ? '匹配' : '不匹配'}`);
                                 return match;
                             });
-
-                        console.log('过滤后的搜索结果:', searchResults);
 
                         // 处理每个字幕项
                         const processedResults = await Promise.all(
                             searchResults.map(async item => {
-                                console.log('处理字幕项:', item.title);
                                 const result = await this.processSubtitleItem(item);
-                                console.log('处理结果:', result ? '成功' : '失败');
+                                this.logger.log(`转换字幕 ${item.title}`, result ? '成功' : '失败');
                                 return result;
                             })
                         );
@@ -156,8 +153,7 @@ export class SubtitleCat {
                             processedResults.filter((item): item is ProcessedSubtitle => item !== undefined)
                         );
 
-                        console.log('最终结果数量:', finalResults.length);
-                        console.log('最终结果:', finalResults);
+                        this.logger.log('最终结果', finalResults);
 
                         resolve(finalResults);
                     } catch (error) {

@@ -17,7 +17,7 @@ export class Subtitle extends PlayerPlugin<SubtitleState> {
     static pluginName = 'subtitle';
 
     constructor(player: Player) {
-        super(player, {
+        super(Subtitle.pluginName, player, {
             playingVideoInfo: undefined,
             subtitles: [],
             index: 0
@@ -36,7 +36,6 @@ export class Subtitle extends PlayerPlugin<SubtitleState> {
     }
 
     onStateChange() {
-        console.log('state.subtitles', this.state.subtitles);
         this.state && this.addSubtitleTracks(this.state.subtitles);
     }
 

@@ -3,17 +3,19 @@ import { getAvNumber } from '../utils/getNumber';
 import { PlayingVideoInfo } from '../types/player';
 import { goToPlayer } from '../utils/route';
 import { VOD_URL_115 } from '../constants/115';
+import { AppLogger } from '../utils/logger';
 
-class HomeScript {
+class HomePage {
+    logger: AppLogger;
 
     constructor() {
-        console.log('Home');
+        this.logger = new AppLogger('HomePage');
         this.init()
     }
 
 
     init() {
-        console.log('Home init');
+        this.logger.log('init');
         this.addFileListItemHouverMenu()
     }
 
@@ -25,7 +27,6 @@ class HomeScript {
 
             if (listItem.getAttribute('paly_button') === '1') return;
             listItem.setAttribute('paly_button', '1');
-            console.log(listItem);
 
             const buttons = [
                 {
@@ -51,7 +52,7 @@ class HomeScript {
                     size: parseInt(listItem.getAttribute('file_size')!),
                 }
 
-                console.log('即将播放', playingVideoInfo);
+                this.logger.log('即将播放', playingVideoInfo);
 
                 goToPlayer(playingVideoInfo, true)
             }
@@ -79,8 +80,6 @@ class HomeScript {
                     GM_openInTab(new URL(`/?pickcode=${listItem.getAttribute('pick_code')}&share_id=0`, VOD_URL_115).href, {
                         active: true
                     })
-
-
                 });
             });
         });
@@ -91,4 +90,4 @@ class HomeScript {
     }
 }
 
-export default HomeScript;
+export default HomePage;

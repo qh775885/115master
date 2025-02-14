@@ -21,7 +21,7 @@ export class Playlist extends PlayerPlugin<State> {
     private changeVideoCallback: (playingVideoInfo: PlayingVideoInfo) => void = () => {};
 
     constructor(player: Player) {
-        super(player, {
+        super(Playlist.pluginName, player, {
             playingVideoInfo: undefined,
             playlist: [],
         });
@@ -34,7 +34,6 @@ export class Playlist extends PlayerPlugin<State> {
     }
 
     destroy(): void {
-
     }
 
     onStateChange(): void {
@@ -58,7 +57,6 @@ export class Playlist extends PlayerPlugin<State> {
         if (firstChild) {
             rightIcons?.insertBefore(button, firstChild);
         }
-        console.log('this.player', this.player);
         button.addEventListener('click', this.onButtonClick.bind(this));
 
         // 除了点击button和播放列表，其他地方点击都关闭播放列表

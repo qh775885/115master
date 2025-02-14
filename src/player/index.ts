@@ -50,8 +50,6 @@ export class Player extends DPlayer {
         volume: 1
     }
 
-    private videoWrapClickTimer: number | null | undefined = null;
-
     plugins: Record<string, PlayerPlugin<any>> = {};
     autoHideTimer: number | null | undefined;
 
