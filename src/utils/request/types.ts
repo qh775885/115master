@@ -1,5 +1,6 @@
 export interface RequestOptions {
     headers?: Record<string, string>;
+    params?: Record<string, string | number | boolean>;
     timeout?: number;
     body?: any;
     method?: string;

@@ -4,10 +4,16 @@ import { IRequest, RequestOptions, ResponseType } from "./types";
 // GM实现
 export class GMRequest extends IRequest {
   async request<T>(url: string, options: RequestOptions = {}): Promise<ResponseType<T>> {
+    let urlRe = new URL(url);
+    if (options.params) {
+      Object.entries(options.params).forEach(([key, value]) => {
+        urlRe.searchParams.set(key, value.toString());
+      });
+    }
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
         method: options.method || 'GET',
-        url,
+        url: urlRe.href,
         headers: options.headers,
         data: options.body,
         timeout: options.timeout,

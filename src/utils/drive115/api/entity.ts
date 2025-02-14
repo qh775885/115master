@@ -8,6 +8,8 @@ export interface PlaylistItem {
     size: number;
     // 创建时间
     createTime: number;
+    // 播放时长
+    play_long: number;
 }
 
 export interface PathItem {
