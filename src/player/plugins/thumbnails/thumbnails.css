@@ -1,4 +1,8 @@
 #dplayer .dplayer-controller .dplayer-bar-wrap .dplayer-bar-preview {
+
+  /* display: block !important; */
+  /* z-index: 9999000 !important; */
+  
   background-color: rgba(55, 55, 55, 0.5) !important;
   backdrop-filter: blur(20px) saturate(180%) !important;
   border-radius: 32px;
@@ -21,6 +25,7 @@
   /* opacity: 1 !important; */
   /* transform: translateY(0) !important; */
   /* z-index: 9999 !important; */
+
   margin-bottom: 16px;
 }
 

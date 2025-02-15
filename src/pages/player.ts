@@ -106,7 +106,7 @@ class PlayerPage {
             this.player.registerPlugin(PanelInfo);
             this.player.registerPlugin(Tumbnails, {
                 intervalSeconds: 10,
-                samplesPerSegment: 1,
+                samplesPerSegment: 10,
                 maxWidth: 540,
                 maxHeight: 304
             });

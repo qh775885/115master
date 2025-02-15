@@ -1,9 +1,10 @@
 import { PlayerPlugin } from "..";
 import { Player } from "../..";
-import { getSegmentsWithDuration, m3u8Tumbnail } from "../../../utils/clip";
+import { M3U8Clipper, VideoFrame } from "../../../utils/clip";
 import './thumbnails.css';
 import throttle from 'lodash/throttle';
 import { calculateFitSize } from "./utils";
+import { AsyncQueue } from "../../../utils/asyncQueue";
 
 type TumbnailsState = {
     intervalSeconds?: number;
@@ -12,17 +13,38 @@ type TumbnailsState = {
     maxHeight: number;
 }
 
+type CachedFrame = {
+    frame: VideoFrame;
+    segmentIndex: number;
+}
+
+type SegmentFrame = {
+    frames: VideoFrame[];
+    isLoaded: boolean;
+    isProcessing: boolean;
+    isAutoPreload: boolean;
+}
+
 export class Tumbnails extends PlayerPlugin<TumbnailsState> {
     static pluginName = 'tumbnails';
+    private clipper: M3U8Clipper | undefined;
     thumbnalCount = 0;
-    private currentLoadingIndex: number = -1;
-    private thumbnailCache: Map<number, string> = new Map();
+    private frameCache: Map<number, CachedFrame> = new Map(); // 按秒级时间索引存储帧
+    private segmentFrame: Map<number, SegmentFrame> = new Map(); // 按秒级时间索引存储片段g
     private videoUrl?: string;
     private segments?: { uri: string; duration: number }[];
     private totalDuration?: number;
-    private throttledMove: (position: number) => void;
+    private throttledMove: ((position: number) => void) | undefined;
     private thumbnailWidth: number = 0;
     private thumbnailHeight: number = 0;
+    private previewCanvas: HTMLCanvasElement | undefined;
+    private previewCtx: CanvasRenderingContext2D | undefined;
+    private lastPosition: number = 0;
+    private isManualLoading = false;  // 添加标记是否有手动加载的状态
+    private autoPreloadTimeout: number | null = null;  // 添加这个属性来跟踪 timeout
+    private loadQueue: AsyncQueue;
+    private readonly TASK_GROUP_AUTO_PRELOAD = 'TASK_GROUP_AUTO_PRELOAD';
+
     constructor(player: Player) {
         super(Tumbnails.pluginName, player, {
             intervalSeconds: 60,
@@ -30,17 +52,17 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
             maxWidth: 540,
             maxHeight: 304
         });
-
-        this.throttledMove = throttle(this.handleMove.bind(this), 1000 / 12, {
-            leading: true,
-            trailing: true
-        });
+        this.loadQueue = new AsyncQueue(2, 100); // 最大并发2，队列长度100
     }
 
     destroy(): void {
-        this.thumbnailCache.clear();
-        // @ts-ignoreg
-        this.throttledMove.cancel();
+        this.frameCache.clear();
+        // @ts-ignore
+        this.throttledMove?.cancel();
+        if (this.autoPreloadTimeout) {
+            clearTimeout(this.autoPreloadTimeout);
+        }
+        this.loadQueue.clear();
         window.removeEventListener('resize', this.handleResize.bind(this));
     }
 
@@ -60,36 +82,140 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
             throw new Error('qualitys is not defined or qualitys is empty');
         }
 
-        this.player.controller.thumbnails.move = this.move.bind(this);
-        this.player.controller.thumbnails.resize = this.resize.bind(this);
 
+        console.log('qualitys', qualitys);
         const url = qualitys[qualitys.length - 1].url;
         this.videoUrl = url;
+        this.clipper = new M3U8Clipper();
+        this.previewEleSetCanvas(this.player.controller.thumbnails.container);
 
         await this.initSegments(url);
 
-        this.player.on('loadedmetadata', this.handleResize.bind(this));
+        this.player.controller.thumbnails.move = this.move.bind(this);
+        this.player.controller.thumbnails.resize = this.resize.bind(this);
+        this.player.on('loadedmetadata', this.onLoadedMetadata.bind(this));
         window.addEventListener('resize', this.handleResize.bind(this));
+        this.throttledMove = throttle(this.handleMove.bind(this), 250, {
+            leading: true,
+            trailing: true
+        });
     }
 
     onStateChange() {
         this.thumbnailWidth = 0;
         this.thumbnailHeight = 0;
         this.thumbnalCount = 0;
-        this.thumbnailCache.clear();
+        this.frameCache.clear();
+        this.segmentFrame.clear();
         this.mount();
+    }
+
+    onLoadedMetadata() {
+        this.handleResize();
+        this.autoPreload(30, 2);
+    }
+
+    autoPreload(num: number = 10, concurrency: number = 2) {
+        if (!this.segments || this.isManualLoading) {
+            return;
+        }
+
+        const loadedCount = Array.from(this.segmentFrame.values())
+            .filter(segment => segment.isLoaded && segment.isAutoPreload).length;
+
+        if (loadedCount >= num) {
+            return;
+        }
+
+        const unloadedIndices = this.getUnloadedIndices();
+        if (unloadedIndices.length === 0) return;
+
+        const remainingToLoad = num - loadedCount;
+        const shuffledIndices = unloadedIndices.sort(() => Math.random() - 0.5);
+        const selectedIndices = shuffledIndices.slice(0, remainingToLoad);
+
+        selectedIndices.forEach(index => {
+            this.segmentFrame.set(index, {
+                frames: [],
+                isLoaded: false,
+                isProcessing: true,
+                isAutoPreload: true
+            });
+
+            this.loadQueue.add(
+                () => this.loadThumbnailAtIndex(index, true),
+                {
+                    priority: 0,
+                    group: this.TASK_GROUP_AUTO_PRELOAD,
+                    id: `thumbnail-${index}`,
+                    retries: 2,
+                    timeout: 10000
+                }
+            ).catch(error => {
+                console.error('Failed to load thumbnail:', error);
+                const segment = this.segmentFrame.get(index);
+                if (segment) {
+                    segment.isProcessing = false;
+                }
+            });
+        });
+
+        // if (this.loadQueue.length === 0 && !this.isManualLoading) {
+        //     setTimeout(() => this.autoPreload(num, concurrency), 1000);
+        // }
     }
 
     private handleResize() {
         const { width, height } = calculateFitSize(this.state.maxWidth, this.state.maxHeight, this.player.video.videoWidth, this.player.video.videoHeight)
         this.thumbnailWidth = width;
         this.thumbnailHeight = height;
+        if (this.previewCanvas) {
+            this.previewCanvas.width = this.thumbnailWidth;
+            this.previewCanvas.height = this.thumbnailHeight;
+
+        }
         this.resize(this.thumbnailWidth, this.thumbnailHeight, this.player.template.barWrap.offsetWidth);
     }
 
+    previewEleSetCanvas(div: HTMLElement) {
+        if (!div.parentNode) {
+            throw new Error('div.parentNode is not defined');
+        }
+
+        const canvas = document.createElement('canvas');
+
+        // 复制 div 元素的所有属性到 canvas 元素
+        for (var i = 0; i < div.attributes.length; i++) {
+            var attr = div.attributes[i];
+            canvas.setAttribute(attr.name, attr.value);
+        }
+
+        canvas.style.backgroundImage = 'none';
+        canvas.style.backgroundPosition = '0 0';
+
+        // 替换 div 元素为 canvas 元素
+        div.parentNode.replaceChild(canvas, div);
+
+        // 你可以在这里初始化你的 canvas 绘图
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('ctx is not defined');
+        }
+        this.previewCanvas = canvas;
+        this.previewCtx = ctx;
+        this.player.controller.thumbnails.container = canvas
+        return {
+            canvas,
+            ctx
+        };
+    }
+
     private async initSegments(url: string) {
+        if (!this.clipper) {
+            throw new Error('clipper is not defined');
+        }
         try {
-            const { segments, totalDuration } = await getSegmentsWithDuration(url);
+            const { segments, totalDuration } = await this.clipper.getSegmentsWithDuration(url);
             this.segments = segments;
             this.totalDuration = totalDuration;
             this.thumbnalCount = segments.length;
@@ -113,49 +239,71 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
         return this.segments.length - 1;
     }
 
-    private async loadThumbnailAtIndex(index: number, sampleIndex: number) {
-        if (this.thumbnailCache.has(index) ||
-            this.currentLoadingIndex === index ||
-            !this.videoUrl ||
-            !this.segments) {
+    private async loadThumbnailAtIndex(index: number, isAutoPreload: boolean = false) {
+        if (!this.clipper) {
+            throw new Error('clipper is not defined');
+        }
+        if (!this.videoUrl || !this.segments) {
             return;
         }
 
-        this.currentLoadingIndex = index;
         try {
             const segment = this.segments[index];
-            const thumbnail = await m3u8Tumbnail(
-                this.videoUrl,
-                this.state.samplesPerSegment,
-                this.thumbnailWidth,
-                segment.uri
-            );
+            const segmentStartTime = this.getSegmentStartTime(index);
+            const thumbnail = await this.clipper.createThumbnail({
+                segmentUrl: segment.uri,
+                segmentStartTime: segmentStartTime,
+                samplesPerSegment: this.state.samplesPerSegment!,
+                width: this.thumbnailWidth,
+                height: this.thumbnailHeight
+            });
 
             if (thumbnail) {
-                this.thumbnailCache.set(index, thumbnail.url);
-                const thumbnailUrl = this.thumbnailCache.get(index);
-                if (thumbnailUrl) {
-                    this.player.controller.thumbnails.container.style.backgroundImage = `url('${thumbnailUrl}')`;
-                    this.player.controller.thumbnails.container.style.backgroundPosition = `-${sampleIndex * this.thumbnailWidth}px 0`;
+                if (!isAutoPreload) {
+                    this.renderThumbnail(thumbnail.videoFrames[0]);
                 }
+                this.segmentFrame.set(index, {
+                    frames: thumbnail.videoFrames,
+                    isLoaded: true,
+                    isProcessing: false,
+                    isAutoPreload: isAutoPreload
+                });
             }
         } catch (error) {
             console.error('Failed to load thumbnail:', error);
-        } finally {
-            this.currentLoadingIndex = -1;
         }
     }
 
+    private renderThumbnail(frame: VideoFrame) {
+        if (!this.previewCtx) {
+            return;
+        }
+        const aspectRatio = frame.img.width / frame.img.height;
+        const frameWidth = this.thumbnailWidth;
+        const frameHeight = frameWidth / aspectRatio;
+        // 清空画布
+        this.previewCtx.clearRect(0, 0, frameWidth, frameHeight);
+        this.previewCtx.drawImage(frame.img, 0, 0, frameWidth, frameHeight);
+    }
 
     resize(width: number, height: number, barWrapWidth: number) {
         const thumbnails = this.player.controller.thumbnails;
-        thumbnails.container.style.width = `${width}px`;
-        thumbnails.container.style.height = `${height}px`;
-        thumbnails.container.style.top = `${-height + 2}px`;
+        if (this.previewCanvas) {
+            this.previewCanvas.width = width;
+            this.previewCanvas.height = height;
+            this.previewCanvas.style.top = `${-height + 2}px`;
+        }
         thumbnails.barWidth = barWrapWidth;
     }
 
-    private handleMove(position: number) {
+    move(position: number) {
+        if (position === this.lastPosition) {
+            return;
+        }
+        this.updateBoxPosition(position);
+        const direction = position - this.lastPosition;  // 计算方向要在更新 lastPosition 之前
+        this.lastPosition = position;
+        
         const thumbnails = this.player.controller.thumbnails;
 
         if (!this.totalDuration) {
@@ -163,36 +311,91 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
         }
 
         const currentTime = (position / thumbnails.barWidth) * this.totalDuration;
-        const index = this.getSegmentIndexByTime(currentTime);
+        const segmentIndex = this.getSegmentIndexByTime(currentTime);
 
-        if (index >= 0) {
-            const segmentTime = this.getSegmentStartTime(index);
-            const timeInSegment = currentTime - segmentTime;
-            const segmentDuration = this.segments![index].duration;
-            const sampleIndex = Math.floor((timeInSegment / segmentDuration) * this.state.samplesPerSegment!);
-            const backgroundPosition = sampleIndex * this.thumbnailWidth;
-            thumbnails.container.style.backgroundPosition = `-${backgroundPosition}px 0`;
+        if (segmentIndex < 0) {
+            return;
+        }
 
-            if (this.thumbnailCache.get(index)) {
-                thumbnails.container.style.backgroundImage = `url('${this.thumbnailCache.get(index)}')`;
-            } else {
-                this.loadThumbnailAtIndex(index, sampleIndex);
+        // 先从片缓存中查找
+        const segmentCache = this.segmentFrame.get(segmentIndex);
+        if (segmentCache?.isLoaded) {
+            const frame = segmentCache.frames.find(f => {
+                if(direction > 0) {
+                    return f.t >= currentTime;
+                } else {
+                    return f.t <= currentTime;
+                }
+            })
+            if (frame) {
+                this.renderThumbnail(frame);
+                return
             }
         }
+
+        if (segmentCache?.isProcessing) {
+            return;
+        }
+
+        // 如果正在等待恢复自动加载，取消等待
+        if (this.autoPreloadTimeout) {
+            clearTimeout(this.autoPreloadTimeout);
+            this.autoPreloadTimeout = null;
+        }
+
+        this.throttledMove?.(segmentIndex);
     }
 
-    move(position: number) {
-        this.updateBoxPosition(position);
-        this.throttledMove(position);
+    private handleMove(segmentIndex: number) {
+        if (this.autoPreloadTimeout) {
+            clearTimeout(this.autoPreloadTimeout);
+            this.autoPreloadTimeout = null;
+        }
+
+        this.isManualLoading = true;
+        this.segmentFrame.set(segmentIndex, {
+            frames: [],
+            isLoaded: false,
+            isProcessing: true,
+            isAutoPreload: false
+        });
+
+        // 取消所有自动预加载任务
+        this.loadQueue.pause(this.TASK_GROUP_AUTO_PRELOAD);
+
+        // 加载当前请求的缩略图
+        this.loadQueue.add(
+            () => this.loadThumbnailAtIndex(segmentIndex, false),
+            {
+                priority: 1,
+                id: `thumbnail-manual-${segmentIndex}`,
+                retries: 3,
+                timeout: 5000
+            }
+        ).then(() => {
+            this.autoPreloadTimeout = setTimeout(() => {
+                this.isManualLoading = false;
+                this.loadQueue.resume(this.TASK_GROUP_AUTO_PRELOAD);
+            }, 3000);
+        }).catch(error => {
+            console.error('Failed to load thumbnail:', error);
+            const segment = this.segmentFrame.get(segmentIndex);
+            if (segment) {
+                segment.isProcessing = false;
+            }
+        });
     }
 
     private updateBoxPosition(position: number) {
+        if (!this.previewCanvas) {
+            throw new Error('previewCanvas is not defined');
+        }
         const thumbnails = this.player.controller.thumbnails;
         const offset = 10;
-        thumbnails.container.style.left = `${Math.min(
-            Math.max(position - thumbnails.container.offsetWidth / 2, -offset),
+        this.previewCanvas.style.transform = `translateX(${Math.min(
+            Math.max(position - this.previewCanvas.offsetWidth / 2, -offset),
             thumbnails.barWidth - (this.thumbnailWidth - offset)
-        )}px`;
+        )}px)`;
     }
 
     private getSegmentStartTime(index: number): number {
@@ -204,5 +407,14 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
             startTime += this.segments[i].duration;
         }
         return startTime;
+    }
+
+    private getUnloadedIndices(): number[] {
+        if (!this.segments) return [];
+        return Array.from({ length: this.segments.length }, (_, i) => i)
+            .filter(index => {
+                const segment = this.segmentFrame.get(index);
+                return !segment || (!segment.isLoaded && !segment.isProcessing);
+            });
     }
 }

@@ -24,6 +24,7 @@ export abstract class PlayerPlugin<State> {
         this.player = player
         this.mount();
         this.logger?.log('已挂载');
+        this.onMounted?.();
     }
 
     /**
@@ -35,6 +36,11 @@ export abstract class PlayerPlugin<State> {
      * 挂载插件
      */
     abstract mount(): void;
+
+    /**
+     * 挂载后事件
+     */
+    onMounted?(): void;
 
     /**
      * 状态变化前事件
