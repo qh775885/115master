@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue';
-import viteLogoUrl from './assets/vite.svg';
-import vueLogoUrl from './assets/vue.svg';
+import viteLogoUrl from "./assets/vite.svg";
+import vueLogoUrl from "./assets/vue.svg";
+import HelloWorld from "./components/HelloWorld.vue";
 </script>
 
 <template>
