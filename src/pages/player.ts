@@ -229,6 +229,7 @@ class PlayerPage {
 		]);
 
 		if (download.status === "fulfilled") {
+			this.logger.log("fetchVideoSources", "原画加载成功");
 			this.state.videoSources.unshift({
 				name: "Ultra原画",
 				url: download.value.url,
@@ -237,6 +238,7 @@ class PlayerPage {
 		}
 
 		if (m3u8List.status === "fulfilled") {
+			this.logger.log("fetchVideoSources", "m3u8加载成功");
 			this.state.videoSources.push(
 				...m3u8List.value.map((item) => ({
 					name: qualityNumMap[

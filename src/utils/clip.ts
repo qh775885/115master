@@ -68,6 +68,8 @@ export class M3U8Clipper {
 							const img = await createImageBitmap(videoFrame, {
 								resizeQuality: "pixelated",
 								premultiplyAlpha: "none",
+								resizeWidth: width,
+								resizeHeight: height,
 							});
 							frames.push({
 								img,

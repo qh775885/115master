@@ -9,8 +9,8 @@ import { calculateFitSize } from "./utils";
 type TumbnailsState = {
 	intervalSeconds?: number;
 	samplesPerSegment?: number;
-	maxWidth: number;
-	maxHeight: number;
+	maxWidth?: number;
+	maxHeight?: number;
 };
 
 type CachedFrame = {
@@ -49,10 +49,10 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
 		super(Tumbnails.pluginName, player, {
 			intervalSeconds: 60,
 			samplesPerSegment: 10,
-			maxWidth: 540,
-			maxHeight: 304,
+			maxWidth: 540 * 0.8,
+			maxHeight: 304 * 0.8,
 		});
-		this.loadQueue = new AsyncQueue(2, 100); // 最大并发2，队列长度100
+		this.loadQueue = new AsyncQueue(5, 100); // 最大并发4，队列长度100
 	}
 
 	destroy(): void {
@@ -111,10 +111,9 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
 
 	onLoadedMetadata() {
 		this.handleResize();
-		this.autoPreload(30, 2);
 	}
 
-	autoPreload(num = 10, concurrency = 2) {
+	autoPreload(num = 10) {
 		if (!this.segments || this.isManualLoading) {
 			return;
 		}
@@ -158,16 +157,12 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
 					}
 				});
 		});
-
-		// if (this.loadQueue.length === 0 && !this.isManualLoading) {
-		//     setTimeout(() => this.autoPreload(num, concurrency), 1000);
-		// }
 	}
 
 	private handleResize() {
 		const { width, height } = calculateFitSize(
-			this.state.maxWidth,
-			this.state.maxHeight,
+			this.state.maxWidth!,
+			this.state.maxHeight!,
 			this.player.video.videoWidth,
 			this.player.video.videoHeight,
 		);
@@ -262,8 +257,8 @@ export class Tumbnails extends PlayerPlugin<TumbnailsState> {
 				segmentUrl: segment.uri,
 				segmentStartTime: segmentStartTime,
 				samplesPerSegment: this.state.samplesPerSegment!,
-				width: this.thumbnailWidth,
-				height: this.thumbnailHeight,
+				width: this.thumbnailWidth * 0.8,
+				height: this.thumbnailHeight * 0.8,
 			});
 
 			if (thumbnail) {
