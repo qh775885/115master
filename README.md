@@ -27,7 +27,7 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 3. 在油猴扩展面板勾选启动 【115Master】脚本，刷新 【115主页】开始使用
 
-3. ⚠️⚠️⚠️ 仍然无法使用，请安装 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为如下：
+4. ⚠️⚠️⚠️ 仍然无法使用，请安装 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为如下：
 
 ```txt
 Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
