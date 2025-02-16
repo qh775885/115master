@@ -49,7 +49,7 @@ class HomePage {
 					title: listItem.getAttribute("title")!,
 					avNumber: getAvNumber(listItem.getAttribute("title")!) || undefined,
 					cid: listItem.getAttribute("cid")!,
-					size: Number.parseInt(listItem.getAttribute("file_size")!),
+					size: parseInt(listItem.getAttribute("file_size")!),
 				};
 
 				this.logger.log("即将播放", playingVideoInfo);
