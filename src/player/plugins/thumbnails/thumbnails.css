@@ -1,35 +1,32 @@
 #dplayer .dplayer-controller .dplayer-bar-wrap .dplayer-bar-preview {
+	/* display: block !important; */
+	/* z-index: 9999000 !important; */
 
-  /* display: block !important; */
-  /* z-index: 9999000 !important; */
-  
-  background-color: rgba(55, 55, 55, 0.5) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  border-radius: 32px;
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3),
-    0 0 20px 0 rgba(255, 255, 255, 0.2),
-    0 0 30px 0 rgba(0, 0, 0, 0.2),
-    0 0 40px 0 rgba(255, 255, 255, 0.1) !important;
-  background-repeat: no-repeat !important;
-  background-size: auto !important;
+	background-color: rgba(55, 55, 55, 0.5) !important;
+	backdrop-filter: blur(20px) saturate(180%) !important;
+	border-radius: 32px;
+	box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3), 0 0 20px 0 rgba(255, 255, 255, 0.2),
+		0 0 30px 0 rgba(0, 0, 0, 0.2), 0 0 40px 0 rgba(255, 255, 255, 0.1) !important;
+	background-repeat: no-repeat !important;
+	background-size: auto !important;
 }
 
 #dplayer .dplayer-controller .dplayer-bar-wrap .dplayer-bar-preview.loading {
-  background-image: url("../../icons/Infinity.svg") !important;
-  background-size: 60px 60px !important;
-  background-position: center !important;
-  background-size: cover !important;
+	background-image: url("../../icons/Infinity.svg") !important;
+	background-size: 60px 60px !important;
+	background-position: center !important;
+	background-size: cover !important;
 }
 
 #dplayer .dplayer-controller {
-  /* opacity: 1 !important; */
-  /* transform: translateY(0) !important; */
-  /* z-index: 9999 !important; */
+	/* opacity: 1 !important; */
+	/* transform: translateY(0) !important; */
+	/* z-index: 9999 !important; */
 
-  margin-bottom: 16px;
+	margin-bottom: 16px;
 }
 
 #dplayer .dplayer-bar-wrap {
-  padding-top: 16px;
-  padding-bottom: 16px;
+	padding-top: 16px;
+	padding-bottom: 16px;
 }

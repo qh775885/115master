@@ -1,10 +1,10 @@
-import { PathItem, PlaylistItem } from "../entity";
+import type { PathItem, PlaylistItem } from "../entity";
 
 type Base<T> = {
-    state: boolean;
-} & T
+	state: boolean;
+} & T;
 
 export type VodApiFiles = Base<{
-    data: PlaylistItem[]
-    path: PathItem[]
-}>
+	data: PlaylistItem[];
+	path: PathItem[];
+}>;

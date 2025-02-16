@@ -1,7 +1,7 @@
-import DPlayer from 'dplayer';
+import DPlayer from "dplayer";
 
-declare module 'dplayer' {
-    export interface DPlayerOptions {
-        preventClickToggle?: boolean;
-    }
+declare module "dplayer" {
+	export interface DPlayerOptions {
+		preventClickToggle?: boolean;
+	}
 }
