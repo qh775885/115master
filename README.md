@@ -29,13 +29,15 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 4. ⚠️⚠️⚠️ 仍然无法使用，请安装 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件，修改 `User-Agent` 为如下：
 
-```txt
-Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
-```
+    ```txt
+    Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
+    ```
 
-填入 `User-Agent` 后，点击 `Apply（all tabs）` 刷新 115 网盘页面即可生效。
+    填入 `User-Agent` 后，点击 `Apply（all tabs）` 刷新 115 网盘页面即可生效。
 
-![user-agent](./docs/images/useragent.png)
+    ![user-agent](./docs/images/useragent.png)
+
+5. 👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
 
 ## 线路图
 
