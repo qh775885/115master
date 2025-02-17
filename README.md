@@ -21,7 +21,7 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 ## 安装
 
-1. 安装 [Tempermonkey](https://www.tampermonkey.net/)，后开启 [浏览器扩展开发者模式](https://www.tampermonkey.net/faq.php#Q209)。
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/)，后开启 [浏览器扩展开发者模式](https://www.tampermonkey.net/faq.php#Q209)。
 
 2. 一键安装 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装 【115Master】脚本。
 
@@ -43,3 +43,4 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 - [ ] 根据字幕自动生成剧情点
 - [ ] 播放页一键收藏
+- [ ] 视频详情页，支持评论区展示
