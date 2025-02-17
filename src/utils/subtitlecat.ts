@@ -83,8 +83,8 @@ export class SubtitleCat {
 		const comment = hasThumbsDown
 			? (-1 as const)
 			: hasThumbsUp
-			  ? (1 as const)
-			  : (0 as const);
+				? (1 as const)
+				: (0 as const);
 
 		// 提取下载次数
 		const downloadsText =
