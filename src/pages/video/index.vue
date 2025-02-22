@@ -35,6 +35,7 @@ import { nextTick, onMounted, onUnmounted } from "vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import type { Entity } from "../../utils/drive115";
+import Drive115Instance from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
 import { goToPlayer } from "../../utils/route";
 import FileInfo from "./components/FileInfo/index.vue";
@@ -84,6 +85,8 @@ const loadData = async (isFirst = true) => {
 		}
 	});
 
+	await Drive115Instance.fakeVodAuthPickcode(params.pickCode.value);
+
 	const promises: {
 		fn: () => Promise<unknown>;
 		condition: boolean;
@@ -94,6 +97,11 @@ const loadData = async (isFirst = true) => {
 		},
 		{
 			fn: () =>
+				DataPlaylist.execute(0, params.cid.value, params.pickCode.value),
+			condition: isFirst,
+		},
+		{
+			fn: () =>
 				DataMovieInfo.value.javDBState.execute(0, params.avNumber.value),
 			condition: !!params.avNumber.value,
 		},
@@ -101,11 +109,6 @@ const loadData = async (isFirst = true) => {
 			fn: () =>
 				DataMovieInfo.value.javBusState.execute(0, params.avNumber.value),
 			condition: !!params.avNumber.value,
-		},
-		{
-			fn: () =>
-				DataPlaylist.execute(0, params.cid.value, params.pickCode.value),
-			condition: !!isFirst,
 		},
 	];
 	Promise.all(

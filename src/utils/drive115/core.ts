@@ -19,6 +19,7 @@ export interface DownloadResult {
 }
 
 // TODO: 超时登录错误 errNo 990001
+// TODO: 验证账号弹窗被拦截 911
 export class Drive115Core {
 	private logger = new AppLogger("Drive115Core");
 
@@ -58,6 +59,18 @@ export class Drive115Core {
 				alert("验证弹窗已被拦截，请允许本页面弹出式窗口！");
 			}
 		}
+	}
+
+	async fakeVodAuthPickcode(pickcode: string) {
+		await this.iRequest.get<WebApi.Res.FilesDownload>(
+			new URL(`?pickcode=${pickcode}`, this.VOD_URL_115).href,
+			{
+				headers: {
+					"User-Agent": USER_AGENT_115,
+				},
+				responseType: "document",
+			},
+		);
 	}
 
 	private async getDownloadUrlByNormal(
