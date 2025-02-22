@@ -18,6 +18,7 @@ export interface DownloadResult {
 	fileToken?: string;
 }
 
+// TODO: 超时登录错误 errNo 990001
 export class Drive115Core {
 	private logger = new AppLogger("Drive115Core");
 
@@ -29,6 +30,34 @@ export class Drive115Core {
 
 	constructor(protected iRequest: IRequest) {
 		this.crypto115 = new Crypto115();
+	}
+
+	private verify() {
+		const time = new Date().getTime();
+		const w = 335;
+		const h = 500;
+		const t = (window.screen.availHeight - h) / 2;
+		const l = (window.screen.availWidth - w) / 2;
+		const link = `https://captchaapi.115.com/?ac=security_code&type=web&cb=Close911_${time}`;
+		const isConfirm = confirm("立即打开验证账号弹窗？");
+		if (isConfirm) {
+			let blocked = false;
+			try {
+				const WindowProxy = window.open(
+					link,
+					"请验证账号",
+					`height=${h},width=${w},top=${t},left=${l},toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no`,
+				);
+				if (WindowProxy == null) {
+					blocked = true;
+				}
+			} catch (e) {
+				blocked = true;
+			}
+			if (blocked) {
+				alert("验证弹窗已被拦截，请允许本页面弹出式窗口！");
+			}
+		}
 	}
 
 	private async getDownloadUrlByNormal(
@@ -43,15 +72,18 @@ export class Drive115Core {
 			},
 		);
 
-		const data = response.data;
-		this.logger.log("普通方式获取响应:", data);
+		if (response.data.errNo === 990001) {
+			alert("登录已过期，请重新登录");
+		}
 
-		if (!data.state || !data.file_url) {
-			throw new Error(`服务器返回数据格式错误: ${JSON.stringify(data)}`);
+		if (!response.data.state || !response.data.file_url) {
+			throw new Error(
+				`服务器返回数据格式错误: ${JSON.stringify(response.data)}`,
+			);
 		}
 
 		return {
-			url: data.file_url,
+			url: response.data.file_url,
 		};
 	}
 
@@ -142,6 +174,13 @@ export class Drive115Core {
 				"User-Agent": USER_AGENT_115,
 			},
 		});
+
+		if (response.data?.state === false) {
+			if (response.data.code === 911) {
+				this.verify();
+			}
+			throw new Error(`获取m3u8文件失败: ${response.data.error}`);
+		}
 
 		const htmlText = response.data;
 
@@ -236,10 +275,28 @@ export class Drive115Core {
 		} catch (error) {
 			this.logger.log("获取webapiFiles失败，尝试使用apsNatsortFiles获取");
 			const response = await this.apsNatsortFiles(obj);
-			if (response.data.state) {
+
+			if (response.data?.state) {
 				return response.data;
 			}
-			throw new Error("apsNatsortFiles 获取播放列表失败");
+			throw new Error(`获取播放列表失败: ${JSON.stringify(response)}`);
 		}
+	}
+
+	public async getFileInfo(params: WebApi.Req.FilesInfoReq) {
+		const response = await this.iRequest.get<WebApi.Res.FilesInfo>(
+			new URL("/webapi/files/video", this.VOD_URL_115).href,
+			{
+				params,
+				headers: {
+					"Content-Type": "application/json",
+					"User-Agent": USER_AGENT_115,
+					referer: `${this.VOD_URL_115}/?pickcode=${params.pickcode}&share_id=0`,
+					host: VOD_HOST_155,
+				},
+			},
+		);
+
+		return response.data;
 	}
 }

@@ -28,7 +28,8 @@ export default defineConfig({
 				include: [
 					"https://115.com/?ct*",
 					"https://115.com/?aid*",
-					"https://dl.115cdn.net/fuckkk/*",
+					"https://dl.115cdn.net/master/*",
+					"https://115.com/web/lixian/video/?*",
 				],
 				exclude: [
 					"https://*.115.com/bridge*",
@@ -40,14 +41,15 @@ export default defineConfig({
 					"115.com",
 					"webapi.115.com",
 					"proapi.115.com",
+					"dl.115cdn.net",
 					"cdnfhnfile.115cdn.net",
 					"v.anxia.com",
-					"dl.115cdn.net",
 					"115vod.com",
 					"subtitlecat.com",
 					"javbus.com",
 					"javdb.com",
 					"jdbstatic.com",
+					"cpats01.115.com",
 				],
 				resource: {
 					icon: "https://115.com/favicon.ico",
@@ -56,6 +58,10 @@ export default defineConfig({
 					"https://github.com/cbingb666/115master/releases/latest/download/115master.user.js",
 				updateURL:
 					"https://github.com/cbingb666/115master/releases/latest/download/115master.meta.js",
+
+				require: [
+					// "https://raw.githubusercontent.com/Tampermonkey/utils/refs/heads/main/requires/gh_2215_make_GM_xhr_more_parallel_again.js",
+				],
 			},
 
 			build: {

@@ -5,7 +5,7 @@ export interface PlaylistItem {
 	// pickcode
 	pc: string;
 	// 文件大小
-	size: number;
+	s: number;
 	// 创建时间
 	createTime: number;
 	// 播放时长

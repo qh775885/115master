@@ -12,15 +12,14 @@ interface ButtonConfig {
 	text: string;
 }
 
-type ViewMode = "list" | "thumb";
-
+// 文件操作菜单
 export class FileOperationMenu {
 	private readonly logger: AppLogger;
 	private readonly ContentsMenubuttons: ButtonConfig[] = [
 		{
 			class: "115-player",
 			title: "使用【115官方播放器】",
-			text: "💩 官方播放",
+			text: "5️⃣ 官方播放",
 		},
 		{
 			class: "master-player",
@@ -34,25 +33,25 @@ export class FileOperationMenu {
 		this.init();
 	}
 
+	// 初始化
 	private init(): void {
 		this.logger.log("init");
 		this.addFileItemHoverMenu();
 	}
 
+	// 添加文件项悬停菜单
 	private addFileItemHoverMenu(): void {
 		document.addEventListener("mouseover", this.handleMouseOver.bind(this));
 	}
 
+	// 处理鼠标悬停事件
 	private handleMouseOver(event: MouseEvent): void {
 		const target = event.target as HTMLElement;
 		const listItem = target.closest(
 			'.list-cell li[file_type="1"]',
 		) as HTMLElement;
 
-		const isNormalItem =
-			!!target.parentElement?.parentElement?.classList.contains(
-				"list-contents",
-			);
+		const isNormalItem = !!target.closest(".list-contents");
 
 		if (!listItem || !this.isValidFileItem(listItem)) return;
 		if (listItem.getAttribute("paly_button") === "1") return;
@@ -67,6 +66,7 @@ export class FileOperationMenu {
 		this.addVideoEventListeners(listItem, isNormalItem);
 	}
 
+	// 获取文件操作元素
 	private getFileOperationElement(item: HTMLElement): Element | null {
 		const listOpr = item.querySelector(".file-opr");
 		if (listOpr) return listOpr;
@@ -75,6 +75,7 @@ export class FileOperationMenu {
 		return thumbOpr;
 	}
 
+	// 验证文件项是否有效
 	private isValidFileItem(element: HTMLElement): boolean {
 		const baseCheck =
 			element.getAttribute("file_type") === "1" &&
@@ -107,7 +108,7 @@ export class FileOperationMenu {
 			}
 		});
 		listItem
-			.querySelector(".file-name")
+			.querySelector(".file-name .name")
 			?.addEventListener("click", openVideo, true);
 		listItem
 			.querySelector(".file-thumb")
@@ -138,6 +139,7 @@ export class FileOperationMenu {
 		}
 	}
 
+	// 创建打开视频处理函数
 	private createOpenVideoHandler(
 		listItem: HTMLElement,
 	): (event: Event) => void {
@@ -159,6 +161,7 @@ export class FileOperationMenu {
 		};
 	}
 
+	// 创建文件操作菜单按钮
 	private createButtons(fileOpr: Element, listItem: HTMLElement): void {
 		this.ContentsMenubuttons.forEach((button) => {
 			const link = this.createNormalItemButtonElement(button);
@@ -167,6 +170,7 @@ export class FileOperationMenu {
 		});
 	}
 
+	// 创建普通文件项按钮元素
 	private createNormalItemButtonElement(
 		button: ButtonConfig,
 	): HTMLAnchorElement {
@@ -185,6 +189,7 @@ export class FileOperationMenu {
 		return link;
 	}
 
+	// 添加按钮点击事件处理函数
 	private addButtonClickHandler(
 		link: HTMLAnchorElement,
 		listItem: HTMLElement,
@@ -215,6 +220,7 @@ export class FileOperationMenu {
 		});
 	}
 
+	// 销毁
 	public destroy(): void {
 		document.removeEventListener("mouseover", this.handleMouseOver.bind(this));
 	}

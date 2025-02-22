@@ -4,10 +4,7 @@
 
 Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请给个 Star 支持一下，谢谢。
 
-![player](./docs/images/player.png)
-![quality](./docs/images/quality.png)
-![subtitle](./docs/images/subtitle.png)
-![javInfo](./docs/images/javInfo.png)
+![preview](./docs/images/preview.png)
 
 ## 功能
 
@@ -17,7 +14,6 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 - 🤖 根据番号自动匹配在线外挂字幕
 - 🔍 播放器集成番号信息展示
 - ⌚ 播放器展示播放列表
-- 🍯 播放器自动获取视频封面
 
 ## 安装
 
@@ -42,9 +38,3 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 6. 如果不能使用，还有可能是与其他的油猴插件冲突，请关闭其他插件重试
 
 7. 👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
-
-## 线路图
-
-- [ ] 根据字幕自动生成剧情点
-- [ ] 播放页一键收藏
-- [ ] 视频详情页，支持评论区展示
