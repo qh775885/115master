@@ -8,8 +8,8 @@
 			alt="字幕"
 			:disabled="subtitles.loadingSubtitles.value"
 		>
-			<span v-if="subtitles.loadingSubtitles.value" class="material-symbols-rounded">
-				hourglass_empty
+			<span v-if="subtitles.loadingSubtitles.value" class="material-symbols-rounded loading-icon">
+				progress_activity
 			</span>
 			<span v-else class="material-symbols-rounded">subtitles</span>
 		</button>
@@ -85,5 +85,18 @@ const handleSubtitleSelect = (subtitle: Subtitle | null) => {
 .subtitle-icon {
 	width: 24px;
 	height: 24px;
+}
+
+.loading-icon {
+	animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 </style> 

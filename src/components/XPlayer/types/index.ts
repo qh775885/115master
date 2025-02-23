@@ -1,3 +1,4 @@
+// 视频源
 export interface VideoSource {
 	// 名称
 	name: string;
@@ -11,9 +12,7 @@ export interface VideoSource {
 	quality: number;
 	// 显示的画质值（可选）
 	displayQuality?: string | number;
-	// 画质标签（可选）
-	label?: string;
-	isHLS?: boolean;
+	// hls 配置
 	hlsConfig?: {
 		autoStartLoad?: boolean;
 		startPosition?: number;
@@ -22,16 +21,10 @@ export interface VideoSource {
 	};
 }
 
+// 字幕
 export interface Subtitle {
-	url: string;
-	label: string;
-	srclang: string;
-	kind: "subtitles" | "captions";
-	default?: boolean;
-}
-
-// 定义 props
-export interface Subtitle {
+	// 字幕 id
+	id: string;
 	// 字幕 url
 	url: string;
 	// 字幕名称

@@ -1,7 +1,8 @@
 import { GM_xmlhttpRequest } from "$";
-import { AppLogger } from "./logger";
-import { vttToBlobUrl } from "./subtitle";
-import { convertSrtToVtt } from "./subtitle";
+import md5 from "blueimp-md5";
+import { AppLogger } from "../logger";
+import { subtitleCache } from "./subtitleCache";
+import { convertSrtToVtt, vttToBlobUrl } from "./subtitleTool";
 
 interface SubtitleSearchResult {
 	title: string;
@@ -13,13 +14,24 @@ interface SubtitleSearchResult {
 }
 
 export interface ProcessedSubtitle {
+	// 字幕 id
+	id: string;
+	// 标题
 	title: string;
+	// 下载地址
 	url: string;
+	// 下载次数
 	downloads: number;
+	// 评论
 	comment: 1 | -1 | 0;
+	// 原始语言
 	originLanguage: string;
+	// 目标语言
 	targetLanguage: string;
+	// vtt文本
 	vvtText: string;
+	// 是否是缓存
+	isCache: boolean;
 }
 
 export class SubtitleCat {
@@ -117,8 +129,10 @@ export class SubtitleCat {
 
 		return {
 			...item,
+			id: md5(JSON.stringify(item)),
 			url: blobUrl!,
 			vvtText: vttText,
+			isCache: false,
 		};
 	}
 
@@ -135,6 +149,17 @@ export class SubtitleCat {
 		keyword: string,
 		language: string,
 	): Promise<ProcessedSubtitle[]> {
+		// 首先尝试从缓存获取
+		const cachedSubtitles = await subtitleCache.get(keyword, language);
+		if (cachedSubtitles) {
+			this.logger.log("从缓存获取字幕成功");
+			// 重新生成所有字幕的 blob URL，因为之前的可能已经失效
+			return cachedSubtitles.map((subtitle) => ({
+				...subtitle,
+				url: vttToBlobUrl(subtitle.vvtText)!,
+			}));
+		}
+
 		return new Promise((resolve, reject) => {
 			GM_xmlhttpRequest({
 				url: `${this.domain}/index.php?search=${keyword}`,
@@ -182,6 +207,18 @@ export class SubtitleCat {
 								(item): item is ProcessedSubtitle => item !== undefined,
 							),
 						);
+
+						// 缓存所有找到的字幕
+						if (finalResults.length > 0) {
+							await subtitleCache.set(
+								keyword,
+								language,
+								finalResults.map((i) => ({
+									...i,
+									isCache: true,
+								})),
+							);
+						}
 
 						this.logger.log("最终结果", finalResults);
 

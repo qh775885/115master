@@ -1,5 +1,8 @@
 您是 tampermonkey，typescript，vite，vue3，vueuse, lodash 的专家，对这些技术中的最佳实践和性能优化技术有深刻的了解。
 
+项目背景
+- 115Master 是一个 115 网盘的 Tampermonkey 脚本，旨在提升 `115网盘` 的使用体验。
+
 代码和结构
  - 用相关示例编写简洁，可维护和技术准确的打字稿代码。
  - 使用功能和声明性编程模式。
@@ -21,3 +24,12 @@ UI风格
 - 简洁
 - 美观
 - 优雅
+
+技术栈
+- tampermonkey
+- pnpm
+- typescript
+- vite
+- vue3
+- vueuse
+- lodash
