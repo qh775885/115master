@@ -6,7 +6,7 @@
 		@click.stop
 		@mouseenter="handleMouseEnter"
 		@mouseleave="handleMouseLeave"
-		@update:visible="$emit('update:visible', $event)"
+		@update:visible="handleVisibleChange"
 	>
 		<div class="x-menu" ref="menuRef">
 			<slot></slot>
@@ -16,6 +16,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayer";
 import Popup from "../Popup/index.vue";
 
 interface Props {
@@ -31,6 +32,8 @@ const emit = defineEmits<{
 	(e: "mouseleave"): void;
 	(e: "update:visible", value: boolean): void;
 }>();
+
+const { controls } = usePlayerContext();
 
 const menuRef = ref<HTMLElement>();
 const forceUpdate = ref(0);
@@ -91,11 +94,17 @@ watch(
 				forceUpdate.value++;
 			}, 0);
 		}
+
+		controls.setIsMouseInMenu(visible);
 	},
 );
 
 const handleMouseEnter = () => emit("mouseenter");
 const handleMouseLeave = () => emit("mouseleave");
+
+const handleVisibleChange = (visible: boolean) => {
+	emit("update:visible", visible);
+};
 </script>
 
 <style scoped>
