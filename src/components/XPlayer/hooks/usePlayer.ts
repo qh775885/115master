@@ -1,4 +1,4 @@
-import { type InjectionKey, type Ref, inject, provide } from "vue";
+import { type InjectionKey, type Ref, inject, provide, ref, watch } from "vue";
 import type { XPlayerProps } from "../index.vue";
 import { useControls } from "./useControls";
 import { useFullscreen } from "./useFullscreen";
@@ -44,7 +44,11 @@ export function useVideoPlayer(
 	// 控制
 	const controls = useControls();
 	// 字幕
-	const subtitles = useSubtitles(videoElementRef, rootProps.subtitles || []);
+	const subtitles = useSubtitles(
+		videoElementRef,
+		rootProps.subtitles,
+		rootProps.loadingSubtitles,
+	);
 	// 源
 	const source = useSource(videoElementRef, rootProps.sources);
 	// 热键
@@ -54,8 +58,7 @@ export function useVideoPlayer(
 		adjustVolume: volume.adjustVolume,
 	});
 
-	// 返回上下文
-	const context: PlayerContext = {
+	const context = {
 		rootProps,
 		fullscreen,
 		volume,

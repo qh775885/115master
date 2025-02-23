@@ -6,8 +6,12 @@
 			@click="toggleMenu"
 			:title="'字幕'"
 			alt="字幕"
+			:disabled="subtitles.loadingSubtitles.value"
 		>
-			<span class="material-symbols-rounded">subtitles</span>
+			<span v-if="subtitles.loadingSubtitles.value" class="material-symbols-rounded">
+				hourglass_empty
+			</span>
+			<span v-else class="material-symbols-rounded">subtitles</span>
 		</button>
 		<Menu
 			v-model:visible="menuVisible"
@@ -23,7 +27,7 @@
 				关闭字幕
 			</div>
 			<div
-				v-for="subtitle in rootProps.subtitles"
+				v-for="subtitle in subtitles.list.value"
 				:key="subtitle.url"
 				class="menu-item"
 				:class="{ active: subtitles.current.value?.url === subtitle.url }"

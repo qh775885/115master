@@ -1,12 +1,12 @@
-import { type Ref, ref, watch } from "vue";
+import { type Ref, ref } from "vue";
 import type { Subtitle } from "../types";
 
 export const useSubtitles = (
 	videoElementRef: Ref<HTMLVideoElement | null>,
-	subtitles: Subtitle[],
+	subtitles: Ref<Subtitle[] | null>,
+	loadingSubtitles: Ref<boolean>,
 ) => {
 	const current = ref<Subtitle | null>(null);
-	const list = ref<Subtitle[]>(subtitles);
 
 	const change = (subtitle: Subtitle | null) => {
 		current.value = subtitle;
@@ -17,7 +17,7 @@ export const useSubtitles = (
 			}
 			if (subtitle) {
 				const index =
-					list.value?.findIndex((s) => s.url === subtitle.url) ?? -1;
+					subtitles.value?.findIndex((s) => s.url === subtitle.url) ?? -1;
 				if (index >= 0 && tracks[index]) {
 					tracks[index].mode = "showing";
 				}
@@ -25,17 +25,17 @@ export const useSubtitles = (
 		}
 	};
 
-	// 监听 list 变化
-	watch(
-		() => list.value,
-		(subtitles) => {
-			current.value = subtitles?.find((s) => s.default) || null;
-		},
-	);
+	const restoreCurrentSubtitle = () => {
+		if (current.value) {
+			change(current.value);
+		}
+	};
 
 	return {
-		list,
+		list: subtitles,
 		current,
 		change,
+		loadingSubtitles,
+		restoreCurrentSubtitle,
 	};
 };
