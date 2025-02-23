@@ -1,35 +1,63 @@
 import { ref } from "vue";
 
 export const useControls = () => {
+	// 控制栏是否显示
 	const visible = ref(true);
+	// 鼠标是否在控制栏
+	const isMouseInControls = ref(false);
+	// 鼠标是否在菜单栏
+	const isMouseInMenu = ref(false);
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
 
-	// 控制栏显示/隐藏控制
-	const showControls = () => {
+	// 设置鼠标是否在控制栏
+	const setIsMouseInControls = (value: boolean) => {
+		isMouseInControls.value = value;
+		if (value) {
+			hideControlsTimer = null;
+		}
+	};
+
+	// 设置鼠标是否在菜单栏
+	const setIsMouseInMenu = (value: boolean) => {
+		isMouseInMenu.value = value;
+	};
+
+	const show = () => {
+		visible.value = true;
+	};
+
+	const hide = () => {
+		visible.value = false;
+	};
+
+	const clearHideControlsTimer = () => {
 		if (hideControlsTimer) {
 			clearTimeout(hideControlsTimer);
 			hideControlsTimer = null;
 		}
-		visible.value = true;
-		hideControlsTimer = window.setTimeout(() => {
-			visible.value = false;
-		}, 1000);
 	};
 
-	// 隐藏控制栏
-	const hideControls = () => {
-		if (hideControlsTimer) {
-			clearTimeout(hideControlsTimer);
-		}
+	const showWithAutoHide = () => {
+		show();
+		hideWithDelay();
+	};
+
+	const hideWithDelay = () => {
+		clearHideControlsTimer();
 		hideControlsTimer = window.setTimeout(() => {
-			visible.value = false;
+			if (isMouseInControls.value || isMouseInMenu.value) {
+				return;
+			}
+			hide();
 		}, 1000);
 	};
 
 	return {
 		visible,
-		showControls,
-		hideControls,
+		showWithAutoHide,
+		hideWithDelay,
+		setIsMouseInControls,
+		setIsMouseInMenu,
 	};
 };

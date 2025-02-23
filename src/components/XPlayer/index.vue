@@ -2,8 +2,8 @@
 	<div 
 		class="x-player"
 		:class="{ 'is-fullscreen': fullscreen.isFullscreen.value }"
-		@mousemove="handleMouseMove"
-		@mouseleave="handleMouseLeave"
+		@mousemove="controls.showWithAutoHide()"
+		@mouseleave="controls.hideWithDelay()"
 	>
 		<!-- 播放器容器 -->
 		<div class="player-container">
@@ -84,14 +84,6 @@ const portalContext = usePortalProvider();
 // 视频播放器上下文
 const { fullscreen, volume, playing, source, controls, subtitles } =
 	useVideoPlayer(videoElement, props);
-// 鼠标移动视频容器
-const handleMouseMove = () => {
-	controls.showControls();
-};
-// 鼠标离开视频容器
-const handleMouseLeave = () => {
-	controls.hideControls();
-};
 </script>
 
 <style scoped>
