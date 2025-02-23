@@ -61,7 +61,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Ref, ref } from "vue";
+import { type Ref, ref, watch } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import { useVideoPlayer } from "./hooks/usePlayer";
 import { usePortalProvider } from "./hooks/usePortal";
@@ -73,7 +73,8 @@ import PlayAnimation from "./components/PlayAnimation/index.vue";
 export interface XPlayerProps {
 	sources: Ref<VideoSource[]>;
 	onThumbnailRequest?: (time: number) => Promise<ImageBitmap>;
-	subtitles?: Subtitle[];
+	subtitles: Ref<Subtitle[] | null>;
+	loadingSubtitles: Ref<boolean>;
 }
 
 const props = defineProps<XPlayerProps>();

@@ -32,7 +32,7 @@ import { usePlayerContext } from "../../hooks/usePlayer";
 import type { VideoSource } from "../../types";
 import Menu from "../Menu/index.vue";
 
-const { source } = usePlayerContext();
+const { source, subtitles } = usePlayerContext();
 const menuVisible = ref(false);
 const buttonRef = ref<HTMLElement>();
 
@@ -56,9 +56,10 @@ const getDisplayQuality = (sourceValue: VideoSource) => {
 	return typeof quality === "number" ? `${quality}P` : quality;
 };
 
-const handleQualityChange = (sourceValue: VideoSource) => {
+const handleQualityChange = async (sourceValue: VideoSource) => {
 	menuVisible.value = false;
-	source.changeQuality(sourceValue);
+	await source.changeQuality(sourceValue);
+	subtitles.restoreCurrentSubtitle();
 };
 </script>
 

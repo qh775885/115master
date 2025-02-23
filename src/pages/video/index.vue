@@ -5,8 +5,9 @@
 				<XPlayer
 					class="video-player"
 					:sources="DataVideoSources.list"
-					:subtitles="DataSubtitles.subtitles.value"
+					:subtitles="DataSubtitles.state"
 					:onThumbnailRequest="DataThumbnails.getThumbnailAtTime"
+					:loadingSubtitles="DataSubtitles.isLoading"
 				/>
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
@@ -70,7 +71,7 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 	params.getParams();
 	DataVideoSources.cleanup();
 	DataThumbnails.cleanup();
-	DataSubtitles.cleanup();
+	DataSubtitles.execute(0, null);
 	DataMovieInfo.value.javBusState.execute(0, null);
 	DataMovieInfo.value.javDBState.execute(0, null);
 	await nextTick();
@@ -81,7 +82,7 @@ const loadData = async (isFirst = true) => {
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
 		DataThumbnails.initialize(DataVideoSources.list.value);
 		if (params.avNumber.value) {
-			DataSubtitles.fetch(params.avNumber.value);
+			DataSubtitles.execute(0, params.avNumber.value);
 		}
 	});
 
@@ -128,7 +129,6 @@ onMounted(async () => {
 onUnmounted(() => {
 	DataVideoSources.cleanup();
 	DataThumbnails.cleanup();
-	DataSubtitles.cleanup();
 });
 </script>
 
