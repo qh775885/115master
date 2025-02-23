@@ -55,8 +55,11 @@ export const useControls = () => {
 
 	return {
 		visible,
+		show,
+		hide,
 		showWithAutoHide,
 		hideWithDelay,
+		clearHideControlsTimer,
 		setIsMouseInControls,
 		setIsMouseInMenu,
 	};
