@@ -48,6 +48,7 @@ export function useVideoPlayer(
 		videoElementRef,
 		rootProps.subtitles,
 		rootProps.loadingSubtitles,
+		rootProps.onSubtitleChange,
 	);
 	// 源
 	const source = useSource(videoElementRef, rootProps.sources);

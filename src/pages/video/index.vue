@@ -8,6 +8,7 @@
 					:subtitles="DataSubtitles.state"
 					:onThumbnailRequest="DataThumbnails.getThumbnailAtTime"
 					:loadingSubtitles="DataSubtitles.isLoading"
+					:onSubtitleChange="handleSubtitleChange"
 				/>
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
@@ -32,13 +33,15 @@
 
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
-import { nextTick, onMounted, onUnmounted } from "vue";
+import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import XPlayer from "../../components/XPlayer/index.vue";
+import type { Subtitle } from "../../components/XPlayer/types";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import type { Entity } from "../../utils/drive115";
 import Drive115Instance from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
 import { goToPlayer } from "../../utils/route";
+import { subtitlePreference } from "../../utils/subtitlePreference";
 import FileInfo from "./components/FileInfo/index.vue";
 import Footer from "./components/Footer/index.vue";
 import MovieInfo from "./components/MovieInfo/index.vue";
@@ -58,7 +61,16 @@ const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
 
-useTitle(params.title || "");
+// 处理字幕变化
+const handleSubtitleChange = async (subtitle: Subtitle | null) => {
+	// 保存字幕选择
+	await subtitlePreference.savePreference(
+		params.pickCode.value,
+		subtitle || null,
+	);
+};
+
+useTitle(params.title.value || "");
 
 const handlePlay = async (item: Entity.PlaylistItem) => {
 	goToPlayer({
@@ -71,7 +83,7 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 	params.getParams();
 	DataVideoSources.cleanup();
 	DataThumbnails.cleanup();
-	DataSubtitles.execute(0, null);
+	DataSubtitles.execute(0, params.pickCode.value, null);
 	DataMovieInfo.value.javBusState.execute(0, null);
 	DataMovieInfo.value.javDBState.execute(0, null);
 	await nextTick();
@@ -82,7 +94,7 @@ const loadData = async (isFirst = true) => {
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
 		DataThumbnails.initialize(DataVideoSources.list.value);
 		if (params.avNumber.value) {
-			DataSubtitles.execute(0, params.avNumber.value);
+			DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
 		}
 	});
 

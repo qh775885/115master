@@ -75,9 +75,16 @@ export interface XPlayerProps {
 	onThumbnailRequest?: (time: number) => Promise<ImageBitmap>;
 	subtitles: Ref<Subtitle[] | null>;
 	loadingSubtitles: Ref<boolean>;
+	onSubtitleChange?: (subtitle: Subtitle | null) => void;
+	defaultSubtitle?: Subtitle | null;
 }
 
-const props = defineProps<XPlayerProps>();
+const props = withDefaults(defineProps<XPlayerProps>(), {
+	onThumbnailRequest: undefined,
+	onSubtitleChange: undefined,
+	defaultSubtitle: null,
+});
+
 // 视频元素
 const videoElement = ref<HTMLVideoElement | null>(null);
 // 弹出层上下文
@@ -85,6 +92,7 @@ const portalContext = usePortalProvider();
 // 视频播放器上下文
 const { fullscreen, volume, playing, source, controls, subtitles } =
 	useVideoPlayer(videoElement, props);
+
 const handleRootMouseMove = () => {
 	controls.showWithAutoHide();
 };
