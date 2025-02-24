@@ -1,3 +1,4 @@
+import { GM_addElement } from "$";
 import { createApp } from "vue";
 import Video from "./index.vue";
 
@@ -6,18 +7,17 @@ const resetDocument = () => {
 	document.body.style.margin = "0";
 	document.body.innerHTML = `<div id="app"></div>`;
 	document.title = "";
-	const favicon = document.createElement("link");
-	favicon.id = "favicon";
-	favicon.rel = "icon";
-	favicon.href = "https://115.com/favicon.ico";
-	document.head.appendChild(favicon);
 
-	const materialIconLink =
-		"https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded";
-	const materialIcon = document.createElement("link");
-	materialIcon.rel = "stylesheet";
-	materialIcon.href = materialIconLink;
-	document.head.appendChild(materialIcon);
+	GM_addElement("link", {
+		id: "favicon",
+		rel: "icon",
+		href: "https://115.com/favicon.ico",
+	});
+
+	GM_addElement("link", {
+		rel: "stylesheet",
+		href: "https://cdn.jsdelivr.net/npm/material-symbols@0.28.2/rounded.css",
+	});
 };
 
 export const videoPage = () => {

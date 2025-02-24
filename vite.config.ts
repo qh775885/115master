@@ -72,9 +72,6 @@ export default defineConfig({
 					photoswipe: cdn
 						.jsdelivr("photoswipe", "dist/umd/photoswipe.umd.min.js")
 						.concat(util.dataUrl(";window.photoswipe=PhotoSwipe;")),
-					dplayer: cdn
-						.jsdelivr("dplayer", "dist/DPlayer.min.js")
-						.concat(util.dataUrl(";window.dplayer=DPlayer;")),
 				},
 			},
 		}),
