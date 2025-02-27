@@ -1,4 +1,4 @@
-import throttle from "lodash/throttle";
+import { throttle } from "lodash";
 import { ref } from "vue";
 import type { VideoSource } from "../../../components/XPlayer/types";
 import { type ClipFrame, M3U8Clipper } from "../../../utils/clip";

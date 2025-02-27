@@ -9,7 +9,7 @@ export class JavBus extends Jav {
 	url = "";
 	labels: { [k: string]: Element | undefined } = {};
 
-	async getInfoByAvNumber(avNumber: string): Promise<JavInfo> {
+	async getInfoByAvNumber(avNumber: string): Promise<JavInfo | undefined> {
 		const url = new URL(avNumber, this.baseUrl).href;
 		this.url = url;
 		const html = await this.iRequest.get<string>(url);
@@ -19,7 +19,7 @@ export class JavBus extends Jav {
 	async parseInfoBefore(dom: Document): Promise<Document> {
 		const errorPage = dom.querySelector(".error-page");
 		if (errorPage) {
-			throw new Error("Not Found AvNumber PageUrl");
+			throw Jav.PAGE_ERROR;
 		}
 
 		const labels = this.getLabels(dom);

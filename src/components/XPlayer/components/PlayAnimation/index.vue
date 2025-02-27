@@ -6,20 +6,7 @@
 		>
 			<div class="play-animation-icon">
 				<div class="icon-wrapper">
-					<svg 
-						v-if="playing.isPlaying.value" 
-						class="icon" 
-						viewBox="0 0 24 24"
-					>
-						<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
-					</svg>
-					<svg 
-						v-else 
-						class="icon" 
-						viewBox="0 0 24 24"
-					>
-						<path d="M8 5v14l11-7z"/>
-					</svg>
+					<Icon :svg="playing.isPlaying.value ? Play : Pause" size="50px" />
 				</div>
 			</div>
 		</div>
@@ -27,7 +14,10 @@
 </template>
 
 <script setup lang="ts">
+import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
+import Play from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
 import { ref, watch } from "vue";
+import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 
 const { playing } = usePlayerContext();
@@ -35,23 +25,20 @@ const visible = ref(false);
 const timer = ref<number | null>(null);
 
 // 监听播放状态变化
-watch(
-	() => playing.isPlaying.value,
-	() => {
-		// 显示动画
-		visible.value = true;
+watch(playing.isPlaying, (value) => {
+	// 显示动画
+	visible.value = true;
 
-		// 清除之前的定时器
-		if (timer.value) {
-			clearTimeout(timer.value);
-		}
+	// 清除之前的定时器
+	if (timer.value) {
+		clearTimeout(timer.value);
+	}
 
-		// 设置新的定时器，800ms 后隐藏动画
-		timer.value = window.setTimeout(() => {
-			visible.value = false;
-		}, 800);
-	},
-);
+	// 设置新的定时器，800ms 后隐藏动画
+	timer.value = window.setTimeout(() => {
+		visible.value = false;
+	}, 300);
+});
 </script>
 
 <style scoped>
@@ -82,16 +69,10 @@ watch(
 	justify-content: center;
 }
 
-.icon {
-	width: 100%;
-	height: 100%;
-	fill: #fff;
-}
-
 /* 淡入淡出动画 */
 .fade-enter-active,
 .fade-leave-active {
-	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .fade-enter-from,

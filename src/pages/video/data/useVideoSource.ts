@@ -19,6 +19,8 @@ export const useDataVideoSources = () => {
 				quality: 99999,
 				displayQuality: "Ultra原画",
 			});
+
+			document.cookie = download.value.fileToken || "";
 		}
 
 		if (m3u8List.status === "fulfilled") {

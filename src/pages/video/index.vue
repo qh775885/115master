@@ -10,6 +10,8 @@
 					:loadingSubtitles="DataSubtitles.isLoading"
 					:onSubtitleChange="handleSubtitleChange"
 				/>
+
+				<!-- <button class="page-mpv-play" @click="handleMpvPlay">MPV 本地播放器 Beta</button> -->
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
 					<MovieInfo 
@@ -52,6 +54,7 @@ import { useDataPlaylist } from "./data/useDataPlaylist";
 import { useDataSubtitles } from "./data/useSubtitlesData";
 import { useDataThumbnails } from "./data/useThumbnails";
 import { useDataVideoSources } from "./data/useVideoSource";
+import { useWeblink } from "./hooks/useWeblink";
 
 const params = useParamsVideoPage();
 const DataVideoSources = useDataVideoSources();
@@ -60,7 +63,7 @@ const DataSubtitles = useDataSubtitles();
 const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
-
+const { play } = useWeblink();
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
@@ -68,6 +71,13 @@ const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 		params.pickCode.value,
 		subtitle || null,
 	);
+};
+
+const handleMpvPlay = () => {
+	play({
+		url: DataVideoSources.list.value[0].url,
+		cookie: document.cookie,
+	});
 };
 
 useTitle(params.title.value || "");
@@ -188,6 +198,15 @@ onUnmounted(() => {
 	--page-main-width-b: calc(100vw - 380px - 24px - 36px);
 	--page-main-width: min(var(--page-main-width-a), var(--page-main-width-b));
 	--video-player-width: var(--page-main-width);
+}
+
+.page-mpv-play {
+	width: 200px;
+	background: #000;
+	color: #fff;
+	padding: 10px 20px;
+	border-radius: 16px;
+	cursor: pointer;
 }
 
 .page-body {

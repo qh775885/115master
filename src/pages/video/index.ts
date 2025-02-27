@@ -13,11 +13,6 @@ const resetDocument = () => {
 		rel: "icon",
 		href: "https://115.com/favicon.ico",
 	});
-
-	GM_addElement("link", {
-		rel: "stylesheet",
-		href: "https://cdn.jsdelivr.net/npm/material-symbols@0.28.2/rounded.css",
-	});
 };
 
 export const videoPage = () => {

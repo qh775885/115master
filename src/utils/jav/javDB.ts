@@ -16,7 +16,7 @@ export class JavDB extends Jav {
 		const html = await this.iRequest.get<string>(url);
 		const avNumberPageUrl = this.getAvNumberPageUrl(html.data);
 		if (!avNumberPageUrl) {
-			throw new Error("Not Found AvNumber PageUrl");
+			throw Jav.PAGE_ERROR;
 		}
 		this.url = avNumberPageUrl;
 		const avNumberPageResponse =
