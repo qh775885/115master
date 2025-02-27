@@ -19,7 +19,7 @@ export class GMRequest extends IRequest {
 				url: urlRe.href,
 				headers: options.headers,
 				data: options.body as BodyInit,
-				timeout: options.timeout,
+				timeout: options.timeout || 5000,
 				responseType: options.responseType,
 				onload: (response) => {
 					let data: T;
@@ -37,7 +37,13 @@ export class GMRequest extends IRequest {
 						rawResponse: response,
 					});
 				},
-				onerror: reject,
+				onerror: (e) => {
+					// @ts-ignore
+					reject(new Error("请求失败", { cause: e.error }));
+				},
+				ontimeout: () => {
+					reject(new Error("请求超时"));
+				},
 			});
 		});
 	}

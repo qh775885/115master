@@ -1,7 +1,6 @@
 import { GM_addElement } from "$";
 import { createApp } from "vue";
 import Video from "./index.vue";
-import "material-symbols/rounded.css";
 
 const resetDocument = () => {
 	document.body.style.backgroundColor = "#000";
@@ -14,11 +13,6 @@ const resetDocument = () => {
 		rel: "icon",
 		href: "https://115.com/favicon.ico",
 	});
-
-	// GM_addElement("link", {
-	// 	rel: "stylesheet",
-	// 	href: "https://cdn.jsdelivr.net/npm/material-symbols@0.28.2/rounded.css",
-	// });
 };
 
 export const videoPage = () => {

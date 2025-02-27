@@ -11,7 +11,7 @@
 					:onSubtitleChange="handleSubtitleChange"
 				/>
 
-				<button class="page-mpv-play" @click="handleMpvPlay">MPV 本地播放器 Beta</button>
+				<!-- <button class="page-mpv-play" @click="handleMpvPlay">MPV 本地播放器 Beta</button> -->
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
 					<MovieInfo 
@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import { GM_openInTab, GM_setValue } from "$";
 import { useTitle } from "@vueuse/core";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import XPlayer from "../../components/XPlayer/index.vue";

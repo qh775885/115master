@@ -4,7 +4,7 @@
 			class="control-button"
 			@click="toggleSpeedMenu"
 		>
-			{{ playbackRate.playbackRate.value }}x
+			{{ playbackRate.playbackRate.value }} X
 		</button>
 		<Transition name="fade">
 			<div 
@@ -20,7 +20,7 @@
 						:class="{ active: playbackRate.playbackRate.value === rate }"
 						@click="handleSpeedChange(rate)"
 					>
-						{{ rate }}x
+						{{ rate }}
 					</button>
 				</div>
 			</div>
@@ -31,7 +31,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
-
 const { playbackRate } = usePlayerContext();
 const isMenuVisible = ref(false);
 // 预设的倍速选项
@@ -57,10 +56,12 @@ const handleSpeedChange = (rate: number) => {
 <style scoped>
 .speed-button {
 	position: relative;
-	margin-right: 8px;
 }
 
 .control-button {
+	display: flex;
+	align-items: center;
+	gap: 4px;
 	background: none;
 	border: none;
 	color: #fff;

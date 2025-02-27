@@ -20,15 +20,15 @@
 				</div>
 			</div>
 
-			<template v-if="!movieInfo.state.value && !movieInfo.isLoading.value">
-				<Empty 
+			<template v-if="movieInfo.error.value">
+				<LoadingError 
 					style="margin: 80px auto 40px"
-					description="暂无影片信息" 
-					:image-size="200"
+					message="获取影片信息失败，可能由于网络异常或者您没有科学上网"
+					:detail="movieInfo.error.value.toString()"
 				/>
 			</template>
 
-			<template v-else-if="movieInfo.isLoading.value">
+			<template v-else-if="movieInfo.isLoading.value || !movieInfo.isReady.value">
 				<div class="movie-info-header">
 					<div class="movie-info-header-title">
 						<Skeleton width="80%" height="56px" />
@@ -49,6 +49,14 @@
 						<Skeleton :width="`${80 + Math.random() * 80}px`" height="20px" />
 					</div>
 				</div>
+			</template>
+
+			<template v-else-if="!movieInfo.state.value">
+				<Empty 
+					style="margin: 80px auto 40px"
+					description="暂无影片信息，可能番号无法识别" 
+					:image-size="200"
+				/>
 			</template>
 			
 			<template v-else>
@@ -115,6 +123,10 @@
 							<a :href="movieInfo.state.value?.url" target="_blank">
 								{{ movieInfo.state.value?.avNumber ?? '-' }}
 							</a>
+							<CopyButton 
+								v-if="movieInfo.state.value?.avNumber" 
+								:text="movieInfo.state.value?.avNumber"
+							/>
 						</span>
 					</div>
 
@@ -207,11 +219,13 @@
 import type { UseAsyncStateReturn } from "@vueuse/core";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { computed, nextTick, onMounted, ref, watch } from "vue";
+import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import Empty from "../../../../components/empty/Empty.vue";
 import { formatDate, formatDuration } from "../../../../utils/format";
 import type { JavInfo } from "../../../../utils/jav/jav";
 import "photoswipe/style.css";
+import CopyButton from "./components/CopyButton.vue";
 
 const props = defineProps<{
 	movieInfos: {
@@ -305,6 +319,7 @@ watch(movieInfoThumb, async () => {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
+	align-items: center;
 }
 
 .movie-info-content-item-value a {

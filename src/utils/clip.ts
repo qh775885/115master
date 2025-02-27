@@ -1,7 +1,6 @@
 import { type Manifest, Parser } from "m3u8-parser";
-import MP4Box from "mp4box";
 // @ts-ignore
-import { DataStream } from "mp4box";
+import MP4Box, { DataStream } from "mp4box";
 import Mux from "mux.js";
 import { AsyncQueue } from "./asyncQueue";
 
@@ -104,6 +103,7 @@ export class M3U8Clipper {
 		maxHeight: number;
 	}): Promise<ClipFrame[]> {
 		const frames: ClipFrame[] = [];
+		// @ts-ignore
 		const mp4boxfile = MP4Box.createFile();
 
 		return new Promise((resolve, reject) => {
@@ -234,6 +234,7 @@ export class M3U8Clipper {
 
 			if (box != null) {
 				const buffer = new ArrayBuffer(1024);
+				// @ts-ignore
 				const stream = new DataStream(buffer, 0, DataStream.BIG_ENDIAN);
 				box.write(stream);
 				return new Uint8Array(stream.buffer, 8, stream.position - 8);

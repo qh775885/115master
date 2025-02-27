@@ -1,22 +1,30 @@
 debugInfo.bootstrapInfo();
 
-import { minimatch } from "minimatch";
 import ROUTE_MATCH from "./constants/route.match";
 import HomePage from "./pages/home/index";
 import { videoPage } from "./pages/video";
 import "./style.css";
+import globToRegex from "glob-to-regexp";
 import { checkUserAgent } from "./utils/checkUserAgent";
 import { debugInfo } from "./utils/debugInfo";
 
 checkUserAgent();
 
+const routeMatch = [
+	{
+		match: ROUTE_MATCH.HOME,
+		exec: () => new HomePage(),
+	},
+	{
+		match: ROUTE_MATCH.VIDEO,
+		exec: () => videoPage(),
+	},
+];
 const main = () => {
-	if (minimatch(window.location.href, ROUTE_MATCH.HOME)) {
-		new HomePage();
-	}
-
-	if (minimatch(window.location.href, ROUTE_MATCH.VIDEO)) {
-		videoPage();
+	for (const route of routeMatch) {
+		if (globToRegex(route.match).test(window.location.href)) {
+			route.exec();
+		}
 	}
 };
 
