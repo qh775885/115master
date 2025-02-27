@@ -8,10 +8,12 @@
 			alt="字幕"
 			:disabled="subtitles.loadingSubtitles.value"
 		>
-			<span v-if="subtitles.loadingSubtitles.value" class="material-symbols-rounded loading-icon">
-				progress_activity
-			</span>
-			<span v-else class="material-symbols-rounded">subtitles</span>
+			<Icon 
+				v-if="subtitles.loadingSubtitles.value"
+				:svg="ProgressActivity"
+				class="loading-icon"
+			/>
+			<Icon v-else :svg="Subtitles"/>
 		</button>
 		<Menu
 			v-model:visible="menuVisible"
@@ -40,7 +42,10 @@
 </template>
 
 <script setup lang="ts">
+import ProgressActivity from "@material-symbols/svg-400/rounded/progress_activity.svg?component";
+import Subtitles from "@material-symbols/svg-400/rounded/subtitles.svg?component";
 import { ref } from "vue";
+import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 import type { Subtitle } from "../../types";
 import Menu from "../Menu/index.vue";

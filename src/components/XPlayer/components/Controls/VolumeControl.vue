@@ -1,9 +1,7 @@
 <template>
 	<div class="volume-control">
 		<button class="volume-control-button" @click="volume.toggleMute">
-			<span class="material-symbols-rounded">
-				{{ volume.isMuted.value ? "volume_off" : "volume_up" }}
-			</span>
+			<Icon :svg="VolumeIcon" class="icon" />
 		</button>
 		<div class="volume-slider">
 			<div class="volume-slider-track">
@@ -24,9 +22,31 @@
 </template>
 
 <script setup lang="ts">
+import VolumeDown from "@material-symbols/svg-400/rounded/volume_down.svg?component";
+import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute.svg?component";
+import VolumeOff from "@material-symbols/svg-400/rounded/volume_off.svg?component";
+import VolumeUp from "@material-symbols/svg-400/rounded/volume_up.svg?component";
+import { computed } from "vue";
+import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 
 const { volume } = usePlayerContext();
+
+const VolumeIcon = computed(() => {
+	if (volume.isMuted.value) {
+		return VolumeOff;
+	}
+
+	if (volume.volume.value < 50) {
+		return VolumeDown;
+	}
+
+	if (volume.volume.value >= 50) {
+		return VolumeUp;
+	}
+
+	return VolumeUp;
+});
 
 const handleVolumeChange = (event: Event) => {
 	const value = Number((event.target as HTMLInputElement).value);

@@ -126,6 +126,8 @@ export type JavInfo = {
 abstract class Jav {
 	constructor(protected iRequest: IRequest) {}
 
+	static PAGE_ERROR = new Error("请求页面错误");
+
 	// 基础 URL
 	abstract baseUrl: string;
 	// 链接
@@ -133,7 +135,7 @@ abstract class Jav {
 	// 来源
 	abstract source: JAV_SOURCE;
 	// 通过番号获取番号信息
-	abstract getInfoByAvNumber(avNumber: string): Promise<JavInfo>;
+	abstract getInfoByAvNumber(avNumber: string): Promise<JavInfo | undefined>;
 	// 解析番号
 	abstract parseAvNumber(dom: Document): string | undefined;
 	// 解析标题
@@ -169,9 +171,13 @@ abstract class Jav {
 	// 解析评论
 	parseComments?(dom: Document): Comment[] | undefined;
 	// 解析番号信息
-	async parseInfo(html: string): Promise<JavInfo> {
+	async parseInfo(html: string): Promise<JavInfo | undefined> {
 		let dom = new DOMParser().parseFromString(html, "text/html");
-		dom = await this.parseInfoBefore(dom);
+		try {
+			dom = await this.parseInfoBefore(dom);
+		} catch (e) {
+			return undefined;
+		}
 		const info = {
 			source: this.source,
 			url: this.url,

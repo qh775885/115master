@@ -1,13 +1,28 @@
 <template>
 	<button @click="playing.togglePlay">
-		<span class="material-symbols-rounded">
-			{{ playing.isPlaying.value ? "pause" : "play_arrow" }}
-		</span>
+		<Icon :svg="icon" class="icon" />
 	</button>
 </template>
 
 <script setup lang="ts">
+import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
+import { computed } from "vue";
+import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 
 const { playing } = usePlayerContext();
-</script> 
+
+const icon = computed(() => {
+	return playing.isPlaying.value ? Pause : PlayArrow;
+});
+</script>
+
+<style scoped>
+.icon {
+	width: 24px;
+	height: 24px;
+	vertical-align: middle;
+	fill: currentColor;
+}
+</style>

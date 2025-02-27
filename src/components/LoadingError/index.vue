@@ -27,6 +27,9 @@
     <span class="loading-error-text">
       <slot>{{ message || defaultMessage }}</slot>
     </span>
+    <span class="loading-error-detail">
+      {{ detail }}
+    </span>
     <button 
       v-if="retryable" 
       class="loading-error-retry"
@@ -41,6 +44,7 @@
 const props = defineProps<{
 	retryable?: boolean;
 	message?: string;
+	detail?: string;
 	retryText?: string;
 }>();
 
@@ -81,6 +85,12 @@ const defaultMessage = "加载失败";
 
 .loading-error-text {
   font-size: 14px;
+  animation: text-appear 0.3s ease-out 0.5s both;
+}
+
+.loading-error-detail {
+  font-size: 12px;
+  color: #999;
   animation: text-appear 0.3s ease-out 0.5s both;
 }
 
