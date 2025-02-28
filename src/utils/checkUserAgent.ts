@@ -3,9 +3,9 @@ import UserAgentPopup from "../components/UserAgentPopup/index.vue";
 
 export const checkUserAgent = () => {
 	const userAgent = navigator.userAgent;
-	const is115Browser = userAgent.includes("115Browser/27");
+	const is115Browser27 = userAgent.includes("115Browser/27");
 
-	if (!is115Browser) {
+	if (is115Browser27) {
 		// 创建一个容器元素
 		const popupContainer = document.createElement("div");
 		document.body.appendChild(popupContainer);
@@ -31,6 +31,8 @@ export const checkUserAgent = () => {
 		app.mount(popupContainer);
 
 		// 抛出错误以阻止脚本继续执行
-		throw new Error("115Master脚本启动失败: 您需要修改【User-Agent】");
+		throw new Error(
+			"115Master脚本启动失败: 现在不需要修改【User-Agent】请删除插件~",
+		);
 	}
 };

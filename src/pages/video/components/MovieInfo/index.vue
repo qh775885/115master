@@ -28,7 +28,7 @@
 				/>
 			</template>
 
-			<template v-else-if="movieInfo.isLoading.value || !movieInfo.isReady.value">
+			<template v-else-if="movieInfo.isLoading.value">
 				<div class="movie-info-header">
 					<div class="movie-info-header-title">
 						<Skeleton width="80%" height="56px" />

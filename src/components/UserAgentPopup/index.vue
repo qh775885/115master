@@ -12,23 +12,15 @@
               <span class="number-icon">1</span>
             </div>
             <div class="content-text">
-              <p>没有修改 User-Agent 哦</p>
-              <p>查看
-                <a href="https://github.com/cbingb666/115master?tab=readme-ov-file#%E5%AE%89%E8%A3%85" target="_blank">安装说明</a> 来修改它！
+              <p>现在不需要 User-Agent Switcher and Manager 插件了</p>
+              <p>
+                快卸载掉他吧~
+              </p>
+              <p>
+                然后刷新下页面，复活我~
               </p>
             </div>
           </div>
-
-          <div class="popup-content">
-            <div class="content-icon">
-              <span class="number-icon">2</span>
-            </div>
-            <div class="content-text">
-              <p>如果已经安装  User-Agent Switcher and Manager  并修改了 User-Agent，但依然看到这个提示</p>
-              <p>请在  User-Agent Switcher and Manager  中点击 Restart，并重启浏览器</p>
-            </div>
-          </div>
-
           <div class="popup-desc">
             <p>当前的 User-Agent</p>
             <div class="user-agent-box">{{ userAgent }}</div>
