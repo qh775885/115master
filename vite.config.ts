@@ -4,8 +4,6 @@ import { defineConfig } from "vite";
 import monkey, { cdn, util } from "vite-plugin-monkey";
 import svgLoader from "vite-svg-loader";
 
-// import { createPreUrlOriginPlugin } from "./plugins/pre-url-origin";
-
 const icons = {
 	prod: "https://115.com/favicon.ico",
 	dev: "https://vitejs.dev/logo.svg",

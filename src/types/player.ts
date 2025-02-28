@@ -1,10 +1,3 @@
-export interface VideoSource {
-	name: string;
-	url: string;
-	type?: string;
-	quality: number;
-}
-
 export interface PlayingVideoInfo {
 	// 标题
 	title: string;

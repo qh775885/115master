@@ -1,10 +1,9 @@
 debugInfo.bootstrapInfo();
 
+import globToRegex from "glob-to-regexp";
 import ROUTE_MATCH from "./constants/route.match";
 import HomePage from "./pages/home/index";
 import { videoPage } from "./pages/video";
-import "./style.css";
-import globToRegex from "glob-to-regexp";
 import { checkUserAgent } from "./utils/checkUserAgent";
 import { debugInfo } from "./utils/debugInfo";
 
