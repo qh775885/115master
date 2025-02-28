@@ -1,5 +1,4 @@
 import dayjs from "dayjs";
-import { imageUrl2BlobUrlOfCors } from "../download";
 import { JAV_SOURCE, Jav, type JavInfo } from "./jav";
 
 // 修改 Javbus 类
@@ -33,9 +32,6 @@ export class JavBus extends Jav {
 			title: info.title
 				?.replace(new RegExp(`^${info.avNumber}`, "i"), "")
 				.trim(),
-			cover: info.cover
-				? await imageUrl2BlobUrlOfCors(info.cover, this.url)
-				: "",
 		};
 	}
 

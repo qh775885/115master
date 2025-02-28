@@ -19,33 +19,21 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 以下安装说明，请认真仔细阅读!
 
-1. 安装 [Tampermonkey](https://www.tampermonkey.net/)，后开启 [浏览器扩展开发者模式](https://www.tampermonkey.net/faq.php#Q209)。
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/)。
 
-2. 一键安装 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装 【115Master】脚本。
+2. 开启 [浏览器扩展开发者模式](https://www.tampermonkey.net/faq.php#Q209)。
 
-3. 油猴面板勾选启动 【115Master】脚本。
+3. 一键安装 [115master.user.js](https://github.com/cbingb666/115master/releases/latest/download/115master.user.js) 安装 【115Master】脚本。
 
-4. 安装 [User-Agent Switcher and Manager](https://chromewebstore.google.com/detail/user-agent-switcher-and-m/bhchdcejhohfmigjafbampogmaanbfkg) 插件。
+4. 油猴面板勾选启动 【115Master】脚本，刷新页面开始使用。
 
-    ```txt
-    Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 115Browser/27.0.6.3
-    ```
-
-    - 4.1 如下图所示，复制上面的 `User-Agent` 填入。
-    - 4.2 点击 `Apply（all tabs）`。
-    - 4.3 点击 `Restart`。
-    - 4.4 重启浏览器生效。
-
-    <img width="600" alt="user-agent-settings-intro" src="https://github.com/user-attachments/assets/011fa1c7-06c6-46b0-94a5-5ab8702b7632" />
-
-
-6. 如果不能使用，还有可能是与其他的油猴插件冲突，请关闭其他插件重试。
-
-7. 如果你更新了 115Master，发现 `User-Agent` 又失效了，请在 `User-Agent Switcher And Manager` 点击 `restart` 再重启浏览器来恢复它。
-
-8. 👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
+👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
 
 ## 常见问题
+
+### Q: 为什么会弹出提示删除 User-Agent Switcher and Manager 插件？
+
+A: 因为现在不需要修改 User-Agent 了，所以请删除这个插件并重启浏览器。
 
 ### Q: 为什么 【Ultra原画】 部分视频无法播放、黑屏、没有声音？
 
@@ -70,5 +58,3 @@ A：你有想法很好！请提交到 [Issues](https://github.com/cbingb666/115m
 ### Q: 我已经有 Emby、Jellyfin 为啥还要这个插件呀？
 
 A: 因为这是个下载、播放、字幕、预览一条龙的插件（你会体会不一样的快乐的）。常见的影库从下载、试看、播放，整个过程还是比较割裂不方便，影库更适合做为影片收藏归档方便以后反复品味~
-
-
