@@ -2,7 +2,9 @@ import { type Manifest, Parser } from "m3u8-parser";
 // @ts-ignore
 import MP4Box, { DataStream } from "mp4box";
 import Mux from "mux.js";
+import { reactive } from "vue";
 import { AsyncQueue } from "./asyncQueue";
+import { util } from "./util";
 
 export type M3U8Info = {
 	// 视频流信息
@@ -70,6 +72,9 @@ export class M3U8Clipper {
 	segmentCache = new Map<SegmentCacheIndexKey, SegmentCacheValue>();
 	// 缓存 M3U8 信息
 	M3U8Info: M3U8Info | null = null;
+	// 记录请求状态
+	segmentUrlStatus: Record<string, "Fetching" | "Decoding" | "Done" | "Error"> =
+		reactive({});
 	// 缓存视频帧
 	queue = new AsyncQueue<SegmentCacheValue | undefined>(3, 100);
 	// 缓存大小
@@ -266,20 +271,35 @@ export class M3U8Clipper {
 
 	// 根据 URL 生成分段截图
 	public async createSegmentClipsByUrl({
+		segmentIndex,
 		segmentUrl,
 		segmentStartTime = 0,
 		samplesPerSegment,
 		maxWidth,
 		maxHeight,
 	}: {
+		segmentIndex: number;
 		segmentUrl: string;
 		segmentStartTime: number;
-	} & ClipperOptions): Promise<SegmentCacheValue | undefined> {
+	} & ClipperOptions): Promise<undefined> {
+		const status = this.segmentUrlStatus[segmentUrl];
+		if (status) {
+			// 等待已开始的任务结束, 避免重复请求
+			await util.wait(
+				() =>
+					this.segmentUrlStatus[segmentUrl] === "Done" ||
+					this.segmentUrlStatus[segmentUrl] === "Error",
+			);
+			return;
+		}
+
 		try {
+			this.segmentUrlStatus[segmentUrl] = "Fetching";
 			const startFetchBuffer = performance.now();
 			const buffer = await this.fetchBuffer(segmentUrl);
 			const endFetchBuffer = performance.now();
 
+			this.segmentUrlStatus[segmentUrl] = "Decoding";
 			const startProcessSegment = performance.now();
 
 			const frames = (
@@ -298,11 +318,12 @@ export class M3U8Clipper {
 
 			const endProcessSegment = performance.now();
 			if (!frames.length) {
+				this.segmentUrlStatus[segmentUrl] = "Error";
 				console.warn("No video frames extracted");
 				return;
 			}
 
-			return {
+			const clips: SegmentCacheValue = {
 				frames,
 				count: frames.length,
 				times: {
@@ -310,7 +331,12 @@ export class M3U8Clipper {
 					processSegment: endProcessSegment - startProcessSegment,
 				},
 			};
+			// 缓存分段信息
+			this.segmentCache.set(segmentIndex, clips);
+
+			this.segmentUrlStatus[segmentUrl] = "Done";
 		} catch (error) {
+			this.segmentUrlStatus[segmentUrl] = "Error";
 			console.error("Error creating thumbnail:", error);
 			return undefined;
 		}
@@ -369,66 +395,49 @@ export class M3U8Clipper {
 		return null;
 	}
 
-	// 根据时间获取帧
-	private findFrameByTime(frames: ClipFrame[], time: number) {
-		return frames.find((frame) => {
-			return frame.t > time;
-		});
-	}
-
-	// 根据时间获取帧（缓存）
-	public getClipByTimeByCache(time: number) {
-		const segment = this.getSegmentByTime(time);
-		if (!segment) {
-			throw new Error("Segment is not found");
-		}
-		// 缓存中获取
-		const cacheValue = this.segmentCache.get(segment.index);
-		if (cacheValue) {
-			const frame = this.findFrameByTime(cacheValue.frames, time);
-			if (frame) {
-				return frame;
-			}
-			return null;
-		}
-	}
-
 	// 根据 time 获取缩略图
-	public async getClipByTime(time: number, options: ClipperOptions) {
+	public async getClipByTime(
+		type: "Cache" | "Must",
+		time: number,
+		options: ClipperOptions,
+	) {
 		const segment = this.getSegmentByTime(time);
 		if (!segment) {
 			throw new Error("Segment is not found");
 		}
 
-		// 缓存中没有，则生成
-		const clips = await this.queue.add(
-			() =>
-				this.createSegmentClipsByUrl({
-					segmentUrl: segment.uri,
-					segmentStartTime: time,
-					...options,
-				}),
-			{
-				priority: 1,
-				timeout: 5000,
-				retries: 3,
-			},
-		);
+		let clips: SegmentCacheValue | undefined;
 
-		if (!clips) {
-			return null;
+		// 尝试缓存中获取
+		clips = this.segmentCache.get(segment.index);
+
+		if (!clips && type === "Must") {
+			// 缓存中没有，则获取
+			await this.queue.add(
+				() =>
+					this.createSegmentClipsByUrl({
+						segmentIndex: segment.index,
+						segmentUrl: segment.uri,
+						segmentStartTime: time,
+						...options,
+					}),
+				{
+					priority: 1,
+					timeout: 5000,
+					retries: 3,
+				},
+			);
+
+			// 获取后 再次尝试缓存中获取
+			clips = this.segmentCache.get(segment.index);
 		}
 
-		// 缓存
-		if (clips) {
-			this.segmentCache.set(segment.index, clips);
-		}
-
-		return this.findFrameByTime(clips.frames, time);
+		return clips?.frames.find((frame) => frame.t >= time)?.img ?? null;
 	}
 
-	destroy() {
+	clear() {
 		this.queue.clear();
 		this.segmentCache.clear();
+		this.segmentUrlStatus = {};
 	}
 }
