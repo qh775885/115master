@@ -14,7 +14,7 @@
 				<!-- <button class="page-mpv-play" @click="handleMpvPlay">MPV 本地播放器 Beta</button> -->
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
-					<MovieInfo 
+					<MovieInfo
 						:movieInfos="DataMovieInfo"
 					/>
 					<div class="page-footer">
@@ -23,10 +23,10 @@
 				</div>
 			</div>
 			<div class="page-sider">
-				<Playlist class="page-sider-playlist" 
-					:pickCode="params.pickCode.value" 
-					:playlist="DataPlaylist" 
-					@play="handlePlay" 
+				<Playlist class="page-sider-playlist"
+					:pickCode="params.pickCode.value"
+					:playlist="DataPlaylist"
+					@play="handlePlay"
 				/>
 			</div>
 		</div>
@@ -92,7 +92,6 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 	});
 	params.getParams();
 	DataVideoSources.cleanup();
-	DataThumbnails.cleanup();
 	DataSubtitles.execute(0, params.pickCode.value, null);
 	DataMovieInfo.value.javBusState.execute(0, null);
 	DataMovieInfo.value.javDBState.execute(0, null);
@@ -150,7 +149,6 @@ onMounted(async () => {
 
 onUnmounted(() => {
 	DataVideoSources.cleanup();
-	DataThumbnails.cleanup();
 });
 </script>
 
