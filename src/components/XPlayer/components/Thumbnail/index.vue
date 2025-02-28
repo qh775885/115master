@@ -66,12 +66,6 @@ const previewTransform = computed(() => {
 	return -(thumbnailWidth / 2);
 });
 
-const timeBlurRange = 15;
-const timeBlurOffset = (timeBlurRange - 1) / 2;
-const timeBlur = computed(
-	() => Math.floor(props.time / timeBlurRange) * timeBlurRange + timeBlurOffset,
-);
-
 const thumb = reactive({
 	lastHoverTime: -1,
 	lastRequestTime: -1,
@@ -98,7 +92,7 @@ const requestThumbnail = debounce(async () => {
 }, 0.5 * 1000);
 
 watch(
-	() => [props.visible, timeBlur.value],
+	() => [props.visible, props.time],
 	async () => {
 		if (!props.visible) {
 			thumb.lastHoverTime = -1;
@@ -108,7 +102,7 @@ watch(
 
 		if (!onThumbnailRequest) return;
 
-		thumb.lastHoverTime = timeBlur.value;
+		thumb.lastHoverTime = props.time;
 		thumb.renderImage = null;
 
 		const cacheImage = await onThumbnailRequest("Cache", thumb.lastHoverTime); // 尝试从缓存中取, 其实是同步返回
