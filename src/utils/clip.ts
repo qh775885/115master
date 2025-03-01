@@ -2,9 +2,7 @@ import { type Manifest, Parser } from "m3u8-parser";
 // @ts-ignore
 import MP4Box, { DataStream } from "mp4box";
 import Mux from "mux.js";
-import { reactive } from "vue";
 import { AsyncQueue } from "./asyncQueue";
-import { util } from "./util";
 
 export type M3U8Info = {
 	// 视频流信息
@@ -59,8 +57,6 @@ export type ClipperOptions = {
 };
 
 export type M3U8ClipperOptions = {
-	// 缓存大小
-	maxCacheSize: number;
 	// 缓存队列大小
 	queueSize: number;
 	// 并发数
@@ -72,20 +68,14 @@ export class M3U8Clipper {
 	segmentCache = new Map<SegmentCacheIndexKey, SegmentCacheValue>();
 	// 缓存 M3U8 信息
 	M3U8Info: M3U8Info | null = null;
-	// 记录请求状态
-	segmentUrlStatus: Record<string, "Fetching" | "Decoding" | "Done" | "Error"> =
-		reactive({});
 	// 缓存视频帧
 	queue = new AsyncQueue<SegmentCacheValue | undefined>(3, 100);
-	// 缓存大小
-	maxCacheSize: number;
 	// 缓存队列大小
 	queueSize: number;
 	// 并发数
 	concurrency: number;
 
 	constructor(options: M3U8ClipperOptions) {
-		this.maxCacheSize = options.maxCacheSize;
 		this.queueSize = options.queueSize;
 		this.concurrency = options.queueConcurrency;
 
@@ -115,8 +105,6 @@ export class M3U8Clipper {
 			let videoDecoder: VideoDecoder | null = null;
 			// biome-ignore lint/suspicious/noExplicitAny: <unknow>
 			let videoTrack: any | null = null;
-			let countSample = 0;
-
 			// @ts-ignore
 			const transmuxer = new Mux.mp4.Transmuxer();
 
@@ -170,11 +158,6 @@ export class M3U8Clipper {
 								t: 0,
 							});
 							videoFrame.close();
-							countSample++;
-
-							if (countSample >= samplesPerSegment) {
-								resolve(frames);
-							}
 						},
 						error: (err) => {
 							console.error("videoDecoder error:", err);
@@ -212,18 +195,18 @@ export class M3U8Clipper {
 					}
 				}
 
-				if (countSample === samplesPerSegment) {
-					resolve(frames);
-					videoDecoder?.flush();
-				}
+				videoDecoder
+					?.flush()
+					.then(() => {
+						resolve(frames);
+					})
+					.catch(reject);
 			};
 
 			try {
 				transmuxer.push(new Uint8Array(buffer));
 				transmuxer.flush();
 				mp4boxfile.flush();
-				// @ts-ignore
-				videoDecoder?.flush();
 			} catch (error) {
 				reject(error);
 			}
@@ -282,24 +265,16 @@ export class M3U8Clipper {
 		segmentUrl: string;
 		segmentStartTime: number;
 	} & ClipperOptions): Promise<undefined> {
-		const status = this.segmentUrlStatus[segmentUrl];
-		if (status) {
-			// 等待已开始的任务结束, 避免重复请求
-			await util.wait(
-				() =>
-					this.segmentUrlStatus[segmentUrl] === "Done" ||
-					this.segmentUrlStatus[segmentUrl] === "Error",
-			);
+		// 如果任务正在执行，则不重复请求
+		const task = this.queue.get(segmentUrl);
+		if (task) {
 			return;
 		}
 
 		try {
-			this.segmentUrlStatus[segmentUrl] = "Fetching";
 			const startFetchBuffer = performance.now();
 			const buffer = await this.fetchBuffer(segmentUrl);
 			const endFetchBuffer = performance.now();
-
-			this.segmentUrlStatus[segmentUrl] = "Decoding";
 			const startProcessSegment = performance.now();
 
 			const frames = (
@@ -318,7 +293,6 @@ export class M3U8Clipper {
 
 			const endProcessSegment = performance.now();
 			if (!frames.length) {
-				this.segmentUrlStatus[segmentUrl] = "Error";
 				console.warn("No video frames extracted");
 				return;
 			}
@@ -333,10 +307,7 @@ export class M3U8Clipper {
 			};
 			// 缓存分段信息
 			this.segmentCache.set(segmentIndex, clips);
-
-			this.segmentUrlStatus[segmentUrl] = "Done";
 		} catch (error) {
-			this.segmentUrlStatus[segmentUrl] = "Error";
 			console.error("Error creating thumbnail:", error);
 			return undefined;
 		}
@@ -356,21 +327,19 @@ export class M3U8Clipper {
 		const segments: M3U8Info["segments"] = manifest.segments.map(
 			(segment, index) => {
 				const uri = new URL(segment.uri, m3u8url).href;
-				startTime += segment.duration;
-				return {
+				const endTime = startTime + segment.duration;
+				const info = {
 					uri,
 					duration: segment.duration,
 					startTime,
-					endTime: startTime + segment.duration,
+					endTime,
 					index,
 				};
+				startTime = endTime;
+				return info;
 			},
 		);
-
-		const totalDuration = segments.reduce(
-			(sum, segment) => sum + segment.duration,
-			0,
-		);
+		const totalDuration = startTime;
 
 		const M3U8Info: M3U8Info = {
 			manifest,
@@ -385,12 +354,10 @@ export class M3U8Clipper {
 		if (!this.M3U8Info) {
 			throw new Error("M3U8Info is not initialized");
 		}
-		let currentTime = 0;
 		for (const segment of this.M3U8Info.segments) {
-			if (time >= currentTime && time < currentTime + segment.duration) {
+			if (time >= segment.startTime && time < segment.endTime) {
 				return segment;
 			}
-			currentTime += segment.duration;
 		}
 		return null;
 	}
@@ -401,9 +368,13 @@ export class M3U8Clipper {
 		time: number,
 		options: ClipperOptions,
 	) {
+		if (!this.M3U8Info) {
+			throw new Error("M3U8Info is not initialized");
+		}
+
 		const segment = this.getSegmentByTime(time);
 		if (!segment) {
-			throw new Error("Segment is not found");
+			throw new Error(`Segment is not found: ${time}`);
 		}
 
 		let clips: SegmentCacheValue | undefined;
@@ -422,6 +393,7 @@ export class M3U8Clipper {
 						...options,
 					}),
 				{
+					id: segment.uri,
 					priority: 1,
 					timeout: 5000,
 					retries: 3,
@@ -438,6 +410,5 @@ export class M3U8Clipper {
 	clear() {
 		this.queue.clear();
 		this.segmentCache.clear();
-		this.segmentUrlStatus = {};
 	}
 }

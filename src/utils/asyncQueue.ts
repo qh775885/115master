@@ -269,6 +269,20 @@ export class AsyncQueue<T> {
 		};
 	}
 
+	/**
+	 * 是否存在任务
+	 */
+	has(idOrGroup: string) {
+		return this.get(idOrGroup) !== undefined;
+	}
+
+	/**
+	 * 获取任务
+	 */
+	get(idOrGroup: string) {
+		return this.queue.find((t) => t.id === idOrGroup || t.group === idOrGroup);
+	}
+
 	clear() {
 		this.queue.forEach((task) => {
 			task.status = "cancelled";

@@ -4,9 +4,8 @@ import { M3U8Clipper } from "../../../utils/clip";
 
 export function useDataThumbnails() {
 	const clipper = new M3U8Clipper({
-		maxCacheSize: 100,
 		queueSize: 100,
-		queueConcurrency: 2,
+		queueConcurrency: 3,
 	});
 
 	tryOnUnmounted(() => {

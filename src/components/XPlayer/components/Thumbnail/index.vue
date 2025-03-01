@@ -13,8 +13,8 @@
 				:width="width"
 				:height="height"
 			></canvas>
-			<div class="thumbnail-loading" v-if="thumb.loading">
-				<LoadingBar />
+			<div class="thumbnail-loading" v-show="loading">
+				<Loading/>
 			</div>
 		</div>
 		<div class="time-tooltip">
@@ -24,11 +24,12 @@
 </template>
 
 <script setup lang="ts">
-import { debounce } from "lodash";
+import { refDebounced } from "@vueuse/core";
+import { throttle } from "lodash";
 import { computed, reactive, ref, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 import { formatTime } from "../../utils/time";
-import LoadingBar from "./LoadingBar.vue";
+import Loading from "./Loading.vue";
 
 interface Props {
 	visible: boolean;
@@ -44,7 +45,19 @@ const thumbnailCanvas = ref<HTMLCanvasElement | null>(null);
 const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
 const width = computed(() => thumb.renderImage?.width ?? 320);
 const height = computed(() => thumb.renderImage?.height ?? 180);
+const thumb = reactive({
+	lastHoverTime: -1,
+	lastRequestTime: -1,
+	renderTime: -1,
+	renderImage: null as ImageBitmap | null,
+});
+const loading = computed(
+	() =>
+		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
+);
+const loadingDebounce = refDebounced(loading, 30);
 
+// 计算预览容器的位移，防止超出边界
 // 计算预览容器的位移，防止超出边界
 const previewTransform = computed(() => {
 	if (!thumbnailCanvas.value) return -(width.value / 2);
@@ -66,35 +79,32 @@ const previewTransform = computed(() => {
 	return -(thumbnailWidth / 2);
 });
 
-const thumb = reactive({
-	lastHoverTime: -1,
-	lastRequestTime: -1,
-	renderImage: null as ImageBitmap | null,
-	loading: computed(
-		(): boolean =>
-			thumb.lastRequestTime >= 0 &&
-			thumb.lastRequestTime === thumb.lastHoverTime,
-	),
-});
+const requestThumbnail = throttle(
+	async () => {
+		if (thumb.lastHoverTime === -1) return;
 
-const requestThumbnail = debounce(async () => {
-	if (thumb.lastHoverTime === -1) return;
+		const requestTime = thumb.lastHoverTime;
+		thumb.lastRequestTime = requestTime;
+		const image = await onThumbnailRequest("Must", requestTime);
+		if (!image) return;
 
-	const requestTime = thumb.lastHoverTime;
-	thumb.lastRequestTime = requestTime;
-	const image = await onThumbnailRequest("Must", requestTime);
-	if (!image) return;
-
-	if (requestTime === thumb.lastHoverTime) {
-		thumb.lastRequestTime = -1;
-		thumb.renderImage = image;
-	}
-}, 0.5 * 1000);
+		// 如果请求时间与最新Hover时间相同，则更新缩略图
+		if (requestTime === thumb.lastHoverTime) {
+			thumb.lastRequestTime = -1;
+			thumb.renderImage = image;
+			thumb.renderTime = requestTime;
+		}
+	},
+	300,
+	{
+		trailing: true,
+	},
+);
 
 watch(
 	() => [props.visible, props.time],
 	async () => {
-		if (!props.visible) {
+		if (!props.visible || !props.time) {
 			thumb.lastHoverTime = -1;
 			thumb.renderImage = null;
 			return;
@@ -104,10 +114,10 @@ watch(
 
 		thumb.lastHoverTime = props.time;
 		thumb.renderImage = null;
-
 		const cacheImage = await onThumbnailRequest("Cache", thumb.lastHoverTime); // 尝试从缓存中取, 其实是同步返回
 		if (cacheImage) {
 			thumb.renderImage = cacheImage;
+			thumb.renderTime = thumb.lastHoverTime;
 		} else {
 			requestThumbnail();
 		}
@@ -132,6 +142,7 @@ watch(
 watch([source.list], () => {
 	thumb.lastHoverTime = -1;
 	thumb.lastRequestTime = -1;
+	thumb.renderTime = -1;
 	thumb.renderImage = null;
 });
 </script>
@@ -152,6 +163,7 @@ watch([source.list], () => {
 	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
 	canvas {
 		background: rgba(15, 15, 15, 0.9);
+		border-radius: 12px;
 	}
 }
 
@@ -164,10 +176,11 @@ watch([source.list], () => {
 
 .thumbnail-loading {
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	left: 0;
 	right: 0;
-	height: 2px;
-	background: rgba(0, 0, 0, 0.3);
+	bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	border-radius: 12px;
 }
 </style>
