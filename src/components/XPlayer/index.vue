@@ -57,6 +57,10 @@
 			class="portal-container"
 			:ref="portalContext.container"
 		></div>
+
+		<div class="resume-container" v-if="source.isInterrupt.value">
+			<button @click="source.resumeSource">恢复</button>
+		</div>
 	</div>
 </template>
 
@@ -108,6 +112,11 @@ const handleRootMouseLeave = () => {
 	controls.clearHideControlsTimer();
 	controls.hide();
 };
+
+defineExpose({
+	togglePlay: playing.togglePlay,
+	interruptSource: source.interruptSource,
+});
 </script>
 
 <style scoped>
@@ -175,5 +184,25 @@ video {
 
 .portal-container > * {
 	pointer-events: auto;
+}
+
+.resume-container {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	button {
+		background-color: var(--x-player-background-color);
+		color: var(--x-player-text-color);
+		border-radius: 32px;
+		padding: 8px 16px;
+		font-size: 14px;
+		cursor: pointer;
+	}
 }
 </style>
