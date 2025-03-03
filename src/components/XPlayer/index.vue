@@ -1,5 +1,5 @@
 <template>
-	<div 
+	<div
 		class="x-player"
 		:class="{ 'is-fullscreen': fullscreen.isFullscreen.value }"
 		@mousemove="handleRootMouseMove"
@@ -8,11 +8,11 @@
 		<!-- 播放器容器 -->
 		<div class="player-container">
 			<!-- 视频容器 -->
-			<div 
+			<div
 				class="video-container"
 			>
 				<!-- 视频元素 -->
-				<video 
+				<video
 					ref="videoElement"
 					:key="source.videoKey.value"
 					:poster="source.current.value?.poster"
@@ -43,7 +43,7 @@
 				<Loading :show="playing.isLoading.value" />
 
 				<!-- 视频遮罩 -->
-				<div 
+				<div
 					class="video-mask"
 					@click="playing.togglePlay"
 					@dblclick="fullscreen.toggleFullscreen"
@@ -53,7 +53,7 @@
 			</div>
 		</div>
 		<!-- 弹出层容器 -->
-		<div 
+		<div
 			class="portal-container"
 			:ref="portalContext.container"
 		></div>
@@ -72,7 +72,15 @@ import PlayAnimation from "./components/PlayAnimation/index.vue";
 
 export interface XPlayerProps {
 	sources: Ref<VideoSource[]>;
-	onThumbnailRequest?: (time: number) => Promise<ImageBitmap>;
+	onThumbnailRequest?: ({
+		type,
+		time,
+		isLast,
+	}: {
+		type: "Cache" | "Must";
+		time: number;
+		isLast: boolean;
+	}) => Promise<ImageBitmap | null>;
 	subtitles: Ref<Subtitle[] | null>;
 	loadingSubtitles: Ref<boolean>;
 	onSubtitleChange?: (subtitle: Subtitle | null) => void;
