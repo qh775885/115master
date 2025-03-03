@@ -6,7 +6,7 @@
 					class="video-player"
 					:sources="DataVideoSources.list"
 					:subtitles="DataSubtitles.state"
-					:onThumbnailRequest="DataThumbnails.getThumbnailAtTime"
+					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
 					:loadingSubtitles="DataSubtitles.isLoading"
 					:onSubtitleChange="handleSubtitleChange"
 				/>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTitle } from "@vueuse/core";
+import { tryOnMounted, useTitle } from "@vueuse/core";
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
@@ -64,6 +64,7 @@ const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
 const { play } = useWeblink();
+
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
@@ -80,8 +81,7 @@ const handleMpvPlay = () => {
 	});
 };
 
-useTitle(params.title.value || "");
-
+// 切换播放
 const handlePlay = async (item: Entity.PlaylistItem) => {
 	goToPlayer({
 		cid: params.cid.value,
@@ -91,6 +91,7 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 		avNumber: getAvNumber(item.n),
 	});
 	params.getParams();
+	DataThumbnails.clear();
 	DataVideoSources.cleanup();
 	DataSubtitles.execute(0, params.pickCode.value, null);
 	DataMovieInfo.value.javBusState.execute(0, null);
@@ -99,6 +100,7 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 	await loadData(false);
 };
 
+// 加载数据
 const loadData = async (isFirst = true) => {
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
 		DataThumbnails.initialize(DataVideoSources.list.value);
@@ -143,12 +145,12 @@ const loadData = async (isFirst = true) => {
 	);
 };
 
+// 设置标题
+useTitle(params.title.value || "");
+
+// 挂载
 onMounted(async () => {
 	await loadData();
-});
-
-onUnmounted(() => {
-	DataVideoSources.cleanup();
 });
 </script>
 

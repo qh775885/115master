@@ -72,10 +72,15 @@ import PlayAnimation from "./components/PlayAnimation/index.vue";
 
 export interface XPlayerProps {
 	sources: Ref<VideoSource[]>;
-	onThumbnailRequest?: (
-		type: "Cache" | "Must",
-		time: number,
-	) => Promise<ImageBitmap | null>;
+	onThumbnailRequest?: ({
+		type,
+		time,
+		isLast,
+	}: {
+		type: "Cache" | "Must";
+		time: number;
+		isLast: boolean;
+	}) => Promise<ImageBitmap | null>;
 	subtitles: Ref<Subtitle[] | null>;
 	loadingSubtitles: Ref<boolean>;
 	onSubtitleChange?: (subtitle: Subtitle | null) => void;

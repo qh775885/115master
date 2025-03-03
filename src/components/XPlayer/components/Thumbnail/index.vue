@@ -24,9 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { refDebounced } from "@vueuse/core";
-import { throttle } from "lodash";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayer";
 import { formatTime } from "../../utils/time";
 import Loading from "./Loading.vue";
@@ -38,13 +36,16 @@ interface Props {
 	progressBarWidth: number;
 }
 
+const DEFAULT_WIDTH = 320;
+const DEFAULT_HEIGHT = 180;
+
 const props = withDefaults(defineProps<Props>(), {});
 const { rootProps, source } = usePlayerContext();
 const { onThumbnailRequest } = rootProps;
 const thumbnailCanvas = ref<HTMLCanvasElement | null>(null);
 const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
-const width = computed(() => thumb.renderImage?.width ?? 320);
-const height = computed(() => thumb.renderImage?.height ?? 180);
+const width = ref(DEFAULT_WIDTH);
+const height = ref(DEFAULT_HEIGHT);
 const thumb = reactive({
 	lastHoverTime: -1,
 	lastRequestTime: -1,
@@ -55,9 +56,7 @@ const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
 );
-const loadingDebounce = refDebounced(loading, 30);
 
-// 计算预览容器的位移，防止超出边界
 // 计算预览容器的位移，防止超出边界
 const previewTransform = computed(() => {
 	if (!thumbnailCanvas.value) return -(width.value / 2);
@@ -79,71 +78,106 @@ const previewTransform = computed(() => {
 	return -(thumbnailWidth / 2);
 });
 
-const requestThumbnail = throttle(
-	async () => {
-		if (thumb.lastHoverTime === -1) return;
+const lastTimer = ref<NodeJS.Timeout | null>(null);
+const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
+	if (lastTimer.value) {
+		clearTimeout(lastTimer.value);
+		lastTimer.value = null;
+	}
 
-		const requestTime = thumb.lastHoverTime;
-		thumb.lastRequestTime = requestTime;
-		const image = await onThumbnailRequest("Must", requestTime);
-		if (!image) return;
+	// 重置缩略图
+	thumb.renderImage = null;
 
-		// 如果请求时间与最新Hover时间相同，则更新缩略图
-		if (requestTime === thumb.lastHoverTime) {
+	if (!isLast) {
+		lastTimer.value = setTimeout(() => {
+			if (hoverTime === thumb.lastHoverTime) {
+				updateThumbnail(hoverTime, true);
+			}
+		}, 300);
+	}
+
+	// 尝试从缓存中取, 其实是同步返回
+	const cacheImage = await onThumbnailRequest({
+		type: "Cache",
+		time: hoverTime,
+		isLast,
+	});
+	if (cacheImage) {
+		thumb.renderImage = cacheImage;
+		thumb.renderTime = hoverTime;
+
+		if (isLast) {
 			thumb.lastRequestTime = -1;
-			thumb.renderImage = image;
-			thumb.renderTime = requestTime;
 		}
-	},
-	300,
-	{
-		trailing: true,
-	},
-);
+		return;
+	}
 
+	thumb.lastRequestTime = hoverTime;
+	const newImage = await onThumbnailRequest({
+		type: "Must",
+		time: hoverTime,
+		isLast,
+	});
+	if (!newImage) return;
+
+	// 如果请求时间与最新Hover时间相同，则更新缩略图
+	if (hoverTime === thumb.lastHoverTime && isLast) {
+		thumb.lastRequestTime = -1;
+		thumb.renderImage = newImage;
+		thumb.renderTime = hoverTime;
+	}
+};
+
+// 监听缩略图请求
 watch(
 	() => [props.visible, props.time],
 	async () => {
+		if (!onThumbnailRequest) return;
 		if (!props.visible || !props.time) {
 			thumb.lastHoverTime = -1;
 			thumb.renderImage = null;
 			return;
 		}
 
-		if (!onThumbnailRequest) return;
-
-		thumb.lastHoverTime = props.time;
-		thumb.renderImage = null;
-		const cacheImage = await onThumbnailRequest("Cache", thumb.lastHoverTime); // 尝试从缓存中取, 其实是同步返回
-		if (cacheImage) {
-			thumb.renderImage = cacheImage;
-			thumb.renderTime = thumb.lastHoverTime;
-		} else {
-			requestThumbnail();
-		}
+		const hoverTime = props.time;
+		// 更新 hover 时间
+		thumb.lastHoverTime = hoverTime;
+		await updateThumbnail(hoverTime, false);
 	},
 );
-
 // 绘制缩略图
 watch(
 	() => thumb.renderImage,
-	(newVal) => {
+	(newVal, oldVal) => {
 		if (thumbnailCanvas.value && ctx.value) {
+			width.value = newVal?.width ?? oldVal?.width ?? DEFAULT_WIDTH;
+			height.value = newVal?.height ?? oldVal?.height ?? DEFAULT_HEIGHT;
 			requestAnimationFrame(() => {
 				ctx.value.fillRect(0, 0, width.value, height.value);
-				if (newVal) {
+				if (newVal && thumb.renderTime === thumb.lastHoverTime) {
 					ctx.value.drawImage(newVal, 0, 0, width.value, height.value);
 				}
 			});
 		}
 	},
 );
-
+// 监听源列表
 watch([source.list], () => {
 	thumb.lastHoverTime = -1;
 	thumb.lastRequestTime = -1;
 	thumb.renderTime = -1;
 	thumb.renderImage = null;
+	if (lastTimer.value) {
+		clearTimeout(lastTimer.value);
+		lastTimer.value = null;
+	}
+});
+
+onUnmounted(() => {
+	if (lastTimer.value) {
+		clearTimeout(lastTimer.value);
+		lastTimer.value = null;
+	}
 });
 </script>
 
@@ -158,12 +192,11 @@ watch([source.list], () => {
 
 .thumbnail-container {
 	position: relative;
-	border-radius: 12px;
-	overflow: hidden;
+	border-radius: 16px;
 	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
+	overflow: hidden;
 	canvas {
 		background: rgba(15, 15, 15, 0.9);
-		border-radius: 12px;
 	}
 }
 
@@ -181,6 +214,6 @@ watch([source.list], () => {
 	right: 0;
 	bottom: 0;
 	background: rgba(0, 0, 0, 0.5);
-	border-radius: 12px;
+	border-radius: 16px;
 }
 </style>
