@@ -21,6 +21,7 @@ export class GMRequest extends IRequest {
 				data: options.body as BodyInit,
 				timeout: options.timeout || 5000,
 				responseType: options.responseType,
+				redirect: options.redirect || "manual",
 				onload: (response) => {
 					let data: T;
 					try {

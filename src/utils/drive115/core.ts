@@ -69,6 +69,7 @@ export class Drive115Core {
 					"User-Agent": USER_AGENT_115,
 				},
 				responseType: "document",
+				redirect: "follow",
 			},
 		);
 	}

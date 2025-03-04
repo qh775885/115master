@@ -111,8 +111,8 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 	DataThumbnails.clear();
 	DataVideoSources.cleanup();
 	DataSubtitles.execute(0, params.pickCode.value, null);
-	DataMovieInfo.value.javBusState.execute(0, null);
 	DataMovieInfo.value.javDBState.execute(0, null);
+	DataMovieInfo.value.javBusState.execute(0, null);
 	await nextTick();
 	await loadData(false);
 };
@@ -120,46 +120,19 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 // 加载数据
 const loadData = async (isFirst = true) => {
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
-		DataThumbnails.initialize(DataVideoSources.list.value);
-		if (params.avNumber.value) {
-			DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
-		}
+		// DataThumbnails.initialize(DataVideoSources.list.value);
 	});
 
-	await Drive115Instance.fakeVodAuthPickcode(params.pickCode.value);
+	Drive115Instance.fakeVodAuthPickcode(params.pickCode.value).then(() => {
+		DataFileInfo.execute(0, params.pickCode.value);
+		isFirst && DataPlaylist.execute(0, params.cid.value, params.pickCode.value);
+	});
 
-	const promises: {
-		fn: () => Promise<unknown>;
-		condition: boolean;
-	}[] = [
-		{
-			fn: () => DataFileInfo.execute(0, params.pickCode.value),
-			condition: true,
-		},
-		{
-			fn: () =>
-				DataPlaylist.execute(0, params.cid.value, params.pickCode.value),
-			condition: isFirst,
-		},
-		{
-			fn: () =>
-				DataMovieInfo.value.javDBState.execute(0, params.avNumber.value),
-			condition: !!params.avNumber.value,
-		},
-		{
-			fn: () =>
-				DataMovieInfo.value.javBusState.execute(0, params.avNumber.value),
-			condition: !!params.avNumber.value,
-		},
-	];
-	Promise.all(
-		promises.map(({ fn, condition }) => {
-			if (condition) {
-				return fn();
-			}
-			return Promise.resolve();
-		}),
-	);
+	if (params.avNumber.value) {
+		DataMovieInfo.value.javDBState.execute(0, params.avNumber.value);
+		DataMovieInfo.value.javBusState.execute(0, params.avNumber.value);
+		DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
+	}
 };
 
 // 设置标题

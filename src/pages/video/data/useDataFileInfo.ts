@@ -1,4 +1,5 @@
 import { useAsyncState } from "@vueuse/core";
+import { reactive } from "vue";
 import Drive115Instance from "../../../utils/drive115";
 import type { WebApi } from "../../../utils/drive115/api";
 
@@ -18,5 +19,5 @@ export const useDataFileInfo = () => {
 		},
 	);
 
-	return fileInfo;
+	return reactive(fileInfo);
 };
