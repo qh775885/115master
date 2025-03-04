@@ -120,7 +120,7 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 // 加载数据
 const loadData = async (isFirst = true) => {
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
-		// DataThumbnails.initialize(DataVideoSources.list.value);
+		DataThumbnails.initialize(DataVideoSources.list.value);
 	});
 
 	Drive115Instance.fakeVodAuthPickcode(params.pickCode.value).then(() => {
