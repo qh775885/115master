@@ -4,15 +4,16 @@
 			播放列表
 		</div>
 
-		<div class="playlist-list" v-if="props.playlist.isLoading.value">
-			<Skeleton width="100%" height="60.5px" border-radius="8px" v-for="i in 1" :key="i" />
-		</div>
-		<div class="playlist-list" v-if="props.playlist.error.value">
+		<div class="playlist-list" v-if="playlist.error">
 			<LoadingError></LoadingError>
 		</div>
+		<div class="playlist-list" v-else-if="playlist.isLoading || (!playlist.isLoading && !playlist.isReady)">
+			<Skeleton width="100%" height="60.5px" border-radius="8px" v-for="i in 1" :key="i" />
+		</div>
+		
 		<div class="playlist-list" v-else>
-			<div class="playlist-item" v-for="item in props.playlist.state.value" :key="item.pc"
-				:class="{ active: item.pc === props.pickCode }"
+			<div class="playlist-item" v-for="item in playlist.state" :key="item.pc"
+				:class="{ active: item.pc === pickCode }"
 				@click="handlePlay(item)"
 			>
 				<div class="playlist-item-title">
@@ -27,14 +28,13 @@
 </template>
 
 <script setup lang="ts">
-import type { UseAsyncStateReturn } from "@vueuse/core";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import type { Entity } from "../../../../utils/drive115";
 import { formatFileSize } from "../../../../utils/format";
-
+import type { useDataPlaylist } from "../../data/useDataPlaylist";
 const props = defineProps<{
-	playlist: UseAsyncStateReturn<Entity.PlaylistItem[], [string, string], false>;
+	playlist: ReturnType<typeof useDataPlaylist>;
 	pickCode: string | null;
 }>();
 

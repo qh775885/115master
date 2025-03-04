@@ -1,4 +1,5 @@
 import { useAsyncState } from "@vueuse/core";
+import { reactive } from "vue";
 import Drive115Instance from "../../../utils/drive115";
 
 export const useDataPlaylist = () => {
@@ -13,5 +14,5 @@ export const useDataPlaylist = () => {
 		},
 	);
 
-	return playlist;
+	return reactive(playlist);
 };

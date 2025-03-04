@@ -1,5 +1,6 @@
 export interface RequestOptions {
 	headers?: Record<string, string>;
+	redirect?: "manual" | "follow" | "error";
 	params?: Record<string, string | number | boolean>;
 	timeout?: number;
 	body?: unknown;

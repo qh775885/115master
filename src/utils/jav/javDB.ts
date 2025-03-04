@@ -4,7 +4,7 @@ import { JAV_SOURCE, Jav } from "./jav";
 // 修改 JavDB 类
 export class JavDB extends Jav {
 	source = JAV_SOURCE.JAVDB;
-	baseUrl = "https://www.javdb.com";
+	baseUrl = "https://javdb.com";
 	url = "";
 	labels: { [k: string]: Element | undefined } = {};
 
@@ -13,15 +13,37 @@ export class JavDB extends Jav {
 			q: avNumber,
 		});
 		const url = new URL(`/search?${params.toString()}`, this.baseUrl).href;
-		const html = await this.iRequest.get<string>(url);
-		const avNumberPageUrl = this.getAvNumberPageUrl(html.data);
+		const html = await this.iRequest
+			.get<string>(url, {
+				responseType: "document",
+			})
+			.then((res) => {
+				console.log("javdb search response", res);
+				// @ts-ignore
+				return res.rawResponse.responseText as unknown as string;
+			})
+			.catch((error) => {
+				console.error(error);
+				throw error;
+			});
+		const avNumberPageUrl = this.getAvNumberPageUrl(html);
+
 		if (!avNumberPageUrl) {
 			throw Jav.PAGE_ERROR;
 		}
 		this.url = avNumberPageUrl;
-		const avNumberPageResponse =
-			await this.iRequest.get<string>(avNumberPageUrl);
-		return await this.parseInfo(avNumberPageResponse.data);
+		const avNumberPageResponse = await this.iRequest
+			.get<string>(avNumberPageUrl, {
+				responseType: "document",
+			})
+			.then((res) => {
+				// @ts-ignore
+				return res.rawResponse.responseText as unknown as string;
+			})
+			.catch((error) => {
+				throw error;
+			});
+		return await this.parseInfo(avNumberPageResponse);
 	}
 
 	getAvNumberPageUrl(html: string) {
