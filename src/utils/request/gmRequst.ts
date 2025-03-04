@@ -1,5 +1,9 @@
-import { GM_xmlhttpRequest } from "$";
+import { GM_info, GM_xmlhttpRequest } from "$";
 import { IRequest, type RequestOptions, type ResponseType } from "./types";
+
+const isChrome = GM_info.userAgentData.brands.some(
+	(brand) => brand.brand === "Google Chrome",
+);
 
 // GM实现
 export class GMRequest extends IRequest {
@@ -13,6 +17,11 @@ export class GMRequest extends IRequest {
 				urlRe.searchParams.set(key, value.toString());
 			});
 		}
+
+		// 谷歌浏览器才允许修改重定向行为，其他浏览器默认跟随重定向
+		// 否则会造成并发请求中 404 请求，也会导致其他的请求被 canceled
+		const redirect = isChrome ? options.redirect || "manual" : "follow";
+
 		return new Promise((resolve, reject) => {
 			GM_xmlhttpRequest({
 				method: options.method || "GET",
@@ -21,7 +30,7 @@ export class GMRequest extends IRequest {
 				data: options.body as BodyInit,
 				timeout: options.timeout || 5000,
 				responseType: options.responseType,
-				redirect: options.redirect || "manual",
+				redirect,
 				onload: (response) => {
 					let data: T;
 					try {
