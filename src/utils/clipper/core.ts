@@ -1,6 +1,7 @@
 // @ts-ignore
 import MP4Box, { DataStream } from "mp4box";
 import Mux from "mux.js";
+import { GMRequestInstance } from "../request/gmRequst";
 
 // 视频帧
 export type ClipFrame = {
@@ -210,10 +211,5 @@ export class ClipperCore {
 			width: width * scale,
 			height: height * scale,
 		};
-	}
-
-	// 根获取 ArrayBuffer
-	fetchBuffer(url: string): Promise<ArrayBuffer> {
-		return fetch(url).then((response) => response.arrayBuffer());
 	}
 }

@@ -2,7 +2,7 @@ import { type Manifest, Parser, type Segment } from "m3u8-parser";
 import { type ClipFrame, ClipperCore, type ClipperOptions } from "./core";
 
 // M3U8 分段扩展
-type SegmentExt = {
+export interface SegmentExt extends Segment {
 	// 分片 URL
 	_uri: string;
 	// 分片时长
@@ -13,15 +13,15 @@ type SegmentExt = {
 	_endTime: number;
 	// 分片索引
 	_index: number;
-} & Segment;
+}
 
 // M3U8 信息扩展
-export type ManifestExt = Manifest & {
+export interface ManifestExt extends Manifest {
 	// 分片信息
-	segments: (Manifest["segments"][number] & SegmentExt)[];
+	segments: SegmentExt[];
 	// 视频流总时长
 	totalDuration: number;
-};
+}
 
 // 分段缓存索引
 export type SegmentCacheIndexKey = number;
@@ -54,9 +54,45 @@ export class M3U8Clipper extends ClipperCore {
 		SegmentCacheIndexKey,
 		Promise<SegmentClips | null>
 	>();
+	// 模糊
+	public blur = 0;
+	// 模糊分段
+	public blurSegments: SegmentExt[] = [];
 
 	constructor(protected options: M3U8ClipperOptions) {
 		super(options);
+	}
+
+	async init(url: string, blur: number) {
+		this.blur = blur;
+		await this.fetchM3U8Info(url);
+		this.blurSegments = this.getblurSegments(
+			this.M3U8Info?.segments ?? [],
+			blur,
+		);
+	}
+
+	// 根获取 ArrayBuffer
+	public async fetchBuffer(url: string): Promise<ArrayBuffer> {
+		const res = await fetch(url);
+		return await res.arrayBuffer();
+	}
+
+	// 模糊时间
+	public blurTime(time: number) {
+		const _blurTime = time - (time % this.blur) + this.blur / 2;
+		return Math.min(Math.max(0, _blurTime), this.M3U8Info?.totalDuration ?? 0);
+	}
+
+	// 模糊分段
+	public getblurSegments(segments: SegmentExt[], blur: number): SegmentExt[] {
+		return segments.filter((segment) => {
+			const segmentBlurTime = this.blurTime(segment._startTime, blur);
+			const isInBlurRange =
+				segment._startTime <= segmentBlurTime &&
+				segment._endTime >= segmentBlurTime;
+			return isInBlurRange;
+		});
 	}
 
 	// 获取 M3U8 信息
