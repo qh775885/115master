@@ -28,6 +28,11 @@ Tips: 小作坊出品下料很猛，请谨慎食用，如果觉得好用，请�
 
 4. 油猴面板勾选启动 【115Master】脚本，刷新页面开始使用。
 
+5. 安装完成后如果没有看到文件列表中有【master播放】的按钮，请检查有没有其他脚本导致冲突或重启浏览器。
+   
+<img width="329" alt="image" src="https://github.com/user-attachments/assets/189ac578-0592-43bd-ab75-b62cbe6f5170" />
+
+
 👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
 
 ## 常见问题
