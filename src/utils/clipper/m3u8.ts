@@ -32,8 +32,6 @@ export type SegmentClips = {
 	count: number;
 	segment: SegmentExt;
 	times: {
-		fetchBuffer: number;
-		processSegment: number;
 		total: number;
 	};
 };
@@ -66,16 +64,7 @@ export class M3U8Clipper extends ClipperCore {
 	async init(url: string, blur: number) {
 		this.blur = blur;
 		await this.fetchM3U8Info(url);
-		this.blurSegments = this.getblurSegments(
-			this.M3U8Info?.segments ?? [],
-			blur,
-		);
-	}
-
-	// 根获取 ArrayBuffer
-	public async fetchBuffer(url: string): Promise<ArrayBuffer> {
-		const res = await fetch(url);
-		return await res.arrayBuffer();
+		this.blurSegments = this.getblurSegments(this.M3U8Info?.segments ?? []);
 	}
 
 	// 模糊时间
@@ -85,9 +74,9 @@ export class M3U8Clipper extends ClipperCore {
 	}
 
 	// 模糊分段
-	public getblurSegments(segments: SegmentExt[], blur: number): SegmentExt[] {
+	public getblurSegments(segments: SegmentExt[]): SegmentExt[] {
 		return segments.filter((segment) => {
-			const segmentBlurTime = this.blurTime(segment._startTime, blur);
+			const segmentBlurTime = this.blurTime(segment._startTime);
 			const isInBlurRange =
 				segment._startTime <= segmentBlurTime &&
 				segment._endTime >= segmentBlurTime;
@@ -204,48 +193,48 @@ export class M3U8Clipper extends ClipperCore {
 	private async clipsSegment(
 		segment: SegmentExt,
 	): Promise<SegmentClips | null> {
-		const startFetchBuffer = performance.now();
-		const buffer = await this.fetchBuffer(segment._uri);
-		const endFetchBuffer = performance.now();
-		const startProcessSegment = performance.now();
+		const startTime = performance.now();
 
-		const frames = await this.processSegment({
-			buffer,
-			nbSamples: 1,
-			maxWidth: this.options.maxWidth,
-			maxHeight: this.options.maxHeight,
-		});
+		try {
+			const processedFrames = await this.processStreamingSegment({
+				url: segment._uri,
+				nbSamples: 1,
+				maxWidth: this.options.maxWidth,
+				maxHeight: this.options.maxHeight,
+			});
 
-		const endProcessSegment = performance.now();
-		if (!frames.length) {
-			console.warn("No video frames extracted");
+			if (!processedFrames.length) {
+				console.warn("No video frames extracted");
+				return null;
+			}
+
+			const endTime = performance.now();
+			const totalTime = endTime - startTime;
+
+			const segmentClips: SegmentClips = {
+				frames: processedFrames,
+				count: processedFrames.length,
+				segment: segment,
+				times: {
+					total: totalTime,
+				},
+			};
+
+			console.log(`分段截图完成
+				耗时：${segmentClips.times.total}ms
+				分片 URL：${segmentClips.segment._uri}
+				分片索引：${segmentClips.segment._index}
+				分片截图数量：${segmentClips.frames.length}
+				分片时长：${segmentClips.segment._duration}s 
+				分片开始时间：${segmentClips.segment._startTime}s
+				分片结束时间：${segmentClips.segment._endTime}s
+				`);
+
+			return segmentClips;
+		} catch (error) {
+			console.error("Error processing segment:", error);
 			return null;
 		}
-
-		const segmentClips: SegmentClips = {
-			frames,
-			count: frames.length,
-			segment: segment,
-			times: {
-				fetchBuffer: endFetchBuffer - startFetchBuffer,
-				processSegment: endProcessSegment - startProcessSegment,
-				total: endProcessSegment - startFetchBuffer,
-			},
-		};
-
-		console.log(`分段截图完成
-			耗时：${segmentClips.times.total}ms
-			分片 URL：${segmentClips.segment._uri}
-			分片索引：${segmentClips.segment._index}
-			分片加载时间：${segmentClips.times.fetchBuffer}ms
-			分片解码时间：${segmentClips.times.processSegment}ms
-			分片截图数量：${segmentClips.frames.length}
-			分片时长：${segmentClips.segment._duration}s 
-			分片开始时间：${segmentClips.segment._startTime}s
-			分片结束时间：${segmentClips.segment._endTime}s
-			`);
-
-		return segmentClips;
 	}
 
 	// 根据 time 获取帧

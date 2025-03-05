@@ -1,5 +1,5 @@
 import { tryOnUnmounted, useThrottleFn } from "@vueuse/core";
-import { sampleSize, shuffle } from "lodash";
+import { sampleSize } from "lodash";
 import type { VideoSource } from "../../../components/XPlayer/types";
 import {
 	M3U8Clipper,
@@ -23,12 +23,12 @@ const LANE_CONFIG: Record<string, LaneConfig> = {
 	buffer: {
 		name: "buffer",
 		priority: 2,
-		maxConcurrent: 6,
+		maxConcurrent: 5,
 	},
 };
 
 const SCHEDULER_OPTIONS = {
-	maxConcurrent: 6,
+	maxConcurrent: 5,
 	maxQueueLength: 500,
 	laneConfig: LANE_CONFIG,
 };
@@ -87,11 +87,6 @@ export function useDataThumbnails() {
 			let promise: Promise<ImageBitmap | null>;
 
 			const task = scheduler.get(id);
-
-			// 如果任务存在，尝试恢复任务
-			if (task) {
-				scheduler.tryResume(id);
-			}
 
 			// 如果有存在的任务并且是最后的任务，尝试抢占车道
 			if (
@@ -157,7 +152,11 @@ export function useDataThumbnails() {
 	const autoBuffer = async () => {
 		const blurSegments = sampleSize(
 			clipper.blurSegments,
-			clipper.blurSegments.length / 2,
+			Math.max(
+				Math.min(clipper.blurSegments.length, 50),
+				clipper.blurSegments.length /
+					(localStorage.getItem("115master-super-auto-buffer") ? 1 : 3),
+			),
 		);
 		if (!blurSegments.length) {
 			throw new Error("blurSegments is not null");
