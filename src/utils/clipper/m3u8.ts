@@ -2,7 +2,7 @@ import { type Manifest, Parser, type Segment } from "m3u8-parser";
 import { type ClipFrame, ClipperCore, type ClipperOptions } from "./core";
 
 // M3U8 分段扩展
-type SegmentExt = {
+export interface SegmentExt extends Segment {
 	// 分片 URL
 	_uri: string;
 	// 分片时长
@@ -13,15 +13,15 @@ type SegmentExt = {
 	_endTime: number;
 	// 分片索引
 	_index: number;
-} & Segment;
+}
 
 // M3U8 信息扩展
-export type ManifestExt = Manifest & {
+export interface ManifestExt extends Manifest {
 	// 分片信息
-	segments: (Manifest["segments"][number] & SegmentExt)[];
+	segments: SegmentExt[];
 	// 视频流总时长
 	totalDuration: number;
-};
+}
 
 // 分段缓存索引
 export type SegmentCacheIndexKey = number;
@@ -32,8 +32,6 @@ export type SegmentClips = {
 	count: number;
 	segment: SegmentExt;
 	times: {
-		fetchBuffer: number;
-		processSegment: number;
 		total: number;
 	};
 };
@@ -54,9 +52,36 @@ export class M3U8Clipper extends ClipperCore {
 		SegmentCacheIndexKey,
 		Promise<SegmentClips | null>
 	>();
+	// 模糊
+	public blur = 0;
+	// 模糊分段
+	public blurSegments: SegmentExt[] = [];
 
 	constructor(protected options: M3U8ClipperOptions) {
 		super(options);
+	}
+
+	async init(url: string, blur: number) {
+		this.blur = blur;
+		await this.fetchM3U8Info(url);
+		this.blurSegments = this.getblurSegments(this.M3U8Info?.segments ?? []);
+	}
+
+	// 模糊时间
+	public blurTime(time: number) {
+		const _blurTime = time - (time % this.blur) + this.blur / 2;
+		return Math.min(Math.max(0, _blurTime), this.M3U8Info?.totalDuration ?? 0);
+	}
+
+	// 模糊分段
+	public getblurSegments(segments: SegmentExt[]): SegmentExt[] {
+		return segments.filter((segment) => {
+			const segmentBlurTime = this.blurTime(segment._startTime);
+			const isInBlurRange =
+				segment._startTime <= segmentBlurTime &&
+				segment._endTime >= segmentBlurTime;
+			return isInBlurRange;
+		});
 	}
 
 	// 获取 M3U8 信息
@@ -168,48 +193,48 @@ export class M3U8Clipper extends ClipperCore {
 	private async clipsSegment(
 		segment: SegmentExt,
 	): Promise<SegmentClips | null> {
-		const startFetchBuffer = performance.now();
-		const buffer = await this.fetchBuffer(segment._uri);
-		const endFetchBuffer = performance.now();
-		const startProcessSegment = performance.now();
+		const startTime = performance.now();
 
-		const frames = await this.processSegment({
-			buffer,
-			nbSamples: 1,
-			maxWidth: this.options.maxWidth,
-			maxHeight: this.options.maxHeight,
-		});
+		try {
+			const processedFrames = await this.processStreamingSegment({
+				url: segment._uri,
+				nbSamples: 1,
+				maxWidth: this.options.maxWidth,
+				maxHeight: this.options.maxHeight,
+			});
 
-		const endProcessSegment = performance.now();
-		if (!frames.length) {
-			console.warn("No video frames extracted");
+			if (!processedFrames.length) {
+				console.warn("No video frames extracted");
+				return null;
+			}
+
+			const endTime = performance.now();
+			const totalTime = endTime - startTime;
+
+			const segmentClips: SegmentClips = {
+				frames: processedFrames,
+				count: processedFrames.length,
+				segment: segment,
+				times: {
+					total: totalTime,
+				},
+			};
+
+			console.log(`分段截图完成
+				耗时：${segmentClips.times.total}ms
+				分片 URL：${segmentClips.segment._uri}
+				分片索引：${segmentClips.segment._index}
+				分片截图数量：${segmentClips.frames.length}
+				分片时长：${segmentClips.segment._duration}s 
+				分片开始时间：${segmentClips.segment._startTime}s
+				分片结束时间：${segmentClips.segment._endTime}s
+				`);
+
+			return segmentClips;
+		} catch (error) {
+			console.error("Error processing segment:", error);
 			return null;
 		}
-
-		const segmentClips: SegmentClips = {
-			frames,
-			count: frames.length,
-			segment: segment,
-			times: {
-				fetchBuffer: endFetchBuffer - startFetchBuffer,
-				processSegment: endProcessSegment - startProcessSegment,
-				total: endProcessSegment - startFetchBuffer,
-			},
-		};
-
-		console.log(`分段截图完成
-			耗时：${segmentClips.times.total}ms
-			分片 URL：${segmentClips.segment._uri}
-			分片索引：${segmentClips.segment._index}
-			分片加载时间：${segmentClips.times.fetchBuffer}ms
-			分片解码时间：${segmentClips.times.processSegment}ms
-			分片截图数量：${segmentClips.frames.length}
-			分片时长：${segmentClips.segment._duration}s 
-			分片开始时间：${segmentClips.segment._startTime}s
-			分片结束时间：${segmentClips.segment._endTime}s
-			`);
-
-		return segmentClips;
 	}
 
 	// 根据 time 获取帧

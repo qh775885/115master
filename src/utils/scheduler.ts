@@ -57,7 +57,7 @@ type AddTaskOptions = {
 	action?: "push" | "unshift";
 };
 
-type LaneConfig = {
+export type LaneConfig = {
 	// 车道名
 	name: string;
 	// 优先级
@@ -490,7 +490,7 @@ export class Scheduler<T> {
 	/**
 	 * 尝试抢占车道
 	 */
-	public tryOvertaking(id: string, lane: string): boolean {
+	public tryOvertaking(id: string, lane: string, priority?: number): boolean {
 		const task = this.get(id);
 		if (!task) return false;
 
@@ -499,9 +499,8 @@ export class Scheduler<T> {
 			task.status === TaskStatus.Running ||
 			task.status === TaskStatus.Paused
 		) {
-			this.tryResume(id);
 			task.lane = lane;
-			task.priority = 0;
+			task.priority = priority ?? task.priority;
 			this.sort();
 			this.processQueue();
 			return true;
