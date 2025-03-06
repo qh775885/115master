@@ -95,6 +95,19 @@ class FileStyle {
 	}
 
 	private initList(): void {
+		let observerContent: MutationObserver | null = null;
+		observerContent = new MutationObserver(() => {
+			observerContent?.disconnect();
+			this.loadList();
+		});
+		observerContent.observe(document, {
+			subtree: true,
+			childList: true,
+			characterData: true,
+		});
+	}
+
+	loadList() {
 		this.$list = document.querySelector(".list-contents") ?? null;
 		this.$items = this.$list?.querySelectorAll("li") ?? null;
 
@@ -111,20 +124,11 @@ class FileStyle {
 		callback: (originUrl: string, currentUrl: string) => void,
 	) {
 		let lastUrl = window.parent.location.href;
-		let observerContent: MutationObserver | null = null;
 		const observerUrl = new MutationObserver(() => {
 			const url = window.parent.location.href;
 			if (url !== lastUrl) {
-				observerContent = new MutationObserver(() => {
-					observerContent?.disconnect();
-					callback(lastUrl, url);
-				});
-				observerContent.observe(document, {
-					subtree: true,
-					childList: true,
-					characterData: true,
-				});
 				lastUrl = url;
+				callback(lastUrl, url);
 			}
 		});
 
@@ -136,7 +140,6 @@ class FileStyle {
 
 		return () => {
 			observerUrl.disconnect();
-			observerContent?.disconnect();
 		};
 	}
 
