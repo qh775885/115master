@@ -1,20 +1,23 @@
 import dayjs from "dayjs";
-import { JAV_SOURCE, Jav } from "./jav";
+import { JAV_SOURCE, Jav, type JavInfo } from "./jav";
 
 // 修改 JavDB 类
 export class JavDB extends Jav {
 	source = JAV_SOURCE.JAVDB;
 	baseUrl = "https://javdb.com";
-	url = "";
+	detailUrl = "";
+	searchUrl = "";
 	labels: { [k: string]: Element | undefined } = {};
 
 	async getInfoByAvNumber(avNumber: string) {
 		const params = new URLSearchParams({
 			q: avNumber,
 		});
-		const url = new URL(`/search?${params.toString()}`, this.baseUrl).href;
+		const searchUrl = new URL(`/search?${params.toString()}`, this.baseUrl)
+			.href;
+		this.searchUrl = searchUrl;
 		const html = await this.iRequest
-			.get<string>(url, {
+			.get<string>(searchUrl, {
 				responseType: "document",
 			})
 			.then((res) => {
@@ -26,14 +29,14 @@ export class JavDB extends Jav {
 				console.error(error);
 				throw error;
 			});
-		const avNumberPageUrl = this.getAvNumberPageUrl(html);
+		const detailUrl = this.getDetailUrl(html);
 
-		if (!avNumberPageUrl) {
+		if (!detailUrl) {
 			throw Jav.PAGE_ERROR;
 		}
-		this.url = avNumberPageUrl;
+		this.detailUrl = detailUrl;
 		const avNumberPageResponse = await this.iRequest
-			.get<string>(avNumberPageUrl, {
+			.get<string>(detailUrl, {
 				responseType: "document",
 			})
 			.then((res) => {
@@ -46,7 +49,7 @@ export class JavDB extends Jav {
 		return await this.parseInfo(avNumberPageResponse);
 	}
 
-	getAvNumberPageUrl(html: string) {
+	getDetailUrl(html: string) {
 		const dom = new DOMParser().parseFromString(html, "text/html");
 		const page = dom.querySelector(".movie-list .item a")?.getAttribute("href");
 		return page ? new URL(page, this.baseUrl).href : undefined;
@@ -157,7 +160,20 @@ export class JavDB extends Jav {
 
 	parseCover(dom: Document) {
 		const cover = dom.querySelector("img.video-cover")?.getAttribute("src");
-		return cover ?? undefined;
+		return cover
+			? {
+					url: new URL(cover, this.baseUrl).href,
+					referer: this.detailUrl,
+				}
+			: undefined;
+	}
+
+	// TODO: 单页封面
+	parseCoverSingle(): JavInfo["coverSingle"] {
+		return {
+			url: "",
+			referer: this.detailUrl,
+		};
 	}
 
 	parsePreview(dom: Document) {
