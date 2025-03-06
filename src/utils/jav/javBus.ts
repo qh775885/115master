@@ -5,13 +5,16 @@ import { JAV_SOURCE, Jav, type JavInfo } from "./jav";
 export class JavBus extends Jav {
 	source = JAV_SOURCE.JAVBUS;
 	baseUrl = "https://www.javbus.com";
-	url = "";
+	detailUrl = "";
+	searchUrl = "";
 	labels: { [k: string]: Element | undefined } = {};
 
 	async getInfoByAvNumber(avNumber: string): Promise<JavInfo | undefined> {
-		const url = new URL(avNumber, this.baseUrl).href;
-		this.url = url;
-		const html = await this.iRequest.get<string>(url);
+		const detailUrl = new URL(avNumber, this.baseUrl).href;
+		const searchUrl = new URL(`/search/${avNumber}`, this.baseUrl).href;
+		this.detailUrl = detailUrl;
+		this.searchUrl = searchUrl;
+		const html = await this.iRequest.get<string>(detailUrl);
 		return await this.parseInfo(html.data);
 	}
 
@@ -128,7 +131,27 @@ export class JavBus extends Jav {
 		const cover = dom
 			.querySelector(".container .bigImage img")
 			?.getAttribute("src");
-		return cover ? new URL(cover, this.baseUrl).href : undefined;
+		return cover
+			? {
+					url: new URL(cover, this.baseUrl).href,
+					referer: this.detailUrl,
+				}
+			: undefined;
+	}
+
+	parseCoverSingle(dom: Document) {
+		const cover = dom
+			.querySelector(".container .bigImage img")
+			?.getAttribute("src");
+		return cover
+			? {
+					url: new URL(
+						cover.replace("_b", "").replace("cover", "thumb"),
+						this.baseUrl,
+					).href,
+					referer: this.searchUrl,
+				}
+			: undefined;
 	}
 
 	parsePreview(dom: Document) {

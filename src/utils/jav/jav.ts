@@ -80,12 +80,23 @@ type Comment = {
 	likeCount: number;
 };
 
+type Cover = {
+	// 链接
+	url: string;
+	// 基础 URL
+	referer?: string;
+};
+
 // 番号信息
 export type JavInfo = {
 	// 来源
 	source: JAV_SOURCE;
+	// 基础 URL
+	baseUrl: string;
 	// 链接
-	url: string;
+	detailUrl: string;
+	// 搜索链接
+	searchUrl: string;
 	// 番号
 	avNumber?: string;
 	// 标题
@@ -102,8 +113,10 @@ export type JavInfo = {
 	studio?: Studio[];
 	// 发行商
 	publisher?: Publisher[];
-	// 封面
-	cover?: string;
+	// 封面（双页）
+	cover?: Cover;
+	// 封面（单页）
+	coverSingle?: Cover;
 	// 预览图
 	preview?: Preview[];
 	// 系列
@@ -131,7 +144,9 @@ abstract class Jav {
 	// 基础 URL
 	abstract baseUrl: string;
 	// 链接
-	abstract url: string;
+	abstract detailUrl: string;
+	// 搜索链接
+	abstract searchUrl: string;
 	// 来源
 	abstract source: JAV_SOURCE;
 	// 通过番号获取番号信息
@@ -153,7 +168,9 @@ abstract class Jav {
 	// 解析发行商
 	abstract parsePublisher(dom: Document): Publisher[] | undefined;
 	// 解析封面
-	abstract parseCover(dom: Document): string | undefined;
+	abstract parseCover(dom: Document): Cover | undefined;
+	// 解析封面（单页）
+	abstract parseCoverSingle(dom: Document): Cover | undefined;
 	// 解析预览图
 	abstract parsePreview(dom: Document): Preview[] | undefined;
 	// 解析系列
@@ -178,9 +195,11 @@ abstract class Jav {
 		} catch (e) {
 			return undefined;
 		}
-		const info = {
+		const info: JavInfo = {
 			source: this.source,
-			url: this.url,
+			baseUrl: this.baseUrl,
+			detailUrl: this.detailUrl,
+			searchUrl: this.searchUrl,
 			avNumber: this.parseAvNumber(dom),
 			title: this.parseTitle(dom),
 			date: this.parseDate(dom),
@@ -190,6 +209,7 @@ abstract class Jav {
 			studio: this.parseStudio(dom),
 			publisher: this.parsePublisher(dom),
 			cover: this.parseCover(dom),
+			coverSingle: this.parseCoverSingle(dom),
 			preview: this.parsePreview(dom),
 			series: this.parseSeries(dom),
 			category: this.parseCategory(dom),

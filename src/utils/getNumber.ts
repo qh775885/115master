@@ -20,7 +20,9 @@ export function getAvNumber(filename: string): string | null {
 		// 清除中文
 		.replace(/[\u4E00-\u9FA5]/g, "")
 		// 清除日语
-		.replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "");
+		.replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "")
+		// 电影常用格式名称
+		.replace(/BDRIP|HDR/gi, "");
 
 	logger.log("清理干扰字符", `before:${name} -> after:${cleanName}`);
 
@@ -61,14 +63,16 @@ export function getAvNumber(filename: string): string | null {
 		// Pacopacomama or 10musume系列 (如 10musume-123114_01、pacopacomama-123114_01)
 		{
 			name: "Pacopacomama or 10musume系列",
-			pattern: /(\d{6})[\s|_]*(\d{2})/i,
-			format: (m: RegExpMatchArray) => `${m[1]}_${m[2]}`,
+			//
+			pattern:
+				/(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])([0-9]{2})([\s|_]*)(\d{2,3})/i,
+			format: (m: RegExpMatchArray) => m[0].replace(/\s|_/g, "_"),
 		},
 
 		// Heydouga系列 (如 heydouga-4037-123)
 		{
 			name: "Heydouga系列",
-			pattern: /(\d{4})[\s|-]*(\d{3,4})/i,
+			pattern: /heydouga[\s|-](\d{4})[\s|-]*(\d{3,4})/i,
 			format: (m: RegExpMatchArray) => `${m[1]}-${m[2]}`,
 		},
 
@@ -110,6 +114,7 @@ export function getAvNumber(filename: string): string | null {
 			logger.log("match name", name);
 			logger.log("match regexp", pattern.toString());
 			const result = format(match);
+			logger.log("找到番号^^^", result, name);
 			return result;
 		}
 	}

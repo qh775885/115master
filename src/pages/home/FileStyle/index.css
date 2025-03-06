@@ -1,0 +1,14 @@
+.list-contents li.with-ext-info {
+	height: auto !important;
+	padding-top: 12px;
+	padding-bottom: 32px;
+	flex-wrap: wrap;
+	align-content: flex-start;
+}
+
+.ext-info-root {
+	width: 100%;
+	position: relative;
+	display: flex;
+	margin-top: 16px;
+}

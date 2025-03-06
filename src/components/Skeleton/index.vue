@@ -3,7 +3,8 @@
         class="skeleton" 
         :class="{
             circle,
-            'skeleton-animated': animated
+            'skeleton-animated': animated,
+            [`skeleton-${mode}`]: mode
         }"
         :style="{
             width,
@@ -23,6 +24,7 @@ withDefaults(
 		circle?: boolean;
 		borderRadius?: string;
 		animated?: boolean;
+		mode?: "dark" | "light";
 	}>(),
 	{
 		width: "100%",
@@ -30,6 +32,7 @@ withDefaults(
 		circle: false,
 		borderRadius: "4px",
 		animated: true,
+		mode: "dark",
 	},
 );
 </script>
@@ -41,6 +44,18 @@ withDefaults(
     overflow: hidden;
     vertical-align: middle;
     background: rgba(255, 255, 255, 0.1);
+}
+
+.skeleton-light {
+    background: rgba(0, 0, 0, 0.1);
+    .skeleton-animated::after {
+        background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0) 0%,
+            rgba(0, 0, 0, 0.1) 50%,
+            rgba(0, 0, 0, 0) 100%
+        );
+    }
 }
 
 .skeleton.circle {
@@ -57,7 +72,7 @@ withDefaults(
     background: linear-gradient(
         90deg,
         rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.3) 50%,
         rgba(255, 255, 255, 0) 100%
     );
     animation: skeleton-loading 1.5s infinite;

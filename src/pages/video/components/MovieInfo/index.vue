@@ -120,7 +120,7 @@
 							番号：
 						</span>
 						<span class="movie-info-content-item-value">
-							<a :href="movieInfo.state.value?.url" target="_blank">
+							<a :href="movieInfo.state.value?.detailUrl" target="_blank">
 								{{ movieInfo.state.value?.avNumber ?? '-' }}
 							</a>
 							<CopyButton 
