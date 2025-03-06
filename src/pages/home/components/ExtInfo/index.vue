@@ -25,7 +25,7 @@
             </template>
               <!-- 空 -->
             <div class="ext-info-empty" v-else-if="!extInfo.state.value" >
-                <Empty />
+                <Empty style="padding: 0;" />
             </div>
 
             <!-- 内容 -->
@@ -244,8 +244,10 @@ onMounted(async () => {});
         flex: 1;
     }
     .ext-info-empty {
-       padding: 0;
-       margin: 0 auto;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       flex: 1;
     }
 }
 </style>
