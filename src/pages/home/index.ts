@@ -1,11 +1,11 @@
 import { AppLogger } from "../../utils/logger";
+import FileListMod from "./FileListMod";
 import { FileOperationMenu } from "./FileOperationMenu";
-import FileStyle from "./FileStyle";
 
 class HomePage {
 	private readonly logger: AppLogger;
 	private fileOperationMenu!: FileOperationMenu;
-	private fileStyle!: FileStyle;
+	private ileListMod!: FileListMod;
 
 	constructor() {
 		this.logger = new AppLogger("HomePage");
@@ -15,12 +15,12 @@ class HomePage {
 	private init(): void {
 		this.logger.log("init");
 		this.fileOperationMenu = new FileOperationMenu();
-		this.fileStyle = new FileStyle();
+		this.ileListMod = new FileListMod();
 	}
 
 	public destroy(): void {
 		this.fileOperationMenu.destroy();
-		this.fileStyle.destroy();
+		this.ileListMod.destroy();
 	}
 }
 

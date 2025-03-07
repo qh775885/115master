@@ -32,7 +32,7 @@
             <template v-else-if="extInfo.state.value">
                 <div class="ext-info-cover">
                     <a href="javascript:void(0)" target="_blank" :alt="extInfo.state.value?.title">
-                        <Image :src="extInfo.state.value?.cover?.url" :alt="extInfo.state.value?.title" :referer="extInfo.state.value?.cover?.referer" />
+                        <Image skeleton-mode="light" :src="extInfo.state.value?.cover?.url" :alt="extInfo.state.value?.title" :referer="extInfo.state.value?.cover?.referer" />
                     </a>
                 </div>
                 <div class="ext-info-main">
@@ -75,7 +75,7 @@
                                 <span class="ext-info-item-value">
                                     <a v-for="actor in extInfo.state.value?.actors" 
                                         :href="actor.url" 
-                                        target="_blank" 
+                                        target="_blank"
                                         :alt="actor.name"
                                         :key="actor.url"
                                         >
@@ -194,6 +194,7 @@ onMounted(async () => {});
         }
         img {
             display: block;
+            width: 100%;
             height: 100%;
             object-fit: cover;
         }
@@ -236,6 +237,14 @@ onMounted(async () => {});
     .ext-info-title {
         font-size: 18px;
         font-weight: 600;
+
+        a {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
     }
     .ext-info-error {
         display: flex;

@@ -55,6 +55,10 @@ class FileItem {
 			return;
 		}
 
+		if (this.$item.classList.contains("with-ext-info")) {
+			return;
+		}
+
 		const avNumber = getAvNumber(this.attributes.title);
 		if (avNumber) {
 			this.$item.classList.add("with-ext-info");
@@ -74,7 +78,7 @@ class FileItem {
 	}
 }
 
-class FileStyle {
+class FileListMod {
 	private readonly logger: AppLogger;
 	private $list!: HTMLElement | null;
 	private $items!: NodeListOf<HTMLElement> | null;
@@ -86,31 +90,46 @@ class FileStyle {
 		this.init();
 	}
 
-	private init(): void {
-		this.logger.log("init");
-		this.initList();
-		this.offChangePage = this.onChangePage(() => {
-			this.initList();
-		});
-	}
-
-	private initList(): void {
-		let observerContent: MutationObserver | null = null;
-		observerContent = new MutationObserver(() => {
-			observerContent?.disconnect();
-			this.loadList();
-		});
-		observerContent.observe(document, {
-			subtree: true,
-			childList: true,
-			characterData: true,
-		});
-	}
-
-	loadList() {
+	private getOriginDom() {
 		this.$list = document.querySelector(".list-contents") ?? null;
 		this.$items = this.$list?.querySelectorAll("li") ?? null;
+	}
 
+	private async init(): Promise<void> {
+		this.logger.log("init");
+		this.getOriginDom();
+
+		if (this.$list && this.$items) {
+			this.loadExtInfo();
+		} else {
+			await this.waitListLoaded();
+			this.loadExtInfo();
+		}
+		this.loadExtInfo();
+		this.offChangePage = this.onChangePage(async () => {
+			this.destroyItems();
+			await this.waitListLoaded();
+			this.loadExtInfo();
+		});
+	}
+
+	private waitListLoaded(): Promise<void> {
+		return new Promise((resolve) => {
+			let observerContent: MutationObserver | null = null;
+			observerContent = new MutationObserver(() => {
+				observerContent?.disconnect();
+				resolve();
+			});
+			observerContent.observe(document, {
+				subtree: true,
+				childList: true,
+				characterData: true,
+			});
+		});
+	}
+
+	private loadExtInfo() {
+		this.getOriginDom();
 		if (this.$list && this.$items) {
 			this.$items.forEach((item) => {
 				const fileItem = new FileItem(item);
@@ -144,6 +163,9 @@ class FileStyle {
 	}
 
 	private destroyItems(): void {
+		if (this.items.length === 0) {
+			return;
+		}
 		this.items.forEach((item) => {
 			item.destroy();
 		});
@@ -157,4 +179,4 @@ class FileStyle {
 	}
 }
 
-export default FileStyle;
+export default FileListMod;
