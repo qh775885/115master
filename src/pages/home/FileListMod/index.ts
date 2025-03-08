@@ -2,6 +2,7 @@ import { getAvNumber } from "../../../utils/getNumber";
 import { AppLogger } from "../../../utils/logger";
 import "./index.css";
 import { type App, createApp } from "vue";
+import actressFaceDB from "../../../utils/actressFaceDB";
 import ExtInfo from "../components/ExtInfo/index.vue";
 
 enum FileType {
@@ -38,6 +39,7 @@ interface FileItemAttributes {
 
 class FileItem {
 	private vueApp: App | null = null;
+	private initedActressInfo = false;
 
 	constructor(private readonly $item: HTMLElement) {}
 
@@ -45,6 +47,11 @@ class FileItem {
 		return Object.fromEntries(
 			Array.from(this.$item.attributes).map((attr) => [attr.name, attr.value]),
 		) as unknown as FileItemAttributes;
+	}
+
+	public async load() {
+		this.loadExtInfo();
+		this.loadActressInfo();
 	}
 
 	public async loadExtInfo() {
@@ -70,6 +77,26 @@ class FileItem {
 			});
 			app.mount(extInfoDom);
 			this.vueApp = app;
+		}
+	}
+
+	public async loadActressInfo() {
+		if (this.initedActressInfo === true) {
+			return;
+		}
+		this.initedActressInfo = true;
+		const actress = (await actressFaceDB).findActress(
+			this.attributes.title.trim(),
+		);
+		if (this.$item.classList.contains("with-actress-info")) {
+			return;
+		}
+		if (actress) {
+			this.$item.classList.add("with-actress-info");
+			const actressDom = document.createElement("img");
+			actressDom.src = actress.url;
+			actressDom.className = "actress-info-img";
+			this.$item.querySelector(".file-name-wrap")?.prepend(actressDom);
 		}
 	}
 
@@ -133,7 +160,7 @@ class FileListMod {
 		if (this.$list && this.$items) {
 			this.$items.forEach((item) => {
 				const fileItem = new FileItem(item);
-				fileItem.loadExtInfo();
+				fileItem.load();
 				this.items.push(fileItem);
 			});
 		}
