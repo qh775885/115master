@@ -28,7 +28,7 @@ const gmRequst = new GMRequest();
 const getImageByGmRequest = async (src: string) => {
 	const res = await gmRequst.get(src, {
 		headers: {
-			Referer: props.referer,
+			...(props.referer ? { Referer: props.referer } : {}),
 		},
 		responseType: "blob",
 	});
@@ -46,8 +46,12 @@ const revokeUrl = (url?: string) => {
 const loadImage = async (_src: string) => {
 	try {
 		loading.value = true;
-		const result = await getImageByGmRequest(_src);
-		src.value = result;
+		if (props.referer) {
+			const result = await getImageByGmRequest(_src);
+			src.value = result;
+		} else {
+			src.value = _src;
+		}
 	} catch {
 		src.value = "";
 		error.value = true;

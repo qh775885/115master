@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
-import { JAV_SOURCE, Jav, type JavInfo } from "./jav";
+import { JAV_SOURCE, Jav, type JavInfo, JavNotFound } from "./jav";
 
-// 修改 Javbus 类
+/**
+ * JavBus 类
+ */
 export class JavBus extends Jav {
 	source = JAV_SOURCE.JAVBUS;
 	baseUrl = "https://www.javbus.com";
@@ -15,13 +17,19 @@ export class JavBus extends Jav {
 		this.detailUrl = detailUrl;
 		this.searchUrl = searchUrl;
 		const html = await this.iRequest.get<string>(detailUrl);
+		if (html.status === 404) {
+			throw new Jav.NotFound();
+		}
+		if (html.status !== 200 && html.status !== 302) {
+			throw new Jav.PageError();
+		}
 		return await this.parseInfo(html.data);
 	}
 
 	async parseInfoBefore(dom: Document): Promise<Document> {
 		const errorPage = dom.querySelector(".error-page");
 		if (errorPage) {
-			throw Jav.PAGE_ERROR;
+			throw new Jav.NotFound();
 		}
 
 		const labels = this.getLabels(dom);
@@ -131,12 +139,21 @@ export class JavBus extends Jav {
 		const cover = dom
 			.querySelector(".container .bigImage img")
 			?.getAttribute("src");
-		return cover
-			? {
-					url: new URL(cover, this.baseUrl).href,
-					referer: this.detailUrl,
-				}
-			: undefined;
+
+		if (!cover) {
+			return undefined;
+		}
+
+		if (cover.includes("https://")) {
+			return {
+				url: cover,
+			};
+		}
+
+		return {
+			url: new URL(cover, this.baseUrl).href,
+			referer: this.detailUrl,
+		};
 	}
 
 	parseCoverSingle(dom: Document) {

@@ -12,17 +12,20 @@ export function getAvNumber(filename: string): string | null {
 	const name = filename;
 	// 清理文件名中的干扰字符
 	const cleanName = name
-
 		// 清楚域名(hjd2048.com)
-		.replace(/^\[?[a-zA-Z0-9]+\.[a-zA-Z]+\]?@?/g, "")
+		.replace(/^\[?([\w_]+\.)+[A-Za-z]+\]?@?/g, "")
 		// 移除文件扩展名(.mp4)
-		.replace(/\.[^\s]+$/, "")
+		.replace(/\.[\w]+$/, "")
 		// 清除中文
 		.replace(/[\u4E00-\u9FA5]/g, "")
 		// 清除日语
 		.replace(/[\u3040-\u309F\u30A0-\u30FF]/g, "")
 		// 电影常用格式名称
-		.replace(/BDRIP|HDR/gi, "");
+		.replace(/BDRIP|HDR/gi, "")
+		// 清除@SIS001@
+		.replace(/@\w+@/, "")
+		// 清除 share_db86f06fdfbf31573ca6828ac0716d22
+		.replace(/share_[\w]{32}/, "");
 
 	logger.log("清理干扰字符", `before:${name} -> after:${cleanName}`);
 
@@ -53,17 +56,9 @@ export function getAvNumber(filename: string): string | null {
 			},
 		},
 
-		// 一本道系列 or Muramura系列 (如 1pondo-123456_789、muramura-123114_163)
-		{
-			name: "一本道系列 or Muramura系列",
-			pattern: /(\d{6})[\s|_]*(\d{3})/i,
-			format: (m: RegExpMatchArray) => `${m[1]}_${m[2]}`,
-		},
-
 		// Pacopacomama or 10musume系列 (如 10musume-123114_01、pacopacomama-123114_01)
 		{
-			name: "Pacopacomama or 10musume系列",
-			//
+			name: "一本道系列 or Pacopacomama or 10musume系列",
 			pattern:
 				/(0[1-9]|1[0-2])(0[1-9]|[1-2][0-9]|3[0-1])([0-9]{2})([\s|_]*)(\d{2,3})/i,
 			format: (m: RegExpMatchArray) => m[0].replace(/\s|_/g, "_"),
@@ -100,7 +95,8 @@ export function getAvNumber(filename: string): string | null {
 		// 标准格式：字母-数字 (如 ABC-123, ABCD-12345)
 		{
 			name: "标准格式：字母-数字",
-			pattern: /([a-zA-Z]{2,5})-?(\d{2,5})(?:c|-c)?/i,
+			pattern:
+				/(?:^|[^a-zA-Z])([a-zA-Z]{2,5})[-]?(\d{2,5})(?:c|-c)?(?:[^a-zA-Z]|$)/i,
 			format: (m: RegExpMatchArray) => {
 				return `${m[1].toUpperCase()}-${m[2]}`;
 			},
