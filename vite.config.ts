@@ -62,6 +62,7 @@ export default defineConfig({
 					"javdb.com",
 					"jdbstatic.com",
 					"cpats01.115.com",
+					"missav.ws",
 				],
 				resource: {
 					icon: "https://115.com/favicon.ico",

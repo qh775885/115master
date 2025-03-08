@@ -1,7 +1,9 @@
 import dayjs from "dayjs";
 import { JAV_SOURCE, Jav, type JavInfo } from "./jav";
 
-// 修改 JavDB 类
+/**
+ * JavDB 类
+ */
 export class JavDB extends Jav {
 	source = JAV_SOURCE.JAVDB;
 	baseUrl = "https://javdb.com";
@@ -16,37 +18,31 @@ export class JavDB extends Jav {
 		const searchUrl = new URL(`/search?${params.toString()}`, this.baseUrl)
 			.href;
 		this.searchUrl = searchUrl;
-		const html = await this.iRequest
-			.get<string>(searchUrl, {
-				responseType: "document",
-			})
-			.then((res) => {
-				console.log("javdb search response", res);
-				// @ts-ignore
-				return res.rawResponse.responseText as unknown as string;
-			})
-			.catch((error) => {
-				console.error(error);
-				throw error;
-			});
-		const detailUrl = this.getDetailUrl(html);
+		const html = await this.iRequest.get<string>(searchUrl);
+		if (html.status === 404) {
+			throw new Jav.NotFound();
+		}
+		if (html.status !== 200 && html.status !== 302) {
+			throw new Jav.PageError();
+		}
 
+		const detailUrl = this.getDetailUrl(html.data);
 		if (!detailUrl) {
-			throw Jav.PAGE_ERROR;
+			throw new Jav.PageError();
 		}
 		this.detailUrl = detailUrl;
-		const avNumberPageResponse = await this.iRequest
-			.get<string>(detailUrl, {
-				responseType: "document",
-			})
-			.then((res) => {
-				// @ts-ignore
-				return res.rawResponse.responseText as unknown as string;
-			})
-			.catch((error) => {
-				throw error;
-			});
-		return await this.parseInfo(avNumberPageResponse);
+		const avNumberPageResponse = await this.iRequest.get<string>(detailUrl);
+
+		if (avNumberPageResponse.status === 404) {
+			throw new Jav.NotFound();
+		}
+		if (
+			avNumberPageResponse.status !== 200 &&
+			avNumberPageResponse.status !== 302
+		) {
+			throw new Jav.PageError();
+		}
+		return await this.parseInfo(avNumberPageResponse.data);
 	}
 
 	getDetailUrl(html: string) {

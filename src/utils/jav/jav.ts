@@ -3,6 +3,7 @@ import type { IRequest } from "../request/types";
 export enum JAV_SOURCE {
 	JAVBUS = "JavBus",
 	JAVDB = "JavDB",
+	MISSAV = "MissAV",
 }
 
 // 导演
@@ -135,11 +136,24 @@ export type JavInfo = {
 	comments?: Comment[];
 };
 
-// 修改 Jav 抽象类
+export class JavNotFound extends Error {
+	constructor() {
+		super("未找到番号");
+	}
+}
+
+export class JavPageError extends Error {
+	constructor() {
+		super("请求页面错误");
+	}
+}
+
+// Jav 抽象类
 abstract class Jav {
 	constructor(protected iRequest: IRequest) {}
 
-	static PAGE_ERROR = new Error("请求页面错误");
+	static NotFound = JavNotFound;
+	static PageError = JavPageError;
 
 	// 基础 URL
 	abstract baseUrl: string;

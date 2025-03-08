@@ -32,13 +32,8 @@ describe("getNumber", () => {
 		expect(getAvNumber("tokyo hot n1234")).toBe("TOKYO-HOT-N1234");
 	});
 
-	test("一本道系列 or Muramura系列", () => {
-		expect(getAvNumber("1pondo-123456_789")).toBe("123456_789");
-		expect(getAvNumber("muramura-123114_163")).toBe("123114_163");
-		expect(getAvNumber("Muramura 123114_163")).toBe("123114_163");
-	});
-
-	test("Pacopacomama or 10musume系列", () => {
+	test("一本道系列 or Pacopacomama or 10musume系列", () => {
+		expect(getAvNumber("042906_872")).toBe("042906_872");
 		expect(getAvNumber("10musume-123114_01")).toBe("123114_01");
 		expect(getAvNumber("10musume 123114 01")).toBe("123114_01");
 		expect(getAvNumber("pacopacomama-123114_01")).toBe("123114_01");
@@ -58,6 +53,7 @@ describe("getNumber", () => {
 		expect(getAvNumber("ABCD-12345")).toBe("ABCD-12345");
 		expect(getAvNumber("abc123")).toBe("ABC-123");
 		expect(getAvNumber("[ABC-123]")).toBe("ABC-123");
+		expect(getAvNumber("123ABC-123")).toBe("ABC-123");
 	});
 
 	test("带有额外信息的文件名", () => {
@@ -78,5 +74,9 @@ describe("getNumber", () => {
 		expect(getAvNumber("invalid")).toBeNull();
 		expect(getAvNumber("123456")).toBeNull();
 		expect(getAvNumber("abcdef")).toBeNull();
+		expect(getAvNumber("www.98T.la@SyMengNan689")).toBeNull();
+		expect(
+			getAvNumber("www.98T.la@share_db86f06fdfbf31573ca6828ac0716d22"),
+		).toBeNull();
 	});
 });
