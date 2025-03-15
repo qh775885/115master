@@ -95,6 +95,8 @@ class FileItem {
 			this.$item.classList.add("with-actress-info");
 			const actressDom = document.createElement("img");
 			actressDom.src = actress.url;
+			actressDom.alt = actress.filename;
+			actressDom.loading = "lazy";
 			actressDom.className = "actress-info-img";
 			this.$item.querySelector(".file-name-wrap")?.prepend(actressDom);
 		}
