@@ -3,7 +3,6 @@
 		<div class="page-body">
 			<div class="page-main">
 				<XPlayer
-					v-if="xplayerShow"
 					ref="xplayerRef"
 					class="video-player"
 					:sources="DataVideoSources.list"
@@ -37,19 +36,19 @@
 </template>
 
 <script setup lang="ts">
-import { tryOnMounted, useTitle } from "@vueuse/core";
-import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
+import { useTitle } from "@vueuse/core";
+import { nextTick, onMounted, ref } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
 import { useParamsVideoPage } from "../../hooks/useParams";
+import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
 import Drive115Instance from "../../utils/drive115";
 import drive115 from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
 import { isMac } from "../../utils/platform";
 import { goToPlayer } from "../../utils/route";
-import { subtitlePreference } from "../../utils/subtitlePreference";
 import { webLinkIINA, webLinkShortcutsMpv } from "../../utils/weblink";
 import FileInfo from "./components/FileInfo/index.vue";
 import Footer from "./components/Footer/index.vue";
@@ -63,8 +62,6 @@ import { useDataThumbnails } from "./data/useThumbnails";
 import { useDataVideoSources } from "./data/useVideoSource";
 
 const xplayerRef = ref<InstanceType<typeof XPlayerInstance>>();
-const xplayerShow = ref(true);
-
 const params = useParamsVideoPage();
 const DataVideoSources = useDataVideoSources();
 const DataThumbnails = useDataThumbnails();
@@ -224,7 +221,6 @@ onMounted(async () => {
 	height: auto;
 	border-radius: 16px;
 	overflow: hidden;
-	box-shadow: 0 0 500px 100px rgba(125, 125, 125, 0.15);
 }
 
 .page-sider-playlist {

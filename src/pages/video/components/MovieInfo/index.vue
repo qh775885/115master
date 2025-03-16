@@ -202,12 +202,12 @@
 				<div class="movie-info-thumb" ref="movieInfoThumb">
 					<a 
 						class="movie-info-thumb-item" 
-						v-for="(item, index) in movieInfo.state.value?.preview" 
+						v-for="(item) in movieInfo.state.value?.preview" 
 						:key="item.thumbnail"
 						:href="item.raw"
 						target="_blank"
 					>
-						<img :src="item.raw" alt="thumb" />
+						<img :src="item.raw" alt="thumb" loading="lazy" />
 					</a>
 				</div>
 			</template>
@@ -353,12 +353,14 @@ watch(movieInfoThumb, async () => {
 }
 
 .movie-info-header-actors-item img {
+	display: block;
 	width: 60px;
 	height: 60px;
 	border-radius: 50%;
 	object-fit: cover;
 	border: 2px solid #f1f1f1;
 	box-sizing: border-box;
+	background-color: #f1f1f1;
 }
 
 .movie-info-header-actors-item-name {

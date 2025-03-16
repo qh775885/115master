@@ -1,15 +1,12 @@
 import { GM_notification } from "$";
-import localforage from "localforage";
 import type { ActressImageInfo, ActressImageMap } from "../types/actress";
+import { actressFaceCache } from "./cache/actressFaceCache";
 
 export class ActressFaceDB {
-	private static readonly CACHE_TIMESTAMP = "actress_images_timestamp";
-	private static readonly CACHE_MAP_KEY = "actress_images_map";
 	private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 1天的毫秒数
 	private static readonly API_URL =
 		"https://raw.githubusercontent.com/gfriends/gfriends/refs/heads/master/Filetree.json";
 
-	private storage: LocalForage;
 	private imageMap: ActressImageMap;
 	private lastUpdateTime = -1;
 	private updateTimer: number | null;
@@ -18,14 +15,8 @@ export class ActressFaceDB {
 	constructor() {
 		this.imageMap = new Map();
 		this.updateTimer = null;
-		this.storage = localforage.createInstance({
-			name: "115master",
-			storeName: "actress_images",
-		});
 		this.init();
 	}
-
-	private inited = false;
 
 	/**
 	 * 初始化数据库
@@ -33,15 +24,11 @@ export class ActressFaceDB {
 	async init(): Promise<ActressFaceDB> {
 		// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
 		const promise = new Promise<ActressFaceDB>(async (resolve) => {
-			this.inited = false;
-			this.lastUpdateTime =
-				(await this.storage.getItem<number>(ActressFaceDB.CACHE_TIMESTAMP)) ??
-				-1;
+			this.lastUpdateTime = await actressFaceCache.getLastUpdateTime();
 			await this.loadFromCache();
 			if (await this.checkUpdate()) {
 				await this.updateDB();
 			}
-			this.inited = true;
 			resolve(this);
 		});
 		this.initPromise = promise;
@@ -54,7 +41,7 @@ export class ActressFaceDB {
 	 */
 	public async updateDB(): Promise<void> {
 		try {
-			GM_notification("♻️ 正在更新头像数据库...");
+			GM_notification("️正在更新头像数据库...");
 			const response = await fetch(ActressFaceDB.API_URL);
 			if (!response.ok) {
 				// @ts-ignore
@@ -88,16 +75,15 @@ export class ActressFaceDB {
 		| { folder: string; filename: string; timestamp: number; url: string }
 		| undefined
 	> {
-		if (!this.inited) {
-			await this.initPromise;
-		}
-		const actress = this.imageMap.get(name.toLowerCase());
+		await this.initPromise;
+		const actress = this.imageMap.get(name);
 		if (!actress) {
 			return undefined;
 		}
+		const file = actress[0];
 		return {
-			...actress,
-			url: `https://github.com/gfriends/gfriends/blob/master/Content/${actress.folder}/${actress.filename}?raw=true`,
+			...file,
+			url: `https://raw.githubusercontent.com/gfriends/gfriends/refs/heads/master/Content/${file.folder}/${file.filename}`,
 		};
 	}
 
@@ -123,16 +109,13 @@ export class ActressFaceDB {
 	 */
 	private async loadFromCache(): Promise<boolean> {
 		try {
-			const [cachedMap, cachedTime] = await Promise.all([
-				this.storage.getItem<ActressImageMap>(ActressFaceDB.CACHE_MAP_KEY),
-				this.storage.getItem<number>(ActressFaceDB.CACHE_TIMESTAMP),
-			]);
+			const cachedData = await actressFaceCache.getActressData();
 
-			if (cachedMap && cachedTime) {
+			if (cachedData) {
 				const now = Date.now();
-				if (now - cachedTime < ActressFaceDB.CACHE_DURATION) {
-					this.imageMap = new Map(cachedMap);
-					this.lastUpdateTime = cachedTime;
+				if (now - cachedData.timestamp < ActressFaceDB.CACHE_DURATION) {
+					this.imageMap = new Map(cachedData.imageMap);
+					this.lastUpdateTime = cachedData.timestamp;
 					return true;
 				}
 			}
@@ -147,21 +130,26 @@ export class ActressFaceDB {
 	 * 处理并保存数据
 	 */
 	private async processAndSaveData(data: ActressImageInfo): Promise<void> {
-		const newMap = new Map<
-			string,
-			{ folder: string; filename: string; timestamp: number }
-		>();
+		const newMap: ActressImageMap = new Map();
 
 		// 处理数据并构建查找映射
 		Object.entries(data.Content).forEach(([folder, files]) => {
-			Object.entries(files).forEach(([originalName, renamedFile]) => {
-				const timestamp = parseInt(renamedFile.split("?t=")[1] || "0", 10);
+			Object.entries(files).forEach(([originalName, filePath]) => {
+				const [, timestampStr] = filePath.split("?t=");
+				const timestamp = parseInt(timestampStr, 10);
 				const actressName = originalName.replace(".jpg", "");
-				newMap.set(actressName.toLowerCase(), {
+				const file = {
 					folder,
-					filename: renamedFile.split("?")[0],
+					filename: filePath,
 					timestamp,
-				});
+				};
+				const files = newMap.get(actressName);
+				if (files && files?.length > 0) {
+					files.push(file);
+					newMap.set(actressName, files);
+				} else {
+					newMap.set(actressName, [file]);
+				}
 			});
 		});
 
@@ -171,11 +159,14 @@ export class ActressFaceDB {
 
 		// 保存到缓存
 		await Promise.all([
-			this.storage.setItem(
-				ActressFaceDB.CACHE_MAP_KEY,
+			actressFaceCache.saveActressData(
 				Array.from(newMap.entries()),
+				this.lastUpdateTime,
 			),
-			this.storage.setItem(ActressFaceDB.CACHE_TIMESTAMP, this.lastUpdateTime),
 		]);
 	}
 }
+
+const actressFaceDB = new ActressFaceDB();
+
+export default actressFaceDB;

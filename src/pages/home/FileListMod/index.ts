@@ -1,6 +1,8 @@
 import { type App, createApp } from "vue";
-import { ActressFaceDB } from "../../../utils/actressFaceDB";
+import actressFaceDB, { ActressFaceDB } from "../../../utils/actressFaceDB";
+import { imageCache } from "../../../utils/cache";
 import { getAvNumber } from "../../../utils/getNumber";
+import { compressImage } from "../../../utils/image";
 import { AppLogger } from "../../../utils/logger";
 import ExtInfo from "../components/ExtInfo/index.vue";
 import ExtPreview from "../components/ExtPreview/index.vue";
@@ -37,6 +39,8 @@ interface FileItemAttributes {
 	shared: string;
 	has_pass: string;
 	issct: string;
+	sha1: string;
+	vdi: string;
 }
 
 class FileItem {
@@ -105,7 +109,7 @@ class FileItem {
 			return;
 		}
 		this.initedActressInfo = true;
-		const actress = await this.actressFaceDB.findActress(
+		const actress = await actressFaceDB.findActress(
 			this.attributes.title.trim(),
 		);
 		if (this.$item.classList.contains("with-actress-info")) {
@@ -114,9 +118,45 @@ class FileItem {
 		if (actress) {
 			this.$item.classList.add("with-actress-info");
 			const actressDom = document.createElement("img");
-			actressDom.src = actress.url;
+			actressDom.alt = actress.filename;
+			actressDom.loading = "lazy";
 			actressDom.className = "actress-info-img";
-			this.$fileNameWrapDom?.prepend(actressDom);
+			this.$item.querySelector(".file-name-wrap")?.prepend(actressDom);
+
+			try {
+				// 尝试从缓存获取图片
+				const cacheKey = `actress-face-${actress.url}`;
+				const cachedImage = await imageCache.get(cacheKey);
+
+				if (cachedImage) {
+					actressDom.src = URL.createObjectURL(cachedImage.value);
+				} else {
+					actressDom.src = actress.url;
+					try {
+						const response = await fetch(actress.url);
+						if (response.ok) {
+							const blob = await response.blob();
+
+							// 压缩图片后再缓存
+							const compressedBlob = await compressImage(blob, {
+								maxWidth: 200,
+								maxHeight: 200,
+								quality: 0.8,
+								type: "image/webp",
+							});
+
+							// 存储到imageCache中
+							await imageCache.set(cacheKey, compressedBlob);
+						}
+					} catch (error) {
+						console.error("缓存演员头像失败:", error);
+					}
+				}
+			} catch (error) {
+				// 出错时直接使用原始URL
+				console.error("加载演员头像缓存失败:", error);
+				actressDom.src = actress.url;
+			}
 		}
 	}
 
@@ -148,27 +188,16 @@ class FileItem {
 		this.$item.append(previewDom);
 		const app = createApp(ExtPreview, {
 			pickCode: this.attributes.pick_code,
+			sha1: this.attributes.sha1,
 		});
 		app.mount(previewDom);
 		this.vueApp = app;
-	}
-
-	// 修改文件夹 a 标签链接（支持鼠标中键新标签打开）
-	private async ModFolderATagLink() {
-		if (this.attributes.file_type !== FileType.folder) {
-			return;
-		}
-
-		if (this.$fileNameATagDom?.href.includes("javascript:;")) {
-			this.$fileNameATagDom.href = `/?cid=${this.attributes.cate_id}&offset=0&tab=&mode=wangpan`;
-		}
 	}
 
 	public async load() {
 		this.loadExtInfo();
 		this.loadActressInfo();
 		this.loadPreview();
-		this.ModFolderATagLink();
 	}
 
 	public destroy(): void {
