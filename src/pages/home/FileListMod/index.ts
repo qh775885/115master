@@ -1,5 +1,5 @@
 import { type App, createApp } from "vue";
-import actressFaceDB from "../../../utils/actressFaceDB";
+import actressFaceDB, { ActressFaceDB } from "../../../utils/actressFaceDB";
 import { imageCache } from "../../../utils/cache";
 import { getAvNumber } from "../../../utils/getNumber";
 import { compressImage } from "../../../utils/image";
@@ -21,6 +21,7 @@ enum IvType {
 interface FileItemAttributes {
 	c: string;
 	iv: IvType;
+	vdi: string;
 	title: string;
 	hdf: string;
 	file_type: FileType;
@@ -45,10 +46,18 @@ interface FileItemAttributes {
 class FileItem {
 	private vueApp: App | null = null;
 	private initedActressInfo = false;
+	private $fileNameDom: HTMLElement | null = null;
+	private $fileNameWrapDom: HTMLElement | null = null;
+	private $fileNameATagDom: HTMLAnchorElement | null = null;
 
-	constructor(private readonly $item: HTMLElement) {}
+	constructor(
+		private readonly $item: HTMLElement,
+		private readonly actressFaceDB: ActressFaceDB,
+	) {
+		this.getDoms();
+	}
 
-	public get attributes(): FileItemAttributes {
+	private get attributes(): FileItemAttributes {
 		return Object.fromEntries(
 			Array.from(this.$item.attributes).map((attr) => [attr.name, attr.value]),
 		) as unknown as FileItemAttributes;
@@ -56,6 +65,16 @@ class FileItem {
 
 	private get avNumber(): string | null {
 		return getAvNumber(this.attributes.title);
+	}
+
+	private getDoms() {
+		this.$fileNameDom = this.$item.querySelector(".file-name") as HTMLElement;
+		this.$fileNameWrapDom = this.$item.querySelector(
+			".file-name-wrap",
+		) as HTMLElement;
+		this.$fileNameATagDom = this.$fileNameDom.querySelector(
+			"a",
+		) as HTMLAnchorElement;
 	}
 
 	// 加载扩展信息
@@ -71,21 +90,21 @@ class FileItem {
 			return;
 		}
 
-		const avNumber = getAvNumber(this.attributes.title);
-		if (avNumber) {
+		if (this.avNumber) {
 			this.$item.classList.add("with-ext-info");
 			const extInfoDom = document.createElement("div");
 			this.$item.append(extInfoDom);
 			extInfoDom.className = "ext-info-root";
 			const app = createApp(ExtInfo, {
-				avNumber,
+				avNumber: this.avNumber,
 			});
 			app.mount(extInfoDom);
 			this.vueApp = app;
 		}
 	}
 
-	public async loadActressInfo() {
+	// 加载演员信息
+	private async loadActressInfo() {
 		if (this.initedActressInfo === true) {
 			return;
 		}
@@ -192,7 +211,7 @@ class FileListMod {
 	private $items!: NodeListOf<HTMLElement> | null;
 	private items: FileItem[] = [];
 	private offChangePage: (() => void) | null = null;
-
+	private actressFaceDB: ActressFaceDB | null = null;
 	constructor() {
 		this.logger = new AppLogger("FileStyle");
 		this.init();
@@ -205,6 +224,8 @@ class FileListMod {
 
 	private async init(): Promise<void> {
 		this.logger.log("init");
+		this.actressFaceDB = new ActressFaceDB();
+		this.actressFaceDB.init();
 		this.getOriginDom();
 
 		if (this.$list && this.$items) {
@@ -240,7 +261,7 @@ class FileListMod {
 		this.getOriginDom();
 		if (this.$list && this.$items) {
 			this.$items.forEach((item) => {
-				const fileItem = new FileItem(item);
+				const fileItem = new FileItem(item, this.actressFaceDB!);
 				fileItem.load();
 				this.items.push(fileItem);
 			});

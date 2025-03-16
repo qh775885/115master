@@ -11,6 +11,7 @@ export class ActressFaceDB {
 	private lastUpdateTime = -1;
 	private updateTimer: number | null;
 	private initPromise: Promise<ActressFaceDB> | null = null;
+
 	constructor() {
 		this.imageMap = new Map();
 		this.updateTimer = null;

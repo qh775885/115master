@@ -4,15 +4,14 @@
 	padding-bottom: 32px;
 	flex-wrap: wrap;
 	align-content: flex-start;
-}
 
-.ext-info-root {
-	width: 100%;
-	position: relative;
-	display: flex;
-	margin-top: 16px;
+	.ext-info-root {
+		width: 100%;
+		position: relative;
+		display: flex;
+		margin-top: 16px;
+	}
 }
-
 
 .list-contents li.with-actress-info {
 	height: auto !important;

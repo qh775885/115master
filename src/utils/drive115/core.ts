@@ -59,6 +59,7 @@ export class Drive115Core {
 		);
 	}
 
+	// 获取原文件地址
 	private async getDownloadUrlByNormal(
 		pickcode: string,
 	): Promise<DownloadResult> {
@@ -86,6 +87,7 @@ export class Drive115Core {
 		};
 	}
 
+	// 获取原文件地址
 	private async getDownloadUrlByPro(pickcode: string): Promise<DownloadResult> {
 		const tm = Math.floor(Date.now() / 1000).toString();
 		const src = JSON.stringify({ pickcode });
@@ -126,6 +128,7 @@ export class Drive115Core {
 		};
 	}
 
+	// 获取原文件地址
 	async getFileDownloadUrl(pickcode: string): Promise<DownloadResult> {
 		try {
 			return await this.getDownloadUrlByPro(pickcode);
@@ -137,6 +140,7 @@ export class Drive115Core {
 		}
 	}
 
+	// 获取原文件地址
 	async getOriginFileUrl(
 		pickcode: string,
 		fileId: string,
@@ -162,7 +166,8 @@ export class Drive115Core {
 		throw new Error(`获取原文件地址失败: ${JSON.stringify(res)}`);
 	}
 
-	getM3u8RootUrl(pickcode: string): string {
+	// 获取 m3u8 根 url
+	private getM3u8RootUrl(pickcode: string): string {
 		return new URL(`/api/video/m3u8/${pickcode}.m3u8`, this.BASE_URL).href;
 	}
 
@@ -255,7 +260,8 @@ export class Drive115Core {
 		return (await response.json()) as VodApi.Res.VodApiFiles;
 	}
 
-	async getPlaylist(cid: string, pickcode: string, offset = 0) {
+	// 获取播放列表
+	public async getPlaylist(cid: string, pickcode: string, offset = 0) {
 		const obj: VodApi.Req.VodApiFilesReq = {
 			pickcode,
 			aid: 1,
@@ -295,6 +301,7 @@ export class Drive115Core {
 		}
 	}
 
+	// 获取文件信息
 	public async getFileInfo(params: WebApi.Req.FilesInfoReq) {
 		const response = await this.iRequest.get(
 			new URL("/webapi/files/video", this.VOD_URL_115).href,
