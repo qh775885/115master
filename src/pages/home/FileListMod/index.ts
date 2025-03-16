@@ -1,9 +1,12 @@
-import { getAvNumber } from "../../../utils/getNumber";
-import { AppLogger } from "../../../utils/logger";
-import "./index.css";
 import { type App, createApp } from "vue";
 import actressFaceDB from "../../../utils/actressFaceDB";
+import { imageCache } from "../../../utils/cache";
+import { getAvNumber } from "../../../utils/getNumber";
+import { compressImage } from "../../../utils/image";
+import { AppLogger } from "../../../utils/logger";
 import ExtInfo from "../components/ExtInfo/index.vue";
+import ExtPreview from "../components/ExtPreview/index.vue";
+import "./index.css";
 
 enum FileType {
 	folder = "0",
@@ -35,6 +38,8 @@ interface FileItemAttributes {
 	shared: string;
 	has_pass: string;
 	issct: string;
+	sha1: string;
+	vdi: string;
 }
 
 class FileItem {
@@ -49,12 +54,12 @@ class FileItem {
 		) as unknown as FileItemAttributes;
 	}
 
-	public async load() {
-		this.loadExtInfo();
-		this.loadActressInfo();
+	private get avNumber(): string | null {
+		return getAvNumber(this.attributes.title);
 	}
 
-	public async loadExtInfo() {
+	// 加载扩展信息
+	private async loadExtInfo() {
 		if (
 			this.attributes.iv !== IvType.playable &&
 			this.attributes.file_type !== FileType.folder
@@ -85,7 +90,7 @@ class FileItem {
 			return;
 		}
 		this.initedActressInfo = true;
-		const actress = (await actressFaceDB).findActress(
+		const actress = await actressFaceDB.findActress(
 			this.attributes.title.trim(),
 		);
 		if (this.$item.classList.contains("with-actress-info")) {
@@ -94,12 +99,86 @@ class FileItem {
 		if (actress) {
 			this.$item.classList.add("with-actress-info");
 			const actressDom = document.createElement("img");
-			actressDom.src = actress.url;
 			actressDom.alt = actress.filename;
 			actressDom.loading = "lazy";
 			actressDom.className = "actress-info-img";
 			this.$item.querySelector(".file-name-wrap")?.prepend(actressDom);
+
+			try {
+				// 尝试从缓存获取图片
+				const cacheKey = `actress-face-${actress.url}`;
+				const cachedImage = await imageCache.get(cacheKey);
+
+				if (cachedImage) {
+					actressDom.src = URL.createObjectURL(cachedImage.value);
+				} else {
+					actressDom.src = actress.url;
+					try {
+						const response = await fetch(actress.url);
+						if (response.ok) {
+							const blob = await response.blob();
+
+							// 压缩图片后再缓存
+							const compressedBlob = await compressImage(blob, {
+								maxWidth: 200,
+								maxHeight: 200,
+								quality: 0.8,
+								type: "image/webp",
+							});
+
+							// 存储到imageCache中
+							await imageCache.set(cacheKey, compressedBlob);
+						}
+					} catch (error) {
+						console.error("缓存演员头像失败:", error);
+					}
+				}
+			} catch (error) {
+				// 出错时直接使用原始URL
+				console.error("加载演员头像缓存失败:", error);
+				actressDom.src = actress.url;
+			}
 		}
+	}
+
+	// 加载预览视频
+	private async loadPreview() {
+		if (this.avNumber) {
+			return;
+		}
+
+		if (this.attributes.file_type === FileType.folder) {
+			return;
+		}
+
+		if (this.attributes.iv !== IvType.playable) {
+			return;
+		}
+
+		if (this.attributes.vdi === "0") {
+			return;
+		}
+
+		if (this.$item.classList.contains("with-ext-preview")) {
+			return;
+		}
+
+		this.$item.classList.add("with-ext-preview");
+		const previewDom = document.createElement("div");
+		previewDom.className = "ext-preview-root";
+		this.$item.append(previewDom);
+		const app = createApp(ExtPreview, {
+			pickCode: this.attributes.pick_code,
+			sha1: this.attributes.sha1,
+		});
+		app.mount(previewDom);
+		this.vueApp = app;
+	}
+
+	public async load() {
+		this.loadExtInfo();
+		this.loadActressInfo();
+		this.loadPreview();
 	}
 
 	public destroy(): void {

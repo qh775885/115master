@@ -1,38 +1,37 @@
 import { GM_notification } from "$";
-import localforage from "localforage";
 import type { ActressImageInfo, ActressImageMap } from "../types/actress";
+import { actressFaceCache } from "./cache/actressFaceCache";
 
 export class ActressFaceDB {
-	private static readonly CACHE_TIMESTAMP = "actress_images_timestamp";
-	private static readonly CACHE_MAP_KEY = "actress_images_map";
 	private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 1天的毫秒数
 	private static readonly API_URL =
 		"https://raw.githubusercontent.com/gfriends/gfriends/refs/heads/master/Filetree.json";
 
-	private storage: LocalForage;
 	private imageMap: ActressImageMap;
 	private lastUpdateTime = -1;
 	private updateTimer: number | null;
-
+	private initPromise: Promise<ActressFaceDB> | null = null;
 	constructor() {
 		this.imageMap = new Map();
 		this.updateTimer = null;
-		this.storage = localforage.createInstance({
-			name: "115master",
-			storeName: "actress_images_v2",
-		});
+		this.init();
 	}
 
 	/**
 	 * 初始化数据库
 	 */
 	async init(): Promise<ActressFaceDB> {
-		this.lastUpdateTime =
-			(await this.storage.getItem<number>(ActressFaceDB.CACHE_TIMESTAMP)) ?? -1;
-		await this.loadFromCache();
-		if (await this.checkUpdate()) {
-			await this.updateDB();
-		}
+		// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+		const promise = new Promise<ActressFaceDB>(async (resolve) => {
+			this.lastUpdateTime = await actressFaceCache.getLastUpdateTime();
+			await this.loadFromCache();
+			if (await this.checkUpdate()) {
+				await this.updateDB();
+			}
+			resolve(this);
+		});
+		this.initPromise = promise;
+		await promise;
 		return this;
 	}
 
@@ -41,7 +40,7 @@ export class ActressFaceDB {
 	 */
 	public async updateDB(): Promise<void> {
 		try {
-			GM_notification("♻️ 正在更新头像数据库...");
+			GM_notification("️正在更新头像数据库...");
 			const response = await fetch(ActressFaceDB.API_URL);
 			if (!response.ok) {
 				// @ts-ignore
@@ -69,12 +68,14 @@ export class ActressFaceDB {
 	/**
 	 * 查找演员头像信息
 	 */
-	public findActress(
+	public async findActress(
 		name: string,
-	):
+	): Promise<
 		| { folder: string; filename: string; timestamp: number; url: string }
-		| undefined {
-		const actress = this.imageMap.get(name)?.reverse();
+		| undefined
+	> {
+		await this.initPromise;
+		const actress = this.imageMap.get(name);
 		if (!actress) {
 			return undefined;
 		}
@@ -107,16 +108,13 @@ export class ActressFaceDB {
 	 */
 	private async loadFromCache(): Promise<boolean> {
 		try {
-			const [cachedMap, cachedTime] = await Promise.all([
-				this.storage.getItem<ActressImageMap>(ActressFaceDB.CACHE_MAP_KEY),
-				this.storage.getItem<number>(ActressFaceDB.CACHE_TIMESTAMP),
-			]);
+			const cachedData = await actressFaceCache.getActressData();
 
-			if (cachedMap && cachedTime) {
+			if (cachedData) {
 				const now = Date.now();
-				if (now - cachedTime < ActressFaceDB.CACHE_DURATION) {
-					this.imageMap = new Map(cachedMap);
-					this.lastUpdateTime = cachedTime;
+				if (now - cachedData.timestamp < ActressFaceDB.CACHE_DURATION) {
+					this.imageMap = new Map(cachedData.imageMap);
+					this.lastUpdateTime = cachedData.timestamp;
 					return true;
 				}
 			}
@@ -135,13 +133,13 @@ export class ActressFaceDB {
 
 		// 处理数据并构建查找映射
 		Object.entries(data.Content).forEach(([folder, files]) => {
-			Object.entries(files).forEach(([originalName, renamedFile]) => {
-				const [filename, timestampStr] = renamedFile.split("?t=");
+			Object.entries(files).forEach(([originalName, filePath]) => {
+				const [, timestampStr] = filePath.split("?t=");
 				const timestamp = parseInt(timestampStr, 10);
 				const actressName = originalName.replace(".jpg", "");
 				const file = {
 					folder,
-					filename,
+					filename: filePath,
 					timestamp,
 				};
 				const files = newMap.get(actressName);
@@ -160,15 +158,14 @@ export class ActressFaceDB {
 
 		// 保存到缓存
 		await Promise.all([
-			this.storage.setItem(
-				ActressFaceDB.CACHE_MAP_KEY,
+			actressFaceCache.saveActressData(
 				Array.from(newMap.entries()),
+				this.lastUpdateTime,
 			),
-			this.storage.setItem(ActressFaceDB.CACHE_TIMESTAMP, this.lastUpdateTime),
 		]);
 	}
 }
 
-const actressFaceDB = new ActressFaceDB().init();
+const actressFaceDB = new ActressFaceDB();
 
 export default actressFaceDB;
