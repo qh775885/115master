@@ -80,15 +80,15 @@ const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 };
 
 const handleLocalPlay = async (player: "mpv" | "iina") => {
-	const { url } = await drive115.getFileDownloadUrl(params.pickCode.value);
+	const download = await drive115.getFileDownloadUrl(params.pickCode.value);
 	switch (player) {
 		case "mpv":
-			open(webLinkShortcutsMpv(url));
+			open(webLinkShortcutsMpv(download));
 			break;
 		case "iina":
 			xplayerRef.value?.interruptSource();
 			setTimeout(() => {
-				open(webLinkIINA(url));
+				open(webLinkIINA(download));
 			}, 300);
 			break;
 	}

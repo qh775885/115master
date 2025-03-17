@@ -1,13 +1,11 @@
+import type { DownloadResult } from "./drive115/core";
 /**
  * 使用 shortcuts 打开 mpv 播放网页
- * 保留备份
- * @param url
- * @returns
  */
-export const webLinkShortcutsMpv = (url: string) => {
+export const webLinkShortcutsMpv = (downloadResult: DownloadResult) => {
 	const shell = {
 		bin: "/opt/homebrew/bin/mpv",
-		url,
+		url: downloadResult.url.url,
 		userAgent: navigator.userAgent,
 	};
 	return `shortcuts://run-shortcut?name=115MasterWebLink&input=text&text=${encodeURIComponent(
@@ -17,11 +15,9 @@ export const webLinkShortcutsMpv = (url: string) => {
 
 /**
  * 使用 iina 打开网页
- * @param url
- * @returns
  */
-export const webLinkIINA = (url: string) => {
-	return `iina://weblink?url=${encodeURIComponent(url)}&mpv_http-header-fields=${encodeURIComponent(
-		`User-Agent: ${navigator.userAgent.replace(",", "\\,")}`,
+export const webLinkIINA = (downloadResult: DownloadResult) => {
+	return `iina://weblink?url=${encodeURIComponent(downloadResult.url.url)}&mpv_http-header-fields=${encodeURIComponent(
+		`User-Agent: ${navigator.userAgent.replace(",", "\\,")},Cookie: ${downloadResult.url.auth_cookie?.name}=${downloadResult.url.auth_cookie?.value}`,
 	)}`;
 };

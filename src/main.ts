@@ -3,7 +3,7 @@ debugInfo.bootstrapInfo();
 import globToRegex from "glob-to-regexp";
 import ROUTE_MATCH from "./constants/route.match";
 import HomePage from "./pages/home/index";
-import { videoPage } from "./pages/video";
+import { videoPage, videoTokenPage } from "./pages/video";
 import { checkUserAgent } from "./utils/checkUserAgent";
 import { debugInfo } from "./utils/debugInfo";
 import "./styles/theme.css";
@@ -18,6 +18,10 @@ const routeMatch = [
 	{
 		match: ROUTE_MATCH.VIDEO,
 		exec: () => videoPage(),
+	},
+	{
+		match: ROUTE_MATCH.VIDEO_TOKEN,
+		exec: () => videoTokenPage(),
 	},
 ];
 const main = () => {

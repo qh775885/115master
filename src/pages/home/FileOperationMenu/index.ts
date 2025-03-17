@@ -233,7 +233,7 @@ export class FileOperationMenu {
 					const download = await drive115.getFileDownloadUrl(
 						listItem.getAttribute("pick_code")!,
 					);
-					open(webLinkIINA(download.url));
+					open(webLinkIINA(download));
 				} catch (error) {
 					this.logger.error("打开iina失败", error);
 					alert("打开iina失败");
