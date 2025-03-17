@@ -1,4 +1,5 @@
 import { ref } from "vue";
+import { setVideoCookie } from "..";
 import type { VideoSource } from "../../../components/XPlayer";
 import { qualityNumMap } from "../../../constants/quality";
 import drive115 from "../../../utils/drive115";
@@ -12,15 +13,22 @@ export const useDataVideoSources = () => {
 		]);
 
 		if (download.status === "fulfilled") {
+			if (download.value.url.auth_cookie) {
+				try {
+					await setVideoCookie(download.value.url.auth_cookie);
+				} catch (error) {
+					alert("设置cookie失败");
+					throw new Error("设置cookie失败");
+				}
+			}
+
 			list.value.unshift({
 				name: "Ultra原画",
-				url: download.value.url,
+				url: download.value.url.url,
 				type: "auto",
 				quality: 99999,
 				displayQuality: "Ultra原画",
 			});
-
-			document.cookie = download.value.fileToken || "";
 		}
 
 		if (m3u8List.status === "fulfilled") {

@@ -15,8 +15,15 @@ import type { NormalApi, ProApi, VodApi, WebApi } from "./api";
 import { Crypto115 } from "./crypto";
 
 export interface DownloadResult {
-	url: string;
-	fileToken?: string;
+	url: {
+		auth_cookie?: {
+			expire: string;
+			name: string;
+			path: string;
+			value: string;
+		};
+		url: string;
+	};
 }
 
 // TODO: 超时登录错误 errNo 990001
@@ -83,7 +90,9 @@ export class Drive115Core {
 		}
 
 		return {
-			url: res.file_url,
+			url: {
+				url: res.file_url,
+			},
 		};
 	}
 
@@ -117,15 +126,9 @@ export class Drive115Core {
 		const result = JSON.parse(
 			this.crypto115.m115_decode(res.data, encoded.key),
 		);
-		const downloadInfo = Object.values(result)[0] as { url: { url: string } };
+		const downloadInfo = Object.values(result)[0] as DownloadResult;
 
-		// 从响应头中获取 fileToken
-		const fileToken = response.headers.get("set-cookie")?.split(";")[0];
-
-		return {
-			url: downloadInfo.url.url,
-			fileToken: fileToken,
-		};
+		return downloadInfo;
 	}
 
 	// 获取原文件地址
@@ -160,8 +163,7 @@ export class Drive115Core {
 
 		const res = (await response.json()) as WebApi.Res.FilesAppChromeDown;
 		if (res.state) {
-			const url = res.data[fileId].url.url;
-			return { url };
+			return res.data[fileId];
 		}
 		throw new Error(`获取原文件地址失败: ${JSON.stringify(res)}`);
 	}
