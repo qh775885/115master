@@ -14,11 +14,20 @@ export const useDataVideoSources = () => {
 
 		if (download.status === "fulfilled") {
 			if (download.value.url.auth_cookie) {
+				console.log("设置cookie", download.value.url.auth_cookie);
 				try {
-					await setVideoCookie(download.value.url.auth_cookie);
+					await setVideoCookie({
+						name: download.value.url.auth_cookie.name,
+						value: download.value.url.auth_cookie.value,
+						path: "/",
+						domain: ".115cdn.net",
+						secure: true,
+						expirationDate: Number(download.value.url.auth_cookie.expire),
+						sameSite: "no_restriction",
+					});
 				} catch (error) {
 					alert("设置cookie失败");
-					throw new Error("设置cookie失败");
+					throw error;
 				}
 			}
 

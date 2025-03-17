@@ -1,5 +1,4 @@
 import { GM_cookie } from "$";
-import { reject } from "lodash";
 import { createApp } from "vue";
 import { DL_URL_115, NORMAL_URL_115 } from "../../constants/115";
 import Video from "./index.vue";
@@ -12,9 +11,11 @@ const resetDocument = () => {
 };
 
 export const setVideoCookie = (
-	cookieDetail: Parameters<typeof GM_cookie.set>[0],
+	cookieDetail: Parameters<typeof GM_cookie.set>[0] & {
+		sameSite: "no_restriction";
+	},
 ) => {
-	return new Promise((resolve) => {
+	return new Promise((resolve, reject) => {
 		const iframe = document.createElement("iframe");
 		iframe.src = `${DL_URL_115}/video/token`;
 		iframe.style.display = "none";
