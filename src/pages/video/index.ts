@@ -19,14 +19,23 @@ export const setVideoCookie = (
 		const iframe = document.createElement("iframe");
 		iframe.src = `${DL_URL_115}/video/token`;
 		iframe.style.display = "none";
-		iframe.onload = () => {
-			iframe.contentWindow?.postMessage(cookieDetail, DL_URL_115);
-		};
-
 		window.addEventListener("message", (event) => {
-			if (event.origin === DL_URL_115) {
-				if (event.data) {
-					reject(event.data);
+			if (event.origin === DL_URL_115 && event.data.event === "ready") {
+				iframe.contentWindow?.postMessage(
+					{
+						event: "set-cookies",
+						data: cookieDetail,
+					},
+					DL_URL_115,
+				);
+			}
+
+			if (
+				event.origin === DL_URL_115 &&
+				event.data.event === "set-cookies-callback"
+			) {
+				if (event.data.data) {
+					reject(event.data.data);
 				} else {
 					resolve("success");
 				}
@@ -38,10 +47,22 @@ export const setVideoCookie = (
 };
 
 export const videoTokenPage = () => {
+	window.parent.postMessage(
+		{
+			event: "ready",
+		},
+		NORMAL_URL_115,
+	);
 	window.addEventListener("message", (event) => {
-		if (event.origin === NORMAL_URL_115) {
-			GM_cookie.set(event.data, (error) => {
-				window.parent.postMessage(error, NORMAL_URL_115);
+		if (event.origin === NORMAL_URL_115 && event.data.event === "set-cookies") {
+			GM_cookie.set(event.data.data, (error) => {
+				window.parent.postMessage(
+					{
+						event: "set-cookies-callback",
+						data: error,
+					},
+					NORMAL_URL_115,
+				);
 			});
 		}
 	});
