@@ -12,6 +12,7 @@ export type RequestOptions = RequestInit & {
 	cacheTime?: number;
 	cacheKey?: string;
 	cacheStatus?: number[];
+	data?: Record<string, unknown> | null;
 };
 
 export type ResponseType = Response;
@@ -19,11 +20,7 @@ export type ResponseType = Response;
 // 请求接口
 export abstract class IRequest {
 	abstract get(url: string, options?: RequestOptions): Promise<ResponseType>;
-	abstract post(
-		url: string,
-		data?: unknown,
-		options?: RequestOptions,
-	): Promise<ResponseType>;
+	abstract post(url: string, options?: RequestOptions): Promise<ResponseType>;
 	abstract request(
 		url: string,
 		options?: RequestOptions,

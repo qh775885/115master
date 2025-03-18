@@ -19,3 +19,19 @@ export type VodApiFilesReq = {
 	cur: number;
 	natsort: number;
 };
+
+type VodApiFilesHistoryBase = {
+	category: "1";
+	share_id: string;
+	pick_code: string;
+};
+
+export type VodApiGetFilesHistoryReq = VodApiFilesHistoryBase & {
+	fetch: "one";
+};
+
+export type VodApiPostFilesHistoryReq = VodApiFilesHistoryBase & {
+	op: "update";
+	time: number;
+	definition: "0";
+};

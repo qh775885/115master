@@ -1,4 +1,5 @@
 import { GM_info, GM_xmlhttpRequest } from "$";
+import { merge } from "lodash";
 import { GMRequestCache } from "../cache/gmRequestCache";
 import { IRequest, type RequestOptions, type ResponseType } from "./types";
 
@@ -104,12 +105,20 @@ export class GMRequest extends IRequest {
 		return this.request(url, { ...options, method: "GET" });
 	}
 
-	post(
-		url: string,
-		data?: BodyInit | null,
-		options?: RequestOptions,
-	): Promise<ResponseType> {
-		return this.request(url, { ...options, method: "POST", body: data });
+	post(url: string, options?: RequestOptions): Promise<ResponseType> {
+		return this.request(
+			url,
+			merge(
+				{
+					method: "POST",
+					body: new URLSearchParams(options?.data as Record<string, string>),
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+					},
+				},
+				options,
+			),
+		);
 	}
 
 	/**

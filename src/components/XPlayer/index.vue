@@ -66,31 +66,14 @@
 </template>
 
 <script setup lang="ts">
-import { type Ref, ref, watch } from "vue";
+import { ref } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import { useVideoPlayer } from "./hooks/usePlayer";
 import { usePortalProvider } from "./hooks/usePortal";
-import type { Subtitle, VideoSource } from "./types";
+import type { XPlayerEmit, XPlayerProps } from "./types";
 import "./styles/theme.css";
 import Loading from "./components/Loading/index.vue";
 import PlayAnimation from "./components/PlayAnimation/index.vue";
-
-export interface XPlayerProps {
-	sources: Ref<VideoSource[]>;
-	onThumbnailRequest?: ({
-		type,
-		time,
-		isLast,
-	}: {
-		type: "Cache" | "Must";
-		time: number;
-		isLast: boolean;
-	}) => Promise<ImageBitmap | null>;
-	subtitles: Ref<Subtitle[] | null>;
-	loadingSubtitles: Ref<boolean>;
-	onSubtitleChange?: (subtitle: Subtitle | null) => void;
-	defaultSubtitle?: Subtitle | null;
-}
 
 const props = withDefaults(defineProps<XPlayerProps>(), {
 	onThumbnailRequest: undefined,
@@ -98,13 +81,15 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
 	defaultSubtitle: null,
 });
 
+const emit = defineEmits<XPlayerEmit>();
+
 // 视频元素
 const videoElement = ref<HTMLVideoElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const { fullscreen, volume, playing, source, controls, subtitles } =
-	useVideoPlayer(videoElement, props);
+const { fullscreen, volume, playing, source, controls, subtitles, progress } =
+	useVideoPlayer(videoElement, props, emit);
 
 const handleRootMouseMove = () => {
 	controls.showWithAutoHide();
@@ -117,6 +102,7 @@ const handleRootMouseLeave = () => {
 defineExpose({
 	togglePlay: playing.togglePlay,
 	interruptSource: source.interruptSource,
+	seekTo: progress.seekTo,
 });
 </script>
 

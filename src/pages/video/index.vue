@@ -10,6 +10,7 @@
 					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
 					:loadingSubtitles="DataSubtitles.isLoading"
 					:onSubtitleChange="handleSubtitleChange"
+					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
 				/>
 				<div class="page-flow">
 					<FileInfo :fileInfo="DataFileInfo" />
@@ -55,6 +56,7 @@ import Footer from "./components/Footer/index.vue";
 import MovieInfo from "./components/MovieInfo/index.vue";
 import Playlist from "./components/Playlist/index.vue";
 import { useDataFileInfo } from "./data/useDataFileInfo";
+import { useDataHistory } from "./data/useDataHistory";
 import { useDataMovieInfo } from "./data/useDataMovieInfo";
 import { useDataPlaylist } from "./data/useDataPlaylist";
 import { useDataSubtitles } from "./data/useSubtitlesData";
@@ -69,7 +71,7 @@ const DataSubtitles = useDataSubtitles();
 const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
-
+const DataHistory = useDataHistory(xplayerRef);
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
@@ -105,8 +107,9 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 		avNumber: getAvNumber(item.n),
 	});
 	params.getParams();
+	DataVideoSources.clear();
 	DataThumbnails.clear();
-	DataVideoSources.cleanup();
+	DataHistory.clear();
 	DataSubtitles.execute(0, params.pickCode.value, null);
 	DataMovieInfo.value.javDBState.execute(0, null);
 	DataMovieInfo.value.javBusState.execute(0, null);
@@ -117,10 +120,18 @@ const handlePlay = async (item: Entity.PlaylistItem) => {
 // 加载数据
 const loadData = async (isFirst = true) => {
 	await DataVideoSources.fetch(params.pickCode.value);
+
+	try {
+		await DataHistory.fetch(params.pickCode.value);
+	} catch (error) {
+		console.error(error);
+	}
+
 	await Drive115Instance.fakeVodAuthPickcode(params.pickCode.value);
 	DataFileInfo.execute(0, params.pickCode.value);
 	isFirst && DataPlaylist.execute(0, params.cid.value, params.pickCode.value);
 	DataThumbnails.initialize(DataVideoSources.list.value);
+
 	if (params.avNumber.value) {
 		DataMovieInfo.value.javDBState.execute(0, params.avNumber.value);
 		DataMovieInfo.value.javBusState.execute(0, params.avNumber.value);

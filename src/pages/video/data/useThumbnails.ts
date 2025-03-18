@@ -5,7 +5,11 @@ import {
 	M3U8Clipper,
 	type M3U8ClipperOptions,
 } from "../../../utils/clipper/m3u8";
-import { type LaneConfig, Scheduler } from "../../../utils/scheduler";
+import {
+	ERROR_QUEUE_CLEARED,
+	type LaneConfig,
+	Scheduler,
+} from "../../../utils/scheduler";
 
 // 缩略图生成器配置
 const CLIPPER_OPTIONS: M3U8ClipperOptions = {
@@ -117,8 +121,10 @@ export function useDataThumbnails() {
 
 			// 返回任务结果
 			return await promise.catch((error) => {
-				console.error(error.message);
-				throw error;
+				if (error instanceof Error && error.message !== ERROR_QUEUE_CLEARED) {
+					throw error;
+				}
+				return null;
 			});
 		},
 		125,
@@ -167,19 +173,25 @@ export function useDataThumbnails() {
 			if (scheduler.get(id)) {
 				continue;
 			}
-			scheduler.add(
-				async () => {
-					const clipImage = await clipper.getClip(segment._startTime);
-					return clipImage?.img ?? null;
-				},
-				{
-					id,
-					lane: LANE_CONFIG.buffer.name,
-					priority: 1,
-					immediate: true,
-					action: "unshift",
-				},
-			);
+			scheduler
+				.add(
+					async () => {
+						const clipImage = await clipper.getClip(segment._startTime);
+						return clipImage?.img ?? null;
+					},
+					{
+						id,
+						lane: LANE_CONFIG.buffer.name,
+						priority: 1,
+						immediate: true,
+						action: "unshift",
+					},
+				)
+				.catch((error) => {
+					if (error instanceof Error && error.message !== ERROR_QUEUE_CLEARED) {
+						throw error;
+					}
+				});
 		}
 	};
 

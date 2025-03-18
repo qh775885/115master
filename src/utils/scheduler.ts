@@ -79,6 +79,8 @@ type AsyncQueueOptions = {
 
 type AsyncQueueOptionsDefault = Required<AsyncQueueOptions>;
 
+export const ERROR_QUEUE_CLEARED = "Queue cleared";
+
 /**
  * 任务调度器
  */
@@ -578,7 +580,7 @@ export class Scheduler<T> {
 	public clear(): void {
 		this.queue.forEach((task) => {
 			task.status = TaskStatus.Cancelled;
-			task.reject(new Error("Queue cleared"));
+			task.reject(new Error(ERROR_QUEUE_CLEARED));
 		});
 		this.queue = [];
 		this.running.clear();

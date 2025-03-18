@@ -41,7 +41,12 @@ export const useSource = (
 			// 设置视频源
 			videoElementRef.value.src = source.url;
 			videoElementRef.value.load();
-			videoElementRef.value.play();
+			videoElementRef.value.play().catch((error) => {
+				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+				throw error;
+			});
 		}
 
 		return () => {

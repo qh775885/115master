@@ -107,8 +107,8 @@ export class Drive115Core {
 
 		const response = await this.iRequest.post(
 			new URL(`/app/chrome/downurl?t=${tm}`, this.PRO_API_URL).href,
-			data,
 			{
+				body: data,
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
 					"User-Agent": USER_AGENT_115,
@@ -319,5 +319,41 @@ export class Drive115Core {
 		);
 
 		return (await response.json()) as WebApi.Res.FilesInfo;
+	}
+
+	// 获取播放历史
+	public async VodApiGetWebApiFilesHistory(
+		params: VodApi.Req.VodApiGetFilesHistoryReq,
+	) {
+		const response = await this.iRequest.get(
+			new URL("/webapi/files/history", this.VOD_URL_115).href,
+			{
+				params,
+				headers: {
+					referer: `${this.VOD_URL_115}/?pickcode=${params.pick_code}&share_id=0`,
+					host: VOD_HOST_155,
+				},
+			},
+		);
+
+		return (await response.json()) as VodApi.Res.VodApiFilesHistory;
+	}
+
+	// 更新播放历史
+	public async VodApiPostWebApiFilesHistory(
+		data: VodApi.Req.VodApiPostFilesHistoryReq,
+	) {
+		const response = await this.iRequest.post(
+			new URL("/webapi/files/history", this.VOD_URL_115).href,
+			{
+				data,
+				headers: {
+					referer: `${this.VOD_URL_115}/?pickcode=${data.pick_code}&share_id=0`,
+					host: VOD_HOST_155,
+				},
+			},
+		);
+
+		return (await response.json()) as VodApi.Res.VodApiFilesHistory;
 	}
 }
