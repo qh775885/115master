@@ -1,10 +1,14 @@
 <template>
-	<div class="page-container">
+	<div class="page-container" :class="{ 'is-theatre': preferences.theatre }">
 		<div class="page-body">
 			<div class="page-main">
 				<XPlayer
 					ref="xplayerRef"
 					class="video-player"
+					v-model:theatre="preferences.theatre"
+					v-model:volume="preferences.volume"
+					v-model:muted="preferences.muted"
+					v-model:playbackRate="preferences.playbackRate"
 					:sources="DataVideoSources.list"
 					:subtitles="DataSubtitles.state"
 					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
@@ -37,8 +41,8 @@
 </template>
 
 <script setup lang="ts">
-import { useTitle } from "@vueuse/core";
-import { nextTick, onMounted, ref } from "vue";
+import { useStorage, useTitle } from "@vueuse/core";
+import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
@@ -63,6 +67,12 @@ import { useDataSubtitles } from "./data/useSubtitlesData";
 import { useDataThumbnails } from "./data/useThumbnails";
 import { useDataVideoSources } from "./data/useVideoSource";
 
+const preferences = useStorage("x-player-preferences", {
+	volume: 100,
+	muted: true,
+	playbackRate: 1,
+	theatre: false,
+});
 const xplayerRef = ref<InstanceType<typeof XPlayerInstance>>();
 const params = useParamsVideoPage();
 const DataVideoSources = useDataVideoSources();
@@ -72,6 +82,7 @@ const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
 const DataHistory = useDataHistory(xplayerRef);
+
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
@@ -236,38 +247,66 @@ onMounted(async () => {
 	flex: 1;
 }
 
-:fullscreen .page-container {
-	padding: 0 0 56px;
+.is-theatre {
+	&.page-container {
+		padding: 0 0 0;
+	}
+	.page-main {
+		width: 100%;
+	}
+	.page-body {
+		width: 100%;
+	}
+	.page-header {
+		display: none;
+	}
+	.page-flow {
+		padding: 0 calc(86px + 380px + 24px) 56px 86px;
+		box-sizing: border-box;
+	}
+	.page-sider {
+		position: absolute;
+		top: calc(100vh + 48px + 28px);
+		right: 86px;
+	}
+	.page-sider-playlist {
+		height: 720px;
+	}
+	.video-player {
+		width: 100%;
+		height: 100vh;
+		max-height: none;
+		border-radius: 0;
+	}
 }
 
-:fullscreen .page-main {
-	width: auto;
+:fullscreen {
+	.page-container {
+		padding: 0 0 56px;
+	}
+	.page-main {
+		width: auto;
+	}
+	.page-header {
+		display: none;
+	}
+	.page-flow {
+		padding: 0 calc(86px + 380px + 24px) 56px 86px;
+		box-sizing: border-box;
+	}
+	.page-sider {
+		position: absolute;
+		top: calc(100vh + 48px + 28px);
+		right: 86px;
+	}
+	.page-sider-playlist {
+		height: 720px;
+	}
+	.video-player {
+		width: 100vw;
+		height: 100vh;
+		max-height: none;
+		border-radius: 0;
+	}
 }
-
-:fullscreen .page-header {
-	display: none;
-}
-
-:fullscreen .page-flow {
-	padding: 0 calc(86px + 380px + 24px) 56px 86px;
-	box-sizing: border-box;
-}
-
-:fullscreen .page-sider {
-	position: absolute;
-	top: calc(100vh + 48px + 28px);
-	right: 86px;
-}
-
-:fullscreen .page-sider-playlist {
-	height: 720px;
-}
-
-:fullscreen .video-player {
-	width: 100vw;
-	height: 100vh;
-	max-height: none;
-	border-radius: 0;
-}
-
 </style>

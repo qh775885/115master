@@ -33,7 +33,7 @@ import { usePlayerContext } from "../../hooks/usePlayer";
 const { volume } = usePlayerContext();
 
 const VolumeIcon = computed(() => {
-	if (volume.isMuted.value) {
+	if (volume.muted.value) {
 		return VolumeOff;
 	}
 
