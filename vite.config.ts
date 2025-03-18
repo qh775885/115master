@@ -3,6 +3,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
 import monkey, { cdn, util } from "vite-plugin-monkey";
 import svgLoader from "vite-svg-loader";
+import PKG from "./package.json";
 
 const icons = {
 	prod: "https://115.com/favicon.ico",
@@ -31,11 +32,10 @@ export default defineConfig({
 				name: "115Master",
 				icon: isProd ? icons.prod : icons.dev,
 				namespace: "115Master",
-				homepage: "https://github.com/cbingb666/115master",
-				author: "cbingb666",
-				description:
-					"115网盘魔法优化: 画质增强 | 视频缩略图 | 在线字幕 | 内置 Jav 信息",
-				supportURL: "https://github.com/cbingb666/115master/issues",
+				homepage: PKG.homepage,
+				author: PKG.author,
+				description: PKG.description,
+				supportURL: PKG.bugs.url,
 				"run-at": "document-start",
 				include: [
 					"https://115.com/?ct*",

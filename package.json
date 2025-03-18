@@ -3,6 +3,17 @@
 	"private": true,
 	"version": "0.2.8",
 	"type": "module",
+	"description": "115网盘魔法优化: 画质增强 | 视频缩略图 | 在线字幕 | 内置 Jav 信息",
+	"author": "cbingb666",
+	"homepage": "https://github.com/cbingb666/115master",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/cbingb666/115master.git"
+	},
+	"bugs": {
+		"url": "https://github.com/cbingb666/115master/issues"
+	},
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
@@ -11,7 +22,8 @@
 		"test:watch": "jest --watch",
 		"lint": "biome check --write .",
 		"format": "biome format --write .",
-		"analyze": "cross-env ANALYZE=true vite build"
+		"analyze": "cross-env ANALYZE=true vite build",
+    "preinstall": "npx -y only-allow pnpm"
 	},
 	"dependencies": {
 		"@material-symbols/svg-400": "^0.28.2",
@@ -47,5 +59,9 @@
 		"vite-plugin-monkey": "^5.0.3",
 		"vite-svg-loader": "^5.1.0",
 		"vue-tsc": "^2.2.2"
+	},
+	"packageManager": "pnpm@9.15.9",
+	"engines": {
+		"node": ">=20.12"
 	}
 }
