@@ -28,6 +28,8 @@
 						<SubtitleButton />
 						<!-- 画质控制 -->
 						<QualityButton />
+						<!-- 剧院模式 -->
+						<TheatreButton />
 						<!-- 全屏控制 -->
 						<FullscreenButton />
 					</div>
@@ -49,6 +51,7 @@ import QualityButton from "./QualityButton.vue";
 import ScrollTip from "./ScrollTip.vue";
 import SpeedButton from "./SpeedButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
+import TheatreButton from "./TheatreButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
 import VolumeControl from "./VolumeControl.vue";
 

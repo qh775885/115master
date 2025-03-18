@@ -33,11 +33,11 @@ export function useVideoPlayer(
 	emit: EmitFn<XPlayerEmit>,
 ) {
 	// 音量
-	const volume = useVolume(videoElementRef);
+	const volume = useVolume(videoElementRef, rootProps, emit);
 	// 播放速度
-	const playbackRate = usePlaybackRate(videoElementRef);
+	const playbackRate = usePlaybackRate(videoElementRef, rootProps, emit);
 	// 全屏
-	const fullscreen = useFullscreen();
+	const fullscreen = useFullscreen(rootProps, emit);
 	// 进度
 	const progress = useProgress(videoElementRef, emit);
 	// 播放

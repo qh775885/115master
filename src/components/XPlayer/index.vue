@@ -16,7 +16,7 @@
 					ref="videoElement"
 					:key="source.videoKey.value"
 					:poster="source.current.value?.poster"
-					:muted="volume.isMuted.value"
+					:muted="volume.muted.value"
 					:volume="volume.volume.value / 100"
 					:autoplay="playing.autoplay.value"
 					:loop="playing.loop.value"
@@ -68,12 +68,12 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import VideoControls from "./components/Controls/index.vue";
+import Loading from "./components/Loading/index.vue";
+import PlayAnimation from "./components/PlayAnimation/index.vue";
 import { useVideoPlayer } from "./hooks/usePlayer";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
 import "./styles/theme.css";
-import Loading from "./components/Loading/index.vue";
-import PlayAnimation from "./components/PlayAnimation/index.vue";
 
 const props = withDefaults(defineProps<XPlayerProps>(), {
 	onThumbnailRequest: undefined,

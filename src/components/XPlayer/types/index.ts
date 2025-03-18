@@ -40,7 +40,17 @@ export interface Subtitle {
 }
 
 export type XPlayerProps = {
+	// 视频源
 	sources: Ref<VideoSource[]>;
+	// 剧院模式
+	theatre: boolean;
+	// 音量
+	volume: number;
+	// 静音
+	muted: boolean;
+	// 播放速率
+	playbackRate: number;
+	// 缩略图请求
 	onThumbnailRequest?: ({
 		type,
 		time,
@@ -50,9 +60,13 @@ export type XPlayerProps = {
 		time: number;
 		isLast: boolean;
 	}) => Promise<ImageBitmap | null>;
+	// 字幕
 	subtitles: Ref<Subtitle[] | null>;
+	// 字幕加载中
 	loadingSubtitles: Ref<boolean>;
+	// 字幕改变
 	onSubtitleChange?: (subtitle: Subtitle | null) => void;
+	// 默认字幕
 	defaultSubtitle?: Subtitle | null;
 };
 
@@ -63,4 +77,8 @@ export type XPlayerEmit = {
 			isManual: boolean;
 		},
 	];
+	theatre: [boolean];
+	volume: [number];
+	muted: [boolean];
+	playbackRate: [number];
 };
