@@ -1,7 +1,7 @@
 {
 	"name": "115master",
 	"private": true,
-	"version": "0.2.8",
+	"version": "0.2.9",
 	"type": "module",
 	"description": "115网盘魔法优化: 画质增强 | 视频缩略图 | 在线字幕 | 内置 Jav 信息",
 	"author": "cbingb666",
@@ -23,7 +23,7 @@
 		"lint": "biome check --write .",
 		"format": "biome format --write .",
 		"analyze": "cross-env ANALYZE=true vite build",
-    "preinstall": "npx -y only-allow pnpm"
+		"preinstall": "npx -y only-allow pnpm"
 	},
 	"dependencies": {
 		"@material-symbols/svg-400": "^0.28.2",
