@@ -45,6 +45,7 @@
 				<!-- 视频遮罩 -->
 				<div
 					class="video-mask"
+					ref="videoMask"
 					@click="playing.togglePlay"
 					@dblclick="fullscreen.toggleFullscreen"
 				></div>
