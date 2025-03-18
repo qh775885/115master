@@ -1,3 +1,5 @@
+import type { Ref } from "vue";
+
 // 视频源
 export interface VideoSource {
 	// 名称
@@ -36,3 +38,29 @@ export interface Subtitle {
 	// 字幕默认
 	default?: boolean;
 }
+
+export type XPlayerProps = {
+	sources: Ref<VideoSource[]>;
+	onThumbnailRequest?: ({
+		type,
+		time,
+		isLast,
+	}: {
+		type: "Cache" | "Must";
+		time: number;
+		isLast: boolean;
+	}) => Promise<ImageBitmap | null>;
+	subtitles: Ref<Subtitle[] | null>;
+	loadingSubtitles: Ref<boolean>;
+	onSubtitleChange?: (subtitle: Subtitle | null) => void;
+	defaultSubtitle?: Subtitle | null;
+};
+
+export type XPlayerEmit = {
+	updateCurrentTime: [
+		{
+			time: number;
+			isManual: boolean;
+		},
+	];
+};

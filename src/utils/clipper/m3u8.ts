@@ -220,15 +220,15 @@ export class M3U8Clipper extends ClipperCore {
 				},
 			};
 
-			console.log(`分段截图完成
-				耗时：${segmentClips.times.total}ms
-				分片 URL：${segmentClips.segment._uri}
-				分片索引：${segmentClips.segment._index}
-				分片截图数量：${segmentClips.frames.length}
-				分片时长：${segmentClips.segment._duration}s 
-				分片开始时间：${segmentClips.segment._startTime}s
-				分片结束时间：${segmentClips.segment._endTime}s
-				`);
+			// console.log(`分段截图完成
+			// 	耗时：${segmentClips.times.total}ms
+			// 	分片 URL：${segmentClips.segment._uri}
+			// 	分片索引：${segmentClips.segment._index}
+			// 	分片截图数量：${segmentClips.frames.length}
+			// 	分片时长：${segmentClips.segment._duration}s
+			// 	分片开始时间：${segmentClips.segment._startTime}s
+			// 	分片结束时间：${segmentClips.segment._endTime}s
+			// 	`);
 
 			return segmentClips;
 		} catch (error) {
@@ -250,16 +250,4 @@ export class M3U8Clipper extends ClipperCore {
 			null
 		);
 	}
-
-	// // 创建缩略图
-	// public createThumbnailBase64(frame: ClipFrame): string {
-	// 	const canvas = document.createElement("canvas");
-	// 	const ctx = canvas.getContext("2d");
-	// 	canvas.width = frame.img.width;
-	// 	canvas.height = frame.img.height;
-	// 	ctx?.drawImage(frame.img, 0, 0, frame.img.width, frame.img.height);
-	// 	const base64 = canvas.toDataURL("image/webp", 0.9);
-	// 	frame.img.close();
-	// 	return base64;
-	// }
 }

@@ -69,7 +69,7 @@ export class ClipperCore {
 		signal?: AbortSignal,
 		onData?: (chunk: Uint8Array) => void,
 	): Promise<ArrayBuffer> {
-		const response = await fetch(url, { signal });
+		const response = await fetch(url, { signal, priority: "low" });
 		if (!onData) {
 			return await response.arrayBuffer();
 		}
@@ -328,7 +328,7 @@ export class ClipperCore {
 
 			// 错误处理和重试
 			const handleError = (error: unknown) => {
-				console.warn(`解码重试 ${retryCount + 1}/${MAX_RETRIES}:`, error);
+				// console.warn(`解码重试 ${retryCount + 1}/${MAX_RETRIES}:`, error);
 
 				if (retryCount < MAX_RETRIES) {
 					retryCount++;
@@ -386,7 +386,7 @@ export class ClipperCore {
 				processAccumulatedData();
 			}).catch((err) => {
 				if (err instanceof DOMException && err.name === "AbortError") {
-					console.log("fetchBuffer abort");
+					void 0;
 				} else {
 					handleError(err);
 				}

@@ -56,13 +56,13 @@ export const useDataVideoSources = () => {
 		}
 	};
 
-	const cleanup = () => {
+	const clear = () => {
 		list.value = [];
 	};
 
 	return {
 		list,
 		fetch,
-		cleanup,
+		clear,
 	};
 };

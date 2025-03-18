@@ -1,23 +1,30 @@
-import { type Ref, onUnmounted, ref, watch } from "vue";
+import { type EmitFn, type Ref, onUnmounted, shallowRef, watch } from "vue";
+import type { XPlayerEmit } from "../types";
 
-export const useProgress = (videoElementRef: Ref<HTMLVideoElement | null>) => {
+export const useProgress = (
+	videoElementRef: Ref<HTMLVideoElement | null>,
+	emit: EmitFn<XPlayerEmit>,
+) => {
 	// 当前时间
-	const currentTime = ref(0);
+	const currentTime = shallowRef(0);
 	// 总时长
-	const duration = ref(0);
+	const duration = shallowRef(0);
 	// 缓冲进度
-	const buffered = ref(0);
+	const buffered = shallowRef(0);
 	// 进度
-	const progress = ref(0);
+	const progress = shallowRef(0);
 
 	// 跳转到指定时间
 	const seekTo = (time: number) => {
 		if (!videoElementRef.value) return;
-		// 立即更新进度状态，不等待 timeupdate 事件
 		currentTime.value = time;
 		progress.value = (time / duration.value) * 100;
 		// 实际更新视频时间
 		videoElementRef.value.currentTime = time;
+		emit("updateCurrentTime", {
+			time,
+			isManual: true,
+		});
 	};
 
 	// 更新进度
@@ -26,6 +33,10 @@ export const useProgress = (videoElementRef: Ref<HTMLVideoElement | null>) => {
 		currentTime.value = videoElementRef.value.currentTime;
 		duration.value = videoElementRef.value.duration;
 		progress.value = (currentTime.value / duration.value) * 100;
+		emit("updateCurrentTime", {
+			time: videoElementRef.value.currentTime,
+			isManual: false,
+		});
 	};
 
 	// 更新缓冲进度

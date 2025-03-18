@@ -1,5 +1,5 @@
-import { type InjectionKey, type Ref, inject, provide } from "vue";
-import type { XPlayerProps } from "../index.vue";
+import { type EmitFn, type InjectionKey, type Ref, inject, provide } from "vue";
+import type { XPlayerEmit, XPlayerProps } from "../types";
 import { useControls } from "./useControls";
 import { useFullscreen } from "./useFullscreen";
 import { useHotKey } from "./useHotKey";
@@ -30,6 +30,7 @@ export const PlayerSymbol: InjectionKey<PlayerContext> = Symbol("VideoPlayer");
 export function useVideoPlayer(
 	videoElementRef: Ref<HTMLVideoElement | null>,
 	rootProps: XPlayerProps,
+	emit: EmitFn<XPlayerEmit>,
 ) {
 	// 音量
 	const volume = useVolume(videoElementRef);
@@ -38,7 +39,7 @@ export function useVideoPlayer(
 	// 全屏
 	const fullscreen = useFullscreen();
 	// 进度
-	const progress = useProgress(videoElementRef);
+	const progress = useProgress(videoElementRef, emit);
 	// 播放
 	const playing = usePlaying(videoElementRef);
 	// 控制
