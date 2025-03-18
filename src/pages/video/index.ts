@@ -1,7 +1,6 @@
 import { GM_cookie } from "$";
-import { createApp } from "vue";
+import { createApp, defineAsyncComponent } from "vue";
 import { DL_URL_115, NORMAL_URL_115 } from "../../constants/115";
-import Video from "./index.vue";
 
 const resetDocument = () => {
 	document.body.style.backgroundColor = "#000";
@@ -70,5 +69,9 @@ export const videoTokenPage = () => {
 
 export const videoPage = () => {
 	resetDocument();
-	createApp(Video).mount("#app");
+	createApp(
+		defineAsyncComponent({
+			loader: () => import("./index.vue"),
+		}),
+	).mount("#app");
 };
