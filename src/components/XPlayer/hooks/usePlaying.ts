@@ -1,10 +1,10 @@
-import { type Ref, onMounted, onUnmounted, ref, watch } from "vue";
+import { type Ref, onUnmounted, ref, watch } from "vue";
 
 export const usePlaying = (videoElementRef: Ref<HTMLVideoElement | null>) => {
 	// 是否播放
 	const isPlaying = ref(false);
 	// 是否自动播放
-	const autoplay = ref(false);
+	const autoplay = ref(true);
 	// 是否循环
 	const loop = ref(false);
 	// 是否加载中
