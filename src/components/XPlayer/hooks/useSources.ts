@@ -21,13 +21,16 @@ export const useSource = (
 
 	// 初始化视频
 	const initializeVideo = async (source: VideoSource) => {
+		let promise: Promise<void> | undefined;
 		// 更新当前源
 		current.value = source;
 
 		// 等待新的 videoElementRef 更新
 		await nextTick();
 
-		if (!videoElementRef.value) return;
+		if (!videoElementRef.value) {
+			throw new Error("videoElementRef is not found");
+		}
 
 		// 清理之前的视频源
 		if (videoElementRef.value.src) {
@@ -41,20 +44,35 @@ export const useSource = (
 			// 设置视频源
 			videoElementRef.value.src = source.url;
 			videoElementRef.value.load();
-			videoElementRef.value.play().catch((error) => {
+			promise = videoElementRef.value.play().catch(async (error) => {
 				if (error instanceof DOMException && error.name === "AbortError") {
+					return;
+				}
+				if (
+					error instanceof DOMException &&
+					error.name === "NotSupportedError"
+				) {
+					console.warn(
+						"Unsupported video sources, try switching to the next video source",
+					);
+					const { promise: nextPromise, clear: nextClear } =
+						await initializeVideo(list.value[1]);
+					cleanupRef.value = nextClear;
+					promise = nextPromise;
 					return;
 				}
 				throw error;
 			});
 		}
 
-		return () => {
+		const clear = () => {
 			if (videoElementRef.value) {
 				videoElementRef.value.src = "";
 				hls.destroy();
 			}
 		};
+
+		return { promise, clear };
 	};
 
 	// 切换视频源
@@ -65,7 +83,8 @@ export const useSource = (
 
 		cleanupRef.value?.();
 		// 切换视频源
-		cleanupRef.value = await initializeVideo(source);
+		const { clear } = await initializeVideo(source);
+		cleanupRef.value = clear;
 
 		// 恢复播放时间和状态
 		if (videoElementRef.value) {
@@ -82,6 +101,7 @@ export const useSource = (
 		cleanupRef.value?.();
 	};
 
+	// 恢复源
 	const resumeSource = () => {
 		isInterrupt.value = false;
 		initializeVideo(current.value!);
@@ -95,7 +115,8 @@ export const useSource = (
 			if (sources.value.length === 0) {
 				return;
 			}
-			cleanupRef.value = await initializeVideo(list.value[0]);
+			const { clear } = await initializeVideo(list.value[0]);
+			cleanupRef.value = clear;
 		},
 		{ immediate: true, deep: true },
 	);
