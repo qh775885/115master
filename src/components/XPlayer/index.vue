@@ -1,9 +1,8 @@
 <template>
 	<div
 		class="x-player"
+		ref="rootRef"
 		:class="{ 'is-fullscreen': fullscreen.isFullscreen.value }"
-		@mousemove="handleRootMouseMove"
-		@mouseleave="handleRootMouseLeave"
 	>
 		<!-- 播放器容器 -->
 		<div class="player-container">
@@ -13,7 +12,7 @@
 			>
 				<!-- 视频元素 -->
 				<video
-					ref="videoElement"
+					ref="videoElementRef"
 					:key="source.videoKey.value"
 					:poster="source.current.value?.poster"
 					:muted="volume.muted.value"
@@ -83,23 +82,16 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();
+// 根元素
+const rootRef = shallowRef<HTMLElement | null>(null);
 // 视频元素
-const videoElement = shallowRef<HTMLVideoElement | null>(null);
+const videoElementRef = shallowRef<HTMLVideoElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
 const { fullscreen, volume, playing, source, controls, subtitles, progress } =
-	usePlayerProvide(videoElement, props, emit);
+	usePlayerProvide(rootRef, videoElementRef, props, emit);
 
-// 鼠标移动
-const handleRootMouseMove = () => {
-	controls.showWithAutoHide();
-};
-// 鼠标离开
-const handleRootMouseLeave = () => {
-	controls.clearHideControlsTimer();
-	controls.hide();
-};
 // 暴露方法
 defineExpose({
 	togglePlay: playing.togglePlay,

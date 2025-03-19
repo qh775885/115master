@@ -2,13 +2,13 @@
 	<div class="progress-bar">
 		<!-- 进度条外容器 -->
 		<div 
-			ref="progressBarRef"
+			ref="progressBarWrapperRef"
 			class="progress-bar-wrapper"
 			@click="handleBarWrapperClick"
-			@mousemove="handleBarWrapperMouseMove"
-			@mouseenter="handleBarWrapperMouseEnter"
-			@mouseleave="handleBarWrapperMouseLeave"
 			@mousedown="handleBarWrapperMouseDown"
+			@mouseenter="handleBarWrapperMouseEnter"
+			@mousemove="handleBarWrapperMouseMove"
+			@mouseleave="handleBarWrapperMouseLeave"
 		>
 			<!-- 进度条内容器 -->
 			<div class="progress-bar-container">
@@ -77,17 +77,19 @@
 
 <script setup lang="ts">
 import { useElementSize } from "@vueuse/core";
-import { computed, onUnmounted, shallowRef, watch } from "vue";
+import { onUnmounted, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
-const { progress } = usePlayerContext();
+const { progress, progressBar } = usePlayerContext();
 // 进度条容器
-const progressBarRef = shallowRef<HTMLElement | null>(null);
+const progressBarWrapperRef = shallowRef<HTMLElement | null>(null);
 // 进度条宽度 - 使用 useElementSize 替代
-const { width: progressBarWidth } = useElementSize(progressBarRef);
-// 是否正在拖拽
-const isDragging = shallowRef(false);
+const { width: progressBarWidth } = useElementSize(progressBarWrapperRef);
+// 是否在拖拽
+const isDragging = progressBar.isDragging;
+// 是否在进度条内
+const isInProgressBar = shallowRef(false);
 // 拖拽进度
 const dragProgress = shallowRef(0);
 // 原始进度
@@ -99,18 +101,6 @@ const previewProgress = shallowRef(0);
 // 预览是否可见
 const isPreviewVisible = shallowRef(false);
 
-// 处理鼠标进入
-const handleBarWrapperMouseEnter = () => {
-	if (!isPreviewVisible.value) {
-		showPreview();
-	}
-};
-
-// 处理鼠标离开
-const handleBarWrapperMouseLeave = () => {
-	hidePreview();
-};
-
 // 计算鼠标位置对应的进度
 const calculatePosition = (event: MouseEvent, element: HTMLElement) => {
 	const rect = element.getBoundingClientRect();
@@ -118,45 +108,58 @@ const calculatePosition = (event: MouseEvent, element: HTMLElement) => {
 	return Math.min(Math.max(position, 0), 1);
 };
 
-// 处理鼠标按下
+// 进度条点击
+const handleBarWrapperClick = (event: MouseEvent) => {
+	if (!progressBarWrapperRef.value || isDragging.value) return;
+	const position = calculatePosition(event, progressBarWrapperRef.value);
+	const newTime = position * progress.duration.value;
+	progress.seekTo(newTime);
+};
+
+// BarWrapper 鼠标按下
 const handleBarWrapperMouseDown = (event: MouseEvent) => {
-	if (!progressBarRef.value) return;
-
-	const position = calculatePosition(event, progressBarRef.value);
+	if (!progressBarWrapperRef.value) return;
+	const position = calculatePosition(event, progressBarWrapperRef.value);
 	startDragging(position);
-
-	document.addEventListener("mousemove", handleGlobalMouseMove);
-	document.addEventListener("mouseup", handleMouseUp);
 };
 
-// 处理鼠标松开
-const handleMouseUp = (event: MouseEvent) => {
-	document.removeEventListener("mousemove", handleGlobalMouseMove);
-	document.removeEventListener("mouseup", handleMouseUp);
-	const position = calculatePosition(event, progressBarRef.value);
-	stopDragging(position);
+// BarWrapper 鼠标进入
+const handleBarWrapperMouseEnter = () => {
+	isInProgressBar.value = true;
+	if (!isPreviewVisible.value) {
+		showPreview();
+	}
 };
 
-// 处理鼠标移动
+// BarWrapper 鼠标移动
 const handleBarWrapperMouseMove = (event: MouseEvent) => {
-	if (!progressBarRef.value) return;
-	const position = calculatePosition(event, progressBarRef.value);
+	if (!progressBarWrapperRef.value) return;
+	const position = calculatePosition(event, progressBarWrapperRef.value);
 	updatePreview(position);
 };
 
-// 处理全局鼠标移动
+// BarWrapper 鼠标离开
+const handleBarWrapperMouseLeave = () => {
+	isInProgressBar.value = false;
+	hidePreview();
+};
+
+// 全局鼠标移动
 const handleGlobalMouseMove = (event: MouseEvent) => {
-	if (!progressBarRef.value) return;
-	const position = calculatePosition(event, progressBarRef.value);
+	if (!progressBarWrapperRef.value) return;
+	const position = calculatePosition(event, progressBarWrapperRef.value);
 	updateDragging(position);
 };
 
-// 进度条点击
-const handleBarWrapperClick = (event: MouseEvent) => {
-	if (!progressBarRef.value || isDragging.value) return;
-	const position = calculatePosition(event, progressBarRef.value);
-	const newTime = position * progress.duration.value;
-	progress.seekTo(newTime);
+// 全局鼠标松开
+const handleGlobalMouseUp = (event: MouseEvent) => {
+	document.removeEventListener("mousemove", handleGlobalMouseMove);
+	document.removeEventListener("mouseup", handleGlobalMouseUp);
+	const position = calculatePosition(event, progressBarWrapperRef.value);
+	stopDragging(position);
+	if (!isInProgressBar.value) {
+		hidePreview();
+	}
 };
 
 // 更新预览位置
@@ -171,6 +174,8 @@ const startDragging = (position: number) => {
 	originalProgress.value = progress.progress.value;
 	dragProgress.value = position * 100;
 	previewTime.value = position * progress.duration.value;
+	document.addEventListener("mousemove", handleGlobalMouseMove);
+	document.addEventListener("mouseup", handleGlobalMouseUp);
 };
 
 // 更新拖拽
@@ -185,7 +190,6 @@ const stopDragging = (position: number) => {
 	if (isDragging.value) {
 		const finalTime = position * progress.duration.value;
 		progress.seekTo(finalTime);
-
 		previewProgress.value = position * 100;
 		previewTime.value = finalTime;
 	}
@@ -209,7 +213,7 @@ const hidePreview = () => {
 
 onUnmounted(() => {
 	document.removeEventListener("mousemove", handleGlobalMouseMove);
-	document.removeEventListener("mouseup", handleMouseUp);
+	document.removeEventListener("mouseup", handleGlobalMouseUp);
 });
 </script>
 
