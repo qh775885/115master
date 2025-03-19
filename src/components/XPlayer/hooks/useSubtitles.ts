@@ -1,14 +1,14 @@
-import { type Ref, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import type { Subtitle } from "../types";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const useSubtitles = (
-	videoElementRef: Ref<HTMLVideoElement | null>,
-	subtitles: Ref<Subtitle[] | null>,
-	loadingSubtitles: Ref<boolean>,
-	onSubtitleChange?: (subtitle: Subtitle | null) => void,
-) => {
+export const useSubtitles = (ctx: PlayerContext) => {
+	// 视频元素
+	const videoElementRef = ctx.refs.videoElementRef;
+	// 当前字幕
 	const current = ref<Subtitle | null>(null);
 
+	// 切换字幕
 	const changeTrack = (subtitle: Subtitle | null) => {
 		const tracks = videoElementRef.value?.textTracks;
 		if (tracks) {
@@ -17,7 +17,9 @@ export const useSubtitles = (
 			}
 			if (subtitle) {
 				const index =
-					subtitles.value?.findIndex((s) => s.url === subtitle.url) ?? -1;
+					ctx.rootProps.subtitles.value?.findIndex(
+						(s) => s.url === subtitle.url,
+					) ?? -1;
 				if (index >= 0 && tracks[index]) {
 					tracks[index].mode = "showing";
 				}
@@ -25,12 +27,14 @@ export const useSubtitles = (
 		}
 	};
 
+	// 切换字幕
 	const change = (subtitle: Subtitle | null) => {
 		current.value = subtitle;
 		changeTrack(subtitle);
-		onSubtitleChange?.(subtitle);
+		ctx.rootProps.onSubtitleChange?.(subtitle);
 	};
 
+	// 设置默认字幕
 	const setDefaultSubtitle = (subtitles: Subtitle[]) => {
 		const defaultSubtitle = subtitles.find((s) => s.default);
 		if (defaultSubtitle) {
@@ -38,6 +42,7 @@ export const useSubtitles = (
 		}
 	};
 
+	// 恢复当前字幕
 	const restoreCurrentSubtitle = () => {
 		if (current.value) {
 			change(current.value);
@@ -45,17 +50,17 @@ export const useSubtitles = (
 	};
 
 	// 监听字幕列表变化，设置默认字幕
-	watch(subtitles, (newSubtitles) => {
+	watch(ctx.rootProps.subtitles, (newSubtitles) => {
 		if (newSubtitles) {
 			setDefaultSubtitle(newSubtitles);
 		}
 	});
 
 	return {
-		list: subtitles,
+		list: ctx.rootProps.subtitles,
 		current,
 		change,
-		loadingSubtitles,
+		loadingSubtitles: ctx.rootProps.loadingSubtitles,
 		restoreCurrentSubtitle,
 	};
 };

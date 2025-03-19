@@ -1,10 +1,13 @@
 import { useEventListener, useVModel } from "@vueuse/core";
-import { type EmitFn, shallowRef } from "vue";
-import type { XPlayerEmit, XPlayerProps } from "../types";
+import { shallowRef } from "vue";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export function useFullscreen(props: XPlayerProps, emit: EmitFn<XPlayerEmit>) {
+// 全屏和剧院模式
+export function useFullscreen(ctx: PlayerContext) {
+	// 是否全屏
 	const isFullscreen = shallowRef(false);
-	const theatre = useVModel(props, "theatre", emit);
+	// 剧院模式
+	const theatre = useVModel(ctx.rootProps, "theatre", ctx.rootEmit);
 
 	// 监听全屏变化
 	const handleFullscreenChange = () => {

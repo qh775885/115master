@@ -23,12 +23,11 @@
 
 <script setup lang="ts">
 import VolumeDown from "@material-symbols/svg-400/rounded/volume_down.svg?component";
-import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute.svg?component";
 import VolumeOff from "@material-symbols/svg-400/rounded/volume_off.svg?component";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up.svg?component";
 import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
 const { volume } = usePlayerContext();
 

@@ -8,12 +8,12 @@
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { onUnmounted, shallowRef, watch } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
 const { fullscreen } = usePlayerContext();
-const isVisible = ref(false);
-const timer = ref<number | null>(null);
+const isVisible = shallowRef(false);
+const timer = shallowRef<number | null>(null);
 
 // 监听全屏变化
 watch(

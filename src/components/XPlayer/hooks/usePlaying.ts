@@ -1,14 +1,19 @@
-import { type Ref, onUnmounted, ref, watch } from "vue";
+import { useEventListener } from "@vueuse/core";
+import { shallowRef } from "vue";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const usePlaying = (videoElementRef: Ref<HTMLVideoElement | null>) => {
+// 播放状态
+export const usePlaying = (ctx: PlayerContext) => {
+	// 视频元素
+	const videoElementRef = ctx.refs.videoElementRef;
 	// 是否播放
-	const isPlaying = ref(false);
+	const isPlaying = shallowRef(false);
 	// 是否自动播放
-	const autoplay = ref(true);
+	const autoplay = shallowRef(true);
 	// 是否循环
-	const loop = ref(false);
+	const loop = shallowRef(false);
 	// 是否加载中
-	const isLoading = ref(false);
+	const isLoading = shallowRef(false);
 
 	// 更新播放状态
 	const updatePlayingState = () => {
@@ -30,36 +35,22 @@ export const usePlaying = (videoElementRef: Ref<HTMLVideoElement | null>) => {
 		}
 	};
 
+	// 显示加载状态
 	const showLoading = () => {
 		isLoading.value = true;
 	};
 
+	// 取消加载状态
 	const cancelLoading = () => {
 		isLoading.value = false;
 	};
 
-	// 播放状态事件
-	watch(videoElementRef, () => {
-		if (!videoElementRef.value) return;
-		showLoading();
-		videoElementRef.value.addEventListener("play", updatePlayingState);
-		videoElementRef.value.addEventListener("pause", updatePlayingState);
-		videoElementRef.value.addEventListener("playing", updatePlayingState);
-		videoElementRef.value.addEventListener("ended", updatePlayingState);
-		videoElementRef.value.addEventListener("waiting", showLoading);
-		videoElementRef.value.addEventListener("canplay", cancelLoading);
-	});
-
-	// 清理事件监听
-	onUnmounted(() => {
-		if (!videoElementRef.value) return;
-		videoElementRef.value.removeEventListener("play", updatePlayingState);
-		videoElementRef.value.removeEventListener("pause", updatePlayingState);
-		videoElementRef.value.removeEventListener("playing", updatePlayingState);
-		videoElementRef.value.removeEventListener("ended", updatePlayingState);
-		videoElementRef.value.removeEventListener("waiting", showLoading);
-		videoElementRef.value.removeEventListener("canplay", cancelLoading);
-	});
+	useEventListener(videoElementRef, "play", updatePlayingState);
+	useEventListener(videoElementRef, "pause", updatePlayingState);
+	useEventListener(videoElementRef, "playing", updatePlayingState);
+	useEventListener(videoElementRef, "ended", updatePlayingState);
+	useEventListener(videoElementRef, "waiting", showLoading);
+	useEventListener(videoElementRef, "canplay", cancelLoading);
 
 	return {
 		loop,

@@ -44,15 +44,15 @@
 <script setup lang="ts">
 import ProgressActivity from "@material-symbols/svg-400/rounded/progress_activity.svg?component";
 import Subtitles from "@material-symbols/svg-400/rounded/subtitles.svg?component";
-import { ref } from "vue";
+import { shallowRef } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { Subtitle } from "../../types";
 import Menu from "../Menu/index.vue";
 
-const { rootProps, subtitles } = usePlayerContext();
-const menuVisible = ref(false);
-const buttonRef = ref<HTMLElement>();
+const { subtitles } = usePlayerContext();
+const menuVisible = shallowRef(false);
+const buttonRef = shallowRef<HTMLElement>();
 
 const toggleMenu = () => {
 	menuVisible.value = !menuVisible.value;

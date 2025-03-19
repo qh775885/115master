@@ -1,16 +1,15 @@
 import { useVModel } from "@vueuse/core";
-import type { EmitFn, Ref } from "vue";
-import type { XPlayerEmit, XPlayerProps } from "../types";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const useVolume = (
-	videoElementRef: Ref<HTMLVideoElement | null>,
-	rootProps: XPlayerProps,
-	emit: EmitFn<XPlayerEmit>,
-) => {
+// 音量
+export const useVolume = (context: PlayerContext) => {
+	const videoElementRef = context.refs.videoElementRef;
+
 	// 音量
-	const volume = useVModel(rootProps, "volume", emit);
+	const volume = useVModel(context.rootProps, "volume", context.rootEmit);
+
 	// 静音
-	const muted = useVModel(rootProps, "muted", emit);
+	const muted = useVModel(context.rootProps, "muted", context.rootEmit);
 
 	// 音量控制
 	const setVolume = (value: number) => {

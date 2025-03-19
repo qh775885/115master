@@ -76,27 +76,27 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, ref } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { computed, onUnmounted, shallowRef } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
 const { progress } = usePlayerContext();
 // 进度条容器
-const progressBarRef = ref<HTMLElement | null>(null);
+const progressBarRef = shallowRef<HTMLElement | null>(null);
 // 进度条宽度
 const progressBarWidth = computed(() => progressBarRef.value?.offsetWidth || 0);
 // 是否正在拖拽
-const isDragging = ref(false);
+const isDragging = shallowRef(false);
 // 拖拽进度
-const dragProgress = ref(0);
+const dragProgress = shallowRef(0);
 // 原始进度
-const originalProgress = ref(0);
+const originalProgress = shallowRef(0);
 // 预览时间
-const previewTime = ref(0);
+const previewTime = shallowRef(0);
 // 预览进度
-const previewProgress = ref(0);
+const previewProgress = shallowRef(0);
 // 预览是否可见
-const isPreviewVisible = ref(false);
+const isPreviewVisible = shallowRef(false);
 
 // 处理鼠标进入
 const handleBarWrapperMouseEnter = () => {

@@ -1,12 +1,14 @@
-import { ref } from "vue";
+import { shallowRef } from "vue";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const useControls = () => {
+// 控制栏
+export const useControls = (_ctx: PlayerContext) => {
 	// 控制栏是否显示
-	const visible = ref(true);
+	const visible = shallowRef(true);
 	// 鼠标是否在控制栏
-	const isMouseInControls = ref(false);
+	const isMouseInControls = shallowRef(false);
 	// 鼠标是否在菜单栏
-	const isMouseInMenu = ref(false);
+	const isMouseInMenu = shallowRef(false);
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
 
@@ -23,14 +25,17 @@ export const useControls = () => {
 		isMouseInMenu.value = value;
 	};
 
+	// 显示控制栏
 	const show = () => {
 		visible.value = true;
 	};
 
+	// 隐藏控制栏
 	const hide = () => {
 		visible.value = false;
 	};
 
+	// 清除隐藏控制栏计时器
 	const clearHideControlsTimer = () => {
 		if (hideControlsTimer) {
 			clearTimeout(hideControlsTimer);
@@ -38,11 +43,13 @@ export const useControls = () => {
 		}
 	};
 
+	// 显示控制栏并延迟隐藏
 	const showWithAutoHide = () => {
 		show();
 		hideWithDelay();
 	};
 
+	// 延迟隐藏控制栏
 	const hideWithDelay = () => {
 		clearHideControlsTimer();
 		hideControlsTimer = window.setTimeout(() => {

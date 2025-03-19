@@ -1,13 +1,13 @@
-import { type Ref, computed, nextTick, ref, watch } from "vue";
+import { computed, nextTick, ref, shallowRef, watch } from "vue";
 import type { VideoSource } from "../types";
 import { useHls } from "./useHls";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const useSource = (
-	videoElementRef: Ref<HTMLVideoElement | null>,
-	sources: Ref<VideoSource[]>,
-) => {
+export const useSource = (ctx: PlayerContext) => {
+	// 视频元素
+	const videoElementRef = ctx.refs.videoElementRef;
 	// 视频源列表
-	const list = sources;
+	const list = ctx.rootProps.sources;
 	// 当前视频源
 	const current = ref<VideoSource | null>(null);
 	// 视频源唯一标识
@@ -15,9 +15,9 @@ export const useSource = (
 	// hls
 	const hls = useHls(videoElementRef);
 	// 清理函数
-	const cleanupRef = ref<(() => void) | undefined>(() => void 0);
+	const cleanupRef = shallowRef<(() => void) | undefined>(() => void 0);
 	// 是否中断
-	const isInterrupt = ref(false);
+	const isInterrupt = shallowRef(false);
 
 	// 初始化视频
 	const initializeVideo = async (source: VideoSource) => {
@@ -112,7 +112,7 @@ export const useSource = (
 		async () => {
 			cleanupRef.value?.();
 			isInterrupt.value = false;
-			if (sources.value.length === 0) {
+			if (list.value.length === 0) {
 				return;
 			}
 			const { clear } = await initializeVideo(list.value[0]);
