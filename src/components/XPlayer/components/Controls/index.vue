@@ -29,6 +29,8 @@
 						<SubtitleButton />
 						<!-- 画质控制 -->
 						<QualityButton />
+						<!-- 画中画 -->
+						<PipButton />
 						<!-- 剧院模式 -->
 						<TheatreButton />
 						<!-- 全屏控制 -->
@@ -46,6 +48,7 @@
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import FullscreenButton from "./FullscreenButton.vue";
+import PipButton from "./PipButton.vue";
 import PlayButton from "./PlayButton.vue";
 import ProgressBar from "./ProgressBar.vue";
 import QualityButton from "./QualityButton.vue";

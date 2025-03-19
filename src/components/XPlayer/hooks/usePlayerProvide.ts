@@ -9,11 +9,13 @@ import { useProgress } from "./useProgress";
 import { useSource } from "./useSources";
 import { useSubtitles } from "./useSubtitles";
 import { useVolume } from "./useVolume";
+import { usePictureInPicture } from "./usePictureInPicture";
 
 export interface PlayerContext {
 	rootProps: XPlayerProps;
 	rootEmit: EmitFn<XPlayerEmit>;
 	fullscreen?: ReturnType<typeof useFullscreen>;
+	pictureInPicture?: ReturnType<typeof usePictureInPicture>;
 	volume?: ReturnType<typeof useVolume>;
 	playbackRate?: ReturnType<typeof usePlaybackRate>;
 	progress?: ReturnType<typeof useProgress>;
@@ -86,6 +88,10 @@ export function usePlayerProvide(
 	// 热键
 	const hotKey = useHotKey(context);
 	context.hotKey = hotKey;
+
+	// 画中画
+	const pictureInPicture = usePictureInPicture(context);
+	context.pictureInPicture = pictureInPicture;
 
 	provide(PlayerSymbol, context);
 	return context;
