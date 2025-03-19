@@ -1,8 +1,9 @@
-import { shallowRef } from "vue";
+import { useEventListener } from "@vueuse/core";
+import { onUnmounted, shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 // 控制栏
-export const useControls = (_ctx: PlayerContext) => {
+export const useControls = (ctx: PlayerContext) => {
 	// 控制栏是否显示
 	const visible = shallowRef(true);
 	// 鼠标是否在控制栏
@@ -53,12 +54,38 @@ export const useControls = (_ctx: PlayerContext) => {
 	const hideWithDelay = () => {
 		clearHideControlsTimer();
 		hideControlsTimer = window.setTimeout(() => {
-			if (isMouseInControls.value || isMouseInMenu.value) {
+			if (
+				isMouseInControls.value ||
+				isMouseInMenu.value ||
+				ctx.progressBar?.isDragging.value
+			) {
 				return;
 			}
 			hide();
 		}, 1000);
 	};
+
+	// 鼠标移动
+	const handleRootMouseMove = () => {
+		showWithAutoHide();
+	};
+	// 鼠标离开
+	const handleRootMouseLeave = async () => {
+		if (ctx.progressBar?.isDragging.value) {
+			await ctx.progressBar?.waitDragEnd();
+			return hideWithDelay();
+		}
+		clearHideControlsTimer();
+		hide();
+	};
+
+	// 监听
+	useEventListener(ctx.refs.rootRef, "mousemove", handleRootMouseMove);
+	useEventListener(ctx.refs.rootRef, "mouseleave", handleRootMouseLeave);
+
+	onUnmounted(() => {
+		clearHideControlsTimer();
+	});
 
 	return {
 		visible,

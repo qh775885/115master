@@ -1,4 +1,10 @@
-import { type EmitFn, type InjectionKey, type Ref, inject, provide } from "vue";
+import {
+	type EmitFn,
+	type InjectionKey,
+	type ShallowRef,
+	inject,
+	provide,
+} from "vue";
 import type { XPlayerEmit, XPlayerProps } from "../types";
 import { useControls } from "./useControls";
 import { useFullscreen } from "./useFullscreen";
@@ -6,6 +12,7 @@ import { useHotKey } from "./useHotKey";
 import { usePlaybackRate } from "./usePlaybackRate";
 import { usePlaying } from "./usePlaying";
 import { useProgress } from "./useProgress";
+import { useProgressBar } from "./useProgressBar";
 import { useSource } from "./useSources";
 import { useSubtitles } from "./useSubtitles";
 import { useVolume } from "./useVolume";
@@ -17,25 +24,29 @@ export interface PlayerContext {
 	volume?: ReturnType<typeof useVolume>;
 	playbackRate?: ReturnType<typeof usePlaybackRate>;
 	progress?: ReturnType<typeof useProgress>;
+	progressBar?: ReturnType<typeof useProgressBar>;
 	playing?: ReturnType<typeof usePlaying>;
 	controls?: ReturnType<typeof useControls>;
 	subtitles?: ReturnType<typeof useSubtitles>;
 	source?: ReturnType<typeof useSource>;
 	hotKey: ReturnType<typeof useHotKey>;
 	refs: {
-		videoElementRef: Ref<HTMLVideoElement | null>;
+		videoElementRef: ShallowRef<HTMLVideoElement | null>;
+		rootRef: ShallowRef<HTMLElement | null>;
 	};
 }
 
 export const PlayerSymbol: InjectionKey<PlayerContext> = Symbol("XPlayer");
 
 export function usePlayerProvide(
-	videoElementRef: Ref<HTMLVideoElement | null>,
+	rootRef: ShallowRef<HTMLElement | null>,
+	videoElementRef: ShallowRef<HTMLVideoElement | null>,
 	rootProps: XPlayerProps,
 	rootEmit: EmitFn<XPlayerEmit>,
 ) {
 	const context: PlayerContext = {
 		refs: {
+			rootRef,
 			videoElementRef,
 		},
 		rootProps,
@@ -44,6 +55,7 @@ export function usePlayerProvide(
 		volume: undefined,
 		playbackRate: undefined,
 		progress: undefined,
+		progressBar: undefined,
 		playing: undefined,
 		controls: undefined,
 		subtitles: undefined,
@@ -66,6 +78,10 @@ export function usePlayerProvide(
 	// 进度
 	const progress = useProgress(context);
 	context.progress = progress;
+
+	// 进度条
+	const progressBar = useProgressBar(context);
+	context.progressBar = progressBar;
 
 	// 播放
 	const playing = usePlaying(context);
