@@ -10,6 +10,7 @@
 		<!-- 视频控制栏 -->
 		<div class="video-controls" :class="{ 'is-visible': controls.visible.value }">
 			<div class="controls-content">
+				<!-- 进度条 -->
 				<ProgressBar 
 				/>
 				<div class="controls-bar">

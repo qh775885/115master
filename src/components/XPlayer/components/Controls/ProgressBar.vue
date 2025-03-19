@@ -76,15 +76,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, shallowRef } from "vue";
+import { useElementSize } from "@vueuse/core";
+import { computed, onUnmounted, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
 const { progress } = usePlayerContext();
 // 进度条容器
 const progressBarRef = shallowRef<HTMLElement | null>(null);
-// 进度条宽度
-const progressBarWidth = computed(() => progressBarRef.value?.offsetWidth || 0);
+// 进度条宽度 - 使用 useElementSize 替代
+const { width: progressBarWidth } = useElementSize(progressBarRef);
 // 是否正在拖拽
 const isDragging = shallowRef(false);
 // 拖拽进度
