@@ -1,10 +1,10 @@
-import { type EmitFn, type Ref, onUnmounted, shallowRef, watch } from "vue";
-import type { XPlayerEmit } from "../types";
+import { useEventListener } from "@vueuse/core";
+import { shallowRef } from "vue";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const useProgress = (
-	videoElementRef: Ref<HTMLVideoElement | null>,
-	emit: EmitFn<XPlayerEmit>,
-) => {
+export const useProgress = (ctx: PlayerContext) => {
+	// 视频元素
+	const videoElementRef = ctx.refs.videoElementRef;
 	// 当前时间
 	const currentTime = shallowRef(0);
 	// 总时长
@@ -21,7 +21,7 @@ export const useProgress = (
 		progress.value = (time / duration.value) * 100;
 		// 实际更新视频时间
 		videoElementRef.value.currentTime = time;
-		emit("updateCurrentTime", {
+		ctx.rootEmit("updateCurrentTime", {
 			time,
 			isManual: true,
 		});
@@ -33,7 +33,7 @@ export const useProgress = (
 		currentTime.value = videoElementRef.value.currentTime;
 		duration.value = videoElementRef.value.duration;
 		progress.value = (currentTime.value / duration.value) * 100;
-		emit("updateCurrentTime", {
+		ctx.rootEmit("updateCurrentTime", {
 			time: videoElementRef.value.currentTime,
 			isManual: false,
 		});
@@ -51,27 +51,19 @@ export const useProgress = (
 		}
 	};
 
-	// 快进快退
-	const skip = (seconds: number) => {
+	// 快进快退 (秒数或百分比浮点数)
+	const skip = (value: number, isPercent = false) => {
 		if (!videoElementRef.value) return;
-		const newTime = currentTime.value + seconds;
+		const newTime = isPercent
+			? value * duration.value
+			: currentTime.value + value;
 		const clampedTime = Math.min(Math.max(0, newTime), duration.value);
 		seekTo(clampedTime);
 	};
 
-	watch(videoElementRef, () => {
-		if (!videoElementRef.value) return;
-		videoElementRef.value.addEventListener("timeupdate", updateProgress);
-		videoElementRef.value.addEventListener("loadedmetadata", updateProgress);
-		videoElementRef.value.addEventListener("progress", updateBuffer);
-	});
-
-	onUnmounted(() => {
-		if (!videoElementRef.value) return;
-		videoElementRef.value.removeEventListener("timeupdate", updateProgress);
-		videoElementRef.value.removeEventListener("loadedmetadata", updateProgress);
-		videoElementRef.value.removeEventListener("progress", updateBuffer);
-	});
+	useEventListener(videoElementRef, "timeupdate", updateProgress);
+	useEventListener(videoElementRef, "loadedmetadata", updateProgress);
+	useEventListener(videoElementRef, "progress", updateBuffer);
 
 	return {
 		currentTime,

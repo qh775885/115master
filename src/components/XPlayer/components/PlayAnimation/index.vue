@@ -16,13 +16,13 @@
 <script setup lang="ts">
 import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
 import Play from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import { ref, watch } from "vue";
+import { shallowRef, watch } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
 const { playing } = usePlayerContext();
-const visible = ref(false);
-const timer = ref<number | null>(null);
+const visible = shallowRef(false);
+const timer = shallowRef<number | null>(null);
 
 // 监听播放状态变化
 watch(playing.isPlaying, (value) => {

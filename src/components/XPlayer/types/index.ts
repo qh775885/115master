@@ -16,9 +16,13 @@ export interface VideoSource {
 	displayQuality?: string | number;
 	// hls 配置
 	hlsConfig?: {
+		// 自动开始加载
 		autoStartLoad?: boolean;
+		// 开始位置
 		startPosition?: number;
+		// 调试
 		debug?: boolean;
+		// 其他配置
 		[key: string]: unknown;
 	};
 }
@@ -71,14 +75,21 @@ export type XPlayerProps = {
 };
 
 export type XPlayerEmit = {
+	// 更新当前时间
 	updateCurrentTime: [
 		{
+			// 时间
 			time: number;
+			// 是否手动
 			isManual: boolean;
 		},
 	];
-	theatre: [boolean];
-	volume: [number];
-	muted: [boolean];
-	playbackRate: [number];
+	// 剧院模式
+	"update:theatre": [boolean];
+	// 音量
+	"update:volume": [number];
+	// 静音
+	"update:muted": [boolean];
+	// 播放速率
+	"update:playbackRate": [number];
 };

@@ -1,14 +1,12 @@
 import { useEventListener, useVModel } from "@vueuse/core";
-import type { EmitFn, Ref } from "vue";
-import type { XPlayerEmit, XPlayerProps } from "../types";
+import type { PlayerContext } from "./usePlayerProvide";
 
-export const usePlaybackRate = (
-	videoElementRef: Ref<HTMLVideoElement | null>,
-	rootProps: XPlayerProps,
-	emit: EmitFn<XPlayerEmit>,
-) => {
+// 播放速度
+export const usePlaybackRate = (ctx: PlayerContext) => {
+	const videoElementRef = ctx.refs.videoElementRef;
 	// 播放速度
-	const playbackRate = useVModel(rootProps, "playbackRate", emit);
+	const playbackRate = useVModel(ctx.rootProps, "playbackRate", ctx.rootEmit);
+
 	// 设置播放速度
 	const setPlaybackRate = (rate: number) => {
 		if (!videoElementRef.value) return;
@@ -16,6 +14,7 @@ export const usePlaybackRate = (
 		playbackRate.value = rate;
 	};
 
+	// 可以播放的时候刷新 playbackRate
 	useEventListener(videoElementRef, "canplay", () => {
 		if (!videoElementRef.value) return;
 		videoElementRef.value.playbackRate = playbackRate.value;

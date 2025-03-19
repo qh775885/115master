@@ -27,14 +27,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { computed, shallowRef } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { VideoSource } from "../../types";
 import Menu from "../Menu/index.vue";
 
 const { source, subtitles } = usePlayerContext();
-const menuVisible = ref(false);
-const buttonRef = ref<HTMLElement>();
+const menuVisible = shallowRef(false);
+const buttonRef = shallowRef<HTMLElement>();
 
 const currentQuality = computed(() => {
 	if (!source.current.value) return "自动";

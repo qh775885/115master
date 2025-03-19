@@ -3,7 +3,6 @@
 		:visible="visible"
 		:x="menuPosition.x"
 		:y="menuPosition.y"
-		@click.stop
 		@mouseenter="handleMouseEnter"
 		@mouseleave="handleMouseLeave"
 		@update:visible="handleVisibleChange"
@@ -15,8 +14,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { computed, shallowRef, watch } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Popup from "../Popup/index.vue";
 
 interface Props {
@@ -35,8 +34,8 @@ const emit = defineEmits<{
 
 const { controls } = usePlayerContext();
 
-const menuRef = ref<HTMLElement>();
-const forceUpdate = ref(0);
+const menuRef = shallowRef<HTMLElement>();
+const forceUpdate = shallowRef(0);
 
 const menuPosition = computed(() => {
 	forceUpdate.value; // 用于强制更新位置

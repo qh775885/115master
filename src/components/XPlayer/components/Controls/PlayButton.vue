@@ -9,7 +9,7 @@ import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
 import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
 const { playing } = usePlayerContext();
 

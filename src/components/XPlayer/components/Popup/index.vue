@@ -4,7 +4,9 @@
 			v-show="visible"
 			class="x-popup"
 			:style="style"
-			@click.stop
+			@click.stop="handleClick"
+			@mouseenter="$emit('mouseenter')"
+			@mouseleave="$emit('mouseleave')"
 		>
 			<div class="x-popup-bg"></div>
 			<div class="x-popup-content">
@@ -29,7 +31,12 @@ const props = withDefaults(defineProps<Props>(), {
 	y: 0,
 });
 
-const emit = defineEmits<(e: "update:visible", value: boolean) => void>();
+const emit = defineEmits<{
+	(e: "update:visible", value: boolean): void;
+	(e: "click"): void;
+	(e: "mouseenter"): void;
+	(e: "mouseleave"): void;
+}>();
 
 const { container } = usePortal();
 
@@ -40,6 +47,12 @@ const style = computed(() => ({
 	top: `${props.y}px`,
 	position: container.value ? ("absolute" as const) : ("fixed" as const),
 }));
+
+// 处理点击事件
+const handleClick = (event: MouseEvent) => {
+	// event.stopPropagation();
+	emit("click");
+};
 
 // 处理点击外部
 const handleClickOutside = (event: MouseEvent) => {

@@ -24,8 +24,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { computed, onUnmounted, reactive, shallowRef, watch } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import { formatTime } from "../../utils/time";
 import Loading from "./Loading.vue";
 
@@ -42,16 +42,17 @@ const DEFAULT_HEIGHT = 180;
 const props = withDefaults(defineProps<Props>(), {});
 const { rootProps, source } = usePlayerContext();
 const { onThumbnailRequest } = rootProps;
-const thumbnailCanvas = ref<HTMLCanvasElement | null>(null);
-const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
-const width = ref(DEFAULT_WIDTH);
-const height = ref(DEFAULT_HEIGHT);
+const thumbnailCanvas = shallowRef<HTMLCanvasElement | null>(null);
+const width = shallowRef(DEFAULT_WIDTH);
+const height = shallowRef(DEFAULT_HEIGHT);
+const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
 const thumb = reactive({
 	lastHoverTime: -1,
 	lastRequestTime: -1,
 	renderTime: -1,
 	renderImage: null as ImageBitmap | null,
 });
+const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
 const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
@@ -78,7 +79,6 @@ const previewTransform = computed(() => {
 	return -(thumbnailWidth / 2);
 });
 
-const lastTimer = ref<NodeJS.Timeout | null>(null);
 const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	if (lastTimer.value) {
 		clearTimeout(lastTimer.value);

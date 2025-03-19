@@ -29,10 +29,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { shallowRef } from "vue";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 const { playbackRate } = usePlayerContext();
-const isMenuVisible = ref(false);
+const isMenuVisible = shallowRef(false);
 // 预设的倍速选项
 const playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 

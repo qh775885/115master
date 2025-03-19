@@ -8,6 +8,6 @@
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen.svg?component";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit.svg?component";
 import Icon from "../../../../components/Icon/index.vue";
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 const { fullscreen } = usePlayerContext();
 </script>

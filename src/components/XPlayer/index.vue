@@ -66,39 +66,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { shallowRef } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import Loading from "./components/Loading/index.vue";
 import PlayAnimation from "./components/PlayAnimation/index.vue";
-import { useVideoPlayer } from "./hooks/usePlayer";
+import { usePlayerProvide } from "./hooks/usePlayerProvide";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
 import "./styles/theme.css";
 
+// 属性
 const props = withDefaults(defineProps<XPlayerProps>(), {
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
 	defaultSubtitle: null,
 });
-
+// 事件
 const emit = defineEmits<XPlayerEmit>();
-
 // 视频元素
-const videoElement = ref<HTMLVideoElement | null>(null);
+const videoElement = shallowRef<HTMLVideoElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
 const { fullscreen, volume, playing, source, controls, subtitles, progress } =
-	useVideoPlayer(videoElement, props, emit);
+	usePlayerProvide(videoElement, props, emit);
 
+// 鼠标移动
 const handleRootMouseMove = () => {
 	controls.showWithAutoHide();
 };
+// 鼠标离开
 const handleRootMouseLeave = () => {
 	controls.clearHideControlsTimer();
 	controls.hide();
 };
-
+// 暴露方法
 defineExpose({
 	togglePlay: playing.togglePlay,
 	interruptSource: source.interruptSource,

@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { usePlayerContext } from "../../hooks/usePlayer";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import FullscreenButton from "./FullscreenButton.vue";
 import PlayButton from "./PlayButton.vue";
 import ProgressBar from "./ProgressBar.vue";
