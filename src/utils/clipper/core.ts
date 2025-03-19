@@ -133,7 +133,7 @@ export class ClipperCore {
 		const frames: ClipFrame[] = [];
 		let sampleCount = 0;
 		let retryCount = 0;
-		const MAX_RETRIES = 10;
+		const MAX_RETRIES = 3;
 		// 存储所有获取到的数据
 		const allData: Uint8Array[] = [];
 		let totalDataSize = 0;
@@ -298,7 +298,7 @@ export class ClipperCore {
 			// 数据缓冲区
 			const dataBuffer: Uint8Array[] = [];
 			let totalBufferSize = 0;
-			const MIN_BUFFER_SIZE = 1024 * 50; // 50KB 最小缓冲区大小
+			const MIN_BUFFER_SIZE = 1024 * 128; // 128KB 最小缓冲区大小
 
 			// 处理累积的数据
 			const processAccumulatedData = () => {
