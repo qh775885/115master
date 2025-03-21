@@ -78,7 +78,6 @@ import "./styles/theme.css";
 const props = withDefaults(defineProps<XPlayerProps>(), {
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
-	defaultSubtitle: null,
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();

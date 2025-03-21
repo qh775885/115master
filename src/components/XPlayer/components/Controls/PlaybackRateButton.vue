@@ -1,23 +1,24 @@
 <template>
-	<div class="speed-button">
+	<div class="playback-rate-button">
 		<button 
 			class="control-button"
+			title="倍速 (↑/↓)"
 			@click="toggleSpeedMenu"
 		>
-			{{ playbackRate.playbackRate.value }} X
+			{{ playbackRate.current.value }} X
 		</button>
 		<Transition name="fade">
 			<div 
 				v-if="isMenuVisible"
-				class="speed-menu"
+				class="playback-rate-menu"
 				@mouseleave="hideMenu"
 			>
-				<div class="speed-menu-items">
+				<div class="playback-rate-menu-items">
 					<button
-						v-for="rate in playbackRates"
+						v-for="rate in rateOptions"
 						:key="rate"
-						class="speed-menu-item"
-						:class="{ active: playbackRate.playbackRate.value === rate }"
+						class="playback-rate-menu-item"
+						:class="{ active: playbackRate.current.value === rate }"
 						@click="handleSpeedChange(rate)"
 					>
 						{{ rate }}
@@ -29,12 +30,11 @@
 </template>
 
 <script setup lang="ts">
-import { shallowRef } from "vue";
+import { computed, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 const { playbackRate } = usePlayerContext();
+const rateOptions = computed(() => playbackRate.rateOptions.value.reverse());
 const isMenuVisible = shallowRef(false);
-// 预设的倍速选项
-const playbackRates = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
 
 // 切换菜单显示
 const toggleSpeedMenu = () => {
@@ -48,13 +48,13 @@ const hideMenu = () => {
 
 // 处理倍速变化
 const handleSpeedChange = (rate: number) => {
-	playbackRate.setPlaybackRate(rate);
+	playbackRate.set(rate);
 	hideMenu();
 };
 </script>
 
 <style scoped>
-.speed-button {
+.playback-rate-button {
 	position: relative;
 }
 
@@ -76,7 +76,7 @@ const handleSpeedChange = (rate: number) => {
 	background-color: rgba(255, 255, 255, 0.1);
 }
 
-.speed-menu {
+.playback-rate-menu {
 	position: absolute;
 	bottom: 100%;
 	right: 0;
@@ -88,13 +88,13 @@ const handleSpeedChange = (rate: number) => {
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-.speed-menu-items {
+.playback-rate-menu-items {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.speed-menu-item {
+.playback-rate-menu-item {
 	background: none;
 	border: none;
 	color: #fff;
@@ -106,11 +106,11 @@ const handleSpeedChange = (rate: number) => {
 	width: 100%;
 }
 
-.speed-menu-item:hover {
+.playback-rate-menu-item:hover {
 	background-color: rgba(255, 255, 255, 0.1);
 }
 
-.speed-menu-item.active {
+.playback-rate-menu-item.active {
 	color: var(--x-player-controller-progress-bar-color);
 }
 

@@ -30,7 +30,17 @@ export function useFullscreen(ctx: PlayerContext) {
 
 	// 剧院模式
 	const toggleTheatre = async () => {
-		theatre.value = !theatre.value;
+		const newValue = !theatre.value;
+		if (newValue) {
+			if (isFullscreen.value) {
+				await toggleFullscreen();
+			}
+		}
+
+		if (ctx.pictureInPicture?.isPip.value) {
+			await ctx.pictureInPicture?.close();
+		}
+		theatre.value = newValue;
 	};
 
 	useEventListener(document, "fullscreenchange", handleFullscreenChange);

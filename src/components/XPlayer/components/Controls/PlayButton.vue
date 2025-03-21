@@ -1,5 +1,8 @@
 <template>
-	<button @click="playing.togglePlay">
+	<button 
+		@click="playing.togglePlay"
+		:title="playing.isPlaying.value ? '暂停(Space)' : '播放(Space)'"
+	>
 		<Icon :svg="icon" class="icon" />
 	</button>
 </template>

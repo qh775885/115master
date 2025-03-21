@@ -24,7 +24,7 @@
 					</div>
 					<div class="right-controls">
 						<!-- 倍速控制 -->
-						<SpeedButton />
+						<PlaybackRateButton />
 						<!-- 字幕控制 -->
 						<SubtitleButton />
 						<!-- 画质控制 -->
@@ -50,10 +50,10 @@ import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import FullscreenButton from "./FullscreenButton.vue";
 import PipButton from "./PipButton.vue";
 import PlayButton from "./PlayButton.vue";
+import PlaybackRateButton from "./PlaybackRateButton.vue";
 import ProgressBar from "./ProgressBar.vue";
 import QualityButton from "./QualityButton.vue";
 import ScrollTip from "./ScrollTip.vue";
-import SpeedButton from "./SpeedButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
 import TheatreButton from "./TheatreButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";

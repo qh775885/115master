@@ -3,17 +3,24 @@
 		<button
 			ref="buttonRef"
 			class="control-button"
+			:title="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
+			:disabled="subtitles.loading.value || !subtitles.ready.value|| subtitles.list.value?.length === 0"
 			@click="toggleMenu"
-			:title="'字幕'"
-			alt="字幕"
-			:disabled="subtitles.loadingSubtitles.value"
 		>
+			<!-- loading -->
 			<Icon 
-				v-if="subtitles.loadingSubtitles.value"
+				v-if="subtitles.loading.value || !subtitles.ready.value"
 				:svg="ProgressActivity"
 				class="loading-icon"
 			/>
-			<Icon v-else :svg="Subtitles"/>
+			<!-- found 字幕 -->
+			<Icon 
+				v-else 
+				:svg="subtitles.current.value ? Subtitles : SubtitlesOff"
+				class="subtitle-icon"
+				:class="{
+					'disabled': subtitles.list.value?.length === 0
+				}"/>
 		</button>
 		<Menu
 			v-model:visible="menuVisible"
@@ -24,7 +31,7 @@
 			<div
 				class="menu-item"
 				:class="{ active: subtitles.current.value === null }"
-				@click="handleSubtitleSelect(null)"
+				@click="handleDisableSubtitle"
 			>
 				关闭字幕
 			</div>
@@ -44,6 +51,7 @@
 <script setup lang="ts">
 import ProgressActivity from "@material-symbols/svg-400/rounded/progress_activity.svg?component";
 import Subtitles from "@material-symbols/svg-400/rounded/subtitles.svg?component";
+import SubtitlesOff from "@material-symbols/svg-400/rounded/subtitles_off.svg?component";
 import { shallowRef } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
@@ -65,6 +73,11 @@ const handleMenuVisibleChange = (visible: boolean) => {
 const handleSubtitleSelect = (subtitle: Subtitle | null) => {
 	menuVisible.value = false;
 	subtitles.change(subtitle);
+};
+
+const handleDisableSubtitle = () => {
+	menuVisible.value = false;
+	subtitles.change(null);
 };
 </script>
 
@@ -90,6 +103,10 @@ const handleSubtitleSelect = (subtitle: Subtitle | null) => {
 .subtitle-icon {
 	width: 24px;
 	height: 24px;
+	&.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 }
 
 .loading-icon {
