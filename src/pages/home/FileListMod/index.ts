@@ -40,7 +40,6 @@ interface FileItemAttributes {
 	has_pass: string;
 	issct: string;
 	sha1: string;
-	vdi: string;
 }
 
 class FileItem {

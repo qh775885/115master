@@ -54,6 +54,11 @@ export type XPlayerProps = {
 	muted: boolean;
 	// 播放速率
 	playbackRate: number;
+	// 设置项
+	preferences?: {
+		autoLoadThumbnails: boolean;
+		superAutoBuffer: boolean;
+	};
 	// 缩略图请求
 	onThumbnailRequest?: ({
 		type,

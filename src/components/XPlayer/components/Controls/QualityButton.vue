@@ -8,10 +8,9 @@
 		<span>{{ currentQuality }}</span>
 		
 		<Menu
-			:visible="menuVisible"
+			v-model:visible="menuVisible"
 			:triggerRef="buttonRef"
 			placement="top"
-			@update:visible="handleMenuVisibleChange"
 		>
 			<div
 				v-for="item in source.list.value"
@@ -46,10 +45,6 @@ const currentQuality = computed(() => {
 
 const toggleMenu = () => {
 	menuVisible.value = !menuVisible.value;
-};
-
-const handleMenuVisibleChange = (visible: boolean) => {
-	menuVisible.value = visible;
 };
 
 const getDisplayQuality = (sourceValue: VideoSource) => {

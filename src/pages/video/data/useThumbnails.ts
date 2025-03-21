@@ -10,6 +10,7 @@ import {
 	type LaneConfig,
 	Scheduler,
 } from "../../../utils/scheduler";
+import type { usePreferences } from "./usePreferences";
 
 // 缩略图生成器配置
 const CLIPPER_OPTIONS: M3U8ClipperOptions = {
@@ -39,7 +40,9 @@ const SCHEDULER_OPTIONS = {
 
 const BLUR = 30;
 
-export function useDataThumbnails() {
+export function useDataThumbnails(
+	preferences: ReturnType<typeof usePreferences>,
+) {
 	// 缩略图生成器
 	const clipper = new M3U8Clipper(CLIPPER_OPTIONS);
 
@@ -156,12 +159,19 @@ export function useDataThumbnails() {
 
 	// 自动加载缩略图
 	const autoBuffer = async () => {
+		// 如果禁用了自动加载预览图
+		if (preferences.value.autoLoadThumbnails === false) {
+			return;
+		}
+
+		// 是否启用全量缓冲
+		const isSuperBuffer = preferences.value.superAutoBuffer === true;
+
 		const blurSegments = sampleSize(
 			clipper.blurSegments,
 			Math.max(
 				Math.min(clipper.blurSegments.length, 50),
-				clipper.blurSegments.length /
-					(localStorage.getItem("115master-super-auto-buffer") ? 1 : 3),
+				clipper.blurSegments.length / (isSuperBuffer ? 1 : 3),
 			),
 		);
 		if (!blurSegments.length) {

@@ -9,14 +9,16 @@ import type { XPlayerEmit, XPlayerProps } from "../types";
 import { useControls } from "./useControls";
 import { useFullscreen } from "./useFullscreen";
 import { useHotKey } from "./useHotKey";
+import { usePictureInPicture } from "./usePictureInPicture";
 import { usePlaybackRate } from "./usePlaybackRate";
 import { usePlaying } from "./usePlaying";
 import { useProgress } from "./useProgress";
 import { useProgressBar } from "./useProgressBar";
 import { useSource } from "./useSources";
 import { useSubtitles } from "./useSubtitles";
+import { useThumbnailSettings } from "./useThumbnailSettings";
+import { useTransform } from "./useTransform";
 import { useVolume } from "./useVolume";
-import { usePictureInPicture } from "./usePictureInPicture";
 
 export interface PlayerContext {
 	rootProps: XPlayerProps;
@@ -32,24 +34,31 @@ export interface PlayerContext {
 	subtitles?: ReturnType<typeof useSubtitles>;
 	source?: ReturnType<typeof useSource>;
 	hotKey: ReturnType<typeof useHotKey>;
+	transform?: ReturnType<typeof useTransform>;
+	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
 	refs: {
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
 		rootRef: ShallowRef<HTMLElement | null>;
+		videoMaskRef: ShallowRef<HTMLDivElement | null>;
 	};
 }
 
 export const PlayerSymbol: InjectionKey<PlayerContext> = Symbol("XPlayer");
 
 export function usePlayerProvide(
-	rootRef: ShallowRef<HTMLElement | null>,
-	videoElementRef: ShallowRef<HTMLVideoElement | null>,
 	rootProps: XPlayerProps,
 	rootEmit: EmitFn<XPlayerEmit>,
+	refs: {
+		rootRef: ShallowRef<HTMLElement | null>;
+		videoElementRef: ShallowRef<HTMLVideoElement | null>;
+		videoMaskRef: ShallowRef<HTMLDivElement | null>;
+	},
 ) {
 	const context: PlayerContext = {
 		refs: {
-			rootRef,
-			videoElementRef,
+			rootRef: refs.rootRef,
+			videoElementRef: refs.videoElementRef,
+			videoMaskRef: refs.videoMaskRef,
 		},
 		rootProps,
 		rootEmit,
@@ -63,6 +72,7 @@ export function usePlayerProvide(
 		subtitles: undefined,
 		source: undefined,
 		hotKey: undefined,
+		thumbnailSettings: undefined,
 	};
 
 	// 音量
@@ -108,6 +118,14 @@ export function usePlayerProvide(
 	// 画中画
 	const pictureInPicture = usePictureInPicture(context);
 	context.pictureInPicture = pictureInPicture;
+
+	// 画面转换
+	const transform = useTransform(context);
+	context.transform = transform;
+
+	// 预览图设置
+	const thumbnailSettings = useThumbnailSettings(context);
+	context.thumbnailSettings = thumbnailSettings;
 
 	provide(PlayerSymbol, context);
 	return context;

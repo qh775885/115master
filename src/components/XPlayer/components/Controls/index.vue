@@ -29,6 +29,8 @@
 						<SubtitleButton />
 						<!-- 画质控制 -->
 						<QualityButton />
+						<!-- 设置 -->
+						<SettingsButton />
 						<!-- 画中画 -->
 						<PipButton />
 						<!-- 剧院模式 -->
@@ -54,6 +56,7 @@ import PlaybackRateButton from "./PlaybackRateButton.vue";
 import ProgressBar from "./ProgressBar.vue";
 import QualityButton from "./QualityButton.vue";
 import ScrollTip from "./ScrollTip.vue";
+import SettingsButton from "./SettingsButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
 import TheatreButton from "./TheatreButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
