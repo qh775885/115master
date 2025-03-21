@@ -1,7 +1,7 @@
 <template>
-	<div class="time-display">
+	<div :class="$style['time-display']">
 		<span>{{ formatTime(progress.currentTime.value) }}</span>
-		<span class="time-separator">/</span>
+		<span :class="$style['time-separator']">/</span>
 		<span>{{ formatTime(progress.duration.value) }}</span>
 	</div>
 </template>
@@ -12,7 +12,7 @@ import { formatTime } from "../../utils/time";
 const { progress } = usePlayerContext();
 </script>
 
-<style scoped>
+<style module>
 .time-display {
 	color: #fff;
 	font-size: 13px;
@@ -20,6 +20,7 @@ const { progress } = usePlayerContext();
 	align-items: center;
 	gap: 4px;
 	user-select: none;
+	margin-left: 6px;
 }
 
 .time-separator {

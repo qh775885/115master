@@ -70,6 +70,9 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 		if (!videoElementRef.value) return;
 		fastForward.value = true;
 		videoElementRef.value.playbackRate = MAX_RATE;
+		if (videoElementRef.value.paused) {
+			videoElementRef.value.play();
+		}
 	};
 
 	// 停止长按快速前进
@@ -91,6 +94,7 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 		NORMAL_RATE,
 		current,
 		rateOptions,
+		fastForward,
 		set,
 		up,
 		down,

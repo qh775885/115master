@@ -59,6 +59,9 @@
 			:ref="portalContext.container"
 		></div>
 
+		<!-- 状态HUD显示 -->
+		<HUD />
+
 		<div class="resume-container" v-if="source.isInterrupt.value">
 			<button @click="source.resumeSource">恢复</button>
 		</div>
@@ -68,6 +71,7 @@
 <script setup lang="ts">
 import { shallowRef } from "vue";
 import VideoControls from "./components/Controls/index.vue";
+import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
 import PlayAnimation from "./components/PlayAnimation/index.vue";
 import { usePlayerProvide } from "./hooks/usePlayerProvide";
