@@ -34,11 +34,14 @@ interface Props {
 	placement?: "top" | "bottom";
 	// 偏移量
 	offset?: number;
+	// 是否锁定控制栏（阻止自动隐藏）
+	lockControls?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	x: 0,
 	y: 0,
+	lockControls: true,
 });
 
 const emit = defineEmits<{
@@ -137,7 +140,10 @@ watch(visibleModel, (visible) => {
 		}, 0);
 	}
 
-	controls.setIsMouseInPopup(visible);
+	// 只有当需要锁定控制栏时才设置
+	if (props.lockControls) {
+		controls.setIsMouseInPopup(visible);
+	}
 });
 
 // 点击外部
@@ -174,16 +180,6 @@ onClickOutside(popupRef, (event) => {
 	backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate));
 	box-shadow: var(--x-popup-box-shadow);
 	border-radius: var(--x-popup-border-radius);
-
-	&:before {
-		content: "";
-		position: absolute;
-		inset: 0;
-		background: var(--x-popup-bg-color);
-		backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate));
-		box-shadow: var(--x-popup-box-shadow);
-		border-radius: var(--x-popup-border-radius);
-	}
 }
 
 .x-popup-content {

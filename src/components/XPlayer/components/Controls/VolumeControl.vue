@@ -1,20 +1,26 @@
 <template>
-	<div class="volume-control">
+	<div :class="$style['volume-control']">
 		<button 
-			class="volume-control-button" 
+			:class="$style['volume-control-button']" 
 			title="音量"
 			@click="volume.toggleMute"
 		>
-			<Icon :svg="VolumeIcon" class="icon" />
+			<Icon :svg="VolumeIcon" :class="$style.icon" />
 		</button>
-		<div class="volume-slider">
-			<div class="volume-slider-track">
+		<div :class="$style['volume-slider']">
+			<div :class="$style['volume-slider-container']">
+				<div :class="$style['volume-slider-track']"></div>
 				<div 
-					class="volume-slider-fill"
+					:class="$style['volume-slider-fill']"
 					:style="{ width: `${volume.volume.value}%` }"
+				></div>
+				<div 
+					:class="$style['volume-slider-thumb']"
+					:style="{ left: `${volume.volume.value}%` }"
 				></div>
 				<input
 					type="range"
+					:class="$style['volume-slider-input']"
 					min="0"
 					max="100"
 					:value="volume.volume.value"
@@ -57,11 +63,12 @@ const handleVolumeChange = (event: Event) => {
 };
 </script>
 
-<style scoped>
+<style module>
 .volume-control {
 	display: flex;
 	align-items: center;
 	gap: 8px;
+	margin-right: 8px;
 }
 
 .volume-control-button {
@@ -82,85 +89,63 @@ const handleVolumeChange = (event: Event) => {
 }
 
 .volume-slider {
-	width: 80px;
+	width: 90px;
+	height: 24px;
 	display: flex;
 	align-items: center;
 }
 
-.volume-slider-track {
+.volume-slider-container {
 	position: relative;
 	width: 100%;
-	height: var(--x-player-volume-control-height);
+	height: 4px;
+}
+
+.volume-slider-track {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(255, 255, 255, 0.3);
+	border-radius: 2px;
 }
 
 .volume-slider-fill {
 	position: absolute;
 	height: 100%;
-	background-color: var(--x-player-volume-control-fill-color);
-	border-radius: calc(var(--x-player-volume-control-height) / 2);
-	pointer-events: none;
+	background-color: var(--x-player-color-primary);
+	border-radius: 2px;
 }
 
-.volume-slider input[type="range"] {
+.volume-slider-thumb {
 	position: absolute;
+	width: 12px;
+	height: 12px;
+	background-color: #fff;
+	border-radius: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 0.2s;
+}
+
+.volume-slider:hover .volume-slider-thumb {
+	opacity: 1;
+}
+
+.volume-slider-input {
+	position: absolute;
+	top: -8px;
+	left: 0;
 	width: 100%;
-	height: 100%;
-	background: var(--x-player-volume-control-track-color);
-	border-radius: calc(var(--x-player-volume-control-height) / 2);
-	outline: none;
+	height: 20px;
+	opacity: 0;
 	cursor: pointer;
 	margin: 0;
 	padding: 0;
 }
 
-.volume-slider input[type="range"]::-webkit-slider-thumb {
-	-webkit-appearance: none;
-	width: var(--x-player-volume-control-thumb-size);
-	height: var(--x-player-volume-control-thumb-size);
-	border-radius: 50%;
-	background: var(--x-player-volume-control-thumb-color);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	position: relative;
-	z-index: 1;
-}
-
-.volume-slider input[type="range"]::-webkit-slider-thumb:hover {
-	transform: scale(1.2);
-}
-
-.volume-slider input[type="range"]::-moz-range-thumb {
-	width: var(--x-player-volume-control-thumb-size);
-	height: var(--x-player-volume-control-thumb-size);
-	border: none;
-	border-radius: 50%;
-	background: var(--x-player-volume-control-thumb-color);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	position: relative;
-	z-index: 1;
-}
-
-.volume-slider input[type="range"]::-moz-range-thumb:hover {
-	transform: scale(1.2);
-}
-
-.volume-slider input[type="range"]::-ms-thumb {
-	width: var(--x-player-volume-control-thumb-size);
-	height: var(--x-player-volume-control-thumb-size);
-	border-radius: 50%;
-	background: var(--x-player-volume-control-thumb-color);
-	cursor: pointer;
-	transition: all 0.2s ease;
-	position: relative;
-	z-index: 1;
-}
-
-.volume-slider input[type="range"]::-ms-thumb:hover {
-	transform: scale(1.2);
-}
-
-.material-symbols-rounded {
+.icon {
 	font-size: 24px;
 }
 </style> 

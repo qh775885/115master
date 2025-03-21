@@ -122,14 +122,15 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			}
 		},
 		keyup: (ctx) => {
-			ctx.playbackRate?.stopLongPressFastForward();
+			if (ctx.playbackRate?.fastForward.value) {
+				ctx.playbackRate?.stopLongPressFastForward();
+			}
 		},
 	},
 	playbackRateUp: {
 		keys: [KEYS.arrowUp, KEYS.w, KEYS.W],
 		name: "播放速度增大",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.playbackRate?.up();
 		},
 	},
@@ -137,7 +138,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.arrowDown, KEYS.s, KEYS.S],
 		name: "播放速度减小",
 		keydown: (ctx, event) => {
-			ctx.controls?.showWithAutoHide();
 			if (event.repeat) {
 				ctx.playbackRate?.downWithLowerLimit();
 			} else {
@@ -149,7 +149,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS["="]],
 		name: "音量增大",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.volume?.adjustVolume(5);
 		},
 	},
@@ -157,7 +156,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS["-"]],
 		name: "音量减小",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.volume?.adjustVolume(-5);
 		},
 	},
@@ -172,7 +170,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.m],
 		name: "切换静音",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.volume?.toggleMute();
 		},
 	},
@@ -183,7 +180,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			if (ctx.subtitles?.loading.value || !ctx.subtitles?.ready.value) {
 				return;
 			}
-			ctx.controls?.showWithAutoHide();
 			ctx.subtitles?.toggleEnabled();
 		},
 	},
@@ -212,7 +208,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS["["], KEYS.l, KEYS.L],
 		name: "向左旋转",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.transform?.left();
 		},
 	},
@@ -220,7 +215,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS["]"], KEYS.r, KEYS.R],
 		name: "向右旋转",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.transform?.right();
 		},
 	},
@@ -228,7 +222,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS["\\"]],
 		name: "重置旋转",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.transform?.normal();
 		},
 	},
@@ -236,7 +229,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.h, KEYS.H],
 		name: "水平翻转",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.transform?.toggleFlipX();
 		},
 	},
@@ -244,7 +236,6 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.j, KEYS.J],
 		name: "垂直翻转",
 		keydown: (ctx) => {
-			ctx.controls?.showWithAutoHide();
 			ctx.transform?.toggleFlipY();
 		},
 	},

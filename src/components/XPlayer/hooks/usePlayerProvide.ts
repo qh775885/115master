@@ -9,6 +9,7 @@ import type { XPlayerEmit, XPlayerProps } from "../types";
 import { useControls } from "./useControls";
 import { useFullscreen } from "./useFullscreen";
 import { useHotKey } from "./useHotKey";
+import { useHud } from "./useHud";
 import { usePictureInPicture } from "./usePictureInPicture";
 import { usePlaybackRate } from "./usePlaybackRate";
 import { usePlaying } from "./usePlaying";
@@ -36,6 +37,7 @@ export interface PlayerContext {
 	hotKey: ReturnType<typeof useHotKey>;
 	transform?: ReturnType<typeof useTransform>;
 	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
+	hud?: ReturnType<typeof useHud>;
 	refs: {
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
 		rootRef: ShallowRef<HTMLElement | null>;
@@ -126,6 +128,10 @@ export function usePlayerProvide(
 	// 预览图设置
 	const thumbnailSettings = useThumbnailSettings(context);
 	context.thumbnailSettings = thumbnailSettings;
+
+	// HUD显示
+	const hud = useHud(context);
+	context.hud = hud;
 
 	provide(PlayerSymbol, context);
 	return context;
