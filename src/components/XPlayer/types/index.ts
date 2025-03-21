@@ -66,12 +66,12 @@ export type XPlayerProps = {
 	}) => Promise<ImageBitmap | null>;
 	// 字幕
 	subtitles: Ref<Subtitle[] | null>;
+	// 字幕准备就绪
+	subtitlesReady: Ref<boolean>;
 	// 字幕加载中
-	loadingSubtitles: Ref<boolean>;
+	subtitlesLoading: Ref<boolean>;
 	// 字幕改变
 	onSubtitleChange?: (subtitle: Subtitle | null) => void;
-	// 默认字幕
-	defaultSubtitle?: Subtitle | null;
 };
 
 export type XPlayerEmit = {

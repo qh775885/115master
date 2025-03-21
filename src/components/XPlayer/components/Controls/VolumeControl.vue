@@ -1,6 +1,10 @@
 <template>
 	<div class="volume-control">
-		<button class="volume-control-button" @click="volume.toggleMute">
+		<button 
+			class="volume-control-button" 
+			title="音量"
+			@click="volume.toggleMute"
+		>
 			<Icon :svg="VolumeIcon" class="icon" />
 		</button>
 		<div class="volume-slider">

@@ -1,5 +1,8 @@
 <template>
-	<button @click="fullscreen.toggleFullscreen">
+	<button 
+		:title="fullscreen.isFullscreen.value ? '退出全屏(F)' : '全屏(F)'"
+		@click="fullscreen.toggleFullscreen"
+	>
 		<Icon :svg="fullscreen.isFullscreen.value ? FullscreenExit : Fullscreen" class="icon" />
 	</button>
 </template>

@@ -11,8 +11,9 @@
 					v-model:playbackRate="preferences.playbackRate"
 					:sources="DataVideoSources.list"
 					:subtitles="DataSubtitles.state"
+					:subtitlesLoading="DataSubtitles.isLoading"
+					:subtitlesReady="DataSubtitles.isReady"
 					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
-					:loadingSubtitles="DataSubtitles.isLoading"
 					:onSubtitleChange="handleSubtitleChange"
 					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
 				/>

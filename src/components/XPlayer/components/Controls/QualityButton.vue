@@ -1,7 +1,8 @@
 <template>
-	<div 
+	<button 
 		ref="buttonRef"
 		class="quality-button"
+		title="画质"
 		@click="toggleMenu"
 	>
 		<span>{{ currentQuality }}</span>
@@ -23,7 +24,7 @@
 			</div>
 		</Menu>
 
-	</div>
+	</button>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +60,6 @@ const getDisplayQuality = (sourceValue: VideoSource) => {
 const handleQualityChange = async (sourceValue: VideoSource) => {
 	menuVisible.value = false;
 	await source.changeQuality(sourceValue);
-	subtitles.restoreCurrentSubtitle();
 };
 </script>
 

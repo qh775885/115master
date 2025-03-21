@@ -1,5 +1,9 @@
 <template>
-	<button @click="pictureInPicture.toggle" v-if="pictureInPicture.isSupport">
+	<button 
+		v-if="pictureInPicture.isSupport"
+		:title="pictureInPicture.isPip.value ? '退出画中画(P)' : '画中画(P)'"
+		@click="pictureInPicture.toggle"
+	>
 		<Icon :svg="pictureInPicture.isPip.value ? PipExit : Pip" class="icon" />
 	</button>
 </template>

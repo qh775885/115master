@@ -1,5 +1,9 @@
 <template>
-	<button @click="fullscreen.toggleTheatre" v-if="!fullscreen.isFullscreen.value">
+	<button 
+		v-if="!fullscreen.isFullscreen.value"
+		:title="fullscreen.theatre.value ? '正常模式(V)' : '剧院模式(V)'"
+		@click="fullscreen.toggleTheatre" 
+	>
 		<Icon :svg="fullscreen.theatre.value ? WidthWide : FitPageWidth" class="icon" />
 	</button>
 </template>
