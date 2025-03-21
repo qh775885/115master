@@ -26,7 +26,6 @@
 			v-model:visible="menuVisible"
 			:triggerRef="buttonRef"
 			placement="top"
-			@update:visible="handleMenuVisibleChange"
 		>
 			<div
 				class="menu-item"
@@ -64,10 +63,6 @@ const buttonRef = shallowRef<HTMLElement>();
 
 const toggleMenu = () => {
 	menuVisible.value = !menuVisible.value;
-};
-
-const handleMenuVisibleChange = (visible: boolean) => {
-	menuVisible.value = visible;
 };
 
 const handleSubtitleSelect = (subtitle: Subtitle | null) => {

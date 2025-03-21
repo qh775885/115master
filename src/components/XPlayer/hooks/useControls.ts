@@ -1,4 +1,4 @@
-import { useEventListener } from "@vueuse/core";
+import { useDebounceFn, useEventListener } from "@vueuse/core";
 import { onUnmounted, shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
@@ -8,8 +8,8 @@ export const useControls = (ctx: PlayerContext) => {
 	const visible = shallowRef(true);
 	// 鼠标是否在控制栏
 	const isMouseInControls = shallowRef(false);
-	// 鼠标是否在菜单栏
-	const isMouseInMenu = shallowRef(false);
+	// 鼠标是否在弹出层
+	const isMouseInPopup = shallowRef(false);
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
 
@@ -21,9 +21,9 @@ export const useControls = (ctx: PlayerContext) => {
 		}
 	};
 
-	// 设置鼠标是否在菜单栏
-	const setIsMouseInMenu = (value: boolean) => {
-		isMouseInMenu.value = value;
+	// 设置鼠标是否在弹出层
+	const setIsMouseInPopup = (value: boolean) => {
+		isMouseInPopup.value = value;
 	};
 
 	// 显示控制栏
@@ -56,7 +56,7 @@ export const useControls = (ctx: PlayerContext) => {
 		hideControlsTimer = window.setTimeout(() => {
 			if (
 				isMouseInControls.value ||
-				isMouseInMenu.value ||
+				isMouseInPopup.value ||
 				ctx.progressBar?.isDragging.value
 			) {
 				return;
@@ -71,6 +71,9 @@ export const useControls = (ctx: PlayerContext) => {
 	};
 	// 鼠标离开
 	const handleRootMouseLeave = async () => {
+		if (isMouseInPopup.value) {
+			return;
+		}
 		if (ctx.progressBar?.isDragging.value) {
 			await ctx.progressBar?.waitDragEnd();
 			return hideWithDelay();
@@ -95,6 +98,6 @@ export const useControls = (ctx: PlayerContext) => {
 		hideWithDelay,
 		clearHideControlsTimer,
 		setIsMouseInControls,
-		setIsMouseInMenu,
+		setIsMouseInPopup,
 	};
 };

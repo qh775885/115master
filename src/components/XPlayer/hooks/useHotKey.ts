@@ -68,6 +68,19 @@ const KEYS = {
 	"9": "9",
 	"-": "-",
 	"=": "=",
+	"[": "[",
+	"]": "]",
+	"\\": "\\",
+	h: "h",
+	j: "j",
+	k: "k",
+	l: "l",
+	H: "H",
+	J: "J",
+	K: "K",
+	L: "L",
+	r: "r",
+	R: "R",
 };
 
 const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
@@ -193,6 +206,46 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		name: "切换画中画",
 		keydown: (ctx) => {
 			ctx.pictureInPicture?.toggle();
+		},
+	},
+	rotateLeft: {
+		keys: [KEYS["["], KEYS.l, KEYS.L],
+		name: "向左旋转",
+		keydown: (ctx) => {
+			ctx.controls?.showWithAutoHide();
+			ctx.transform?.left();
+		},
+	},
+	rotateRight: {
+		keys: [KEYS["]"], KEYS.r, KEYS.R],
+		name: "向右旋转",
+		keydown: (ctx) => {
+			ctx.controls?.showWithAutoHide();
+			ctx.transform?.right();
+		},
+	},
+	resetRotation: {
+		keys: [KEYS["\\"]],
+		name: "重置旋转",
+		keydown: (ctx) => {
+			ctx.controls?.showWithAutoHide();
+			ctx.transform?.normal();
+		},
+	},
+	toggleFlipX: {
+		keys: [KEYS.h, KEYS.H],
+		name: "水平翻转",
+		keydown: (ctx) => {
+			ctx.controls?.showWithAutoHide();
+			ctx.transform?.toggleFlipX();
+		},
+	},
+	toggleFlipY: {
+		keys: [KEYS.j, KEYS.J],
+		name: "垂直翻转",
+		keydown: (ctx) => {
+			ctx.controls?.showWithAutoHide();
+			ctx.transform?.toggleFlipY();
 		},
 	},
 };

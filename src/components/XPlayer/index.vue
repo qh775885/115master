@@ -22,6 +22,7 @@
 					:controls="false"
 					:playsinline="true"
 					:webkit-playsinline="true"
+					:style="transform.transformStyle.value"
 					@click="playing.togglePlay"
 				>
 					<track
@@ -44,7 +45,7 @@
 				<!-- 视频遮罩 -->
 				<div
 					class="video-mask"
-					ref="videoMask"
+					ref="videoMaskRef"
 					@click="playing.togglePlay"
 					@dblclick="fullscreen.toggleFullscreen"
 				></div>
@@ -85,11 +86,17 @@ const emit = defineEmits<XPlayerEmit>();
 const rootRef = shallowRef<HTMLElement | null>(null);
 // 视频元素
 const videoElementRef = shallowRef<HTMLVideoElement | null>(null);
+// Mask
+const videoMaskRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const { fullscreen, volume, playing, source, controls, subtitles, progress } =
-	usePlayerProvide(rootRef, videoElementRef, props, emit);
+const { fullscreen, volume, playing, source, subtitles, progress, transform } =
+	usePlayerProvide(props, emit, {
+		rootRef,
+		videoElementRef,
+		videoMaskRef,
+	});
 
 // 暴露方法
 defineExpose({

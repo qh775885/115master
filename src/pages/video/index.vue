@@ -13,6 +13,7 @@
 					:subtitles="DataSubtitles.state"
 					:subtitlesLoading="DataSubtitles.isLoading"
 					:subtitlesReady="DataSubtitles.isReady"
+					:preferences="preferences"
 					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
 					:onSubtitleChange="handleSubtitleChange"
 					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
@@ -42,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { useStorage, useTitle } from "@vueuse/core";
+import { useTitle } from "@vueuse/core";
 import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
@@ -64,26 +65,21 @@ import { useDataFileInfo } from "./data/useDataFileInfo";
 import { useDataHistory } from "./data/useDataHistory";
 import { useDataMovieInfo } from "./data/useDataMovieInfo";
 import { useDataPlaylist } from "./data/useDataPlaylist";
+import { usePreferences } from "./data/usePreferences";
 import { useDataSubtitles } from "./data/useSubtitlesData";
 import { useDataThumbnails } from "./data/useThumbnails";
 import { useDataVideoSources } from "./data/useVideoSource";
 
-const preferences = useStorage("x-player-preferences", {
-	volume: 100,
-	muted: true,
-	playbackRate: 1,
-	theatre: false,
-});
 const xplayerRef = ref<InstanceType<typeof XPlayerInstance>>();
+const preferences = usePreferences();
 const params = useParamsVideoPage();
 const DataVideoSources = useDataVideoSources();
-const DataThumbnails = useDataThumbnails();
+const DataThumbnails = useDataThumbnails(preferences);
 const DataSubtitles = useDataSubtitles();
 const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
 const DataHistory = useDataHistory(xplayerRef);
-
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择

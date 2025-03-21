@@ -1,120 +1,49 @@
 <template>
 	<Popup
-		:visible="visible"
-		:x="menuPosition.x"
-		:y="menuPosition.y"
-		@mouseenter="handleMouseEnter"
-		@mouseleave="handleMouseLeave"
-		@update:visible="handleVisibleChange"
+		:class="$style['x-menu-popup']"
+		v-model:visible="visibleModel"
+		:x="props.x"
+		:y="props.y"
+		:triggerRef="triggerRef"
+		:placement="props.placement"
+		:offset="props.offset"
 	>
-		<div class="x-menu" ref="menuRef">
+		<div :class="$style['x-menu-content']" ref="menuRef">
 			<slot></slot>
 		</div>
 	</Popup>
 </template>
 
 <script setup lang="ts">
-import { computed, shallowRef, watch } from "vue";
-import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { useVModel } from "@vueuse/core";
 import Popup from "../Popup/index.vue";
 
 interface Props {
 	visible: boolean;
+	x?: number;
+	y?: number;
 	triggerRef?: HTMLElement;
 	placement?: "top" | "bottom";
 	offset?: number;
 }
 
 const props = defineProps<Props>();
-const emit = defineEmits<{
-	(e: "mouseenter"): void;
-	(e: "mouseleave"): void;
-	(e: "update:visible", value: boolean): void;
-}>();
-
-const { controls } = usePlayerContext();
-
-const menuRef = shallowRef<HTMLElement>();
-const forceUpdate = shallowRef(0);
-
-const menuPosition = computed(() => {
-	forceUpdate.value; // 用于强制更新位置
-
-	if (!props.triggerRef || !menuRef.value) return { x: 0, y: 0 };
-
-	// 获取触发元素和菜单的尺寸
-	const triggerRect = props.triggerRef.getBoundingClientRect();
-	const menuRect = menuRef.value.getBoundingClientRect();
-
-	// 获取播放器容器
-	const playerContainer = props.triggerRef.closest(".x-player");
-	if (!playerContainer) return { x: 0, y: 0 };
-
-	const playerRect = playerContainer.getBoundingClientRect();
-
-	// 计算触发元素相对于播放器的位置
-	const triggerLeft = triggerRect.left - playerRect.left;
-	const triggerTop = triggerRect.top - playerRect.top;
-	const triggerBottom = triggerRect.bottom - playerRect.top;
-
-	// 计算可用空间
-	const spaceBelow = playerRect.height - triggerBottom;
-	const spaceAbove = triggerTop;
-
-	// 默认偏移量
-	const offset = props.offset ?? 8;
-
-	// 确定垂直位置
-	let y: number;
-	if (
-		props.placement === "top" ||
-		(props.placement !== "bottom" &&
-			spaceBelow < menuRect.height &&
-			spaceAbove >= menuRect.height)
-	) {
-		y = triggerTop - menuRect.height - offset;
-	} else {
-		y = triggerBottom + offset;
-	}
-
-	// 确保菜单不会超出播放器右侧边界
-	const x = Math.min(triggerLeft, playerRect.width - menuRect.width - 16);
-
-	return { x, y };
-});
-
-// 监听全屏状态变化
-watch(
-	() => props.visible,
-	(visible) => {
-		if (visible) {
-			// 给浏览器一点时间来完成 DOM 更新
-			setTimeout(() => {
-				forceUpdate.value++;
-			}, 0);
-		}
-
-		controls.setIsMouseInMenu(visible);
-	},
-);
-
-const handleMouseEnter = () => emit("mouseenter");
-const handleMouseLeave = () => emit("mouseleave");
-
-const handleVisibleChange = (visible: boolean) => {
-	emit("update:visible", visible);
-};
+const emit = defineEmits<(e: "update:visible", value: boolean) => void>();
+const visibleModel = useVModel(props, "visible", emit);
 </script>
 
-<style scoped>
-.x-menu {
-	min-width: 200px;
-	padding: 8px;
-	background: rgba(28, 28, 28, 0.95);
-	backdrop-filter: blur(20px);
-	border-radius: 8px;
+<style module>
+.x-menu-popup {
+	min-width: 150px;
+	--x-popup-padding: 8px;
 }
-
+.x-menu-content {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+</style>
+<style scoped>
 :deep(.menu-item) {
 	padding: 8px 12px;
 	color: #fff;
@@ -124,8 +53,7 @@ const handleVisibleChange = (visible: boolean) => {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	border-radius: 6px;
-	margin: 2px 0;
+	border-radius: 8px;
 }
 
 :deep(.menu-item:hover) {
