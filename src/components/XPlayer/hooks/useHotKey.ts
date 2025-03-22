@@ -31,7 +31,11 @@ const MODIFIERS = {
 	Meta: "Meta",
 };
 
-// 按键
+/**
+ * 按键
+ * @description 按键映射
+ * @doc https://developer.mozilla.org/en-US/docs/Web/API/UI_Events/Keyboard_event_key_values
+ */
 const KEYS = {
 	sapce: " ",
 	arrowLeft: "ArrowLeft",
@@ -99,9 +103,17 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		],
 		name: "进度",
 		keydown: (ctx, event) => {
-			const key = event.code;
-			const digit = Number(key.replace("Digit", ""));
-			ctx.progress?.skip(digit / 10, true);
+			const key = event.key;
+			const digit = Number(key);
+			const percentage = digit / 10;
+
+			// 调用原始方法进行跳转
+			ctx.progress?.skip(percentage, true);
+
+			// 显示HUD消息
+			if (ctx.hud) {
+				ctx.hud.showProgressJump(digit);
+			}
 		},
 	},
 	fastBackward: {

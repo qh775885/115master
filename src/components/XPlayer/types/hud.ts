@@ -33,4 +33,5 @@ export type HudContext = {
 	messages: Ref<HudMessage[]>; // 消息队列
 	show: (message: Omit<HudMessage, "timestamp">) => void; // 显示消息
 	clear: () => void; // 清空消息
+	showProgressJump: (digit: number) => void; // 显示进度跳转HUD
 };
