@@ -25,9 +25,40 @@
 - ⌚ 播放列表展示
 - ⌨️ [快捷键](#播放器快捷键)
 
-## 安装
+## 开发
 
-以下安装说明，请认真仔细阅读!
+### 环境
+
+- Node.js v20.x.x
+- pnpm v9.x.x
+
+### 安装依赖
+
+```sh
+pnpm install
+```
+
+### 运行开发环境
+
+```bash
+pnpm dev
+```
+
+### 构建
+
+```bash
+pnpm build
+```
+
+## 使用安装
+
+### 运行环境基准
+
+- 浏览器：Chrome 130+ 或 115Browser 35.x.x
+- 浏览器扩展：Tampermonkey v5.3.3+
+- 网络环境：需要科学上网才能使用完整功能
+
+### 安装步骤
 
 1. 安装 [Tampermonkey](https://www.tampermonkey.net/)。
 
@@ -38,9 +69,8 @@
 4. 油猴面板勾选启动 【115Master】脚本，刷新页面开始使用。
 
 5. 安装完成后如果没有看到文件列表中有【master播放】的按钮，请检查有没有其他脚本导致冲突或重启浏览器。
-   
-<img width="329" alt="image" src="https://github.com/user-attachments/assets/189ac578-0592-43bd-ab75-b62cbe6f5170" />
 
+<img width="329" alt="image" src="https://github.com/user-attachments/assets/189ac578-0592-43bd-ab75-b62cbe6f5170" />
 
 👆上面一通操作后，还是无法使用的话请进入 [TG群](https://t.me/+EzfL2xXhlOA4ZjBh) 反馈或提交 [Issues](https://github.com/cbingb666/115master/issues)，请说明你的详情操作！
 
