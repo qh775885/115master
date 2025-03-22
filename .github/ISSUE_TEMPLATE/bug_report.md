@@ -3,7 +3,7 @@ name: Bug report
 about: Create a report to help us improve
 title: ''
 labels: bug
-assignees: ''
+assignees: cbingb666
 
 ---
 
@@ -25,9 +25,10 @@ If applicable, add screenshots to help explain your problem.
 
 **Information (please complete the following information):**
  - Version:  [e.g. v0.0.1]
- - Browser: [e.g. Chrome, 115Broswer, Edge]
- - CPU: [e.g. AMD ryzen 7 5800x, Intel I7 9700k]
- - GPU: [e.g. Amd 5700xt, Nvidia RTX3080]
+ - Tampermonkey Version:  [e.g. v5.3.3]
+ - Browser Version: [e.g. Chrome 134.0.6998.166]
+ - CPU: [e.g. Intel I7 9700k]
+ - GPU: [e.g. AMD 5700xt]
  - OS: [e.g. MacOS 15.2]
 
 **Additional context**
