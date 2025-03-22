@@ -143,8 +143,8 @@ const loadData = async (isFirst = true) => {
 	if (params.avNumber.value) {
 		DataMovieInfo.value.javDBState.execute(0, params.avNumber.value);
 		DataMovieInfo.value.javBusState.execute(0, params.avNumber.value);
-		DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
 	}
+	DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
 };
 
 // 设置标题
