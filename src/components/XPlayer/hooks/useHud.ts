@@ -52,6 +52,31 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 		currentMessage.value = null;
 	};
 
+	// 显示进度跳转HUD
+	const showProgressJump = (digit: number) => {
+		// 计算百分比
+		const percentage = digit / 10;
+
+		// 计算百分比对应的时间
+		const targetTime = percentage * (ctx.progress?.duration.value || 0);
+		const minutes = Math.floor(targetTime / 60);
+		const seconds = Math.floor(targetTime % 60);
+		const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+		// 显示HUD
+		show({
+			type: "fastForward",
+			title: digit === 0 ? "跳转到开头" : `跳转到 ${digit}0%`,
+			data: {
+				value: timeString,
+				max: 100,
+				min: 0,
+				progress: percentage * 100,
+			},
+			duration: 1500,
+		});
+	};
+
 	// 创建一个通用的显示消息方法
 	const showMessage = (
 		type: HudMessageType,
@@ -220,5 +245,6 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 		messages,
 		show,
 		clear,
+		showProgressJump,
 	};
 };

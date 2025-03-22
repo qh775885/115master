@@ -101,7 +101,15 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keydown: (ctx, event) => {
 			const key = event.code;
 			const digit = Number(key.replace("Digit", ""));
-			ctx.progress?.skip(digit / 10, true);
+			const percentage = digit / 10;
+
+			// 调用原始方法进行跳转
+			ctx.progress?.skip(percentage, true);
+
+			// 显示HUD消息
+			if (ctx.hud) {
+				ctx.hud.showProgressJump(digit);
+			}
 		},
 	},
 	fastBackward: {
