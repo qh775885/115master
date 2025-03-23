@@ -1,309 +1,198 @@
-import { type App, createApp } from "vue";
-import actressFaceDB, { ActressFaceDB } from "../../../utils/actressFaceDB";
-import { imageCache } from "../../../utils/cache";
+import { ActressFaceDB } from "../../../utils/actressFaceDB";
 import { getAvNumber } from "../../../utils/getNumber";
-import { compressImage } from "../../../utils/image";
-import { AppLogger } from "../../../utils/logger";
-import ExtInfo from "../components/ExtInfo/index.vue";
-import ExtPreview from "../components/ExtPreview/index.vue";
 import "./index.css";
+import {
+	type FileItemAttributes,
+	FileListType,
+	FileType,
+	type ItemInfo,
+	IvType,
+} from "../types";
+import { FileItemActressInfo } from "./actressInfo";
+import { FileItemClickPlay } from "./clickPlay";
+import { FileItemExtInfo } from "./extInfo";
+import { FileItemExtMenu } from "./extMenu";
+import { FileItemPreview } from "./preview";
 
-enum FileType {
-	folder = "0",
-	file = "1",
-}
-
-enum IvType {
-	playable = "1",
-	unplayable = "0",
-}
-
-interface FileItemAttributes {
-	c: string;
-	iv: IvType;
-	vdi: string;
-	title: string;
-	hdf: string;
-	file_type: FileType;
-	pick_code: string;
-	is_share: string;
-	is_top: string;
-	area_id: string;
-	p_id: string;
-	cate_id: string;
-	cate_name: string;
-	score: string;
-	has_desc: string;
-	fl_encode: string;
-	fuuid: string;
-	shared: string;
-	has_pass: string;
-	issct: string;
-	sha1: string;
-}
-
-class FileItem {
-	private vueApp: App | null = null;
-	private initedActressInfo = false;
-	private $fileNameDom: HTMLElement | null = null;
-	private $fileNameWrapDom: HTMLElement | null = null;
-	private $fileNameATagDom: HTMLAnchorElement | null = null;
+class FileItemLoader {
+	// 预览信息
+	private preview: FileItemPreview | null = null;
+	// 扩展信息
+	private extInfo: FileItemExtInfo | null = null;
+	// 演员信息
+	private actressInfo: FileItemActressInfo | null = null;
+	// 扩展菜单
+	private extMenu: FileItemExtMenu | null = null;
+	// 点击播放
+	private clickPlay: FileItemClickPlay | null = null;
 
 	constructor(
-		private readonly $item: HTMLElement,
-		private readonly actressFaceDB: ActressFaceDB,
-	) {
-		this.getDoms();
-	}
+		private readonly itemNode: HTMLElement,
+		private readonly fileListType: FileListType,
+	) {}
 
+	// 获取属性
 	private get attributes(): FileItemAttributes {
 		return Object.fromEntries(
-			Array.from(this.$item.attributes).map((attr) => [attr.name, attr.value]),
+			Array.from(this.itemNode.attributes).map((attr) => [
+				attr.name,
+				attr.value,
+			]),
 		) as unknown as FileItemAttributes;
 	}
 
-	private get avNumber(): string | null {
+	// 获取番号
+	private get avNumber(): ItemInfo["avNumber"] {
 		return getAvNumber(this.attributes.title);
 	}
 
-	private getDoms() {
-		this.$fileNameDom = this.$item.querySelector(".file-name") as HTMLElement;
-		this.$fileNameWrapDom = this.$item.querySelector(
-			".file-name-wrap",
-		) as HTMLElement;
-		this.$fileNameATagDom = this.$fileNameDom.querySelector(
-			"a",
-		) as HTMLAnchorElement;
-	}
-
-	// 加载扩展信息
-	private async loadExtInfo() {
-		if (
-			this.attributes.iv !== IvType.playable &&
-			this.attributes.file_type !== FileType.folder
-		) {
-			return;
-		}
-
-		if (this.$item.classList.contains("with-ext-info")) {
-			return;
-		}
-
-		if (this.avNumber) {
-			this.$item.classList.add("with-ext-info");
-			const extInfoDom = document.createElement("div");
-			this.$item.append(extInfoDom);
-			extInfoDom.className = "ext-info-root";
-			const app = createApp(ExtInfo, {
-				avNumber: this.avNumber,
-			});
-			app.mount(extInfoDom);
-			this.vueApp = app;
-		}
-	}
-
-	// 加载演员信息
-	private async loadActressInfo() {
-		if (this.initedActressInfo === true) {
-			return;
-		}
-		this.initedActressInfo = true;
-		const actress = await actressFaceDB.findActress(
-			this.attributes.title.trim(),
+	// 获取是否可播放
+	private get filePlayable(): boolean {
+		return (
+			this.attributes.file_type === FileType.file &&
+			this.attributes.iv === IvType.playable &&
+			this.attributes.vdi !== "0"
 		);
-		if (this.$item.classList.contains("with-actress-info")) {
-			return;
-		}
-		if (actress) {
-			this.$item.classList.add("with-actress-info");
-			const actressDom = document.createElement("img");
-			actressDom.alt = actress.filename;
-			actressDom.loading = "lazy";
-			actressDom.className = "actress-info-img";
-			this.$item.querySelector(".file-name-wrap")?.prepend(actressDom);
-
-			try {
-				// 尝试从缓存获取图片
-				const cacheKey = `actress-face-${actress.url}`;
-				const cachedImage = await imageCache.get(cacheKey);
-
-				if (cachedImage) {
-					actressDom.src = URL.createObjectURL(cachedImage.value);
-				} else {
-					actressDom.src = actress.url;
-					try {
-						const response = await fetch(actress.url);
-						if (response.ok) {
-							const blob = await response.blob();
-
-							// 压缩图片后再缓存
-							const compressedBlob = await compressImage(blob, {
-								maxWidth: 200,
-								maxHeight: 200,
-								quality: 0.8,
-								type: "image/webp",
-							});
-
-							// 存储到imageCache中
-							await imageCache.set(cacheKey, compressedBlob);
-						}
-					} catch (error) {
-						console.error("缓存演员头像失败:", error);
-					}
-				}
-			} catch (error) {
-				// 出错时直接使用原始URL
-				console.error("加载演员头像缓存失败:", error);
-				actressDom.src = actress.url;
-			}
-		}
 	}
 
-	// 加载预览视频
-	private async loadPreview() {
-		if (this.avNumber) {
-			return;
-		}
-
-		if (this.attributes.file_type === FileType.folder) {
-			return;
-		}
-
-		if (this.attributes.iv !== IvType.playable) {
-			return;
-		}
-
-		if (this.attributes.vdi === "0") {
-			return;
-		}
-
-		if (this.$item.classList.contains("with-ext-preview")) {
-			return;
-		}
-
-		this.$item.classList.add("with-ext-preview");
-		const previewDom = document.createElement("div");
-		previewDom.className = "ext-preview-root";
-		this.$item.append(previewDom);
-		const app = createApp(ExtPreview, {
-			pickCode: this.attributes.pick_code,
-			sha1: this.attributes.sha1,
-		});
-		app.mount(previewDom);
-		this.vueApp = app;
-	}
-
-	public async load() {
-		this.loadExtInfo();
-		this.loadActressInfo();
-		this.loadPreview();
-	}
-
-	public destroy(): void {
-		this.vueApp?.unmount();
-	}
-}
-
-class FileListMod {
-	private readonly logger: AppLogger;
-	private $list!: HTMLElement | null;
-	private $items!: NodeListOf<HTMLElement> | null;
-	private items: FileItem[] = [];
-	private offChangePage: (() => void) | null = null;
-	private actressFaceDB: ActressFaceDB | null = null;
-	constructor() {
-		this.logger = new AppLogger("FileStyle");
-		this.init();
-	}
-
-	private getOriginDom() {
-		this.$list = document.querySelector(".list-contents") ?? null;
-		this.$items = this.$list?.querySelectorAll("li") ?? null;
-	}
-
-	private async init(): Promise<void> {
-		this.logger.log("init");
-		this.actressFaceDB = new ActressFaceDB();
-		this.actressFaceDB.init();
-		this.getOriginDom();
-
-		if (this.$list && this.$items) {
-			this.loadExtInfo();
-		} else {
-			await this.waitListLoaded();
-			this.loadExtInfo();
-		}
-		this.loadExtInfo();
-		this.offChangePage = this.onChangePage(async () => {
-			this.destroyItems();
-			await this.waitListLoaded();
-			this.loadExtInfo();
-		});
-	}
-
-	private waitListLoaded(): Promise<void> {
-		return new Promise((resolve) => {
-			let observerContent: MutationObserver | null = null;
-			observerContent = new MutationObserver(() => {
-				observerContent?.disconnect();
-				resolve();
-			});
-			observerContent.observe(document, {
-				subtree: true,
-				childList: true,
-				characterData: true,
-			});
-		});
-	}
-
-	private loadExtInfo() {
-		this.getOriginDom();
-		if (this.$list && this.$items) {
-			this.$items.forEach((item) => {
-				const fileItem = new FileItem(item, this.actressFaceDB!);
-				fileItem.load();
-				this.items.push(fileItem);
-			});
-		}
-	}
-
-	private onChangePage(
-		callback: (originUrl: string, currentUrl: string) => void,
-	) {
-		let lastUrl = window.parent.location.href;
-		const observerUrl = new MutationObserver(() => {
-			const url = window.parent.location.href;
-			if (url !== lastUrl) {
-				lastUrl = url;
-				callback(lastUrl, url);
-			}
-		});
-
-		observerUrl.observe(document, {
-			subtree: true,
-			childList: true,
-			characterData: true,
-		});
-
-		return () => {
-			observerUrl.disconnect();
+	// 获取 itemInfo
+	private get itemInfo(): ItemInfo {
+		return {
+			avNumber: this.avNumber,
+			attributes: this.attributes,
+			filePlayable: this.filePlayable,
+			fileListType: this.fileListType,
 		};
 	}
 
-	private destroyItems(): void {
-		if (this.items.length === 0) {
-			return;
-		}
-		this.items.forEach((item) => {
-			item.destroy();
-		});
-		this.items = [];
+	// 加载
+	public async load() {
+		// 加载扩展信息
+		this.extInfo = new FileItemExtInfo(this.itemNode, this.itemInfo);
+		this.extInfo.load();
+
+		// 加载预览信息
+		this.preview = new FileItemPreview(this.itemNode, this.itemInfo);
+		this.preview.load();
+
+		// 加载演员信息
+		this.actressInfo = new FileItemActressInfo(this.itemNode, this.itemInfo);
+		this.actressInfo.load();
+
+		// 加载扩展菜单
+		this.extMenu = new FileItemExtMenu(this.itemNode, this.itemInfo);
+		this.extMenu.load();
+
+		// 加载点击播放
+		this.clickPlay = new FileItemClickPlay(this.itemNode, this.itemInfo);
+		this.clickPlay.load();
 	}
 
+	// 销毁
 	public destroy(): void {
-		this.logger.log("destroy");
+		this.extInfo?.destroy();
+		this.preview?.destroy();
+		this.actressInfo?.destroy();
+		this.clickPlay?.destroy();
+	}
+}
+
+/**
+ * 文件列表修改器
+ */
+class FileListMod {
+	// 文件列表 ItemMaps
+	private fileitemMaps: Map<HTMLLIElement, FileItemLoader> = new Map();
+	// 演员头像数据库
+	private actressFaceDB: ActressFaceDB | null = null;
+	// 文件列表变化监听器
+	private observerContent: MutationObserver | null = null;
+
+	constructor() {
+		this.init();
+	}
+
+	// 初始化
+	private async init(): Promise<void> {
+		this.actressFaceDB = new ActressFaceDB();
+		this.actressFaceDB.init();
+		this.updateFileItem();
+		this.watchFileItemChange();
+	}
+
+	// 获取文件列表dom
+	get fileListCellNode() {
+		return document.querySelector(".list-cell") ?? null;
+	}
+
+	// 获取文件列表类型
+	get fileListType(): FileListType {
+		const listThumb = this.fileListCellNode?.querySelector(".list-contents");
+		if (listThumb) {
+			return FileListType.list;
+		}
+		return FileListType.grid;
+	}
+
+	// 获取文件列表dom的li节点
+	get fileItemNodes() {
+		const nodes = this.fileListCellNode?.querySelectorAll("li");
+		return nodes ? new Set(nodes) : null;
+	}
+
+	// 监听文件列表变化
+	private watchFileItemChange() {
+		let observerContent: MutationObserver | null = null;
+		observerContent = new MutationObserver(() => {
+			this.updateFileItem();
+		});
+		observerContent.observe(document, {
+			childList: true,
+			subtree: true,
+		});
+		this.observerContent = observerContent;
+	}
+
+	// 更新文件列表
+	private updateFileItem() {
+		// 遍历文件列表dom的li节点
+		for (const item of this.fileItemNodes ?? []) {
+			// 如果已经存在，则跳过
+			if (this.fileitemMaps.has(item)) {
+				return;
+			}
+			// 创建文件列表item
+			const fileItem = new FileItemLoader(item, this.fileListType);
+			// 加载文件列表item
+			fileItem.load();
+			// 设置文件列表item
+			this.fileitemMaps.set(item, fileItem);
+		}
+		// 遍历文件列表item
+		for (const [key, value] of this.fileitemMaps.entries()) {
+			// 如果文件列表dom的li节点存在，则跳过
+			if (this.fileItemNodes?.has(key)) {
+				return;
+			}
+			// 销毁文件列表item
+			value.destroy();
+			// 删除文件列表item
+			this.fileitemMaps.delete(key);
+		}
+	}
+
+	// 销毁文件列表
+	private destroyItems(): void {
+		this.fileitemMaps.forEach((item) => {
+			item.destroy();
+		});
+		this.fileitemMaps.clear();
+	}
+
+	// 销毁
+	public destroy(): void {
+		this.observerContent?.disconnect();
 		this.destroyItems();
-		this.offChangePage?.();
 	}
 }
 
