@@ -71,3 +71,5 @@ export type FilesInfo = Base<{
 	// 用户翻转
 	user_turn: number;
 }>;
+
+export type FilesStar = Base<unknown>;

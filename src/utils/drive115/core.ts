@@ -356,4 +356,23 @@ export class Drive115Core {
 
 		return (await response.json()) as VodApi.Res.VodApiFilesHistory;
 	}
+
+	// 文件收藏
+	public async webapiFilesStar(
+		params: WebApi.Req.FilesStarReq,
+	): Promise<WebApi.Res.FilesStar> {
+		const response = await fetch(
+			new URL("/files/star", this.WEB_API_URL).href,
+			{
+				method: "POST",
+				body: new URLSearchParams(params),
+				credentials: "include",
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+			},
+		);
+
+		return (await response.json()) as WebApi.Res.FilesStar;
+	}
 }

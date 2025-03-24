@@ -19,7 +19,7 @@
 					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
 				/>
 				<div class="page-flow">
-					<FileInfo :fileInfo="DataFileInfo" />
+					<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" />
 					<div class="local-player">
 						<button v-if="isMac" class="page-local-play" @click="handleLocalPlay('iina')">IINA Beta</button>
 					</div>
@@ -35,7 +35,7 @@
 				<Playlist class="page-sider-playlist"
 					:pickCode="params.pickCode.value"
 					:playlist="DataPlaylist"
-					@play="handlePlay"
+					@play="handleChangeVideo"
 				/>
 			</div>
 		</div>
@@ -43,9 +43,8 @@
 </template>
 
 <script setup lang="ts">
-import { GM_addStyle } from "$";
 import { useTitle } from "@vueuse/core";
-import { nextTick, onMounted, ref, shallowRef } from "vue";
+import { computed, nextTick, onMounted, ref } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
@@ -64,6 +63,7 @@ import MovieInfo from "./components/MovieInfo/index.vue";
 import Playlist from "./components/Playlist/index.vue";
 import { useDataFileInfo } from "./data/useDataFileInfo";
 import { useDataHistory } from "./data/useDataHistory";
+import { useMark } from "./data/useDataMark";
 import { useDataMovieInfo } from "./data/useDataMovieInfo";
 import { useDataPlaylist } from "./data/useDataPlaylist";
 import { usePreferences } from "./data/usePreferences";
@@ -81,6 +81,8 @@ const DataMovieInfo = useDataMovieInfo();
 const DataFileInfo = useDataFileInfo();
 const DataPlaylist = useDataPlaylist();
 const DataHistory = useDataHistory(xplayerRef);
+const DataMark = useMark(DataFileInfo);
+
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
@@ -90,6 +92,7 @@ const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	);
 };
 
+// 本地播放
 const handleLocalPlay = async (player: "mpv" | "iina") => {
 	const download = await drive115.getFileDownloadUrl(params.pickCode.value);
 	switch (player) {
@@ -105,9 +108,8 @@ const handleLocalPlay = async (player: "mpv" | "iina") => {
 	}
 };
 
-useTitle(params.title.value || "");
-
-const handlePlay = async (item: Entity.PlaylistItem) => {
+// 播放器列表切换
+const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 	goToPlayer({
 		cid: params.cid.value,
 		pickCode: item.pc,
@@ -212,7 +214,7 @@ onMounted(async () => {
 
 .page-sider-playlist {
 	width: 380px;
-	height: calc(100vh - 36px - 24px );
+	height: calc(100vh - 36px - 24px - 36px);
 	flex: 1;
 }
 
@@ -235,7 +237,7 @@ onMounted(async () => {
 	}
 	.page-sider {
 		position: absolute;
-		top: calc(100vh + 48px + 28px);
+		top: calc(100vh + 24px);
 		right: 86px;
 	}
 	.page-sider-playlist {
