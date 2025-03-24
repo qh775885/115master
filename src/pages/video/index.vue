@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+import { GM_addStyle } from "$";
 import { useTitle } from "@vueuse/core";
 import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
@@ -156,37 +157,8 @@ onMounted(async () => {
 });
 </script>
 
-<style>
-
-/* 全局滚动条样式 */
-::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-	/* display: none !important; */
-}
-
-::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-	background: rgba(255, 255, 255, 0.3);
-	border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-	background: rgba(255, 255, 255, 0.3);
-}
-
-/* 隐藏滚动条 */
-:fullscreen ::-webkit-scrollbar {
-	width: 0 !important;
-	height: 0 !important;
-	display: none !important
-}
-</style>
-
 <style scoped>
+/* 全局滚动条样式 */
 .page-container {
 	padding: 36px 0 56px;
 	background: rgb(15,15,15);
