@@ -1,4 +1,4 @@
-import { GM_cookie } from "$";
+import { GM_addStyle, GM_cookie } from "$";
 import { createApp, defineAsyncComponent } from "vue";
 import { DL_URL_115, NORMAL_URL_115 } from "../../constants/115";
 
@@ -7,6 +7,35 @@ const resetDocument = () => {
 	document.body.style.margin = "0";
 	document.body.innerHTML = `<div id="app"></div>`;
 	document.title = "";
+
+	// fix scrollbar 在主页下丢失，因为 vite-plugin-monkey 的 css 处理会造成全局污染
+	GM_addStyle(`
+		::-webkit-scrollbar {
+			width: 8px;
+			height: 8px;
+			/* display: none !important; */
+		}
+
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.3);
+			border-radius: 4px;
+		}
+
+		::-webkit-scrollbar-thumb:hover {
+			background: rgba(255, 255, 255, 0.3);
+		}
+
+		/* 隐藏滚动条 */
+		:fullscreen ::-webkit-scrollbar {
+			width: 0 !important;
+			height: 0 !important;
+			display: none !important
+		}
+	`);
 };
 
 export const setVideoCookie = (
