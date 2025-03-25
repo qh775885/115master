@@ -1,26 +1,26 @@
 <template>
     <!-- 文件名 -->
-    <div class="header-file" v-if="fileInfo.error">
+    <div :class="$style['header-file']" v-if="fileInfo.error">
         <div class="header-file-error">
             <div>❌ 获取文件信息失败</div>
             <div>{{ fileInfo.error }}</div>
         </div>
     </div>
-    <div class="header-file" v-else-if="fileInfo.isLoading || (!fileInfo.isLoading && !fileInfo.isReady)">
+    <div :class="$style['header-file']" v-else-if="fileInfo.isLoading || (!fileInfo.isLoading && !fileInfo.isReady)">
         <Skeleton width="320px" height="28px" />
     </div>
-    <div class="file-info-container" v-else>
-        <div class="header-file">
-            <span class="header-file-text">
+    <div :class="$style['file-info-container']" v-else>
+        <div :class="$style['header-file']">
+            <span :class="$style['header-file-text']">
                 {{ fileInfo.state?.file_name?.toUpperCase() }}
-                <span class="header-file-text-size">
+                <span :class="$style['header-file-text-size']">
                     {{ formatFileSize(Number(fileInfo.state?.file_size)) }}
                 </span>
             </span>
         </div>
-        <div class="action-bar">
-            <button class="action-bar-button" @click="mark.toggleMark">
-                <Icon :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
+        <div :class="$style['action-bar']">
+            <button :class="$style['action-bar-button']" @click="mark.toggleMark">
+                <Icon class="action-bar-button-icon" :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
                 <span>收藏</span>
             </button>
         </div>
@@ -41,11 +41,11 @@ const props = defineProps<{
 }>();
 </script>
 
-<style scoped>
+<style module>
 .file-info-container {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     width: 100%;
     margin-bottom: 8px;
 }
@@ -63,7 +63,6 @@ const props = defineProps<{
     display: inline-block;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
     max-width: 100%;
 }
 
@@ -79,12 +78,13 @@ const props = defineProps<{
     align-items: center;
     gap: 16px;
     margin-left: 16px;
+    flex-shrink: 0;
 }
 
 .action-bar-button {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background-color: rgba(255, 255, 255, 0.1);
     border: none;
     border-radius: 8px;
@@ -100,7 +100,7 @@ const props = defineProps<{
 }
 
 .action-bar-button svg {
-    width: 20px;
-    height: 20px;
+    width: 24px !important;
+    height: 24px !important;
 }
 </style>
