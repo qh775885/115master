@@ -9,7 +9,9 @@ import {
 import { qualityCodeMap } from "../../constants/quality";
 import type { M3u8Item } from "../../types/player";
 import { AppLogger } from "../logger";
+import { is115Browser } from "../platform";
 import { fetchRequest } from "../request/fetchRequest";
+import { GMRequest } from "../request/gmRequst";
 import type { NormalApi, ProApi, WebApi } from "./api";
 import { Crypto115 } from "./crypto";
 
@@ -86,7 +88,9 @@ export class Drive115Core {
 		const data = `data=${encodeURIComponent(encoded.data)}`;
 		this.logger.log("发送加密数据:", data);
 
-		const response = await fetchRequest.post(
+		// 115Browser 需要使用 GMRequest，因为 115 会检查 ua 是否是 115Browser，请求这个接口返回重定向到 dl.115cdn.net，导致跨域无法获取到返回结果
+		const request = is115Browser ? new GMRequest() : fetchRequest;
+		const response = await request.post(
 			new URL(`/app/chrome/downurl?t=${tm}`, this.PRO_API_URL).href,
 			{
 				body: data,

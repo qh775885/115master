@@ -1,7 +1,6 @@
 import { GM_openInTab } from "$";
 import { VOD_URL_115 } from "../../../constants/115";
 import drive115 from "../../../utils/drive115";
-import { getAvNumber } from "../../../utils/getNumber";
 import { isMac } from "../../../utils/platform";
 import { goToPlayer } from "../../../utils/route";
 import { webLinkIINA } from "../../../utils/weblink";
