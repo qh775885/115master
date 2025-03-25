@@ -14,6 +14,8 @@ export enum IvType {
 
 export interface FileItemAttributes {
 	c: string;
+	// 目录id
+	cid: string;
 	// 是否可播放
 	iv: IvType;
 	// 视频时长
@@ -35,7 +37,6 @@ export interface FileItemAttributes {
 	// 地区id
 	area_id: string;
 	p_id: string;
-	// cid
 	cate_id: string;
 	cate_name: string;
 	score: string;

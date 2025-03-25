@@ -53,6 +53,7 @@ export default defineConfig({
 					"115.com",
 					"webapi.115.com",
 					"proapi.115.com",
+					"aps.115.com",
 					"dl.115cdn.net",
 					"cdnfhnfile.115cdn.net",
 					"v.anxia.com",

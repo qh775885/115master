@@ -68,10 +68,7 @@ export class FileItemExtMenu {
 					goToPlayer(
 						{
 							pickCode: this.itemInfo.attributes.pick_code,
-							title: this.itemInfo.attributes.title,
-							avNumber: getAvNumber(this.itemInfo.attributes.title) ?? "",
-							cid: this.itemInfo.attributes.cate_id,
-							size: parseInt(this.itemInfo.attributes.file_size ?? "0"),
+							cid: this.itemInfo.attributes.cid,
 						},
 						true,
 					);

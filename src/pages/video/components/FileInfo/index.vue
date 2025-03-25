@@ -2,7 +2,8 @@
     <!-- 文件名 -->
     <div class="header-file" v-if="fileInfo.error">
         <div class="header-file-error">
-            <span>❌ 获取文件信息失败</span>
+            <div>❌ 获取文件信息失败</div>
+            <div>{{ fileInfo.error }}</div>
         </div>
     </div>
     <div class="header-file" v-else-if="fileInfo.isLoading || (!fileInfo.isLoading && !fileInfo.isReady)">

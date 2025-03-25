@@ -41,10 +41,7 @@ export class FileItemClickPlay {
 		goToPlayer(
 			{
 				pickCode: this.itemInfo.attributes.pick_code,
-				title: this.itemInfo.attributes.title,
-				avNumber: this.itemInfo.avNumber || undefined,
-				cid: this.itemInfo.attributes.cate_id,
-				size: parseInt(this.itemInfo.attributes.file_size!),
+				cid: this.itemInfo.attributes.cid,
 			},
 			true,
 		);

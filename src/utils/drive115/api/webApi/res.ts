@@ -1,8 +1,17 @@
+import type { PathItem, PlaylistItem } from "../entity";
+
 type Base<T> = {
 	state: boolean;
 	errNo: number;
 } & T;
 
+// 获取文件列表
+export type Files = Base<{
+	data: PlaylistItem[];
+	path: PathItem[];
+}>;
+
+// 应用浏览器下载
 export type FilesAppChromeDown = Base<{
 	data: {
 		[key: string]: {
@@ -13,11 +22,13 @@ export type FilesAppChromeDown = Base<{
 	};
 }>;
 
+// 下载
 export type FilesDownload = Base<{
 	file_url: string;
 }>;
 
-export type FilesInfo = Base<{
+// 视频文件信息
+export type FilesVideo = Base<{
 	// 是否开启内嵌字幕
 	inlay_power: number;
 	// 是否开启视频推送
@@ -72,4 +83,18 @@ export type FilesInfo = Base<{
 	user_turn: number;
 }>;
 
+// 收藏
 export type FilesStar = Base<unknown>;
+
+// 播放历史
+export type FilesHistory = Base<{
+	data: {
+		add_time: number;
+		category: number;
+		file_name: string;
+		hash: string;
+		pick_code: string;
+		thumb: string;
+		time: number;
+	};
+}>;
