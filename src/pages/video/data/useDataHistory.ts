@@ -13,7 +13,7 @@ export const useDataHistory = (
 		if (!isinit.value || !pickcode.value) {
 			return;
 		}
-		drive115.VodApiPostWebApiFilesHistory({
+		drive115.webApiPostWebApiFilesHistory({
 			op: "update",
 			pick_code: pickcode.value,
 			share_id: "0",
@@ -44,7 +44,7 @@ export const useDataHistory = (
 	const fetch = async (_pickcode: string) => {
 		pickcode.value = _pickcode;
 		try {
-			const res = await drive115.VodApiGetWebApiFilesHistory({
+			const res = await drive115.webApiGetWebApiFilesHistory({
 				fetch: "one",
 				pick_code: pickcode.value,
 				share_id: "0",

@@ -26,9 +26,9 @@ import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import { M3U8Clipper } from "../../../../utils/clipper/m3u8";
-import Drive115Instance from "../../../../utils/drive115";
 import "photoswipe/style.css";
 import { previewCache } from "../../../../utils/cache";
+import drive115 from "../../../../utils/drive115";
 import {
 	blobToBase64,
 	getImageSize,
@@ -102,7 +102,7 @@ const fetchVideoData = async () => {
 		return processedData;
 	}
 
-	const m3u8List = await Drive115Instance.getM3u8(props.pickCode);
+	const m3u8List = await drive115.getM3u8(props.pickCode);
 	const source = m3u8List.sort((a, b) => a.quality - b.quality)[0];
 	if (!source) return null;
 

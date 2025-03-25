@@ -44,14 +44,13 @@
 
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
-import { computed, nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
-import Drive115Instance from "../../utils/drive115";
 import drive115 from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
 import { isMac } from "../../utils/platform";
@@ -71,16 +70,27 @@ import { useDataSubtitles } from "./data/useSubtitlesData";
 import { useDataThumbnails } from "./data/useThumbnails";
 import { useDataVideoSources } from "./data/useVideoSource";
 
+// 播放器 Ref
 const xplayerRef = ref<InstanceType<typeof XPlayerInstance>>();
+// 偏好设置
 const preferences = usePreferences();
+// 参数
 const params = useParamsVideoPage();
+// 视频源
 const DataVideoSources = useDataVideoSources();
+// 缩略图
 const DataThumbnails = useDataThumbnails(preferences);
+// 字幕
 const DataSubtitles = useDataSubtitles();
+// 番号信息
 const DataMovieInfo = useDataMovieInfo();
+// 文件信息
 const DataFileInfo = useDataFileInfo();
+// 播放列表
 const DataPlaylist = useDataPlaylist();
+// 历史记录
 const DataHistory = useDataHistory(xplayerRef);
+// 收藏
 const DataMark = useMark(DataFileInfo);
 
 // 处理字幕变化
@@ -113,9 +123,6 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 	goToPlayer({
 		cid: params.cid.value,
 		pickCode: item.pc,
-		title: item.n,
-		size: item.s,
-		avNumber: getAvNumber(item.n),
 	});
 	params.getParams();
 	DataVideoSources.clear();
@@ -130,28 +137,36 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 
 // 加载数据
 const loadData = async (isFirst = true) => {
-	await DataVideoSources.fetch(params.pickCode.value);
+	// 加载视频源
+	DataVideoSources.fetch(params.pickCode.value);
 
+	// 加载历史记录
 	try {
-		await DataHistory.fetch(params.pickCode.value);
+		DataHistory.fetch(params.pickCode.value);
 	} catch (error) {
 		console.error(error);
 	}
 
-	await Drive115Instance.fakeVodAuthPickcode(params.pickCode.value);
-	DataFileInfo.execute(0, params.pickCode.value);
-	isFirst && DataPlaylist.execute(0, params.cid.value, params.pickCode.value);
+	// 加载文件信息
+	DataFileInfo.execute(0, params.pickCode.value).then((res) => {
+		const avNumber = getAvNumber(res.file_name);
+		// 设置标题
+		useTitle(DataFileInfo.state.file_name || "");
+		// 加载番号信息
+		if (avNumber) {
+			DataMovieInfo.value.javDBState.execute(0, avNumber);
+			DataMovieInfo.value.javBusState.execute(0, avNumber);
+		}
+		// 加载字幕
+		DataSubtitles.execute(0, params.pickCode.value, avNumber);
+	});
+
+	// 加载播放列表
+	isFirst && DataPlaylist.execute(0, params.cid.value);
+
+	// 初始化缩略图
 	DataThumbnails.initialize(DataVideoSources.list.value);
-
-	if (params.avNumber.value) {
-		DataMovieInfo.value.javDBState.execute(0, params.avNumber.value);
-		DataMovieInfo.value.javBusState.execute(0, params.avNumber.value);
-	}
-	DataSubtitles.execute(0, params.pickCode.value, params.avNumber.value);
 };
-
-// 设置标题
-useTitle(params.title.value || "");
 
 // 挂载
 onMounted(async () => {

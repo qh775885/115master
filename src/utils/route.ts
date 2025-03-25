@@ -11,8 +11,6 @@ export const goToPlayer = (
 	const params = new URLSearchParams({
 		cid: playingVideoInfo.cid || "",
 		pick_code: playingVideoInfo.pickCode,
-		avNumber: playingVideoInfo.avNumber || "",
-		title: playingVideoInfo.title,
 	});
 	const url = `https://${NORMAL_HOST_155}/web/lixian/master/video/?${params.toString()}`;
 	if (isOpenInTab) {

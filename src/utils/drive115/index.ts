@@ -1,6 +1,6 @@
-import { Drive115GM } from "./gm";
+import { Drive115Wrap } from "./wrap";
 
-const Drive115Instance = new Drive115GM();
+const Drive115Instance = new Drive115Wrap();
 
 export default Drive115Instance;
 
