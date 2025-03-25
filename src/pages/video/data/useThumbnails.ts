@@ -23,17 +23,17 @@ const LANE_CONFIG: Record<string, LaneConfig> = {
 	must: {
 		name: "must",
 		priority: 1,
-		maxConcurrent: 5,
+		maxConcurrent: 4,
 	},
 	buffer: {
 		name: "buffer",
 		priority: 2,
-		maxConcurrent: 5,
+		maxConcurrent: 4,
 	},
 };
 
 const SCHEDULER_OPTIONS = {
-	maxConcurrent: 5,
+	maxConcurrent: 4,
 	maxQueueLength: 500,
 	laneConfig: LANE_CONFIG,
 };

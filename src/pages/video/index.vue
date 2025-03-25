@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTitle } from "@vueuse/core";
+import { useTimeoutFn, useTitle } from "@vueuse/core";
 import { nextTick, onMounted, ref } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
@@ -138,14 +138,12 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 // 加载数据
 const loadData = async (isFirst = true) => {
 	// 加载视频源
-	DataVideoSources.fetch(params.pickCode.value);
-
-	// 加载历史记录
-	try {
+	DataVideoSources.fetch(params.pickCode.value).then(() => {
+		// 加载历史记录
 		DataHistory.fetch(params.pickCode.value);
-	} catch (error) {
-		console.error(error);
-	}
+		// 初始化缩略图
+		DataThumbnails.initialize(DataVideoSources.list.value);
+	});
 
 	// 加载文件信息
 	DataFileInfo.execute(0, params.pickCode.value).then((res) => {
@@ -163,9 +161,6 @@ const loadData = async (isFirst = true) => {
 
 	// 加载播放列表
 	isFirst && DataPlaylist.execute(0, params.cid.value);
-
-	// 初始化缩略图
-	DataThumbnails.initialize(DataVideoSources.list.value);
 };
 
 // 挂载
