@@ -58,9 +58,13 @@ export type XPlayerProps = {
 	playbackRate: number;
 	// 设置项
 	preferences?: {
+		// 自动缓冲缩略图
 		autoLoadThumbnails: boolean;
+		// 全量缓冲缩略图
 		superAutoBuffer: boolean;
 	};
+	// 字幕渲染类型
+	subtitleRenderType?: "native" | "custom";
 	// 缩略图请求
 	onThumbnailRequest?: ({
 		type,

@@ -12,20 +12,18 @@ import { subtitlecat } from "../../../utils/subtitle/subtitlecat";
 // 获取字幕
 export const useDataSubtitles = () => {
 	// 通过 subtitleCat 获取字幕
-	const getFromSubtitlecat = async (pickcode: string, keyword: string) => {
+	const getFromSubtitlecat = async (keyword: string) => {
 		if (!keyword) {
 			return [];
 		}
-		const ResSubtitles = await subtitlecat.fetchSubtitle(keyword, "zh-CN");
-		const preference = await subtitlePreference.getPreference(pickcode);
-		return ResSubtitles.map((subtitle) => ({
+		const res = await subtitlecat.fetchSubtitle(keyword, "zh-CN");
+		return res.map((subtitle) => ({
 			id: subtitle.id,
 			url: subtitle.url,
 			label: subtitle.title,
 			srclang: subtitle.targetLanguage,
 			source: "Subtitle Cat",
 			kind: "subtitles" as const,
-			default: preference ? preference.id === subtitle.id : false,
 		}));
 	};
 
@@ -54,9 +52,16 @@ export const useDataSubtitles = () => {
 	// 获取字幕
 	const subtitles = useAsyncState<Subtitle[]>(
 		async (pickcode: string, keyword: string) => {
-			const subtitleCats = await getFromSubtitlecat(pickcode, keyword);
+			const preference = await subtitlePreference.getPreference(pickcode);
+			const subtitleCats = await getFromSubtitlecat(keyword);
 			const subtitles115 = await getFrom115(pickcode);
-			return [...subtitleCats, ...subtitles115];
+
+			return [...subtitleCats, ...subtitles115].map((s) => {
+				return {
+					...s,
+					default: preference ? preference.id === s.id : false,
+				};
+			});
 		},
 		[],
 		{

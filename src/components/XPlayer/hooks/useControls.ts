@@ -1,9 +1,11 @@
-import { useDebounceFn, useEventListener } from "@vueuse/core";
-import { onUnmounted, shallowRef } from "vue";
+import { useEventListener } from "@vueuse/core";
+import { computed, onUnmounted, shallowRef, watch } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 // 控制栏
 export const useControls = (ctx: PlayerContext) => {
+	const mainRef = shallowRef<HTMLDivElement | null>(null);
+
 	// 控制栏是否显示
 	const visible = shallowRef(true);
 	// 鼠标是否在控制栏
@@ -12,6 +14,10 @@ export const useControls = (ctx: PlayerContext) => {
 	const isMouseInPopup = shallowRef(false);
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
+	// 控制栏高度
+	const controlsMainHeight = computed(() => {
+		return mainRef.value?.offsetHeight;
+	});
 
 	// 设置鼠标是否在控制栏
 	const setIsMouseInControls = (value: boolean) => {
@@ -82,6 +88,19 @@ export const useControls = (ctx: PlayerContext) => {
 		hide();
 	};
 
+	// 监听控制栏高度
+	watch([visible, controlsMainHeight], () => {
+		if (!ctx.cssVar) {
+			return;
+		}
+
+		if (visible.value) {
+			ctx.cssVar.safeAreaBottom.value = `${controlsMainHeight.value}px`;
+		} else {
+			ctx.cssVar.safeAreaBottom.value = "0px";
+		}
+	});
+
 	// 监听
 	useEventListener(ctx.refs.rootRef, "mousemove", handleRootMouseMove);
 	useEventListener(ctx.refs.rootRef, "mouseleave", handleRootMouseLeave);
@@ -92,6 +111,8 @@ export const useControls = (ctx: PlayerContext) => {
 
 	return {
 		visible,
+		mainRef,
+		controlsMainHeight,
 		show,
 		hide,
 		showWithAutoHide,

@@ -1,20 +1,32 @@
 <template>
 	<div 
-		class="controls-wrapper"
+		:class="$style['controls-wrapper']"
 		v-if="source.list.value.length > 0"
 		@mouseenter="controls.setIsMouseInControls(true)"
 		@mouseleave="controls.setIsMouseInControls(false)"
 	>
 		<!-- 控制栏渐变 -->
-		<div class="controls-gradient" :class="{ 'is-visible': controls.visible.value }"></div>
+		<div :class="[
+			$style['controls-bg'],
+			{
+				[$style['is-visible']]: controls.visible.value
+			}
+		]"></div>
 		<!-- 视频控制栏 -->
-		<div class="video-controls" :class="{ 'is-visible': controls.visible.value }">
-			<div class="controls-content">
+		<div 
+			:ref="controls.mainRef"
+			:class="[
+				$style['controls-main'],
+				{
+					[$style['is-visible']]: controls.visible.value
+				}
+		]">
+			<div :class="$style['controls-content']">
 				<!-- 进度条 -->
 				<ProgressBar 
 				/>
-				<div class="controls-bar">
-					<div class="left-controls">
+				<div :class="$style['controls-bar']">
+					<div :class="$style['left']">
 						<!-- 播放按钮 -->
 						<PlayButton />
 						<!-- 音量控制 -->
@@ -22,7 +34,7 @@
 						<!-- 时间显示 -->
 						<TimeDisplay />
 					</div>
-					<div class="right-controls">
+					<div :class="$style['right']">
 						<!-- 倍速控制 -->
 						<PlaybackRateButton />
 						<!-- 字幕控制 -->
@@ -43,7 +55,6 @@
 				<ScrollTip />
 			</div>
 		</div>
-		
 	</div>
 </template>
 
@@ -66,16 +77,17 @@ import VolumeControl from "./VolumeControl.vue";
 const { controls, source } = usePlayerContext();
 </script>
 
-<style scoped>
+<style module>
 .controls-wrapper {
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	right: 0;
 	pointer-events: auto;
+	z-index: 3;
 }
 
-.controls-gradient {
+.controls-bg {
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -87,28 +99,25 @@ const { controls, source } = usePlayerContext();
 	z-index: 1;
 	pointer-events: none;
 	opacity: 0;
-	transition: opacity 0.3s ease;
-}
-.controls-gradient.is-visible {
-	opacity: 1;
+	transition: opacity 0.25s ease;
+	&.is-visible {
+		opacity: 1;
+	}
 }
 
-.video-controls {
+.controls-main {
 	position: absolute;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+	background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
 	color: #fff;
 	z-index: 2;
-	transform: translateY(calc(100% - 30px));
-	opacity: 0.5;
-	transition: all 0.3s ease;
-}
-
-.video-controls.is-visible {
-	transform: translateY(0);
-	opacity: 1;
+	opacity: 0;
+	transition: all 0.25s ease;
+	&.is-visible {
+		opacity: 1;
+	}
 }
 
 .controls-content {
@@ -119,56 +128,23 @@ const { controls, source } = usePlayerContext();
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-}
+	.left,
+	.right {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+	}
 
-.left-controls,
-.right-controls {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-}
+	button {
+		background: none;
+		border: none;
+		color: white;
+		cursor: pointer;
+		padding: 5px;
+	}
 
-button {
-	background: none;
-	border: none;
-	color: white;
-	cursor: pointer;
-	padding: 5px;
-}
-
-button:hover {
-	opacity: 0.8;
-}
-
-.material-symbols-rounded {
-	font-size: 24px;
-	color: white;
-	font-variation-settings: "FILL" 1, "wght" 400, "GRAD" 0, "opsz" 24;
-}
-
-.progress-container {
-	position: absolute;
-	top: 0;
-	left: 20px;
-	right: 20px;
-	z-index: 3;
-}
-
-.progress-container.hide {
-	transform: translateY(84px);
-}
-
-.controls-buttons {
-	margin-top: 40px;
-	padding-bottom: 12px;
-	transform-origin: bottom;
-}
-
-.controls-buttons.hide {
-	transform: translateY(84px) scaleX(0);
-}
-
-.controls-gradient.hide {
-	opacity: 0;
+	button:hover {
+		opacity: 0.8;
+	}
 }
 </style> 

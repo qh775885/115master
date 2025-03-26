@@ -90,9 +90,7 @@ const triggerPositiong = computed(() => {
 	const menuRect = popupRef.value.getBoundingClientRect();
 
 	// 获取播放器容器
-	const playerContainer = props.triggerRef.closest(".x-player");
-	if (!playerContainer) return { x: 0, y: 0 };
-
+	const playerContainer = refs.rootRef.value;
 	const playerRect = playerContainer.getBoundingClientRect();
 
 	// 计算触发元素相对于播放器的位置

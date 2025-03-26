@@ -1,14 +1,13 @@
 <template>
 	<div
-		class="x-player"
 		ref="rootRef"
-		:class="{ 'is-fullscreen': fullscreen.isFullscreen.value }"
+		:class="[$style['x-player'], { 'is-fullscreen': fullscreen.isFullscreen.value }]"
 	>
 		<!-- 播放器容器 -->
-		<div class="player-container">
+		<div :class="$style['x-player-container']">
 			<!-- 视频容器 -->
 			<div
-				class="video-container"
+				:class="$style['x-player-video-container']"
 			>
 				<!-- 视频元素 -->
 				<video
@@ -25,15 +24,18 @@
 					:style="transform.transformStyle.value"
 					@click="playing.togglePlay"
 				>
-					<track
-						v-for="(subtitle, index) in subtitles.list.value"
-						:key="index"
-						:src="subtitle.url"
-						:label="subtitle.label"
-						:srclang="subtitle.srclang"
-						:kind="subtitle.kind"
-						:default="subtitle.default"
-					/>
+					<!-- 字幕 -->
+					<template v-if="props.subtitleRenderType === 'native'">
+						<track
+							v-for="(subtitle, index) in subtitles.list.value"
+							:key="index"
+							:src="subtitle.url"
+							:label="subtitle.label"
+							:srclang="subtitle.srclang"
+							:kind="subtitle.kind"
+							:default="subtitle.default"
+						/>
+					</template>
 				</video>
 
 				<!-- 播放/暂停动画 -->
@@ -42,27 +44,36 @@
 				<!-- 加载动画 -->
 				<Loading :show="playing.isLoading.value" />
 
+				<!-- 字幕 -->
+				<Subtitle v-if="props.subtitleRenderType === 'custom'" />
+
 				<!-- 视频遮罩 -->
 				<div
-					class="video-mask"
+					:class="$style['x-player-video-mask']"
 					ref="videoMaskRef"
 					@click="playing.togglePlay"
 					@dblclick="fullscreen.toggleFullscreen"
 				></div>
+
 				<!-- 视频控制栏 -->
 				<VideoControls />
 			</div>
 		</div>
+
 		<!-- 弹出层容器 -->
 		<div
-			class="portal-container"
+			:class="$style['x-player-portal-container']"
 			:ref="portalContext.container"
 		></div>
 
 		<!-- 状态HUD显示 -->
 		<HUD />
 
-		<div class="resume-container" v-if="source.isInterrupt.value">
+		<!-- 恢复容器 -->
+		<div
+			:class="$style['x-player-resume-container']"
+			v-if="source.isInterrupt.value"
+		>
 			<button @click="source.resumeSource">恢复</button>
 		</div>
 	</div>
@@ -74,6 +85,7 @@ import VideoControls from "./components/Controls/index.vue";
 import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
 import PlayAnimation from "./components/PlayAnimation/index.vue";
+import Subtitle from "./components/Subtitle/index.vue";
 import { usePlayerProvide } from "./hooks/usePlayerProvide";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
@@ -81,6 +93,7 @@ import "./styles/theme.css";
 
 // 属性
 const props = withDefaults(defineProps<XPlayerProps>(), {
+	subtitleRenderType: "native",
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
 });
@@ -110,30 +123,30 @@ defineExpose({
 });
 </script>
 
-<style scoped>
+<style module>
 .x-player {
 	width: 100%;
 	height: 100%;
 	position: relative;
 	background-color: var(--x-player-background-color);
-}
-.x-player * {
-	user-select: none;
+	-webkit-font-smoothing: antialiased;
+	* {
+		user-select: none;
+	}
+	&.is-fullscreen {
+		width: 100vw;
+		height: 100vh;
+	}
 }
 
-.x-player.is-fullscreen {
-	width: 100vw;
-	height: 100vh;
-}
-
-.player-container {
+.x-player-container {
 	position: relative;
 	width: 100%;
 	height: 100%;
 	overflow: hidden;
 }
 
-.video-container {
+.x-player-video-container {
 	position: relative;
 	z-index: 1;
 	width: 100%;
@@ -141,9 +154,14 @@ defineExpose({
 	display: flex;
 	justify-content: center;
 	align-items: center;
+	video {
+		width: 100%;
+		height: 100%;
+		backdrop-filter: saturate(1);
+	}
 }
 
-.video-mask {
+.x-player-video-mask {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -152,18 +170,7 @@ defineExpose({
 	z-index: 2;
 }
 
-video {
-	width: 100%;
-	height: 100%;
-	backdrop-filter: saturate(1);
-}
-
-/* 确保控制栏在遮罩层上方 */
-:deep(.controls-wrapper) {
-	z-index: 3;
-}
-
-.portal-container {
+.x-player-portal-container {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -171,13 +178,12 @@ video {
 	height: 100%;
 	pointer-events: none;
 	z-index: 9999;
+	> * {
+		pointer-events: auto;
+	}
 }
 
-.portal-container > * {
-	pointer-events: auto;
-}
-
-.resume-container {
+.x-player-resume-container {
 	position: absolute;
 	top: 0;
 	left: 0;
