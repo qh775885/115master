@@ -1,4 +1,4 @@
-import type { PathItem, PlaylistItem } from "../entity";
+import type { MoviesSubtitleItem, PathItem, PlaylistItem } from "../entity";
 
 type Base<T> = {
 	state: boolean;
@@ -96,5 +96,13 @@ export type FilesHistory = Base<{
 		pick_code: string;
 		thumb: string;
 		time: number;
+	};
+}>;
+
+// 电影字幕
+export type MoviesSubtitle = Base<{
+	data: {
+		autoload: MoviesSubtitleItem;
+		list: MoviesSubtitleItem[];
 	};
 }>;

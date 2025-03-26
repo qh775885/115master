@@ -70,3 +70,8 @@ export type PostFilesHistory = FilesHistoryBase & {
 	time: number;
 	definition: "0";
 };
+
+// 获取电影字幕请求
+export type GetMoviesSubtitle = {
+	pickcode: string;
+};

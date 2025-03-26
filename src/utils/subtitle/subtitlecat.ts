@@ -39,6 +39,7 @@ export class SubtitleCat {
 	logger = new AppLogger("Utils SubtitleCat");
 	private iRequest = GMRequestInstance;
 
+	// 获取字幕文本
 	getSubtitleText(url: string): Promise<string> {
 		return new Promise((resolve, reject) => {
 			this.iRequest
@@ -52,6 +53,7 @@ export class SubtitleCat {
 		});
 	}
 
+	// 获取字幕 url
 	fetchSubtitleUrl(url: string, language: string): Promise<string | undefined> {
 		return new Promise((resolve, reject) => {
 			this.iRequest
@@ -74,6 +76,7 @@ export class SubtitleCat {
 		});
 	}
 
+	// 解析字幕行
 	private parseSubtitleRow(
 		row: Element,
 		language: string,
@@ -114,6 +117,7 @@ export class SubtitleCat {
 		};
 	}
 
+	// 处理字幕项
 	private async processSubtitleItem(
 		item: SubtitleSearchResult,
 	): Promise<ProcessedSubtitle | undefined> {
@@ -145,6 +149,7 @@ export class SubtitleCat {
 		});
 	}
 
+	// 获取字幕
 	async fetchSubtitle(
 		keyword: string,
 		language: string,

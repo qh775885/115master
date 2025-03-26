@@ -64,9 +64,4 @@ const visibleModel = useVModel(props, "visible", emit);
 	color: var(--x-player-color-primary, #007aff);
 	background: rgba(0, 122, 255, 0.1);
 }
-
-:deep(.menu-item.active::after) {
-	content: "✓";
-	margin-left: 8px;
-}
 </style> 
