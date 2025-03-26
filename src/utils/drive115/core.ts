@@ -232,4 +232,16 @@ export class Drive115Core {
 
 		return (await response.json()) as WebApi.Res.FilesStar;
 	}
+
+	// 获取电影字幕
+	public async webApiGetMoviesSubtitle(params: WebApi.Req.GetMoviesSubtitle) {
+		const response = await fetchRequest.get(
+			new URL("/movies/subtitle", this.WEB_API_URL).href,
+			{
+				params,
+			},
+		);
+
+		return (await response.json()) as WebApi.Res.MoviesSubtitle;
+	}
 }

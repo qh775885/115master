@@ -41,6 +41,8 @@ export interface Subtitle {
 	kind: "subtitles" | "captions";
 	// 字幕默认
 	default?: boolean;
+	// 字幕来源
+	source?: string;
 }
 
 export type XPlayerProps = {

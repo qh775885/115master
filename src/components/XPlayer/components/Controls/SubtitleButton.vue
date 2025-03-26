@@ -1,8 +1,8 @@
 <template>
-	<div class="subtitle-button">
+	<div :class="$style['subtitle-button']">
 		<button
 			ref="buttonRef"
-			class="control-button"
+			:class="$style['control-button']"
 			:title="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
 			:disabled="subtitles.loading.value || !subtitles.ready.value|| subtitles.list.value?.length === 0"
 			@click="toggleMenu"
@@ -10,17 +10,19 @@
 			<!-- loading -->
 			<Icon 
 				v-if="subtitles.loading.value || !subtitles.ready.value"
+				:class="$style['loading-icon']"
 				:svg="ProgressActivity"
-				class="loading-icon"
 			/>
 			<!-- found 字幕 -->
 			<Icon 
 				v-else 
 				:svg="subtitles.current.value ? Subtitles : SubtitlesOff"
-				class="subtitle-icon"
-				:class="{
-					'disabled': subtitles.list.value?.length === 0
-				}"/>
+				:class="[
+					$style['subtitle-icon'],
+					{
+						[$style['disabled']]: subtitles.list.value?.length === 0
+					}
+				]"/>
 		</button>
 		<Menu
 			v-model:visible="menuVisible"
@@ -41,7 +43,13 @@
 				:class="{ active: subtitles.current.value?.url === subtitle.url }"
 				@click="handleSubtitleSelect(subtitle)"
 			>
-				{{ subtitle.label }}
+				<div :class="$style['menu-item-content']">
+					<span :class="$style['subtitle-label']">{{ subtitle.label }}</span>
+					<span v-if="subtitle.source" :class="$style['subtitle-source']">
+						{{ subtitle.source }}
+					</span>
+				</div>
+				
 			</div>
 		</Menu>
 	</div>
@@ -76,7 +84,7 @@ const handleDisableSubtitle = () => {
 };
 </script>
 
-<style scoped>
+<style module>
 .subtitle-button {
 	position: relative;
 	display: inline-block;
@@ -106,6 +114,29 @@ const handleDisableSubtitle = () => {
 
 .loading-icon {
 	animation: spin 1s linear infinite;
+}
+
+.menu-item-content {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	flex: 1;
+}
+
+.subtitle-label {
+	font-size: 14px;
+}
+
+.subtitle-source {
+	display: inline-flex;
+	align-items: center;
+	font-size: 8px;
+	color: #000;
+	background-color: rgba(195, 195, 195, 0.5);
+	padding: 2px 6px;
+	border-radius: 8px;
+	flex-shrink: 0;
 }
 
 @keyframes spin {
