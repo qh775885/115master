@@ -10,6 +10,7 @@ import {
 } from "../types";
 import { FileItemActressInfo } from "./actressInfo";
 import { FileItemClickPlay } from "./clickPlay";
+import { FileListDownload } from "./download";
 import { FileItemExtInfo } from "./extInfo";
 import { FileItemExtMenu } from "./extMenu";
 import { FileItemPreview } from "./preview";
@@ -25,6 +26,8 @@ class FileItemLoader {
 	private extMenu: FileItemExtMenu | null = null;
 	// 点击播放
 	private clickPlay: FileItemClickPlay | null = null;
+	// 下载
+	private download: FileListDownload | null = null;
 
 	constructor(
 		private readonly itemNode: HTMLElement,
@@ -86,6 +89,10 @@ class FileItemLoader {
 		// 加载点击播放
 		this.clickPlay = new FileItemClickPlay(this.itemNode, this.itemInfo);
 		this.clickPlay.load();
+
+		// 加载下载
+		this.download = new FileListDownload(this.itemNode, this.itemInfo);
+		this.download.load();
 	}
 
 	// 销毁

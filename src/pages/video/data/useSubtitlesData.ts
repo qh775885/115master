@@ -1,7 +1,7 @@
 import { useAsyncState } from "@vueuse/core";
 import type { Subtitle } from "../../../components/XPlayer/types";
 import { subtitlePreference } from "../../../utils/cache/subtitlePreference";
-import drive115 from "../../../utils/drive115";
+import { drive115 } from "../../../utils/drive115";
 import { fetchRequest } from "../../../utils/request/fetchRequest";
 import {
 	convertSrtToVtt,

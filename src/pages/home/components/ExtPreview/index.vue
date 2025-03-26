@@ -28,7 +28,7 @@ import Skeleton from "../../../../components/Skeleton/index.vue";
 import { M3U8Clipper } from "../../../../utils/clipper/m3u8";
 import "photoswipe/style.css";
 import { previewCache } from "../../../../utils/cache";
-import drive115 from "../../../../utils/drive115";
+import { drive115 } from "../../../../utils/drive115";
 import {
 	blobToBase64,
 	getImageSize,
