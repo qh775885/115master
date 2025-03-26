@@ -2,7 +2,9 @@ import { ref } from "vue";
 import { setVideoCookie } from "..";
 import type { VideoSource } from "../../../components/XPlayer";
 import { qualityNumMap } from "../../../constants/quality";
-import drive115 from "../../../utils/drive115";
+import { drive115 } from "../../../utils/drive115";
+
+// 视频源
 export const useDataVideoSources = () => {
 	const list = ref<VideoSource[]>([]);
 

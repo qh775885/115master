@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { useTimeoutFn, useTitle } from "@vueuse/core";
+import { useTitle } from "@vueuse/core";
 import { nextTick, onMounted, ref } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
@@ -52,7 +52,7 @@ import type { Subtitle } from "../../components/XPlayer/types";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
-import drive115 from "../../utils/drive115";
+import { drive115 } from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
 import { isMac } from "../../utils/platform";
 import { goToPlayer } from "../../utils/route";

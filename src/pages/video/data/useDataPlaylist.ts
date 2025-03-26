@@ -1,6 +1,6 @@
 import { useAsyncState } from "@vueuse/core";
 import { reactive } from "vue";
-import drive115 from "../../../utils/drive115";
+import { drive115 } from "../../../utils/drive115";
 
 export const useDataPlaylist = () => {
 	const playlist = useAsyncState(
