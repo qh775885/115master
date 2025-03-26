@@ -48,9 +48,6 @@ export const useSubtitles = (ctx: PlayerContext) => {
 		ctx.rootProps.onSubtitleChange?.(subtitle);
 	};
 
-	// 开关字幕
-	const switchEnabled = (_enabled: boolean) => {};
-
 	// 切换字幕开关
 	const toggleEnabled = () => {
 		if (current.value) {
@@ -100,7 +97,6 @@ export const useSubtitles = (ctx: PlayerContext) => {
 		ready: ctx.rootProps.subtitlesReady,
 		current,
 		change,
-		switchEnabled,
 		toggleEnabled,
 		restoreCurrentSubtitle,
 	};

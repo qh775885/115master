@@ -11,6 +11,7 @@
 					v-model:playbackRate="preferences.playbackRate"
 					:sources="DataVideoSources.list"
 					:subtitles="DataSubtitles.state"
+					subtitleRenderType="custom"
 					:subtitlesLoading="DataSubtitles.isLoading"
 					:subtitlesReady="DataSubtitles.isReady"
 					:preferences="preferences"
@@ -184,6 +185,7 @@ onMounted(async () => {
 	--page-main-width-b: calc(100vw - 380px - 24px - 36px);
 	--page-main-width: min(var(--page-main-width-a), var(--page-main-width-b));
 	--video-player-width: var(--page-main-width);
+	-webkit-font-smoothing: antialiased;
 }
 
 .page-local-play {

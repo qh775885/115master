@@ -7,6 +7,7 @@ import {
 } from "vue";
 import type { XPlayerEmit, XPlayerProps } from "../types";
 import { useControls } from "./useControls";
+import { useCssVar } from "./useCssVar";
 import { useFullscreen } from "./useFullscreen";
 import { useHotKey } from "./useHotKey";
 import { useHud } from "./useHud";
@@ -38,6 +39,7 @@ export interface PlayerContext {
 	transform?: ReturnType<typeof useTransform>;
 	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
 	hud?: ReturnType<typeof useHud>;
+	cssVar?: ReturnType<typeof useCssVar>;
 	refs: {
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
 		rootRef: ShallowRef<HTMLElement | null>;
@@ -75,6 +77,7 @@ export function usePlayerProvide(
 		source: undefined,
 		hotKey: undefined,
 		thumbnailSettings: undefined,
+		cssVar: undefined,
 	};
 
 	// 音量
@@ -132,6 +135,10 @@ export function usePlayerProvide(
 	// HUD显示
 	const hud = useHud(context);
 	context.hud = hud;
+
+	// 变量
+	const cssVar = useCssVar(context);
+	context.cssVar = cssVar;
 
 	provide(PlayerSymbol, context);
 	return context;
