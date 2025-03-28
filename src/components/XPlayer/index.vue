@@ -3,6 +3,9 @@
 		ref="rootRef"
 		:class="[$style['x-player'], { 'is-fullscreen': fullscreen.isFullscreen.value }]"
 	>
+		<!-- SVG滤镜定义，使用v-html渲染 -->
+		<div v-html="videoEnhance.renderFilter.value"></div>
+		
 		<!-- 播放器容器 -->
 		<div :class="$style['x-player-container']">
 			<!-- 视频容器 -->
@@ -21,7 +24,7 @@
 					:controls="false"
 					:playsinline="true"
 					:webkit-playsinline="true"
-					:style="transform.transformStyle.value"
+					:style="[transform.transformStyle.value, videoEnhance.getFilterStyle.value]"
 					@click="playing.togglePlay"
 				>
 					<!-- 字幕 -->
@@ -80,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import { shallowRef } from "vue";
+import { computed, ref, shallowRef, watch } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
@@ -96,6 +99,7 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
 	subtitleRenderType: "native",
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
+	sharpen: 10,
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();
@@ -108,12 +112,20 @@ const videoMaskRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const { fullscreen, volume, playing, source, subtitles, progress, transform } =
-	usePlayerProvide(props, emit, {
-		rootRef,
-		videoElementRef,
-		videoMaskRef,
-	});
+const {
+	fullscreen,
+	volume,
+	playing,
+	source,
+	subtitles,
+	progress,
+	transform,
+	videoEnhance,
+} = usePlayerProvide(props, emit, {
+	rootRef,
+	videoElementRef,
+	videoMaskRef,
+});
 
 // 暴露方法
 defineExpose({
@@ -157,7 +169,6 @@ defineExpose({
 	video {
 		width: 100%;
 		height: 100%;
-		backdrop-filter: saturate(1);
 	}
 }
 
