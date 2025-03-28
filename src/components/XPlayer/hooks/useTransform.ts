@@ -52,6 +52,7 @@ export const useTransform = (_ctx: PlayerContext) => {
 		const transforms = [
 			`rotate(${rotate.value}deg)`,
 			`scale(${scale.value * (flipX.value ? -1 : 1)}, ${scale.value * (flipY.value ? -1 : 1)})`,
+			"translateZ(0)",
 		];
 
 		return {

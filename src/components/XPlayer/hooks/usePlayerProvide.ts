@@ -20,6 +20,7 @@ import { useSource } from "./useSources";
 import { useSubtitles } from "./useSubtitles";
 import { useThumbnailSettings } from "./useThumbnailSettings";
 import { useTransform } from "./useTransform";
+import { useVideoEnhance } from "./useVideoEnhance";
 import { useVolume } from "./useVolume";
 
 export interface PlayerContext {
@@ -40,6 +41,7 @@ export interface PlayerContext {
 	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
 	hud?: ReturnType<typeof useHud>;
 	cssVar?: ReturnType<typeof useCssVar>;
+	videoEnhance?: ReturnType<typeof useVideoEnhance>;
 	refs: {
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
 		rootRef: ShallowRef<HTMLElement | null>;
@@ -78,6 +80,7 @@ export function usePlayerProvide(
 		hotKey: undefined,
 		thumbnailSettings: undefined,
 		cssVar: undefined,
+		videoEnhance: undefined,
 	};
 
 	// 音量
@@ -139,6 +142,10 @@ export function usePlayerProvide(
 	// 变量
 	const cssVar = useCssVar(context);
 	context.cssVar = cssVar;
+
+	// 视频增强
+	const videoEnhance = useVideoEnhance(context);
+	context.videoEnhance = videoEnhance;
 
 	provide(PlayerSymbol, context);
 	return context;
