@@ -19,9 +19,25 @@ export const useSource = (ctx: PlayerContext) => {
 	// 是否中断
 	const isInterrupt = shallowRef(false);
 
+	// 播放错误处理
+	const handlePlayError = async (error: Error) => {
+		if (error instanceof DOMException && error.name === "AbortError") {
+			return;
+		}
+		if (error instanceof DOMException && error.name === "NotSupportedError") {
+			console.warn(
+				"Unsupported video sources, try switching to the next video source",
+			);
+
+			const { clear } = await initializeVideo(list.value[1]);
+			cleanupRef.value = clear;
+			return;
+		}
+		throw error;
+	};
+
 	// 初始化视频
 	const initializeVideo = async (source: VideoSource) => {
-		let promise: Promise<void> | undefined;
 		// 更新当前源
 		current.value = source;
 
@@ -44,25 +60,7 @@ export const useSource = (ctx: PlayerContext) => {
 			// 设置视频源
 			videoElementRef.value.src = source.url;
 			videoElementRef.value.load();
-			promise = videoElementRef.value.play().catch(async (error) => {
-				if (error instanceof DOMException && error.name === "AbortError") {
-					return;
-				}
-				if (
-					error instanceof DOMException &&
-					error.name === "NotSupportedError"
-				) {
-					console.warn(
-						"Unsupported video sources, try switching to the next video source",
-					);
-					const { promise: nextPromise, clear: nextClear } =
-						await initializeVideo(list.value[1]);
-					cleanupRef.value = nextClear;
-					promise = nextPromise;
-					return;
-				}
-				throw error;
-			});
+			videoElementRef.value.play().catch(handlePlayError);
 		}
 
 		const clear = () => {
@@ -72,7 +70,7 @@ export const useSource = (ctx: PlayerContext) => {
 			}
 		};
 
-		return { promise, clear };
+		return { clear };
 	};
 
 	// 切换视频源
@@ -90,7 +88,7 @@ export const useSource = (ctx: PlayerContext) => {
 		if (videoElementRef.value) {
 			videoElementRef.value.currentTime = currentTime;
 			if (wasPlaying) {
-				videoElementRef.value.play();
+				videoElementRef.value.play().catch(handlePlayError);
 			}
 		}
 	};
@@ -129,5 +127,6 @@ export const useSource = (ctx: PlayerContext) => {
 		interruptSource,
 		resumeSource,
 		isInterrupt,
+		handlePlayError,
 	};
 };

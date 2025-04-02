@@ -26,7 +26,7 @@ export const usePlaying = (ctx: PlayerContext) => {
 		if (!videoElementRef.value) return;
 		try {
 			if (videoElementRef.value.paused) {
-				await videoElementRef.value.play();
+				await videoElementRef.value.play().catch(ctx.source?.handlePlayError);
 			} else {
 				videoElementRef.value.pause();
 			}
