@@ -1,7 +1,7 @@
 <template>
     <!-- 文件名 -->
     <div :class="$style['header-file']" v-if="fileInfo.error">
-        <div class="header-file-error">
+        <div :class="$style['header-file-error']">
             <div>❌ 获取文件信息失败</div>
             <div>{{ fileInfo.error }}</div>
         </div>
@@ -19,8 +19,16 @@
             </span>
         </div>
         <div :class="$style['action-bar']">
-            <button :class="$style['action-bar-button']" @click="mark.toggleMark">
-                <Icon class="action-bar-button-icon" :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
+            <button 
+                v-if="isMac" 
+                :class="$style['action-bar__button']"
+                @click="handleLocalPlay('iina')"
+            >
+                <img :class="$style['action-bar__button-icon']" :src="iinaIcon" alt="IINA" />
+				<span>IINA</span>
+			</button>
+            <button :class="$style['action-bar__button']" @click="mark.toggleMark">
+                <Icon :class="$style['action-bar__button-icon']" :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
                 <span>收藏</span>
             </button>
         </div>
@@ -29,16 +37,25 @@
 <script setup lang="ts">
 import StarFillSvg from "@material-symbols/svg-400/rounded/star-fill.svg?component";
 import StarSvg from "@material-symbols/svg-400/rounded/star.svg?component";
+import iinaIcon from "../../../../assets/icons/iina-icon.png";
 import Icon from "../../../../components/Icon/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import { formatFileSize } from "../../../../utils/format";
+import { isMac } from "../../../../utils/platform";
 import type { useDataFileInfo } from "../../data/useDataFileInfo";
 import type { useMark } from "../../data/useDataMark";
-
 const props = defineProps<{
 	fileInfo: ReturnType<typeof useDataFileInfo>;
 	mark: ReturnType<typeof useMark>;
 }>();
+
+const emit = defineEmits<{
+	localPlay: [string];
+}>();
+
+const handleLocalPlay = (player: string) => {
+	emit("localPlay", player);
+};
 </script>
 
 <style module>
@@ -81,7 +98,7 @@ const props = defineProps<{
     flex-shrink: 0;
 }
 
-.action-bar-button {
+.action-bar__button {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -95,12 +112,12 @@ const props = defineProps<{
     transition: all 0.2s ease;
 }
 
-.action-bar-button:hover {
+.action-bar__button:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.action-bar-button svg {
-    width: 24px !important;
-    height: 24px !important;
+.action-bar__button-icon {
+    width: 24px;
+    height: 24px;
 }
 </style>

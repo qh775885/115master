@@ -6,6 +6,7 @@
 		}
 	]">
 		<div :class="$style['page-main']">
+			<!-- 视频播放器 -->
 			<XPlayer
 				ref="xplayerRef"
 				:class="$style['video-player']"
@@ -23,7 +24,7 @@
 				:onSubtitleChange="handleSubtitleChange"
 				@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
 			/>
-
+			<!-- 播放列表 -->
 			<Playlist
 				:class="$style['page-sider']"
 				:pickCode="params.pickCode.value"
@@ -32,13 +33,13 @@
 			/>
 		</div>
 		<div :class="$style['page-flow']">
-			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" />
-			<div :class="$style['local-player']">
-				<button v-if="isMac" :class="$style['page-local-play']" @click="handleLocalPlay('iina')">IINA Beta</button>
-			</div>
+			<!-- 文件信息 -->
+			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" @localPlay="handleLocalPlay" />
+			<!-- 电影信息 -->
 			<MovieInfo 
 				:movieInfos="DataMovieInfo"
 			/>
+			<!-- 底部 -->
 			<div :class="$style['page-footer']">
 				<Footer></Footer>
 			</div>
@@ -57,7 +58,6 @@ import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
 import { drive115 } from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
-import { isMac } from "../../utils/platform";
 import { goToPlayer } from "../../utils/route";
 import { webLinkIINA, webLinkShortcutsMpv } from "../../utils/weblink";
 import FileInfo from "./components/FileInfo/index.vue";
