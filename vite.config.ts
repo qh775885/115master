@@ -9,10 +9,8 @@ const icons = {
 	prod: "https://115.com/favicon.ico",
 	dev: "https://vitejs.dev/logo.svg",
 };
-
 const isProd = process.env.NODE_ENV === "production";
 const isAnalyze = process.env.ANALYZE === "true";
-
 const _cdn = cdn.jsdelivrFastly;
 
 // https://vitejs.dev/config/
@@ -83,18 +81,18 @@ export default defineConfig({
 					vue: _cdn("Vue", "dist/vue.global.prod.js"),
 					localforage: _cdn("localforage", "dist/localforage.min.js"),
 					lodash: _cdn("_", "lodash.min.js"),
-					"big-integer": cdn
-						.jsdelivrFastly("bigInt", "BigInteger.min.js")
-						.concat(util.dataUrl(";window.bigInt=bigInt;")),
-					"blueimp-md5": cdn.jsdelivr("md5", "js/md5.min.js"),
-					dayjs: cdn
-						.jsdelivrFastly("dayjs", "dayjs.min.js")
-						.concat(util.dataUrl(";window.dayjs=dayjs;")),
-					"mux.js": cdn
-						.jsdelivrFastly("muxjs", "dist/mux.min.js")
-						.concat(util.dataUrl(";window.Mux=muxjs;")),
+					"big-integer": _cdn("bigInt", "BigInteger.min.js").concat(
+						util.dataUrl(";window.bigInt=bigInt;"),
+					),
+					"blueimp-md5": _cdn("md5", "js/md5.min.js"),
+					dayjs: _cdn("dayjs", "dayjs.min.js").concat(
+						util.dataUrl(";window.dayjs=dayjs;"),
+					),
+					"mux.js": _cdn("muxjs", "dist/mux.min.js").concat(
+						util.dataUrl(";window.Mux=muxjs;"),
+					),
 					"hls.js": _cdn("Hls", "dist/hls.min.js"),
-					"m3u8-parser": cdn.jsdelivr("m3u8Parser", "dist/m3u8-parser.min.js"),
+					"m3u8-parser": _cdn("m3u8Parser", "dist/m3u8-parser.min.js"),
 					photoswipe: _cdn(
 						"photoswipe",
 						"dist/umd/photoswipe.umd.min.js",
