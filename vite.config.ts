@@ -54,18 +54,18 @@ export default defineConfig({
 				// 自动允许脚本跨域访问的域名
 				connect: [
 					"115.com",
+					"115vod.com",
+					"aps.115.com",
 					"webapi.115.com",
 					"proapi.115.com",
-					"aps.115.com",
+					"cpats01.115.com",
 					"dl.115cdn.net",
 					"cdnfhnfile.115cdn.net",
 					"v.anxia.com",
-					"115vod.com",
 					"subtitlecat.com",
 					"javbus.com",
 					"javdb.com",
 					"jdbstatic.com",
-					"cpats01.115.com",
 					"missav.ws",
 				],
 				resource: {
@@ -75,10 +75,6 @@ export default defineConfig({
 					"https://github.com/cbingb666/115master/releases/latest/download/115master.user.js",
 				updateURL:
 					"https://github.com/cbingb666/115master/releases/latest/download/115master.meta.js",
-
-				require: [
-					// "https://raw.githubusercontent.com/Tampermonkey/utils/refs/heads/main/requires/gh_2215_make_GM_xhr_more_parallel_again.js",
-				],
 			},
 			build: {
 				fileName: "115master.user.js",
