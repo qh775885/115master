@@ -136,6 +136,7 @@
                                 </button>
                             </div>
                             <div :class="$style['chunk-content']">
+                                
                                 <!-- 亮度 -->
                                 <div :class="$style['slider-item']">
                                     <div :class="$style['slider-label']">
@@ -231,6 +232,18 @@
                                         v-model.number="videoEnhance.sharpness.value"
                                     />
                                 </div>
+
+                                <!-- 禁用HDR -->
+                                <div :class="$style['slider-item']">
+                                    <div :class="$style['slider-label']">
+                                        <span>禁用HDR</span>
+                                        <div :class="$style['toggle-switch']" @click="videoEnhance.disabledHDR.value = !videoEnhance.disabledHDR.value">
+                                            <div :class="[$style['toggle-track'], { [$style.active]: videoEnhance.disabledHDR.value }]">
+                                                <div :class="[$style['toggle-thumb'], { [$style.active]: videoEnhance.disabledHDR.value }]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -295,7 +308,7 @@ const toggleMenu = () => {
     flex-direction: column;
     padding: 4px 0;
     margin-bottom: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(55,55,55,.5);
     border-radius: 8px;
 }
 
@@ -495,9 +508,9 @@ const toggleMenu = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
 }
 
 .slider-value {
@@ -544,6 +557,41 @@ const toggleMenu = () => {
 
     &:hover::-moz-range-thumb {
         box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
+    }
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle-track {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    background: #505050;
+    border-radius: 22px;
+    transition: background 0.2s;
+    
+    &.active {
+        background: #0078FF;
+    }
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    
+    &.active {
+        left: calc(100% - 21px);
     }
 }
 </style>

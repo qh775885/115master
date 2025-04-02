@@ -1,11 +1,10 @@
 <template>
 	<button 
+		:class="$style['playlist-button']"
 		title="播放列表(B)"
 		@click="fullscreen.toggleShowSider" 
 	>
-		<Icon :svg="SubscriptionsSvg" :class="[$style['icon'], {
-			[`${$style['show']}`]: show,
-		}]" />
+		<Icon :svg="SubscriptionsSvg" />
 	</button>
 </template>
 
@@ -21,9 +20,15 @@ const show = computed(() => {
 </script>
 
 <style module>
-.icon {
-	&.show {
-		fill: var(--color-primary);
-	}
+.playlist-button {
+	background-color: transparent;
+	border: none;
+	padding: 0;
+	border-radius: 50%;
+	background-color: rgba(15, 15, 15, 0.9);
+	box-shadow: 0 0 10px 0 rgba(55, 55, 55, 0.5);
+	backdrop-filter: blur(20px) saturate(180%);
+	padding: 8px;
+	cursor: pointer;
 }
 </style>

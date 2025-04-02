@@ -161,9 +161,9 @@ onClickOutside(popupRef, (event) => {
 		if (props.triggerRef?.contains(event.target as Node)) {
 			event.stopPropagation();
 		}
-		if (refs.videoMaskRef.value?.contains(event.target as Node)) {
-			event.stopPropagation();
-		}
+		// if (refs.videoMaskRef.value?.contains(event.target as Node)) {
+		// 	event.stopPropagation();
+		// }
 		visibleModel.value = false;
 	}
 });
@@ -171,7 +171,7 @@ onClickOutside(popupRef, (event) => {
 
 <style module>
 .x-popup {
-	--x-popup-bg-color: rgba(15, 15, 15, 0.8);
+	--x-popup-bg-color: rgba(15, 15, 15, 0.9);
 	--x-popup-bg-blur: 20px;
 	--x-popup-bg-saturate: 180%;
 	--x-popup-padding: 8px;
@@ -186,7 +186,7 @@ onClickOutside(popupRef, (event) => {
 	position: absolute;
 	inset: 0;
 	background: var(--x-popup-bg-color);
-	/* backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate)); */
+	backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate));
 	box-shadow: var(--x-popup-box-shadow);
 	border-radius: var(--x-popup-border-radius);
 }

@@ -45,7 +45,6 @@ export interface PlayerContext {
 	refs: {
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
 		rootRef: ShallowRef<HTMLElement | null>;
-		videoMaskRef: ShallowRef<HTMLDivElement | null>;
 	};
 }
 
@@ -57,14 +56,12 @@ export function usePlayerProvide(
 	refs: {
 		rootRef: ShallowRef<HTMLElement | null>;
 		videoElementRef: ShallowRef<HTMLVideoElement | null>;
-		videoMaskRef: ShallowRef<HTMLDivElement | null>;
 	},
 ) {
 	const context: PlayerContext = {
 		refs: {
 			rootRef: refs.rootRef,
 			videoElementRef: refs.videoElementRef,
-			videoMaskRef: refs.videoMaskRef,
 		},
 		rootProps,
 		rootEmit,

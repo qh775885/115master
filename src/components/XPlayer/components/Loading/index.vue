@@ -1,10 +1,8 @@
 <template>
   <div class="loading-container" v-show="show">
-    <div class="apple-loading">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
+    <span></span>
+    <span></span>
+    <span></span>
   </div>
 </template>
 
@@ -21,32 +19,27 @@ defineProps<{
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
-}
-
-.apple-loading {
-  position: relative;
-  width: 50px;
-  height: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
+  gap: 10px;
 
-.apple-loading span {
-  width: 10px;
-  height: 10px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border-radius: 50%;
-  display: inline-block;
-  animation: bounce 1.4s infinite ease-in-out both;
-}
-
-.apple-loading span:nth-child(1) {
-  animation-delay: -0.32s;
-}
-
-.apple-loading span:nth-child(2) {
-  animation-delay: -0.16s;
+  span {
+    width: 10px;
+    height: 10px;
+    background-color: #eee;
+    box-shadow: 0 0 5px 0 rgba(15, 15, 15, 0.5);
+    box-sizing: border-box;
+    border-radius: 50%;
+    display: inline-block;
+    animation: bounce 1.4s infinite ease-in-out both;
+  }
+  span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
 }
 
 @keyframes bounce {

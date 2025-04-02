@@ -8,6 +8,7 @@ export const usePreferences = () => {
 		showSider: false,
 		autoLoadThumbnails: true,
 		superAutoBuffer: false,
+		disabledHDR: false,
 	});
 
 	return preferences;

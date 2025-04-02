@@ -62,6 +62,8 @@ export type XPlayerProps = {
 		autoLoadThumbnails: boolean;
 		// 全量缓冲缩略图
 		superAutoBuffer: boolean;
+		// 禁用HDR
+		disabledHDR: boolean;
 	};
 	// 字幕渲染类型
 	subtitleRenderType?: "native" | "custom";

@@ -50,14 +50,6 @@
 				<!-- 字幕 -->
 				<Subtitle v-if="props.subtitleRenderType === 'custom'" />
 
-				<!-- 视频遮罩 -->
-				<div
-					:class="$style['x-player-video-mask']"
-					ref="videoMaskRef"
-					@click="playing.togglePlay"
-					@dblclick="fullscreen.toggleFullscreen"
-				></div>
-
 				<!-- 视频控制栏 -->
 				<VideoControls />
 			</div>
@@ -83,7 +75,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from "vue";
+import { shallowRef } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
@@ -99,7 +91,6 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
 	subtitleRenderType: "native",
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
-	sharpen: 10,
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();
@@ -107,8 +98,6 @@ const emit = defineEmits<XPlayerEmit>();
 const rootRef = shallowRef<HTMLElement | null>(null);
 // 视频元素
 const videoElementRef = shallowRef<HTMLVideoElement | null>(null);
-// Mask
-const videoMaskRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
@@ -124,7 +113,6 @@ const {
 } = usePlayerProvide(props, emit, {
 	rootRef,
 	videoElementRef,
-	videoMaskRef,
 });
 
 // 暴露方法
@@ -170,15 +158,6 @@ defineExpose({
 		width: 100%;
 		height: 100%;
 	}
-}
-
-.x-player-video-mask {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 2;
 }
 
 .x-player-portal-container {

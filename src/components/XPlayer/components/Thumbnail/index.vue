@@ -7,7 +7,7 @@
 			transform: `translateX(${previewTransform}px)`
 		}"
 	>
-		<div class="thumbnail-container">
+		<div class="thumbnail-container" ref="thumbnailContainer">
 			<canvas
 				ref="thumbnailCanvas"
 				:width="width"
@@ -24,6 +24,7 @@
 </template>
 
 <script setup lang="ts">
+import { useElementBounding } from "@vueuse/core";
 import { computed, onUnmounted, reactive, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import { formatTime } from "../../utils/time";
@@ -43,6 +44,7 @@ const props = withDefaults(defineProps<Props>(), {});
 const { rootProps, source } = usePlayerContext();
 const { onThumbnailRequest } = rootProps;
 const thumbnailCanvas = shallowRef<HTMLCanvasElement | null>(null);
+const thumbnailContainer = shallowRef<HTMLDivElement | null>(null);
 const width = shallowRef(DEFAULT_WIDTH);
 const height = shallowRef(DEFAULT_HEIGHT);
 const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
@@ -52,17 +54,23 @@ const thumb = reactive({
 	renderTime: -1,
 	renderImage: null as ImageBitmap | null,
 });
-const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
+const ctx = computed(() =>
+	thumbnailCanvas.value?.getContext("2d", {
+		alpha: false,
+		colorSpace: "srgb",
+	}),
+);
 const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
 );
+const thumbnailRect = useElementBounding(thumbnailContainer);
 
 // 计算预览容器的位移，防止超出边界
 const previewTransform = computed(() => {
-	if (!thumbnailCanvas.value) return -(width.value / 2);
+	if (!thumbnailCanvas.value) return -(thumbnailRect.width.value / 2);
 
-	const thumbnailWidth = width.value;
+	const thumbnailWidth = thumbnailRect.width.value;
 	const centerOffset = props.progressBarWidth * (props.position / 100);
 
 	// 如果缩略图会超出左边界
@@ -191,13 +199,20 @@ onUnmounted(() => {
 }
 
 .thumbnail-container {
+	width: 300px;
+	height: 168.75px;
 	display: flex;
+	align-items: center;
+	justify-content: center;
 	position: relative;
 	border-radius: 16px;
-	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
 	overflow: hidden;
+	box-sizing: border-box;
+	background: rgba(0,0,0, 1);
+	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
 	canvas {
-		background: rgba(15, 15, 15, 0.9);
+		position: relative;
+		z-index: 1;
 	}
 }
 
