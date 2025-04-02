@@ -5,7 +5,7 @@ export const usePreferences = () => {
 		volume: 100,
 		muted: true,
 		playbackRate: 1,
-		theatre: false,
+		showSider: false,
 		autoLoadThumbnails: true,
 		superAutoBuffer: false,
 	});

@@ -1,43 +1,46 @@
 <template>
-	<div class="page-container" :class="{ 'is-theatre': preferences.theatre }">
-		<div class="page-body">
-			<div class="page-main">
-				<XPlayer
-					ref="xplayerRef"
-					class="video-player"
-					v-model:theatre="preferences.theatre"
-					v-model:volume="preferences.volume"
-					v-model:muted="preferences.muted"
-					v-model:playbackRate="preferences.playbackRate"
-					:sources="DataVideoSources.list"
-					:subtitles="DataSubtitles.state"
-					subtitleRenderType="custom"
-					:subtitlesLoading="DataSubtitles.isLoading"
-					:subtitlesReady="DataSubtitles.isReady"
-					:preferences="preferences"
-					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
-					:onSubtitleChange="handleSubtitleChange"
-					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
-				/>
-				<div class="page-flow">
-					<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" />
-					<div class="local-player">
-						<button v-if="isMac" class="page-local-play" @click="handleLocalPlay('iina')">IINA Beta</button>
-					</div>
-					<MovieInfo 
-						:movieInfos="DataMovieInfo"
-					/>
-					<div class="page-footer">
-						<Footer></Footer>
-					</div>
-				</div>
+	<div :class="[
+		$style['page-container'],
+		{
+			[`${$style['show-sider']}`]: preferences.showSider,
+		}
+	]">
+		<div :class="$style['page-main']">
+			<XPlayer
+				ref="xplayerRef"
+				:class="$style['video-player']"
+				v-model:showSider="preferences.showSider"
+				v-model:volume="preferences.volume"
+				v-model:muted="preferences.muted"
+				v-model:playbackRate="preferences.playbackRate"
+				:sources="DataVideoSources.list"
+				:subtitles="DataSubtitles.state"
+				subtitleRenderType="custom"
+				:subtitlesLoading="DataSubtitles.isLoading"
+				:subtitlesReady="DataSubtitles.isReady"
+				:preferences="preferences"
+				:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
+				:onSubtitleChange="handleSubtitleChange"
+				@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
+			/>
+
+			<Playlist
+				:class="$style['page-sider']"
+				:pickCode="params.pickCode.value"
+				:playlist="DataPlaylist"
+				@play="handleChangeVideo"
+			/>
+		</div>
+		<div :class="$style['page-flow']">
+			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" />
+			<div :class="$style['local-player']">
+				<button v-if="isMac" :class="$style['page-local-play']" @click="handleLocalPlay('iina')">IINA Beta</button>
 			</div>
-			<div class="page-sider">
-				<Playlist class="page-sider-playlist"
-					:pickCode="params.pickCode.value"
-					:playlist="DataPlaylist"
-					@play="handleChangeVideo"
-				/>
+			<MovieInfo 
+				:movieInfos="DataMovieInfo"
+			/>
+			<div :class="$style['page-footer']">
+				<Footer></Footer>
 			</div>
 		</div>
 	</div>
@@ -170,22 +173,23 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style module>
 /* 全局滚动条样式 */
 .page-container {
-	padding: 36px 0 56px;
+	--page-video-top: 36px;
+	--video-player-normal-height: calc(100vh - 24px * 2 - 28px);
+	--page-video-offset: 92px;
+	--cubic-bezier: ease-in-out;
+	--cubic-bezier-duration: 0.2s;
+	padding: 0 0 56px;
 	background: rgb(15,15,15);
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
 	color: #fff;
 	align-items: center;
-	--video-player-height: calc(100vh - 36px - 24px * 2 - 28px);
-	--page-main-width-a: calc(16 / 9 * (100vh - 36px - 24px * 2 - 28px));
-	--page-main-width-b: calc(100vw - 380px - 24px - 36px);
-	--page-main-width: min(var(--page-main-width-a), var(--page-main-width-b));
-	--video-player-width: var(--page-main-width);
 	-webkit-font-smoothing: antialiased;
+	gap: 24px;
 }
 
 .page-local-play {
@@ -199,67 +203,57 @@ onMounted(async () => {
 
 .page-body {
 	display: flex;
+	flex-direction: column;
 	gap: 24px;
 }
 
 .page-main {
 	display: flex;
-	flex-direction: column;
-	width: var(--page-main-width);
-	gap: 24px;
+	width: 100%;
+	height: 100vh;
+	box-sizing: border-box;
+	padding: 0;
+	transition:
+		all var(--cubic-bezier-duration) var(--cubic-bezier);
 }
 
 .page-flow {
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
-	min-height: 720px;
+	padding: 0 var(--page-video-offset);
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .video-player {
-	aspect-ratio: 16 / 9;
-	width: var(--video-player-width);
-	height: auto;
-	border-radius: 16px;
+	border-radius: 0;
 	overflow: hidden;
+	transition:
+		all var(--cubic-bezier-duration) var(--cubic-bezier);
 }
 
-.page-sider-playlist {
-	width: 380px;
-	height: calc(100vh - 36px - 24px - 36px);
-	flex: 1;
+.page-sider {
+	width: 0;
+	height: 100%;
+	opacity: 0;
+	margin-left: 0;
+	transition:
+		all var(--cubic-bezier-duration) var(--cubic-bezier);
 }
 
-.is-theatre {
-	&.page-container {
-		padding: 0 0 0;
-	}
+.show-sider {
 	.page-main {
-		width: 100%;
-	}
-	.page-body {
-		width: 100%;
-	}
-	.page-header {
-		display: none;
-	}
-	.page-flow {
-		padding: 0 calc(86px + 380px + 24px) 56px 86px;
-		box-sizing: border-box;
+		height: var(--video-player-normal-height);
+		padding: var(--page-video-top) var(--page-video-offset) 0;
 	}
 	.page-sider {
-		position: absolute;
-		top: calc(100vh + 24px);
-		right: 86px;
-	}
-	.page-sider-playlist {
-		height: 720px;
+		width: 30%;
+		opacity: 1;
+		margin-left: 24px;
 	}
 	.video-player {
-		width: 100%;
-		height: 100vh;
-		max-height: none;
-		border-radius: 0;
+		border-radius: 16px;
 	}
 }
 
@@ -268,28 +262,19 @@ onMounted(async () => {
 		padding: 0 0 56px;
 	}
 	.page-main {
-		width: auto;
-	}
-	.page-header {
-		display: none;
-	}
-	.page-flow {
-		padding: 0 calc(86px + 380px + 24px) 56px 86px;
-		box-sizing: border-box;
-	}
-	.page-sider {
-		position: absolute;
-		top: calc(100vh + 48px + 28px);
-		right: 86px;
-	}
-	.page-sider-playlist {
-		height: 720px;
+		height: 100vh;
+		padding: 0;
+		transition: none;
 	}
 	.video-player {
-		width: 100vw;
-		height: 100vh;
 		max-height: none;
 		border-radius: 0;
+		transition: none;
+	}
+	.page-sider {
+		border-radius: 0;
+		margin-left: 0;
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
 	}
 }
 </style>

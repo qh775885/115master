@@ -24,6 +24,8 @@ export function useHls(videoElement: Ref<HTMLVideoElement | null>) {
 
 		instance.value = new Hls({
 			autoStartLoad: true,
+			maxBufferLength: 1200,
+			lowLatencyMode: true,
 			startPosition: -1,
 			debug: false,
 			...config,

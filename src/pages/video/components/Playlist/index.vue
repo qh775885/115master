@@ -53,9 +53,7 @@ const handlePlay = (item: Entity.PlaylistItem) => {
 	position: relative;
 	display: flex;
 	flex-direction: column;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(0,0,0,.9);
+	background-color: rgba(0,0,0, 0.9);
 	color: #fff;
     box-sizing: border-box;
     border-radius: 16px;

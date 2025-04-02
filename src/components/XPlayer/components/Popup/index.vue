@@ -7,7 +7,18 @@
 			:style="style"
 			v-bind="$attrs"
 		>
-			<div :class="$style['x-popup-bg']"></div>
+			<svg :class="$style['x-popup-bg']" width="100%" height="100%">
+				<defs>
+					<linearGradient id="x-popup-bg-gradient">
+						<stop offset="0%" style="stop-color: rgba(15, 15, 15, 0.8); stop-opacity: 1;" />
+						<stop offset="100%" style="stop-color: rgba(15, 15, 15, 0.8); stop-opacity: 1;" />
+					</linearGradient>
+					<filter id="x-popup-bg-blur">
+						<feGaussianBlur in="SourceGraphic" stdDeviation="10" />
+					</filter>
+					<image filter="url(#blur)" x="0" y="0" width="100%" height="100%" xlink:href="" alt=""></image>
+				</defs>
+			</svg>
 			<div :class="$style['x-popup-content']">
 				<slot></slot>
 			</div>
@@ -175,7 +186,7 @@ onClickOutside(popupRef, (event) => {
 	position: absolute;
 	inset: 0;
 	background: var(--x-popup-bg-color);
-	backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate));
+	/* backdrop-filter: blur(var(--x-popup-bg-blur)) saturate(var(--x-popup-bg-saturate)); */
 	box-shadow: var(--x-popup-box-shadow);
 	border-radius: var(--x-popup-border-radius);
 }

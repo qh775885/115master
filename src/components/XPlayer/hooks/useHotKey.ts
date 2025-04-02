@@ -44,22 +44,22 @@ const KEYS = {
 	arrowDown: "ArrowDown",
 	w: "w",
 	a: "a",
+	b: "b",
 	s: "s",
 	d: "d",
 	c: "c",
 	f: "f",
 	p: "p",
 	m: "m",
-	v: "v",
 	W: "W",
 	A: "A",
+	B: "B",
 	S: "S",
 	D: "D",
 	C: "C",
 	F: "F",
 	P: "P",
 	M: "M",
-	V: "V",
 	"0": "0",
 	"1": "1",
 	"2": "2",
@@ -202,11 +202,11 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.fullscreen?.toggleFullscreen();
 		},
 	},
-	toggleTheaterMode: {
-		keys: [KEYS.v, KEYS.V],
-		name: "切换剧院模式",
+	toggleShowSider: {
+		keys: [KEYS.b, KEYS.B],
+		name: "切换播放列表",
 		keydown: (ctx) => {
-			ctx.fullscreen?.toggleTheatre();
+			ctx.fullscreen?.toggleShowSider();
 		},
 	},
 	togglePictureInPicture: {

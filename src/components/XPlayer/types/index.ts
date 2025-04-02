@@ -49,7 +49,7 @@ export type XPlayerProps = {
 	// 视频源
 	sources: Ref<VideoSource[]>;
 	// 剧院模式
-	theatre: boolean;
+	showSider: boolean;
 	// 音量
 	volume: number;
 	// 静音
@@ -95,8 +95,8 @@ export type XPlayerEmit = {
 			isManual: boolean;
 		},
 	];
-	// 剧院模式
-	"update:theatre": [boolean];
+	// 播放列表
+	"update:showSider": [boolean];
 	// 音量
 	"update:volume": [number];
 	// 静音

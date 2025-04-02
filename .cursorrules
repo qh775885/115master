@@ -12,7 +12,8 @@
 
 Vue 文件格式
 - 使用 <script setup lang="ts"> 语法
-- 使用 <style scoped> 语法
+- 使用 <style module> 语法
+- 在 template 中使用 :class="$style['class-name']" 语法
 - 以 Template、Script、Style 的顺序编写文件
 - 需要拆分 Composition API 的文件，需要拆分到同级 hooks 目录下
 - 需要拆分组件的文件，需要拆分到同级 components 目录下

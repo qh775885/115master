@@ -45,8 +45,8 @@
 						<SettingsButton />
 						<!-- 画中画 -->
 						<PipButton />
-						<!-- 剧院模式 -->
-						<TheatreButton />
+						<!-- 播放列表 -->
+						<PlaylistButton />
 						<!-- 全屏控制 -->
 						<FullscreenButton />
 					</div>
@@ -64,12 +64,12 @@ import FullscreenButton from "./FullscreenButton.vue";
 import PipButton from "./PipButton.vue";
 import PlayButton from "./PlayButton.vue";
 import PlaybackRateButton from "./PlaybackRateButton.vue";
+import PlaylistButton from "./PlaylistButton.vue";
 import ProgressBar from "./ProgressBar.vue";
 import QualityButton from "./QualityButton.vue";
 import ScrollTip from "./ScrollTip.vue";
 import SettingsButton from "./SettingsButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
-import TheatreButton from "./TheatreButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
 import VolumeControl from "./VolumeControl.vue";
 
