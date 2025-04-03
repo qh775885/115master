@@ -7,8 +7,8 @@ export const usePreferences = () => {
 		playbackRate: 1,
 		showSider: false,
 		autoLoadThumbnails: true,
-		superAutoBuffer: false,
 		disabledHDR: false,
+		thumbnailsSamplingInterval: 60,
 	});
 
 	return preferences;

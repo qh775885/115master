@@ -1,6 +1,9 @@
 import { tryOnUnmounted, useThrottleFn } from "@vueuse/core";
 import { sampleSize } from "lodash";
-import type { VideoSource } from "../../../components/XPlayer/types";
+import type {
+	ThumbnailFrame,
+	VideoSource,
+} from "../../../components/XPlayer/types";
 import {
 	M3U8Clipper,
 	type M3U8ClipperOptions,
@@ -38,7 +41,7 @@ const SCHEDULER_OPTIONS = {
 	laneConfig: LANE_CONFIG,
 };
 
-const BLUR = 30;
+const DEFAULT_SAMPLING_INTERVAL = 120;
 
 export function useDataThumbnails(
 	preferences: ReturnType<typeof usePreferences>,
@@ -47,17 +50,23 @@ export function useDataThumbnails(
 	const clipper = new M3U8Clipper(CLIPPER_OPTIONS);
 
 	// 任务调度器
-	const scheduler = new Scheduler<ImageBitmap | null>(SCHEDULER_OPTIONS);
+	const scheduler = new Scheduler<ThumbnailFrame | null>(SCHEDULER_OPTIONS);
 
 	// 初始化缩略图生成器
 	let isInited = false;
-	const initialize = async (sources: VideoSource[]) => {
+	const initialize = async (
+		sources: VideoSource[],
+		samplingInterval: number,
+	) => {
 		isInited = false;
 		clipper.clear();
 
 		const source = findLowestQualityHLS(sources);
 		if (!source) return;
-		await clipper.init(source.url, BLUR);
+		await clipper.init(
+			source.url,
+			samplingInterval ?? DEFAULT_SAMPLING_INTERVAL,
+		);
 		await autoBuffer();
 		isInited = true;
 	};
@@ -77,7 +86,7 @@ export function useDataThumbnails(
 
 	// 节流拉取缩略图
 	const onMThumbnailRequestMust = useThrottleFn(
-		async (time: number, isLast: boolean): Promise<ImageBitmap | null> => {
+		async (time: number, isLast: boolean): Promise<ThumbnailFrame | null> => {
 			if (!isInited || Number.isNaN(time)) {
 				return null;
 			}
@@ -91,7 +100,7 @@ export function useDataThumbnails(
 
 			const lane = isLast ? LANE_CONFIG.must : LANE_CONFIG.buffer;
 
-			let promise: Promise<ImageBitmap | null>;
+			let promise: Promise<ThumbnailFrame | null>;
 
 			const task = scheduler.get(id);
 
@@ -110,7 +119,7 @@ export function useDataThumbnails(
 				promise = scheduler.add(
 					async () => {
 						const clipImage = await clipper.getClip(time);
-						return clipImage?.img ?? null;
+						return clipImage ?? null;
 					},
 					{
 						id,
@@ -144,14 +153,15 @@ export function useDataThumbnails(
 		type: "Cache" | "Must";
 		time: number;
 		isLast: boolean;
-	}): Promise<ImageBitmap | null> => {
+	}): Promise<ThumbnailFrame | null> => {
 		if (!isInited || Number.isNaN(time)) {
 			return null;
 		}
 		const _blurTime = clipper.blurTime(time);
+
 		if (type === "Cache") {
 			const clipImage = clipper.getClipByCache(_blurTime);
-			return clipImage?.img ?? null;
+			return clipImage ?? null;
 		}
 
 		return onMThumbnailRequestMust(_blurTime, isLast);
@@ -164,14 +174,11 @@ export function useDataThumbnails(
 			return;
 		}
 
-		// 是否启用全量缓冲
-		const isSuperBuffer = preferences.value.superAutoBuffer === true;
-
 		const blurSegments = sampleSize(
 			clipper.blurSegments,
 			Math.max(
 				Math.min(clipper.blurSegments.length, 50),
-				clipper.blurSegments.length / (isSuperBuffer ? 1 : 3),
+				clipper.blurSegments.length,
 			),
 		);
 		if (!blurSegments.length) {
@@ -187,7 +194,7 @@ export function useDataThumbnails(
 				.add(
 					async () => {
 						const clipImage = await clipper.getClip(segment._startTime);
-						return clipImage?.img ?? null;
+						return clipImage ?? null;
 					},
 					{
 						id,

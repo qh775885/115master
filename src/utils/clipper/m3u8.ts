@@ -70,7 +70,10 @@ export class M3U8Clipper extends ClipperCore {
 	// 模糊时间
 	public blurTime(time: number) {
 		const _blurTime = time - (time % this.blur) + this.blur / 2;
-		return Math.min(Math.max(0, _blurTime), this.M3U8Info?.totalDuration ?? 0);
+		return Math.min(
+			Math.max(0, _blurTime),
+			this.M3U8Info?.totalDuration ? this.M3U8Info.totalDuration - 1 : 0,
+		);
 	}
 
 	// 模糊分段
@@ -201,6 +204,13 @@ export class M3U8Clipper extends ClipperCore {
 				nbSamples: 1,
 				maxWidth: this.options.maxWidth,
 				maxHeight: this.options.maxHeight,
+			}).then((frames) => {
+				return frames.map((frame) => {
+					return {
+						...frame,
+						timestamp: segment._startTime + frame.timestamp,
+					};
+				});
 			});
 
 			if (!processedFrames.length) {

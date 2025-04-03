@@ -8,7 +8,7 @@ export type ClipFrame = {
 	img: ImageBitmap;
 	// 帧时长
 	duration: number | null;
-	// 样本数量
+	// 样本时间戳
 	timestamp: number;
 };
 
@@ -226,7 +226,7 @@ export class ClipperCore {
 							const frame = {
 								img,
 								duration: videoFrame.duration,
-								timestamp: videoFrame.timestamp,
+								timestamp: videoFrame.timestamp / 10e6,
 							};
 
 							sampleCount++;

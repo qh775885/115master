@@ -146,7 +146,10 @@ const loadData = async (isFirst = true) => {
 		// 加载历史记录
 		DataHistory.fetch(params.pickCode.value);
 		// 初始化缩略图
-		DataThumbnails.initialize(DataVideoSources.list.value);
+		DataThumbnails.initialize(
+			DataVideoSources.list.value,
+			preferences.value.thumbnailsSamplingInterval,
+		);
 	});
 
 	// 加载文件信息

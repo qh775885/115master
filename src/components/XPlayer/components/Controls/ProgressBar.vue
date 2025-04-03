@@ -4,7 +4,6 @@
 		<div 
 			ref="progressBarWrapperRef"
 			class="progress-bar-wrapper"
-			@click="handleBarWrapperClick"
 			@mousedown="handleBarWrapperMouseDown"
 			@mouseenter="handleBarWrapperMouseEnter"
 			@mousemove="handleBarWrapperMouseMove"
@@ -70,6 +69,7 @@
 				:position="isDragging ? dragProgress : previewProgress"
 				:time="isDragging ? previewTime : (isPreviewVisible ? previewTime : progress.currentTime.value)"
 				:progress-bar-width="progressBarWidth"
+				@seek="handleThumbnailSeek"
 			/>
 		</div>
 	</div>
@@ -106,14 +106,6 @@ const calculatePosition = (event: MouseEvent, element: HTMLElement) => {
 	const rect = element.getBoundingClientRect();
 	const position = (event.clientX - rect.left) / rect.width;
 	return Math.min(Math.max(position, 0), 1);
-};
-
-// 进度条点击
-const handleBarWrapperClick = (event: MouseEvent) => {
-	if (!progressBarWrapperRef.value || isDragging.value) return;
-	const position = calculatePosition(event, progressBarWrapperRef.value);
-	const newTime = position * progress.duration.value;
-	progress.seekTo(newTime);
 };
 
 // BarWrapper 鼠标按下
@@ -209,6 +201,18 @@ const hidePreview = () => {
 		previewProgress.value = 0;
 		previewTime.value = 0;
 	}
+};
+
+// 处理缩略图点击跳转事件
+const handleThumbnailSeek = (time: number) => {
+	// 直接跳转到缩略图时间点
+	progress.seekTo(time);
+	isDragging.value = false;
+	// 隐藏预览
+	hidePreview();
+
+	document.removeEventListener("mousemove", handleGlobalMouseMove);
+	document.removeEventListener("mouseup", handleGlobalMouseUp);
 };
 
 onUnmounted(() => {

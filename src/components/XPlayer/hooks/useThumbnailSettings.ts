@@ -14,17 +14,19 @@ export const useThumbnailSettings = (ctx: PlayerContext) => {
 		preferences.autoLoadThumbnails = !preferences.autoLoadThumbnails;
 	};
 
-	// 切换全量预览图缓冲
-	const toggleSuperBuffer = () => {
-		preferences.superAutoBuffer = !preferences.superAutoBuffer;
+	// 设置采样间隔
+	const setSamplingInterval = (interval: number) => {
+		if (preferences.thumbnailsSamplingInterval !== interval) {
+			preferences.thumbnailsSamplingInterval = interval;
+		}
 	};
 
 	return {
 		// 状态
 		autoLoadThumbnails: toRef(preferences, "autoLoadThumbnails"),
-		superAutoBuffer: toRef(preferences, "superAutoBuffer"),
+		samplingInterval: toRef(preferences, "thumbnailsSamplingInterval"),
 		// 方法
 		toggleAutoLoad,
-		toggleSuperBuffer,
+		setSamplingInterval,
 	};
 };

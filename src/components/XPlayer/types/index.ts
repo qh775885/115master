@@ -1,5 +1,37 @@
 import type { Ref } from "vue";
 
+// 设置项
+export interface Preferences {
+	// 自动缓冲缩略图
+	autoLoadThumbnails: boolean;
+	// 禁用HDR
+	disabledHDR: boolean;
+	// 缩略图采样间隔
+	thumbnailsSamplingInterval: number;
+}
+
+// 缩略图
+export interface ThumbnailFrame {
+	// 缩略图
+	img: ImageBitmap;
+	// 时间戳
+	timestamp: number;
+}
+
+// 缩略图请求
+export type ThumbnailRequest = ({
+	type,
+	time,
+	isLast,
+}: {
+	// 类型
+	type: "Cache" | "Must";
+	// 时间
+	time: number;
+	// 是否最后
+	isLast: boolean;
+}) => Promise<ThumbnailFrame | null>;
+
 // 视频源
 export interface VideoSource {
 	// 名称
@@ -57,26 +89,11 @@ export type XPlayerProps = {
 	// 播放速率
 	playbackRate: number;
 	// 设置项
-	preferences?: {
-		// 自动缓冲缩略图
-		autoLoadThumbnails: boolean;
-		// 全量缓冲缩略图
-		superAutoBuffer: boolean;
-		// 禁用HDR
-		disabledHDR: boolean;
-	};
+	preferences?: Preferences;
 	// 字幕渲染类型
 	subtitleRenderType?: "native" | "custom";
 	// 缩略图请求
-	onThumbnailRequest?: ({
-		type,
-		time,
-		isLast,
-	}: {
-		type: "Cache" | "Must";
-		time: number;
-		isLast: boolean;
-	}) => Promise<ImageBitmap | null>;
+	onThumbnailRequest?: ThumbnailRequest;
 	// 字幕
 	subtitles: Ref<Subtitle[] | null>;
 	// 字幕准备就绪

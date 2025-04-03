@@ -93,6 +93,7 @@
                                 <span>预览图</span>
                             </div>
                             <div :class="$style['chunk-content']">
+                                <!-- 自动缓冲 -->
                                 <div :class="$style['button-group']">
                                     <button 
                                         :class="[$style['option-button'], { [$style.active]: thumbnailSettings.autoLoadThumbnails.value }]" 
@@ -103,19 +104,26 @@
                                         </div>
                                         <span>自动缓冲</span>
                                     </button>
-                                    <button 
-                                        :class="[$style['option-button'], { 
-                                            [$style.active]: thumbnailSettings.superAutoBuffer.value
-                                        }]" 
-                                        :disabled="!thumbnailSettings.autoLoadThumbnails.value"
-                                        @click="thumbnailSettings.toggleSuperBuffer"
-                                    >
-                                        <div :class="$style['item-icon']">
-                                            <Icon :svg="AllInclusiveSvg" class="icon icon-sm" />
-                                        </div>
-                                        <span>全量缓冲</span>
-                                    </button>
+                                  
                                 </div>
+                                
+                                <!-- 采样间隔设置 -->
+                                <div :class="$style['sampling-interval']">
+                                    <div :class="$style['sampling-label']">采样间隔 (S)</div>
+                                    <div :class="$style['sampling-options']">
+                                        <button
+                                            v-for="interval in samplingIntervals"
+                                            :key="interval"
+                                            :class="[$style['interval-option'], { 
+                                                [$style.active]: thumbnailSettings.samplingInterval.value === interval 
+                                            }]"
+                                            @click="thumbnailSettings.setSamplingInterval(interval)"
+                                        >
+                                            {{ interval }}
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <div :class="$style['tip-text']">刷新后生效</div>
                             </div>
                         </div>
@@ -268,6 +276,8 @@ import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Popup from "../Popup/index.vue";
 const { transform, thumbnailSettings, videoEnhance } = usePlayerContext();
 
+// 采样间隔选项
+const samplingIntervals = [10, 15, 30, 45, 60, 120];
 const buttonRef = shallowRef<HTMLElement>();
 const menuVisible = shallowRef(false);
 const toggleMenu = () => {
@@ -592,6 +602,43 @@ const toggleMenu = () => {
     
     &.active {
         left: calc(100% - 21px);
+    }
+}
+
+.sampling-interval {
+    margin-top: 12px;
+}
+
+.sampling-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+}
+
+.sampling-options {
+    display: flex;
+    gap: 8px;
+}
+
+.interval-option {
+    flex: 1;
+    padding: 5px 0;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    &.active {
+        color: var(--x-player-color-primary, #007aff);
+        background: rgba(0, 122, 255, 0.15);
+        font-weight: 500;
     }
 }
 </style>
