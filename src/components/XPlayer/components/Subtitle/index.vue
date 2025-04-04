@@ -1,5 +1,5 @@
 <template>
-    <div :class="$style['subtitle-container']">
+    <div :class="$style['subtitle-container']" v-if="subtitles.current.value">
         <div :class="$style['subtitle-content']" v-if="currentSubtitle">
             {{ currentSubtitle.text }}
         </div>
