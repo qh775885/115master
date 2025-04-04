@@ -30,6 +30,7 @@
 				:pickCode="params.pickCode.value"
 				:playlist="DataPlaylist"
 				@play="handleChangeVideo"
+				@close="handleClosePlaylist"
 			/>
 		</div>
 		<div :class="$style['page-flow']">
@@ -139,6 +140,11 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 	await loadData(false);
 };
 
+// 关闭播放列表
+const handleClosePlaylist = () => {
+	preferences.value.showSider = false;
+};
+
 // 加载数据
 const loadData = async (isFirst = true) => {
 	// 加载视频源
@@ -189,7 +195,7 @@ onMounted(async () => {
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
-	color: #fff;
+	color: #f1f1f1;
 	align-items: center;
 	-webkit-font-smoothing: antialiased;
 	gap: 24px;
@@ -217,7 +223,9 @@ onMounted(async () => {
 	box-sizing: border-box;
 	padding: 0;
 	transition:
-		all var(--cubic-bezier-duration) var(--cubic-bezier);
+		padding var(--cubic-bezier-duration) var(--cubic-bezier),
+		height var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: padding, height;
 }
 
 .page-flow {
@@ -232,8 +240,8 @@ onMounted(async () => {
 .video-player {
 	border-radius: 0;
 	overflow: hidden;
-	transition:
-		all var(--cubic-bezier-duration) var(--cubic-bezier);
+	transition: border-radius var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: border-radius;
 }
 
 .page-sider {
@@ -241,8 +249,12 @@ onMounted(async () => {
 	height: 100%;
 	opacity: 0;
 	margin-left: 0;
+	content-visibility: auto;
+	flex-shrink: 0;
 	transition:
-		all var(--cubic-bezier-duration) var(--cubic-bezier);
+		width var(--cubic-bezier-duration) var(--cubic-bezier),
+		opacity var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: width, opacity, margin-left;
 }
 
 .show-sider {
@@ -251,9 +263,9 @@ onMounted(async () => {
 		padding: var(--page-video-top) var(--page-video-offset) 0;
 	}
 	.page-sider {
-		width: 30%;
+		width: 460px;
 		opacity: 1;
-		margin-left: 24px;
+		margin-left: 16px;
 	}
 	.video-player {
 		border-radius: 16px;
@@ -280,4 +292,11 @@ onMounted(async () => {
 		border-left: 1px solid rgba(255, 255, 255, 0.1);
 	}
 }
+
+@media (max-width: 1600px) {
+	.page-container {
+		--page-video-offset: 24px;
+	}
+}
+
 </style>

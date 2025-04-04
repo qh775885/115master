@@ -274,6 +274,7 @@ watch(movieInfoThumb, async () => {
 	position: relative;
 	display: flex;
 	flex-direction: column;
+	content-visibility: auto;
 }
 
 .movie-info-main {

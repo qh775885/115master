@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-error">
+  <div class="loading-error" :class="{ 'no-padding': noPadding, [size]: size }">
     <svg
       class="loading-error-icon"
       viewBox="0 0 24 24"
@@ -27,7 +27,7 @@
     <span class="loading-error-text">
       <slot>{{ message || defaultMessage }}</slot>
     </span>
-    <span class="loading-error-detail">
+    <span v-if="detail" class="loading-error-detail">
       {{ detail }}
     </span>
     <button 
@@ -41,12 +41,30 @@
 </template>
 
 <script lang="ts" setup>
-const props = defineProps<{
-	retryable?: boolean;
-	message?: string;
-	detail?: string;
-	retryText?: string;
-}>();
+const props = withDefaults(
+	defineProps<{
+		// 是否可重试
+		retryable?: boolean;
+		// 错误信息
+		message?: string;
+		// 错误详情
+		detail?: string | Error | unknown;
+		// 重试按钮文本
+		retryText?: string;
+		// 是否无内边距
+		noPadding?: boolean;
+		// 大小
+		size?: "mini" | "small" | "medium" | "large";
+	}>(),
+	{
+		retryable: false,
+		message: "加载失败",
+		detail: undefined,
+		retryText: "重试",
+		noPadding: false,
+		size: "medium",
+	},
+);
 
 defineEmits<(e: "retry") => void>();
 
@@ -62,6 +80,23 @@ const defaultMessage = "加载失败";
   gap: 12px;
   padding: 24px;
   color: #666;
+  &.no-padding {
+    padding: 0;
+  }
+  &.mini {
+    padding: 0;
+    gap: 4px;
+    .loading-error-icon {
+      width: 24px;
+      height: 24px;
+    }
+    .loading-error-text {
+      font-size: 10px;
+    }
+    .loading-error-detail {
+      font-size: 8px;
+    }
+  }
 }
 
 .loading-error-icon {

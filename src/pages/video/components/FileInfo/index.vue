@@ -65,6 +65,7 @@ const handleLocalPlay = (player: string) => {
     align-items: flex-start;
     width: 100%;
     margin-bottom: 8px;
+    content-visibility: auto;
 }
 
 .header-file {

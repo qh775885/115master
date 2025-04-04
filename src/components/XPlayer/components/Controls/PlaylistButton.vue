@@ -1,5 +1,6 @@
 <template>
 	<button 
+		v-show="!show"
 		:class="$style['playlist-button']"
 		title="播放列表(B)"
 		@click="fullscreen.toggleShowSider" 
