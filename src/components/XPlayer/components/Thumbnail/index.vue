@@ -248,7 +248,7 @@ onUnmounted(() => {
 	bottom: 100%;
 	pointer-events: auto;
 	will-change: transform;
-	padding-bottom: 10px;
+	padding-bottom: 0;
 }
 
 .container {
@@ -302,6 +302,7 @@ onUnmounted(() => {
 		font-size: 12px;
 		opacity: 0;
 		line-height: 1.2;
+		display: block;
 	}
 
 	.time-normal {
@@ -310,6 +311,7 @@ onUnmounted(() => {
 
 	.time-image {
 		transform: translate(-50%, -150%);
+		font-weight: bold;
 	}
 
 	.time-normal.show, 

@@ -63,15 +63,16 @@
 				</div>
 			</div>
 
-			<!-- 缩略图预览 -->
-			<Thumbnail
-				:visible="isPreviewVisible || isDragging"
-				:position="isDragging ? dragProgress : previewProgress"
-				:time="isDragging ? previewTime : (isPreviewVisible ? previewTime : progress.currentTime.value)"
-				:progress-bar-width="progressBarWidth"
-				@seek="handleThumbnailSeek"
-			/>
+			
 		</div>
+		<!-- 缩略图预览 -->
+		<Thumbnail
+			:visible="isPreviewVisible || isDragging"
+			:position="isDragging ? dragProgress : previewProgress"
+			:time="isDragging ? previewTime : (isPreviewVisible ? previewTime : progress.currentTime.value)"
+			:progress-bar-width="progressBarWidth"
+			@seek="handleThumbnailSeek"
+		/>
 	</div>
 </template>
 
