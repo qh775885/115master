@@ -1,29 +1,43 @@
 <template>
-  <div class="loading-container" v-show="show">
-    <span></span>
-    <span></span>
-    <span></span>
+  <div :class="$style['loading']">
+    <div :class="$style['loading-animation']">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <div v-if="playerCore?.type === PlayerCoreType.AvPlayer && playerCore.stats?.bandwidth>0" 
+        :class="$style['loading-speed']">
+      {{ Math.round(playerCore.stats?.bandwidth / 1024 / 1024 * 100) / 100 }} Mbps/s
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-	show: boolean;
-}>();
+import { PlayerCoreType } from "../../hooks/playerCore/types";
+import { usePlayerContext } from "../../hooks/usePlayerProvide";
+
+const { playerCore } = usePlayerContext();
 </script>
 
-<style scoped>
-.loading-container {
+<style module>
+.loading {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.loading-animation {
+  display: inline-flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-
   span {
     width: 10px;
     height: 10px;
@@ -40,6 +54,12 @@ defineProps<{
   span:nth-child(2) {
     animation-delay: -0.16s;
   }
+}
+
+.loading-speed {
+  font-size: 12px;
+  text-shadow: 0 0 5px 2px rgba(15, 15, 15, 0.9);
+  font-weight: bold;
 }
 
 @keyframes bounce {

@@ -17,6 +17,7 @@
 			</div>
 			<div :class="$style['control-header__right']">
 				<div :class="$style['control-header__right-item']">
+					<StatisticsButton />
 					<PlaylistButton />
 				</div>
 			</div>
@@ -27,6 +28,7 @@
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import PlaylistButton from "./PlaylistButton.vue";
+import StatisticsButton from "./StatisticsButton.vue";
 const { controls } = usePlayerContext();
 </script>
 
@@ -43,6 +45,21 @@ const { controls } = usePlayerContext();
 	opacity: 0;
 	&.is-visible {
 		opacity: 1;
+	}
+}
+.control-header__right-item {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	button {
+		background-color: transparent;
+		border: none;
+		padding: 0;
+		border-radius: 50%;
+		background-color: rgba(15, 15, 15, 0.7);
+		backdrop-filter: blur(20px) saturate(180%);
+		padding: 8px;
+		cursor: pointer;
 	}
 }
 </style>

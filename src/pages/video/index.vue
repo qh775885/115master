@@ -2,7 +2,7 @@
 	<div :class="[
 		$style['page-container'],
 		{
-			[`${$style['show-sider']}`]: preferences.showSider,
+			[`${$style['show-playlist']}`]: preferences.showPlaylist,
 		}
 	]">
 		<div :class="$style['page-main']">
@@ -10,23 +10,28 @@
 			<XPlayer
 				ref="xplayerRef"
 				:class="$style['video-player']"
-				v-model:showSider="preferences.showSider"
+				v-model:showPlaylist="preferences.showPlaylist"
 				v-model:volume="preferences.volume"
 				v-model:muted="preferences.muted"
 				v-model:playbackRate="preferences.playbackRate"
+				v-model:autoLoadThumbnails="preferences.autoLoadThumbnails"
+				v-model:disabledHDR="preferences.disabledHDR"
+				v-model:thumbnailsSamplingInterval="preferences.thumbnailsSamplingInterval"
 				:sources="DataVideoSources.list"
 				:subtitles="DataSubtitles.state"
-				subtitleRenderType="custom"
+				:lastTime="DataHistory.lastTime.value"
 				:subtitlesLoading="DataSubtitles.isLoading"
 				:subtitlesReady="DataSubtitles.isReady"
-				:preferences="preferences"
 				:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
 				:onSubtitleChange="handleSubtitleChange"
-				@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
+				:onTimeupdate="handleTimeupdate"
+				:onSeeking="DataHistory.handleSeek"
+				:onSeeked="DataHistory.handleSeek"
+				:onCanplay="handleStartAutoBuffer"
 			/>
 			<!-- 播放列表 -->
 			<Playlist
-				:class="$style['page-sider']"
+				:class="$style['playlist']"
 				:pickCode="params.pickCode.value"
 				:playlist="DataPlaylist"
 				@play="handleChangeVideo"
@@ -35,7 +40,7 @@
 		</div>
 		<div :class="$style['page-flow']">
 			<!-- 文件信息 -->
-			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" @localPlay="handleLocalPlay" />
+			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" :playlist="DataPlaylist" @localPlay="handleLocalPlay" />
 			<!-- 电影信息 -->
 			<MovieInfo 
 				:movieInfos="DataMovieInfo"
@@ -140,17 +145,33 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 	await loadData(false);
 };
 
+// 开始自动缓冲缩略图
+const handleStartAutoBuffer = () => {
+	DataThumbnails.autoBuffer();
+};
+
+// 处理时间更新
+const handleTimeupdate = (time: number) => {
+	if (!DataHistory.isinit.value) {
+		return;
+	}
+	if (time <= 0) {
+		return;
+	}
+	DataHistory.handleTimeupdate(time);
+	DataPlaylist.updateItemTime(params.pickCode.value, time);
+};
+
 // 关闭播放列表
 const handleClosePlaylist = () => {
-	preferences.value.showSider = false;
+	preferences.value.showPlaylist = false;
 };
 
 // 加载数据
 const loadData = async (isFirst = true) => {
+	await DataHistory.fetch(params.pickCode.value);
 	// 加载视频源
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
-		// 加载历史记录
-		DataHistory.fetch(params.pickCode.value);
 		// 初始化缩略图
 		DataThumbnails.initialize(
 			DataVideoSources.list.value,
@@ -244,7 +265,7 @@ onMounted(async () => {
 	will-change: border-radius;
 }
 
-.page-sider {
+.playlist {
 	width: 0;
 	height: 100%;
 	opacity: 0;
@@ -257,12 +278,12 @@ onMounted(async () => {
 	will-change: width, opacity, margin-left;
 }
 
-.show-sider {
+.show-playlist {
 	.page-main {
 		height: var(--video-player-normal-height);
 		padding: var(--page-video-top) var(--page-video-offset) 0;
 	}
-	.page-sider {
+	.playlist {
 		width: 460px;
 		opacity: 1;
 		margin-left: 16px;
@@ -286,7 +307,7 @@ onMounted(async () => {
 		border-radius: 0;
 		transition: none;
 	}
-	.page-sider {
+	.playlist {
 		border-radius: 0;
 		margin-left: 0;
 		border-left: 1px solid rgba(255, 255, 255, 0.1);

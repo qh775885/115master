@@ -1,19 +1,15 @@
-import { useVModel } from "@vueuse/core";
 import { computed, shallowRef, toRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 /**
  * 视频色彩调整设置
  */
-export const useVideoEnhance = (_ctx: PlayerContext) => {
-	const preferences = _ctx.rootProps.preferences;
-
-	if (!preferences) {
-		throw new Error("播放器的 preferences 配置不存在，请先配置");
-	}
-
+export const useVideoEnhance = (ctx: PlayerContext) => {
 	// 滤镜名称
 	const filterName = "video-enhance";
+
+	// 禁用HDR
+	const disabledHDR = ctx.rootPropsVm.disabledHDR;
 
 	// 锐度 0-100
 	const sharpness = shallowRef(0);
@@ -32,9 +28,6 @@ export const useVideoEnhance = (_ctx: PlayerContext) => {
 
 	// 色调 -100-100（洋红-青色轴调整）
 	const hue = shallowRef(0);
-
-	// 禁用HDR
-	const disabledHDR = toRef(preferences, "disabledHDR");
 
 	// 判断是否启用滤镜（任何参数不为0则启用）
 	const isEnabled = computed(() => {

@@ -1,6 +1,9 @@
 import { shallowRef, watch } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
+/**
+ * 进度条
+ */
 export const useProgressBar = (_ctx: PlayerContext) => {
 	const isDragging = shallowRef(false);
 

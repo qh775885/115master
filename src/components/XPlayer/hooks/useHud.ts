@@ -1,16 +1,37 @@
-import { computed, onUnmounted, ref, watch } from "vue";
-import type { HudContext, HudMessage, HudMessageType } from "../types/hud";
+import FastForwardSvg from "@material-symbols/svg-400/rounded/fast_forward.svg";
+import FastRewindSvg from "@material-symbols/svg-400/rounded/fast_rewind.svg";
+import FlipSvg from "@material-symbols/svg-400/rounded/flip.svg";
+import LocationOnSvg from "@material-symbols/svg-400/rounded/location_on.svg";
+import RocketLaunchSvg from "@material-symbols/svg-400/rounded/rocket_launch.svg";
+import RotateSvg from "@material-symbols/svg-400/rounded/rotate_right.svg";
+import SubtitlesSvg from "@material-symbols/svg-400/rounded/subtitles.svg";
+import SubtitlesOffSvg from "@material-symbols/svg-400/rounded/subtitles_off.svg";
+import TimerSvg from "@material-symbols/svg-400/rounded/timer.svg";
+import VolumeDownSvg from "@material-symbols/svg-400/rounded/volume_down.svg";
+import VolumeOffSvg from "@material-symbols/svg-400/rounded/volume_off.svg";
+import VolumeUpSvg from "@material-symbols/svg-400/rounded/volume_up.svg";
+
+import { computed, onUnmounted, shallowRef, watch } from "vue";
+import type { HudMessage } from "../components/HUD/index";
+import { formatTime } from "../utils/time";
 import type { PlayerContext } from "./usePlayerProvide";
 
-// 默认消息持续时间（毫秒）
-const DEFAULT_DURATION = 1500;
+// 消息持续时间选项
+const DurationOptions = {
+	// 快速
+	Fast: 500,
+	// 正常
+	Normal: 1500,
+	// 长
+	Long: 2000,
+};
 
 /**
  * HUD消息管理
  */
-export const useHud = (ctx: PlayerContext): HudContext => {
+export const useHud = (ctx: PlayerContext) => {
 	// 当前消息 - 只保留一条最新消息
-	const currentMessage = ref<HudMessage | null>(null);
+	const currentMessage = shallowRef<HudMessage | null>(null);
 	// 超时ID
 	let timeoutId: number | null = null;
 
@@ -22,7 +43,7 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 	// 显示消息
 	const show = (message: Omit<HudMessage, "timestamp">) => {
 		const timestamp = Date.now();
-		const duration = message.duration || DEFAULT_DURATION;
+		const duration = message.duration || DurationOptions.Normal;
 
 		// 清除之前的超时
 		if (timeoutId !== null) {
@@ -52,95 +73,100 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 		currentMessage.value = null;
 	};
 
+	// 获取当前播放进度百分比
+	const getCurrentProgressPercentage = () => {
+		if (!ctx.playerCore.value) return 0;
+
+		return ctx.playerCore.value.duration > 0
+			? (ctx.playerCore.value.currentTime / ctx.playerCore.value.duration) * 100
+			: 0;
+	};
+
 	// 显示进度跳转HUD
 	const showProgressJump = (digit: number) => {
 		// 计算百分比
 		const percentage = digit / 10;
 
 		// 计算百分比对应的时间
-		const targetTime = percentage * (ctx.progress?.duration.value || 0);
+		const targetTime = percentage * (ctx.playerCore.value?.duration || 0);
 		const minutes = Math.floor(targetTime / 60);
 		const seconds = Math.floor(targetTime % 60);
 		const timeString = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
 		// 显示HUD
 		show({
-			type: "fastForward",
 			title: digit === 0 ? "跳转到开头" : `跳转到 ${digit}0%`,
 			data: {
+				icon: LocationOnSvg,
 				value: timeString,
 				max: 100,
 				min: 0,
 				progress: percentage * 100,
 			},
-			duration: 1500,
 		});
 	};
 
-	// 创建一个通用的显示消息方法
-	const showMessage = (
-		type: HudMessageType,
-		title: string,
-		value?: string | number | boolean,
-		options?: {
-			max?: number;
-			min?: number;
-			duration?: number;
-		},
-	) => {
+	// 显示音量
+	const showVolume = () => {
+		let icon = VolumeUpSvg;
+		const value = ctx.playerCore.value?.volume;
+
+		if (value === undefined) return;
+
+		if (value < 66) {
+			icon = VolumeDownSvg;
+		}
+
 		show({
-			type,
-			title,
+			title: "音量",
 			data: {
+				icon,
 				value,
-				max: options?.max,
-				min: options?.min,
-			},
-			duration: options?.duration,
-		});
-	};
-
-	// 获取当前播放进度百分比
-	const getCurrentProgressPercentage = () => {
-		if (!ctx.progress) return 0;
-
-		return ctx.progress.duration.value > 0
-			? (ctx.progress.currentTime.value / ctx.progress.duration.value) * 100
-			: 0;
-	};
-
-	// 监听音量变化
-	if (ctx.volume) {
-		const { volume, muted } = ctx.volume;
-		// 监听音量变化
-		watch(volume, (newVolume: number, oldVolume: number | undefined) => {
-			if (oldVolume === undefined) return;
-			showMessage("volume", "音量", newVolume, {
 				max: 100,
 				min: 0,
-			});
+			},
 		});
+	};
 
-		// 监听静音变化
-		watch(muted, (newMuted: boolean) => {
-			showMessage("mute", newMuted ? "静音" : "取消静音");
+	// 显示静音
+	const showMute = () => {
+		const muted = ctx.playerCore.value?.muted;
+		const icon = muted ? VolumeOffSvg : VolumeUpSvg;
+		const value = muted ? "静音" : "取消静音";
+		show({
+			data: {
+				icon,
+				value,
+			},
 		});
-	}
+	};
 
-	// 监听播放速度变化
-	if (ctx.playbackRate) {
+	// 显示播放速度
+	const showPlaybackRate = () => {
+		if (!ctx.playbackRate) return;
 		const { current } = ctx.playbackRate;
-		watch(current, (newRate: number, oldRate: number | undefined) => {
-			if (oldRate === undefined) return;
-			showMessage("speed", "播放速度", newRate);
+		show({
+			title: "播放速度",
+			data: {
+				icon: TimerSvg,
+				value: current.value,
+			},
 		});
-	}
+	};
 
 	// 监听字幕变化
 	if (ctx.subtitles) {
 		const { current } = ctx.subtitles;
 		watch(current, (newSubtitle) => {
-			showMessage("subtitle", "字幕", newSubtitle ? newSubtitle.label : "关闭");
+			const value = newSubtitle ? newSubtitle.label : "关闭";
+			const icon = newSubtitle ? SubtitlesSvg : SubtitlesOffSvg;
+			show({
+				title: "字幕",
+				data: {
+					icon,
+					value,
+				},
+			});
 		});
 	}
 
@@ -151,87 +177,74 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 		// 监听旋转变化
 		watch(rotate, (newRotate: number, oldRotate: number | undefined) => {
 			if (oldRotate === undefined) return;
-			showMessage("transform", "旋转", `${newRotate}°`);
+			show({
+				title: "旋转",
+				data: {
+					icon: RotateSvg,
+					value: `${newRotate}°`,
+				},
+			});
 		});
 
 		// 监听水平翻转
 		watch(flipX, (newFlipX: boolean) => {
-			showMessage("transform", "水平翻转", newFlipX ? "开启" : "关闭");
+			show({
+				title: "水平翻转",
+				data: {
+					icon: FlipSvg,
+					value: newFlipX ? "开启" : "关闭",
+				},
+			});
 		});
 
 		// 监听垂直翻转
 		watch(flipY, (newFlipY: boolean) => {
-			showMessage("transform", "垂直翻转", newFlipY ? "开启" : "关闭");
+			show({
+				title: "垂直翻转",
+				data: {
+					icon: FlipSvg,
+					value: newFlipY ? "开启" : "关闭",
+				},
+			});
 		});
 	}
 
-	// 拦截播放器的skip方法，添加HUD显示
-	if (ctx.progress) {
-		const originalSkip = ctx.progress.skip;
+	// 显示快进/快退HUD
+	const showFastJumpHud = (dir: number) => {
+		// 计算当前进度百分比
+		const currentProgress = getCurrentProgressPercentage();
+		const title = dir === 1 ? "快进" : "快退";
 
-		// 重写skip方法
-		ctx.progress.skip = (value: number, isPercent?: boolean) => {
-			// 调用原始方法
-			originalSkip(value, isPercent);
+		// 创建消息并添加进度信息
+		show({
+			title,
+			data: {
+				icon: dir === 1 ? FastForwardSvg : FastRewindSvg,
+				max: 100,
+				min: 0,
+				// 直接把当前进度作为消息的属性
+				progress: currentProgress,
+				value: formatTime(ctx.playerCore.value?.currentTime || 0),
+			},
+			duration: DurationOptions.Fast,
+		});
+	};
 
-			// 显示快进/快退消息
-			if (!isPercent) {
-				// 计算当前进度百分比
-				const currentProgress = getCurrentProgressPercentage();
-
-				// 创建消息并添加进度信息
-				show({
-					type: value > 0 ? "fastForward" : "fastBackward",
-					title: value > 0 ? "快进" : "快退",
-					data: {
-						value: `${Math.abs(value)}秒`,
-						max: 100,
-						min: 0,
-						// 直接把当前进度作为消息的属性
-						progress: currentProgress,
-					},
-					duration: DEFAULT_DURATION,
-				});
-			}
-		};
-	}
-
-	// 如果存在playbackRate的长按快进功能
-	if (ctx.playbackRate) {
-		const originalStartLongPress = ctx.playbackRate.startLongPressFastForward;
-		const originalStopLongPress = ctx.playbackRate.stopLongPressFastForward;
-
-		if (originalStartLongPress && originalStopLongPress) {
-			// 重写长按快进方法
-			ctx.playbackRate.startLongPressFastForward = () => {
-				originalStartLongPress();
-
-				// 计算当前进度百分比
-				const currentProgress = getCurrentProgressPercentage();
-
-				// 创建HUD消息，包含当前进度
-				show({
-					type: "fastForward",
-					title: "快速播放",
-					data: {
-						value: `${ctx.playbackRate?.MAX_RATE || 15}x`,
-						max: 100,
-						min: 0,
-						progress: currentProgress,
-					},
-					duration: 2000,
-				});
-			};
-
-			// 重写停止长按快进方法
-			ctx.playbackRate.stopLongPressFastForward = () => {
-				originalStopLongPress();
-
-				// 长按松开时立即清除HUD消息
-				clear();
-			};
-		}
-	}
+	// 显示长按快进HUD
+	const showLongPressFastForward = () => {
+		// 计算当前进度百分比
+		const currentProgress = getCurrentProgressPercentage();
+		show({
+			title: "快速播放",
+			data: {
+				icon: RocketLaunchSvg,
+				value: `${formatTime(ctx.playerCore.value?.currentTime || 0)}`,
+				max: 100,
+				min: 0,
+				progress: currentProgress,
+			},
+		});
+	};
 
 	// 组件卸载时清理定时器
 	onUnmounted(() => {
@@ -246,5 +259,10 @@ export const useHud = (ctx: PlayerContext): HudContext => {
 		show,
 		clear,
 		showProgressJump,
+		showFastJumpHud,
+		showMute,
+		showPlaybackRate,
+		showVolume,
+		showLongPressFastForward,
 	};
 };

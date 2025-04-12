@@ -40,7 +40,7 @@
 <script setup lang="ts">
 import SubscriptionSvg from "@material-symbols/svg-400/rounded/subscriptions.svg?component";
 import CloseSvg from "@material-symbols/svg-400/rounded/unfold_less-fill.svg?component";
-import { nextTick, ref, useTemplateRef, watch } from "vue";
+import { nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
@@ -60,9 +60,9 @@ const emit = defineEmits<{
 }>();
 
 const playlistRef = ref<HTMLElement | null>(null);
-
 const playlistItemRefs =
 	useTemplateRef<InstanceType<typeof PlaylistItemVue>[]>("playlistItemRefs");
+const initedScroll = shallowRef(false);
 
 const handlePlay = (item: Entity.PlaylistItem) => {
 	if (item.pc === props.pickCode) {
@@ -75,7 +75,10 @@ const handlePlay = (item: Entity.PlaylistItem) => {
  * 滚动到激活的项目
  */
 const scrollToActiveItem = async (withAnimation = true) => {
+	if (initedScroll.value) return;
 	await nextTick();
+
+	if (!playlistItemRefs.value) return;
 
 	// 查找激活的项目
 	const activeItem = playlistItemRefs.value.find((ref) => ref.$props.active);
@@ -110,6 +113,8 @@ const scrollToActiveItem = async (withAnimation = true) => {
 		top: Math.max(0, scrollTop),
 		behavior: withAnimation ? "smooth" : "instant",
 	});
+
+	initedScroll.value = true;
 };
 
 // 点击标题时调用的滚动函数

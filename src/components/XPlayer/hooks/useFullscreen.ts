@@ -1,13 +1,15 @@
-import { useEventListener, useVModel } from "@vueuse/core";
+import { useEventListener } from "@vueuse/core";
 import { shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
-// 全屏和播放列表
+/**
+ * 全屏和播放列表
+ */
 export function useFullscreen(ctx: PlayerContext) {
 	// 是否全屏
 	const isFullscreen = shallowRef(false);
 	// 显示播放列表
-	const showSider = useVModel(ctx.rootProps, "showSider", ctx.rootEmit);
+	const showPlaylist = ctx.rootPropsVm.showPlaylist;
 
 	// 监听全屏变化
 	const handleFullscreenChange = () => {
@@ -20,6 +22,7 @@ export function useFullscreen(ctx: PlayerContext) {
 			if (!document.fullscreenElement) {
 				window.scrollTo(0, 0);
 				await document.documentElement.requestFullscreen();
+				showPlaylist.value = false;
 			} else {
 				await document.exitFullscreen();
 			}
@@ -30,8 +33,8 @@ export function useFullscreen(ctx: PlayerContext) {
 
 	// 播放列表
 	const toggleShowSider = async () => {
-		const newValue = !showSider.value;
-		showSider.value = newValue;
+		const newValue = !showPlaylist.value;
+		showPlaylist.value = newValue;
 	};
 
 	useEventListener(document, "fullscreenchange", handleFullscreenChange);
@@ -40,7 +43,7 @@ export function useFullscreen(ctx: PlayerContext) {
 	useEventListener(document, "MSFullscreenChange", handleFullscreenChange);
 
 	return {
-		showSider,
+		showPlaylist,
 		isFullscreen,
 		toggleFullscreen,
 		toggleShowSider,

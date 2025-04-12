@@ -7,18 +7,8 @@
 			:style="style"
 			v-bind="$attrs"
 		>
-			<svg :class="$style['x-popup-bg']" width="100%" height="100%">
-				<defs>
-					<linearGradient id="x-popup-bg-gradient">
-						<stop offset="0%" style="stop-color: rgba(15, 15, 15, 0.8); stop-opacity: 1;" />
-						<stop offset="100%" style="stop-color: rgba(15, 15, 15, 0.8); stop-opacity: 1;" />
-					</linearGradient>
-					<filter id="x-popup-bg-blur">
-						<feGaussianBlur in="SourceGraphic" stdDeviation="10" />
-					</filter>
-					<image filter="url(#blur)" x="0" y="0" width="100%" height="100%" xlink:href="" alt=""></image>
-				</defs>
-			</svg>
+			<div :class="$style['x-popup-bg']" width="100%" height="100%">
+			</div>
 			<div :class="$style['x-popup-content']">
 				<slot></slot>
 			</div>
@@ -55,11 +45,7 @@ const props = withDefaults(defineProps<Props>(), {
 	lockControls: true,
 });
 
-const emit = defineEmits<{
-	(e: "click"): void;
-	(e: "mouseenter"): void;
-	(e: "mouseleave"): void;
-}>();
+const emit = defineEmits<(e: "update:visible", value: boolean) => void>();
 
 const { container } = usePortal();
 const { controls, refs } = usePlayerContext();
@@ -94,7 +80,8 @@ const style = computed(() => ({
 const triggerPositiong = computed(() => {
 	forceUpdate.value; // 用于强制更新位置
 
-	if (!props.triggerRef || !popupRef.value) return { x: 0, y: 0 };
+	if (!props.triggerRef || !popupRef.value || !refs.rootRef.value)
+		return { x: 0, y: 0 };
 
 	// 获取触发元素和菜单的尺寸
 	const triggerRect = props.triggerRef.getBoundingClientRect();
@@ -161,9 +148,6 @@ onClickOutside(popupRef, (event) => {
 		if (props.triggerRef?.contains(event.target as Node)) {
 			event.stopPropagation();
 		}
-		// if (refs.videoMaskRef.value?.contains(event.target as Node)) {
-		// 	event.stopPropagation();
-		// }
 		visibleModel.value = false;
 	}
 });

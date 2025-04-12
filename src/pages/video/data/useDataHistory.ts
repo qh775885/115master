@@ -1,15 +1,23 @@
-import { useThrottleFn } from "@vueuse/core";
+import { useDebounceFn, useThrottleFn } from "@vueuse/core";
 import { type Ref, onUnmounted, shallowRef } from "vue";
 import type XPlayerInstance from "../../../components/XPlayer/index.vue";
 import { drive115 } from "../../../utils/drive115";
 
+/**
+ * 历史记录
+ */
 export const useDataHistory = (
-	xplayerRef: Ref<InstanceType<typeof XPlayerInstance> | null>,
+	_xplayerRef: Ref<InstanceType<typeof XPlayerInstance> | null>,
 ) => {
+	// 是否初始化
 	const isinit = shallowRef(false);
+	// 文件提取码
 	const pickcode = shallowRef("");
+	// 最后播放时间
+	const lastTime = shallowRef(0);
 
-	const update = (time: number) => {
+	// 保存历史记录
+	const postHistory = async (time: number) => {
 		if (!isinit.value || !pickcode.value) {
 			return;
 		}
@@ -23,24 +31,17 @@ export const useDataHistory = (
 		});
 	};
 
-	const updateThrottle = useThrottleFn((time: number) => {
-		update(time);
-	}, 3000);
+	// 处理时间更新
+	const handleTimeupdate = useThrottleFn(async (time: number) => {
+		await postHistory(time);
+	}, 5000);
 
-	const handleUpdateCurrentTime = ({
-		time,
-		isManual,
-	}: {
-		time: number;
-		isManual: boolean;
-	}) => {
-		if (isManual) {
-			update(time);
-		} else {
-			updateThrottle(time);
-		}
-	};
+	// 处理跳转
+	const handleSeek = useDebounceFn(async (time: number) => {
+		await postHistory(time);
+	}, 2000);
 
+	// 获取历史记录
 	const fetch = async (_pickcode: string) => {
 		pickcode.value = _pickcode;
 		try {
@@ -51,16 +52,18 @@ export const useDataHistory = (
 				category: "1",
 			});
 			if (!Number.isNaN(res.data.time)) {
-				xplayerRef.value?.seekTo(res.data.time);
+				lastTime.value = Number(res.data.time ?? 0);
 			}
 		} finally {
 			isinit.value = true;
 		}
 	};
 
+	// 清除
 	const clear = () => {
-		pickcode.value = "";
 		isinit.value = false;
+		pickcode.value = "";
+		lastTime.value = 0;
 	};
 
 	onUnmounted(() => {
@@ -68,7 +71,10 @@ export const useDataHistory = (
 	});
 
 	return {
-		handleUpdateCurrentTime,
+		isinit,
+		lastTime,
+		handleTimeupdate,
+		handleSeek,
 		fetch,
 		clear,
 	};

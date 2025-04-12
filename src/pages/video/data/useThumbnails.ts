@@ -1,5 +1,6 @@
 import { tryOnUnmounted, useThrottleFn } from "@vueuse/core";
 import { sampleSize } from "lodash";
+import { shallowRef } from "vue";
 import type {
 	ThumbnailFrame,
 	VideoSource,
@@ -53,12 +54,16 @@ export function useDataThumbnails(
 	const scheduler = new Scheduler<ThumbnailFrame | null>(SCHEDULER_OPTIONS);
 
 	// 初始化缩略图生成器
-	let isInited = false;
+	const isInited = shallowRef(false);
+
+	// 是否执行过自动缓冲
+	const isAutoBufferExecuted = shallowRef(false);
+
 	const initialize = async (
 		sources: VideoSource[],
 		samplingInterval: number,
 	) => {
-		isInited = false;
+		isInited.value = false;
 		clipper.clear();
 
 		const source = findLowestQualityHLS(sources);
@@ -67,8 +72,7 @@ export function useDataThumbnails(
 			source.url,
 			samplingInterval ?? DEFAULT_SAMPLING_INTERVAL,
 		);
-		await autoBuffer();
-		isInited = true;
+		isInited.value = true;
 	};
 
 	// 找到最低画质的 HLS 源
@@ -174,6 +178,10 @@ export function useDataThumbnails(
 			return;
 		}
 
+		if (isAutoBufferExecuted.value) {
+			return;
+		}
+
 		const blurSegments = sampleSize(
 			clipper.blurSegments,
 			Math.max(
@@ -187,7 +195,7 @@ export function useDataThumbnails(
 
 		for (const segment of blurSegments) {
 			const id = segment._uri ?? "";
-			if (scheduler.get(id)) {
+			if (scheduler.get(id) || clipper.segmentCache.get(segment._index)) {
 				continue;
 			}
 			scheduler
@@ -216,6 +224,8 @@ export function useDataThumbnails(
 	const clear = () => {
 		clipper.clear();
 		scheduler.clear();
+		isInited.value = false;
+		isAutoBufferExecuted.value = false;
 	};
 
 	tryOnUnmounted(() => {
@@ -223,7 +233,10 @@ export function useDataThumbnails(
 	});
 
 	return {
+		isInited,
+		isAutoBufferExecuted,
 		initialize,
+		autoBuffer,
 		onThumbnailRequest,
 		clear,
 	};

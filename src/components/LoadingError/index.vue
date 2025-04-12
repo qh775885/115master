@@ -24,12 +24,19 @@
         stroke-linecap="round"
       />
     </svg>
-    <span class="loading-error-text">
+    <p class="loading-error-text">
       <slot>{{ message || defaultMessage }}</slot>
-    </span>
-    <span v-if="detail" class="loading-error-detail">
-      {{ detail }}
-    </span>
+    </p>
+    <p v-if="detail" class="loading-error-detail">
+      <template v-if="detail instanceof Error">
+        {{ detail.name }} <br />
+        [Error message]: {{ detail.message }} <br />
+        [Error stack]:  <br />{{ detail.stack }}
+      </template>
+      <template v-else>
+        {{ detail }}
+      </template>
+    </p>
     <button 
       v-if="retryable" 
       class="loading-error-retry"
@@ -121,12 +128,16 @@ const defaultMessage = "加载失败";
 .loading-error-text {
   font-size: 14px;
   animation: text-appear 0.3s ease-out 0.5s both;
+  user-select: text;
+  margin: 0;
 }
 
 .loading-error-detail {
   font-size: 12px;
   color: #999;
   animation: text-appear 0.3s ease-out 0.5s both;
+  user-select: text;
+  margin: 0;
 }
 
 .loading-error-retry {

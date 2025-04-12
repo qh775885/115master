@@ -6,7 +6,7 @@
 		>
 			<div class="play-animation-icon">
 				<div class="icon-wrapper">
-					<Icon :svg="playing.isPlaying.value ? Play : Pause" size="50px" />
+					<Icon :svg="isShowPause ? Pause : Play" size="50px" />
 				</div>
 			</div>
 		</div>
@@ -16,18 +16,19 @@
 <script setup lang="ts">
 import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
 import Play from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import { shallowRef, watch } from "vue";
+import { computed, shallowRef, watch } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
-const { playing } = usePlayerContext();
+const { playerCore } = usePlayerContext();
 const visible = shallowRef(false);
 const timer = shallowRef<number | null>(null);
+const isShowPause = shallowRef(false);
 
-// 监听播放状态变化
-watch(playing.isPlaying, (value) => {
+const showAnimation = (paused: boolean) => {
 	// 显示动画
 	visible.value = true;
+	isShowPause.value = paused;
 
 	// 清除之前的定时器
 	if (timer.value) {
@@ -37,8 +38,44 @@ watch(playing.isPlaying, (value) => {
 	// 设置新的定时器，800ms 后隐藏动画
 	timer.value = window.setTimeout(() => {
 		visible.value = false;
-	}, 300);
-});
+	}, 250);
+};
+
+const showPlayButton = () => {
+	visible.value = true;
+	isShowPause.value = false;
+};
+
+const hideButton = () => {
+	visible.value = false;
+};
+
+watch(
+	() => playerCore.value?.canplay,
+	(value) => {
+		if (value) {
+			if (!playerCore?.value?.paused) {
+				showAnimation(false);
+				return;
+			}
+			showPlayButton();
+			return;
+		}
+
+		hideButton();
+	},
+);
+
+// 监听播放状态变化
+watch(
+	() => playerCore?.value?.paused,
+	(value) => {
+		if (!playerCore?.value?.canplay) {
+			return;
+		}
+		showAnimation(value);
+	},
+);
 </script>
 
 <style scoped>

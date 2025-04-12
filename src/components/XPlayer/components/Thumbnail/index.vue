@@ -21,8 +21,8 @@
 			>
 				<canvas
 					ref="thumbnailCanvas"
-					:width="width * 2"
-					:height="height * 2"
+					:width="width"
+					:height="height"
 					:style="{
 						width: `${width}px`,
 						height: `${height}px`
@@ -191,7 +191,7 @@ watch(
 			height.value = newVal?.img.height ?? oldVal?.img.height ?? DEFAULT_HEIGHT;
 
 			// 计算设备像素比
-			const dpr = 2; // 固定2x分辨率
+			const dpr = 1; // 固定2x分辨率
 
 			requestAnimationFrame(() => {
 				// 重置画布变换以防止叠加效应
@@ -205,8 +205,48 @@ watch(
 
 				// 如果缩略图存在且渲染时间与最新Hover时间相同，则绘制缩略图
 				if (newVal && thumb.renderTime === thumb.lastHoverTime) {
-					// 首先绘制缩略图
-					ctx.value.drawImage(newVal.img, 0, 0, width.value, height.value);
+					// 实现 contain 模式绘制
+					const canvasWidth = width.value;
+					const canvasHeight = height.value;
+					const imgWidth = newVal.img.width;
+					const imgHeight = newVal.img.height;
+
+					// 计算宽高比
+					const canvasRatio = canvasWidth / canvasHeight;
+					const imgRatio = imgWidth / imgHeight;
+
+					let drawWidth: number;
+					let drawHeight: number;
+					let offsetX: number;
+					let offsetY: number;
+
+					// 根据比例决定如何缩放和定位图像
+					if (imgRatio > canvasRatio) {
+						// 图像更宽，以宽度为基准
+						drawWidth = canvasWidth;
+						drawHeight = canvasWidth / imgRatio;
+						offsetX = 0;
+						offsetY = (canvasHeight - drawHeight) / 2;
+					} else {
+						// 图像更高，以高度为基准
+						drawHeight = canvasHeight;
+						drawWidth = canvasHeight * imgRatio;
+						offsetX = (canvasWidth - drawWidth) / 2;
+						offsetY = 0;
+					}
+
+					// 先用黑色背景填充整个画布
+					ctx.value.fillStyle = "#000000";
+					ctx.value.fillRect(0, 0, canvasWidth, canvasHeight);
+
+					// 绘制缩略图，使用计算出的尺寸和偏移量
+					ctx.value.drawImage(
+						newVal.img,
+						offsetX,
+						offsetY,
+						drawWidth,
+						drawHeight,
+					);
 				}
 			});
 		}
@@ -267,7 +307,7 @@ onUnmounted(() => {
 	overflow: hidden;
 	box-sizing: border-box;
 	background: rgba(0,0,0, 1);
-	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
+	box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.4);
 	pointer-events: auto;
 	cursor: pointer;
 	transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -275,7 +315,7 @@ onUnmounted(() => {
 	
 	&:hover {
 		transform: scale(1.02);
-		box-shadow: 0 4px 12px rgba(15, 15, 15, 0.8), 0 0 0 2px rgba(255, 255, 255, 0.4);
+		box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 2px rgba(255, 255, 255, 0.9);
 	}
 	
 	&:active {

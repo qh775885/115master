@@ -81,46 +81,6 @@ export class ClipperCore {
 		return null;
 	}
 
-	// 根据 URL 获取 ArrayBuffer，支持流式读取
-	public async fetchBuffer(
-		url: string,
-		signal?: AbortSignal,
-		onData?: (chunk: Uint8Array) => void,
-	): Promise<ArrayBuffer> {
-		const response = await fetch(url, { signal, priority: "low" });
-		if (!onData) {
-			return await response.arrayBuffer();
-		}
-
-		const reader = response.body?.getReader();
-		if (!reader) {
-			throw new Error("Stream not supported");
-		}
-
-		const chunks: Uint8Array[] = [];
-		let totalLength = 0;
-
-		while (true) {
-			const { done, value } = await reader.read();
-			if (done) break;
-
-			if (value) {
-				chunks.push(value);
-				totalLength += value.length;
-				onData(value);
-			}
-		}
-
-		const result = new Uint8Array(totalLength);
-		let offset = 0;
-		for (const chunk of chunks) {
-			result.set(chunk, offset);
-			offset += chunk.length;
-		}
-
-		return result.buffer;
-	}
-
 	// 根据 URL 获取指定范围的 ArrayBuffer
 	public async fetchBufferRange(
 		url: string,

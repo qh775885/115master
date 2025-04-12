@@ -11,17 +11,11 @@
 		>
 			<!-- 进度条内容器 -->
 			<div class="progress-bar-container">
-				<!-- 缓冲进度 -->
-				<div 
-					class="progress-buffer"
-					:style="{ width: `${progress.buffered.value}%` }"
-				></div>
-
 				<!-- 原始播放进度（拖拽时保持显示） -->
 				<div 
 					class="progress-current"
 					:style="{ 
-						width: `${progress.progress.value}%`,
+						width: `${progressValue}%`,
 						opacity: isDragging ? 0.5 : 1
 					}"
 				></div>
@@ -53,7 +47,7 @@
 				<div 
 					class="progress-handle-container"
 					:style="{ 
-						left: `${isDragging ? dragProgress : progress.progress.value}%` 
+						left: `${isDragging ? dragProgress : progressValue}%` 
 					}"
 				>
 					<div 
@@ -69,7 +63,7 @@
 		<Thumbnail
 			:visible="isPreviewVisible || isDragging"
 			:position="isDragging ? dragProgress : previewProgress"
-			:time="isDragging ? previewTime : (isPreviewVisible ? previewTime : progress.currentTime.value)"
+			:time="previewTime"
 			:progress-bar-width="progressBarWidth"
 			@seek="handleThumbnailSeek"
 		/>
@@ -78,11 +72,17 @@
 
 <script setup lang="ts">
 import { useElementSize } from "@vueuse/core";
-import { onUnmounted, shallowRef } from "vue";
+import { computed, onUnmounted, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
-const { progress, progressBar } = usePlayerContext();
+const { progress, progressBar, playerCore: player } = usePlayerContext();
+
+const progressValue = computed(() => {
+	return (player.value?.currentTime / (player.value?.duration ?? 1)) * 100;
+});
+
+const duration = computed(() => player.value?.duration ?? 0);
 // 进度条容器
 const progressBarWrapperRef = shallowRef<HTMLElement | null>(null);
 // 进度条宽度 - 使用 useElementSize 替代
@@ -158,15 +158,15 @@ const handleGlobalMouseUp = (event: MouseEvent) => {
 // 更新预览位置
 const updatePreview = (position: number) => {
 	previewProgress.value = position * 100;
-	previewTime.value = position * progress.duration.value;
+	previewTime.value = position * duration.value;
 };
 
 // 开始拖拽
 const startDragging = (position: number) => {
 	isDragging.value = true;
-	originalProgress.value = progress.progress.value;
+	originalProgress.value = progressValue.value;
 	dragProgress.value = position * 100;
-	previewTime.value = position * progress.duration.value;
+	previewTime.value = position * duration.value;
 	document.addEventListener("mousemove", handleGlobalMouseMove);
 	document.addEventListener("mouseup", handleGlobalMouseUp);
 };
@@ -175,14 +175,14 @@ const startDragging = (position: number) => {
 const updateDragging = (position: number) => {
 	if (!isDragging.value) return;
 	dragProgress.value = position * 100;
-	previewTime.value = position * progress.duration.value;
+	previewTime.value = position * duration.value;
 };
 
 // 停止拖拽
 const stopDragging = (position: number) => {
 	if (isDragging.value) {
-		const finalTime = position * progress.duration.value;
-		progress.seekTo(finalTime);
+		const finalTime = position * duration.value;
+		player.value?.seek(finalTime);
 		previewProgress.value = position * 100;
 		previewTime.value = finalTime;
 	}
@@ -207,7 +207,7 @@ const hidePreview = () => {
 // 处理缩略图点击跳转事件
 const handleThumbnailSeek = (time: number) => {
 	// 直接跳转到缩略图时间点
-	progress.seekTo(time);
+	player.value?.seek(time);
 	isDragging.value = false;
 	// 隐藏预览
 	hidePreview();
@@ -244,13 +244,6 @@ onUnmounted(() => {
 
 .progress-bar-wrapper:hover .progress-bar-container {
 	height: 5px;
-}
-
-.progress-buffer {
-	position: absolute;
-	height: 100%;
-	background-color: rgba(255, 255, 255, 0.4);
-	transition: width 0.2s ease;
 }
 
 .progress-current {

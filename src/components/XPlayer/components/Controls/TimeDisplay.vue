@@ -1,15 +1,15 @@
 <template>
 	<div :class="$style['time-display']">
-		<span>{{ formatTime(progress.currentTime.value) }}</span>
+		<span>{{ formatTime(playerCore?.currentTime) }}</span>
 		<span :class="$style['time-separator']">/</span>
-		<span>{{ formatTime(progress.duration.value) }}</span>
+		<span>{{ formatTime(playerCore?.duration) }}</span>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import { formatTime } from "../../utils/time";
-const { progress } = usePlayerContext();
+const { progress, playerCore } = usePlayerContext();
 </script>
 
 <style module>

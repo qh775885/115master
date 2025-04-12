@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# cache
+.rollup.cache
+
+# yalc
+.yalc/
+yalc.lock

@@ -1,7 +1,11 @@
+import transformer from "@libmedia/cheap/build/transformer";
+import typescript from "@rollup/plugin-typescript";
 import vue from "@vitejs/plugin-vue";
 import { visualizer } from "rollup-plugin-visualizer";
+import type { PluginOption } from "vite";
 import { defineConfig } from "vite";
 import monkey, { cdn, util } from "vite-plugin-monkey";
+import { viteStaticCopy } from "vite-plugin-static-copy";
 import svgLoader from "vite-svg-loader";
 import PKG from "./package.json";
 
@@ -16,9 +20,39 @@ const _cdn = cdn.jsdelivrFastly;
 // https://vitejs.dev/config/
 export default defineConfig({
 	build: {
-		minify: true,
+		minify: false,
+	},
+	optimizeDeps: {
+		exclude: ["@libmedia/avplayer"],
 	},
 	plugins: [
+		// AvPlayer 已采用动态 esm 进行加载，因此不需要进行静态复制
+		// viteStaticCopy({
+		// 	targets: [
+		// 		{
+		// 			src: "node_modules/@libmedia/avplayer/dist/esm/[0-9]*.avplayer.js",
+		// 			dest: "./",
+		// 		},
+		// 	],
+		// }) as unknown as PluginOption,
+
+		typescript({
+			// ref: https://zhaohappy.github.io/libmedia/docs/guide/quick-start#%E7%BC%96%E8%AF%91%E9%85%8D%E7%BD%AE
+			// 配置使用的 tsconfig.json 配置文件
+			// include 中需要包含要处理的文件
+			tsconfig: "./tsconfig.app.json",
+			transformers: {
+				before: [
+					{
+						type: "program",
+						factory: (program) => {
+							// console.log(program.);
+							return transformer.before(program);
+						},
+					},
+				],
+			},
+		}),
 		vue(),
 		svgLoader(),
 		visualizer({
@@ -40,8 +74,8 @@ export default defineConfig({
 				"run-at": "document-start",
 				include: [
 					"https://115.com/?ct*",
-					"https://115.com/?aid*",
 					"https://115.com/web/lixian/master/video/*",
+					"https://115.com/?aid*",
 					"https://dl.115cdn.net/video/token",
 				],
 				exclude: [

@@ -1,7 +1,6 @@
 <template>
 	<div 
 		:class="$style['control-bar']"
-		v-if="source.list.value.length > 0"
 		@mouseenter="controls.setIsMouseInControls(true)"
 		@mouseleave="controls.setIsMouseInControls(false)"
 	>
@@ -24,21 +23,26 @@
 			<div :class="$style['control-bar__content']">
 				<!-- 进度条 -->
 				<ProgressBar 
+					v-if="canplay"
 				/>
 				<div :class="$style['control-bar__bar']">
 					<div :class="$style['left']">
 						<!-- 播放按钮 -->
-						<PlayButton />
+						<PlayButton v-if="canplay" />
 						<!-- 音量控制 -->
-						<VolumeControl />
+						<VolumeControl v-if="canplay" />
 						<!-- 时间显示 -->
-						<TimeDisplay />
+						<TimeDisplay v-if="canplay" />
 					</div>
 					<div :class="$style['right']">
 						<!-- 倍速控制 -->
-						<PlaybackRateButton />
+						<PlaybackRateButton v-if="canplay" />
 						<!-- 字幕控制 -->
-						<SubtitleButton />
+						<SubtitleButton v-if="canplay" />
+						<!-- 音频 Track -->
+						<AudioTrackButton v-if="canplay" />
+						<!-- 播放器核心 -->
+						<PlayerCoreButton />
 						<!-- 画质控制 -->
 						<QualityButton />
 						<!-- 设置 -->
@@ -57,11 +61,14 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import AudioTrackButton from "./AudioTrackButton.vue";
 import FullscreenButton from "./FullscreenButton.vue";
 import PipButton from "./PipButton.vue";
 import PlayButton from "./PlayButton.vue";
 import PlaybackRateButton from "./PlaybackRateButton.vue";
+import PlayerCoreButton from "./PlayerCoreButton.vue";
 import ProgressBar from "./ProgressBar.vue";
 import QualityButton from "./QualityButton.vue";
 import ScrollTip from "./ScrollTip.vue";
@@ -69,9 +76,12 @@ import SettingsButton from "./SettingsButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
 import VolumeControl from "./VolumeControl.vue";
-
 // 视频播放器上下文
-const { controls, source } = usePlayerContext();
+const { controls, source, playerCore } = usePlayerContext();
+
+const canplay = computed(() => {
+	return playerCore.value?.canplay;
+});
 </script>
 
 <style module>
@@ -124,15 +134,27 @@ const { controls, source } = usePlayerContext();
 	}
 
 	button {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
 		background: none;
 		border: none;
 		color: white;
 		cursor: pointer;
 		padding: 5px;
-	}
 
-	button:hover {
-		opacity: 0.8;
+		svg {
+			width: 32px;
+			height: 32px;
+		}
+		
+		&:hover {
+			opacity: 0.8;
+		}
+		&:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+		}
 	}
 }
 </style> 

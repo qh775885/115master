@@ -1,10 +1,13 @@
 <template>
 	<div :class="$style['controls']">
 		<ControlHeader />
-		<div :class="$style['controls__mask']"
-			@click="playing.togglePlay"
-			@dblclick="fullscreen.toggleFullscreen"
+		<div
+			:class="$style['controls__mask']"
 		>
+			<div 
+				@click="player?.togglePlay"
+				@dblclick="fullscreen.toggleFullscreen">
+			</div>
 		</div>
 		<ControlBar />
 	</div>
@@ -14,7 +17,7 @@
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import ControlBar from "./ControlBar.vue";
 import ControlHeader from "./ControlHeader.vue";
-const { playing, fullscreen } = usePlayerContext();
+const { fullscreen, playerCore: player } = usePlayerContext();
 </script>
 
 <style module>
@@ -29,5 +32,9 @@ const { playing, fullscreen } = usePlayerContext();
 }
 .controls__mask {
 	flex: 1;
+	> div {
+		width: 100%;
+		height: 100%;
+	}
 }
 </style>
