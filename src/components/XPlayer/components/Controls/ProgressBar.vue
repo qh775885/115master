@@ -76,10 +76,12 @@ import { computed, onUnmounted, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
-const { progress, progressBar, playerCore: player } = usePlayerContext();
+const { progressBar, playerCore: player } = usePlayerContext();
 
 const progressValue = computed(() => {
-	return (player.value?.currentTime / (player.value?.duration ?? 1)) * 100;
+	return (
+		((player.value?.currentTime ?? 0) / (player.value?.duration ?? 1)) * 100
+	);
 });
 
 const duration = computed(() => player.value?.duration ?? 0);
@@ -148,6 +150,7 @@ const handleGlobalMouseMove = (event: MouseEvent) => {
 const handleGlobalMouseUp = (event: MouseEvent) => {
 	document.removeEventListener("mousemove", handleGlobalMouseMove);
 	document.removeEventListener("mouseup", handleGlobalMouseUp);
+	if (!progressBarWrapperRef.value) return;
 	const position = calculatePosition(event, progressBarWrapperRef.value);
 	stopDragging(position);
 	if (!isInProgressBar.value) {

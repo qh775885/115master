@@ -99,7 +99,7 @@ const DataFileInfo = useDataFileInfo();
 // 播放列表
 const DataPlaylist = useDataPlaylist();
 // 历史记录
-const DataHistory = useDataHistory(xplayerRef);
+const DataHistory = useDataHistory();
 // 收藏
 const DataMark = useMark(DataFileInfo);
 
@@ -107,13 +107,16 @@ const DataMark = useMark(DataFileInfo);
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
 	await subtitlePreference.savePreference(
-		params.pickCode.value,
+		params.pickCode.value ?? "",
 		subtitle || null,
 	);
 };
 
 // 本地播放
-const handleLocalPlay = async (player: "mpv" | "iina") => {
+const handleLocalPlay = async (player: LocalPlayer) => {
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
 	const download = await drive115.getFileDownloadUrl(params.pickCode.value);
 	switch (player) {
 		case "mpv":
@@ -130,6 +133,9 @@ const handleLocalPlay = async (player: "mpv" | "iina") => {
 
 // 播放器列表切换
 const handleChangeVideo = async (item: Entity.PlaylistItem) => {
+	if (!params.cid.value) {
+		throw new Error("cid is required");
+	}
 	goToPlayer({
 		cid: params.cid.value,
 		pickCode: item.pc,
@@ -139,8 +145,8 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 	DataThumbnails.clear();
 	DataHistory.clear();
 	DataSubtitles.execute(0, params.pickCode.value, null);
-	DataMovieInfo.value.javDBState.execute(0, null);
-	DataMovieInfo.value.javBusState.execute(0, null);
+	DataMovieInfo.javDBState.execute(0);
+	DataMovieInfo.javBusState.execute(0);
 	await nextTick();
 	await loadData(false);
 };
@@ -159,6 +165,9 @@ const handleTimeupdate = (time: number) => {
 		return;
 	}
 	DataHistory.handleTimeupdate(time);
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
 	DataPlaylist.updateItemTime(params.pickCode.value, time);
 };
 
@@ -169,6 +178,12 @@ const handleClosePlaylist = () => {
 
 // 加载数据
 const loadData = async (isFirst = true) => {
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
+	if (!params.cid.value) {
+		throw new Error("cid is required");
+	}
 	await DataHistory.fetch(params.pickCode.value);
 	// 加载视频源
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
@@ -186,8 +201,8 @@ const loadData = async (isFirst = true) => {
 		useTitle(DataFileInfo.state.file_name || "");
 		// 加载番号信息
 		if (avNumber) {
-			DataMovieInfo.value.javDBState.execute(0, avNumber);
-			DataMovieInfo.value.javBusState.execute(0, avNumber);
+			DataMovieInfo.javDBState.execute(0, avNumber);
+			DataMovieInfo.javBusState.execute(0, avNumber);
 		}
 		// 加载字幕
 		DataSubtitles.execute(0, params.pickCode.value, avNumber);

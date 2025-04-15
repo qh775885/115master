@@ -209,6 +209,6 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 	return {
 		...state,
 		...methods,
-		type: PlayerCoreType.Native,
+		type: PlayerCoreType.Native as const,
 	};
 };

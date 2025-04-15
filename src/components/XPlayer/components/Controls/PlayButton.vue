@@ -10,7 +10,6 @@
 <script setup lang="ts">
 import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import ProgressActivity from "@material-symbols/svg-400/rounded/progress_activity.svg?component";
 import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";

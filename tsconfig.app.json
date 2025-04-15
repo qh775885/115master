@@ -80,11 +80,11 @@
 		"node_modules/@libmedia/cheap/dist/esm/cheapdef.d.ts",
 	],
 	"include": [
+		"package.json",
 		"src/**/*.ts",
 		"src/**/*.tsx",
 		"src/**/*.vue",
 		"src/**/*.d.ts",
-		"package.json"
 	],
 	"exclude": [
 		"src/**/__tests__/**"

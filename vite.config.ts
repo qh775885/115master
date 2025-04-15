@@ -2,10 +2,8 @@ import transformer from "@libmedia/cheap/build/transformer";
 import typescript from "@rollup/plugin-typescript";
 import vue from "@vitejs/plugin-vue";
 import { visualizer } from "rollup-plugin-visualizer";
-import type { PluginOption } from "vite";
 import { defineConfig } from "vite";
 import monkey, { cdn, util } from "vite-plugin-monkey";
-import { viteStaticCopy } from "vite-plugin-static-copy";
 import svgLoader from "vite-svg-loader";
 import PKG from "./package.json";
 

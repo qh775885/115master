@@ -134,7 +134,7 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	}
 
 	// 尝试从缓存中取, 其实是同步返回
-	const cacheImage = await onThumbnailRequest({
+	const cacheImage = await onThumbnailRequest?.({
 		type: "Cache",
 		time: hoverTime,
 		isLast,
@@ -150,7 +150,7 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	}
 
 	thumb.lastRequestTime = hoverTime;
-	const newImage = await onThumbnailRequest({
+	const newImage = await onThumbnailRequest?.({
 		type: "Must",
 		time: hoverTime,
 		isLast,
@@ -194,6 +194,10 @@ watch(
 			const dpr = 1; // 固定2x分辨率
 
 			requestAnimationFrame(() => {
+				if (!ctx.value) {
+					throw new Error("ctx not found");
+				}
+
 				// 重置画布变换以防止叠加效应
 				ctx.value.setTransform(1, 0, 0, 1, 0, 0);
 

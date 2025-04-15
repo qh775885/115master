@@ -51,7 +51,7 @@ import type PlaylistItemVue from "./item.vue";
 
 const props = defineProps<{
 	playlist: ReturnType<typeof useDataPlaylist>;
-	pickCode: string | null;
+	pickCode?: string;
 }>();
 
 const emit = defineEmits<{

@@ -46,11 +46,13 @@ const VolumeIcon = computed(() => {
 		return VolumeOff;
 	}
 
-	if (playerCore.value?.volume < 50) {
+	const volume = playerCore.value?.volume;
+
+	if (volume && volume < 50) {
 		return VolumeDown;
 	}
 
-	if (playerCore.value?.volume >= 50) {
+	if (volume && volume >= 50) {
 		return VolumeUp;
 	}
 

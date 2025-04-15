@@ -31,7 +31,7 @@
             <template v-else-if="extInfo.state.value">
                 <div class="ext-info-cover">
                     <a href="javascript:void(0)" :alt="extInfo.state.value?.title">
-                        <Image skeleton-mode="light" :src="extInfo.state.value?.cover?.url" :alt="extInfo.state.value?.title" :referer="extInfo.state.value?.cover?.referer" cache />
+                        <Image skeleton-mode="light" :src="extInfo.state.value?.cover?.url ?? ''" :alt="extInfo.state.value?.title ?? ''" :referer="extInfo.state.value?.cover?.referer" cache />
                     </a>
                 </div>
                 <div class="ext-info-main">

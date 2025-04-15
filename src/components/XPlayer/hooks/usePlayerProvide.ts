@@ -52,35 +52,35 @@ export interface PlayerContext {
 	// 根属性
 	rootPropsVm: ToRefs<XPlayerProps>;
 	// 驱动
-	driver?: ReturnType<typeof useSwitchPlayerCore>;
+	driver: ReturnType<typeof useSwitchPlayerCore>;
 	// 全屏
-	fullscreen?: ReturnType<typeof useFullscreen>;
+	fullscreen: ReturnType<typeof useFullscreen>;
 	// 画中画
-	pictureInPicture?: ReturnType<typeof usePictureInPicture>;
+	pictureInPicture: ReturnType<typeof usePictureInPicture>;
 	// 播放速度
-	playbackRate?: ReturnType<typeof usePlaybackRate>;
+	playbackRate: ReturnType<typeof usePlaybackRate>;
 	// 进度条
-	progressBar?: ReturnType<typeof useProgressBar>;
+	progressBar: ReturnType<typeof useProgressBar>;
 	// 控制栏
-	controls?: ReturnType<typeof useControls>;
+	controls: ReturnType<typeof useControls>;
 	// 字幕
-	subtitles?: ReturnType<typeof useSubtitles>;
+	subtitles: ReturnType<typeof useSubtitles>;
 	// 视频源
-	source?: ReturnType<typeof useSources>;
+	source: ReturnType<typeof useSources>;
 	// 热键
 	hotKey: ReturnType<typeof useHotKey>;
 	// 画面转换
-	transform?: ReturnType<typeof useTransform>;
+	transform: ReturnType<typeof useTransform>;
 	// 预览图设置
-	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
+	thumbnailSettings: ReturnType<typeof useThumbnailSettings>;
 	// HUD显示
-	hud?: ReturnType<typeof useHud>;
+	hud: ReturnType<typeof useHud>;
 	// 变量
-	cssVar?: ReturnType<typeof useCssVar>;
+	cssVar: ReturnType<typeof useCssVar>;
 	// 视频增强
-	videoEnhance?: ReturnType<typeof useVideoEnhance>;
+	videoEnhance: ReturnType<typeof useVideoEnhance>;
 	// 调试面板
-	statistics?: ReturnType<typeof useStatistics>;
+	statistics: ReturnType<typeof useStatistics>;
 	// 播放器核心
 	playerCore: Ref<ReturnType<typeof usePlayerCoreDecorator> | undefined>;
 }
@@ -110,19 +110,7 @@ export function usePlayerProvide(
 		rootProps,
 		rootPropsVm: useVModels(rootProps, rootEmit),
 		playerCore: ref(),
-		driver: undefined,
-		fullscreen: undefined,
-		playbackRate: undefined,
-		progressBar: undefined,
-		controls: undefined,
-		subtitles: undefined,
-		source: undefined,
-		hotKey: undefined,
-		thumbnailSettings: undefined,
-		cssVar: undefined,
-		videoEnhance: undefined,
-		statistics: undefined,
-	};
+	} as PlayerContext;
 
 	context.driver = useSwitchPlayerCore(context);
 

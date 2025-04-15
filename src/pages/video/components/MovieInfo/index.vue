@@ -216,22 +216,18 @@
 </template>
 
 <script lang="ts" setup>
-import type { UseAsyncStateReturn } from "@vueuse/core";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { computed, nextTick, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import Empty from "../../../../components/empty/Empty.vue";
 import { formatDate, formatDuration } from "../../../../utils/format";
-import type { JavInfo } from "../../../../utils/jav/jav";
 import "photoswipe/style.css";
+import type { useDataMovieInfo } from "../../data/useDataMovieInfo";
 import CopyButton from "./components/CopyButton.vue";
 
 const props = defineProps<{
-	movieInfos: {
-		javDBState: UseAsyncStateReturn<JavInfo, [string], true>;
-		javBusState: UseAsyncStateReturn<JavInfo, [string], true>;
-	};
+	movieInfos: ReturnType<typeof useDataMovieInfo>;
 }>();
 
 const movieInfoThumb = ref<HTMLElement | null>(null);
@@ -242,11 +238,9 @@ const activeSource = ref<"javDBState" | "javBusState">("javDBState");
 const DEFAULT_AVATAR =
 	"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2NjYyI+PHBhdGggZD0iTTEyIDJDNi40OCAyIDIgNi40OCAyIDEyczQuNDggMTAgMTAgMTAgMTAtNC40OCAxMC0xMFMxNy41MiAyIDEyIDJ6bTAgM2MxLjY2IDAgMyAxLjM0IDMgM3MtMS4zNCAzLTMgMy0zLTEuMzQtMy0zIDEuMzQtMyAzLTN6bTAgMTQuMmMtMi41IDAtNC43MS0xLjI4LTYtMy4yMi4wMy0xLjk5IDQtMy4wOCA2LTMuMDggMS45OSAwIDUuOTcgMS4wOSA2IDMuMDgtMS4yOSAxLjk0LTMuNSAzLjIyLTYgMy4yMnoiLz48L3N2Zz4=";
 
-const movieInfo = computed<UseAsyncStateReturn<JavInfo, [string], false>>(
-	() => {
-		return props.movieInfos[activeSource.value];
-	},
-);
+const movieInfo = computed(() => {
+	return props.movieInfos[activeSource.value];
+});
 
 watch(movieInfoThumb, async () => {
 	if (!movieInfoThumb.value) return;

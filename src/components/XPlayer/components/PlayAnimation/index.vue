@@ -16,7 +16,7 @@
 <script setup lang="ts">
 import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
 import Play from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import { computed, shallowRef, watch } from "vue";
+import { shallowRef, watch } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
@@ -73,7 +73,7 @@ watch(
 		if (!playerCore?.value?.canplay) {
 			return;
 		}
-		showAnimation(value);
+		showAnimation(!!value);
 	},
 );
 </script>

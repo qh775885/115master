@@ -12,7 +12,7 @@ import { computed, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { Subtitle } from "../../types";
 
-const { subtitles, cssVar, refs, playerCore: player } = usePlayerContext();
+const { subtitles, cssVar, refs, playerCore } = usePlayerContext();
 // 安全区域底部
 const safeAreaBottom = computed(() => cssVar?.safeAreaBottom.value);
 // 当前字幕
@@ -44,9 +44,12 @@ const subtitleParsed = shallowRef<
  */
 const currentSubtitle = computed(() => {
 	return subtitleParsed.value.find((subtitle) => {
+		if (!playerCore.value) {
+			return false;
+		}
 		return (
-			subtitle.st <= player.value?.currentTime &&
-			subtitle.et >= player.value?.currentTime
+			subtitle.st <= playerCore.value?.currentTime &&
+			subtitle.et >= playerCore.value?.currentTime
 		);
 	});
 });

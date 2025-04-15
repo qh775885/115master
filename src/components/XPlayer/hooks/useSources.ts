@@ -1,4 +1,4 @@
-import { nextTick, ref, shallowRef, toValue, watch } from "vue";
+import { ref, shallowRef, toValue, watch } from "vue";
 import { type VideoSource, VideoSourceExtension } from "../types";
 import { PlayerCoreType } from "./playerCore/types";
 import type { PlayerContext } from "./usePlayerProvide";

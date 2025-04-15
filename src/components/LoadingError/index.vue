@@ -27,22 +27,22 @@
     <p class="loading-error-text">
       <slot>{{ message || defaultMessage }}</slot>
     </p>
-    <p v-if="detail" class="loading-error-detail">
-      <template v-if="detail instanceof Error">
-        {{ detail.name }} <br />
-        [Error message]: {{ detail.message }} <br />
-        [Error stack]:  <br />{{ detail.stack }}
+    <p v-if="props.detail" class="loading-error-detail">
+      <template v-if="props.detail instanceof Error">
+        {{ props.detail.name }} <br />
+        [Error message]: {{ props.detail.message }} <br />
+        [Error stack]:  <br />{{ props.detail.stack }}
       </template>
       <template v-else>
         {{ detail }}
       </template>
     </p>
     <button 
-      v-if="retryable" 
+      v-if="props.retryable" 
       class="loading-error-retry"
       @click="$emit('retry')"
     >
-      {{ retryText }}
+      {{ props.retryText }}
     </button>
   </div>
 </template>

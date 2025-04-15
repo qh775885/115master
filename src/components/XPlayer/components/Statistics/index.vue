@@ -88,7 +88,7 @@
             :class="$style['section-item']"
             v-for="key in Object.keys(playerCore.stats)" :key="key">
             <span>{{ key }}</span>
-            <span>{{ playerCore.stats[key] }}</span>
+            <span>{{ playerCore.stats[key as keyof Stats] }}</span>
           </div>
           <div :class="$style['section-item']">
             <span>A-V:</span>
@@ -109,9 +109,8 @@
 </template>
 
 <script setup lang="ts">
+import Stats from "@libmedia/avpipeline/struct/stats";
 import CloseSvg from "@material-symbols/svg-400/rounded/close.svg?component";
-import { isReactive, watch } from "vue";
-import { isRef } from "vue";
 import Icon from "../../../Icon/index.vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";

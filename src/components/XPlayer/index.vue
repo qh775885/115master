@@ -76,7 +76,6 @@ import { usePlayerProvide } from "./hooks/usePlayerProvide";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
 import "./styles/theme.css";
-import { useVModels } from "@vueuse/core";
 import LoadingError from "../../components/LoadingError/index.vue";
 import Statistics from "./components/Statistics/index.vue";
 
@@ -84,8 +83,8 @@ import Statistics from "./components/Statistics/index.vue";
 const props = withDefaults(defineProps<XPlayerProps>(), {
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
-	hlsConfig: {},
-	avPlayerConfig: {},
+	hlsConfig: () => ({}),
+	avPlayerConfig: () => ({}),
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();
@@ -96,24 +95,15 @@ const playerElementRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const {
-	fullscreen,
-	volume,
-	source,
-	subtitles,
-	transform,
-	videoEnhance,
-	playerCore,
-	statistics,
-	rootPropsVm,
-} = usePlayerProvide(
-	{
-		rootRef,
-		playerElementRef,
-	},
-	props,
-	emit,
-);
+const { fullscreen, source, transform, videoEnhance, playerCore, statistics } =
+	usePlayerProvide(
+		{
+			rootRef,
+			playerElementRef,
+		},
+		props,
+		emit,
+	);
 
 // 暴露方法
 defineExpose({

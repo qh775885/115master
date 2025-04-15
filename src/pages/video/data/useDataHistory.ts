@@ -1,14 +1,11 @@
 import { useDebounceFn, useThrottleFn } from "@vueuse/core";
-import { type Ref, onUnmounted, shallowRef } from "vue";
-import type XPlayerInstance from "../../../components/XPlayer/index.vue";
+import { onUnmounted, shallowRef } from "vue";
 import { drive115 } from "../../../utils/drive115";
 
 /**
  * 历史记录
  */
-export const useDataHistory = (
-	_xplayerRef: Ref<InstanceType<typeof XPlayerInstance> | null>,
-) => {
+export const useDataHistory = () => {
 	// 是否初始化
 	const isinit = shallowRef(false);
 	// 文件提取码

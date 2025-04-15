@@ -89,7 +89,7 @@ watch(
 watch(
 	() => videoData.state.value,
 	async (newValue) => {
-		if (newValue?.length > 0) {
+		if (newValue && newValue?.length > 0) {
 			await nextTick();
 			initPhotoSwipe();
 		}

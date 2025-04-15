@@ -15,7 +15,7 @@
 			placement="top"
 		>
 			<div
-				v-for="(type, index) in [PlayerCoreType.Native, PlayerCoreType.AvPlayer]"
+				v-for="(type) in [PlayerCoreType.Native, PlayerCoreType.AvPlayer]"
 				:key="type"
 				:class="[
 					$style['menu-item'],
@@ -33,15 +33,12 @@
 </template>
 
 <script setup lang="ts">
-import HubSvg from "@material-symbols/svg-400/rounded/hub.svg?component";
-import { computed, shallowRef } from "vue";
-import Icon from "../../../Icon/index.vue";
+import { shallowRef } from "vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import type { VideoSource } from "../../types";
 import Menu from "../Menu/index.vue";
 
-const { source, subtitles, playerCore } = usePlayerContext();
+const { source, playerCore } = usePlayerContext();
 const menuVisible = shallowRef(false);
 const buttonRef = shallowRef<HTMLElement>();
 

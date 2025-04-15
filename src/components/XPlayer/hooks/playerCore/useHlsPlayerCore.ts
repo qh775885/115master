@@ -84,6 +84,6 @@ export function useHlsPlayerCore(ctx: PlayerContext) {
 	return {
 		...videoNative,
 		...methods,
-		type: PlayerCoreType.Hls,
+		type: PlayerCoreType.Hls as const,
 	};
 }

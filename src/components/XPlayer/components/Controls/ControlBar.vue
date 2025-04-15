@@ -77,7 +77,7 @@ import SubtitleButton from "./SubtitleButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
 import VolumeControl from "./VolumeControl.vue";
 // 视频播放器上下文
-const { controls, source, playerCore } = usePlayerContext();
+const { controls, playerCore } = usePlayerContext();
 
 const canplay = computed(() => {
 	return playerCore.value?.canplay;

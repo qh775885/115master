@@ -546,7 +546,6 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 	return {
 		...state,
 		...methods,
-		type: PlayerCoreType.AvPlayer,
 		stats,
 		streams,
 		audioStreams,
@@ -556,5 +555,6 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 		subtitleStreamId,
 		isSupportStream,
 		setAudioStream,
+		type: PlayerCoreType.AvPlayer as const,
 	};
 };

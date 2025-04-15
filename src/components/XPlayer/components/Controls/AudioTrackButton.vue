@@ -17,7 +17,7 @@
 			placement="top"
 		>
 			<div
-				v-for="(stream, index) in playerCore.audioStreams"
+				v-for="(stream) in playerCore.audioStreams"
 				:key="stream.id"
 				:class="[
 					$style['menu-item'],
@@ -43,14 +43,13 @@
 
 <script setup lang="ts">
 import AudioFileSvg from "@material-symbols/svg-400/rounded/audio_file.svg";
-import { computed, shallowRef } from "vue";
+import { shallowRef } from "vue";
 import Icon from "../../../Icon/index.vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import type { VideoSource } from "../../types";
 import Menu from "../Menu/index.vue";
 
-const { source, subtitles, playerCore } = usePlayerContext();
+const { playerCore } = usePlayerContext();
 const menuVisible = shallowRef(false);
 const buttonRef = shallowRef<HTMLElement>();
 

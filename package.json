@@ -15,7 +15,7 @@
 		"url": "https://github.com/cbingb666/115master/issues"
 	},
 	"scripts": {
-		"dev": "vite",
+		"dev": "vue-tsc -b && vite",
 		"build": "vite build",
 		"preview": "vue-tsc -b && vite preview",
 		"test": "jest",

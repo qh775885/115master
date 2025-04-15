@@ -55,10 +55,10 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-	localPlay: [string];
+	localPlay: [LocalPlayer];
 }>();
 
-const handleLocalPlay = (player: string) => {
+const handleLocalPlay = (player: LocalPlayer) => {
 	emit("localPlay", player);
 };
 
@@ -68,7 +68,7 @@ const handleMark = async () => {
 	// 更新播放列表项星标
 	props.playlist.updateItemMark(
 		props.fileInfo.state.pick_code,
-		props.mark.isMark.value,
+		!!props.mark.isMark.value,
 	);
 };
 </script>

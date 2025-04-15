@@ -9,7 +9,7 @@
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import { formatTime } from "../../utils/time";
-const { progress, playerCore } = usePlayerContext();
+const { playerCore } = usePlayerContext();
 </script>
 
 <style module>

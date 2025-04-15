@@ -9,7 +9,6 @@
 
 <script setup lang="ts">
 import SubscriptionsSvg from "@material-symbols/svg-400/rounded/subscriptions.svg?component";
-import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 const { fullscreen } = usePlayerContext();

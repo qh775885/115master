@@ -10,7 +10,7 @@ export type HudMessageData = {
 // HUD消息
 export type HudMessage = {
 	title?: string; // 标题
-	data?: HudMessageData; // 数据
+	data: HudMessageData; // 数据
 	duration?: number; // 持续时间（毫秒）, 默认1500ms
 	timestamp: number; // 时间戳
 };

@@ -6,9 +6,9 @@
       <span></span>
     </div>
 
-    <div v-if="playerCore?.type === PlayerCoreType.AvPlayer && playerCore.stats?.bandwidth>0" 
+    <div v-if="playerCore?.type === PlayerCoreType.AvPlayer && (playerCore.stats?.bandwidth ?? 0) >0" 
         :class="$style['loading-speed']">
-      {{ Math.round(playerCore.stats?.bandwidth / 1024 / 1024 * 100) / 100 }} Mbps/s
+      {{ Math.round((playerCore.stats?.bandwidth ?? 0) / 1024 / 1024 * 100) / 100 }} Mbps/s
     </div>
   </div>
 </template>

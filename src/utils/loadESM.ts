@@ -1,3 +1,4 @@
+import { unsafeWindow } from "$";
 import pkg from "../../package.json";
 import { CDN_BASE_URL } from "./cache/core/const";
 
