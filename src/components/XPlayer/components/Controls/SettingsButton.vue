@@ -262,7 +262,6 @@
 </template>
 
 <script setup lang="ts">
-import AllInclusiveSvg from "@material-symbols/svg-400/rounded/all_inclusive.svg?component";
 import AutorenewSvg from "@material-symbols/svg-400/rounded/autorenew.svg?component";
 import BlockSvg from "@material-symbols/svg-400/rounded/block.svg?component";
 import FlipSvg from "@material-symbols/svg-400/rounded/flip.svg?component";
@@ -277,7 +276,7 @@ import Popup from "../Popup/index.vue";
 const { transform, thumbnailSettings, videoEnhance } = usePlayerContext();
 
 // 采样间隔选项
-const samplingIntervals = [10, 15, 30, 45, 60, 120];
+const samplingIntervals = [10, 30, 60, 120];
 const buttonRef = shallowRef<HTMLElement>();
 const menuVisible = shallowRef(false);
 const toggleMenu = () => {
