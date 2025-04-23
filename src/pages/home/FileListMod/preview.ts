@@ -1,4 +1,5 @@
 import { type App, createApp } from "vue";
+import { PLUS_VERSION } from "../../../constants";
 import ExtPreview from "../components/ExtPreview/index.vue";
 import { FileListType, type ItemInfo } from "../types";
 
@@ -17,8 +18,8 @@ export class FileItemPreview {
 			return;
 		}
 
-		// 如果有番号，则不加载预览视频
-		if (this.itemInfo.avNumber) {
+		// 如果有番号并且是Plus版本，则不加载预览视频
+		if (this.itemInfo.avNumber && PLUS_VERSION) {
 			return;
 		}
 

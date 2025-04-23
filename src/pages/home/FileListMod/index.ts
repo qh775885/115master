@@ -2,6 +2,7 @@ import { ActressFaceDB } from "../../../utils/actressFaceDB";
 import { getAvNumber } from "../../../utils/getNumber";
 import "./index.css";
 import { defer } from "lodash";
+import { PLUS_VERSION } from "../../../constants";
 import { getDuration } from "../../../utils/time";
 import {
 	type FileItemAttributes,
@@ -82,17 +83,18 @@ class FileItemLoader {
 
 	// 加载
 	public async load() {
-		// 加载扩展信息
-		this.extInfo = new FileItemExtInfo(this.itemNode, this.itemInfo);
-		this.extInfo.load();
+		if (PLUS_VERSION) {
+			// 加载扩展信息
+			this.extInfo = new FileItemExtInfo(this.itemNode, this.itemInfo);
+			this.extInfo.load();
+			// 加载演员信息
+			this.actressInfo = new FileItemActressInfo(this.itemNode, this.itemInfo);
+			this.actressInfo.load();
+		}
 
 		// 加载预览信息
 		this.preview = new FileItemPreview(this.itemNode, this.itemInfo);
 		this.preview.load();
-
-		// 加载演员信息
-		this.actressInfo = new FileItemActressInfo(this.itemNode, this.itemInfo);
-		this.actressInfo.load();
 
 		// 加载扩展菜单
 		this.extMenu = new FileItemExtMenu(this.itemNode, this.itemInfo);

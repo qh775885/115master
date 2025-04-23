@@ -43,6 +43,7 @@
 			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" :playlist="DataPlaylist" @localPlay="handleLocalPlay" />
 			<!-- 电影信息 -->
 			<MovieInfo 
+				v-if="PLUS_VERSION"
 				:movieInfos="DataMovieInfo"
 			/>
 			<!-- 底部 -->
@@ -59,6 +60,7 @@ import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
+import { PLUS_VERSION } from "../../constants";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
@@ -149,8 +151,10 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 		DataThumbnails.clear();
 		DataHistory.clear();
 		DataSubtitles.execute(0, params.pickCode.value, null);
-		DataMovieInfo.javDBState.execute(0);
-		DataMovieInfo.javBusState.execute(0);
+		if (PLUS_VERSION) {
+			DataMovieInfo.javDBState.execute(0);
+			DataMovieInfo.javBusState.execute(0);
+		}
 		await nextTick();
 		await loadData(false);
 	} finally {

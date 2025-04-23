@@ -17,6 +17,8 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "vite build",
+		"dev:plus": "cross-env VITE_PLUS_VERSION=true vite",
+		"build:plus": "cross-env VITE_PLUS_VERSION=true vite build",
 		"preview": "vue-tsc -b && vite preview",
 		"test": "jest",
 		"test:watch": "jest --watch",
