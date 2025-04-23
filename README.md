@@ -16,7 +16,7 @@
 
 ### 播放器
 
-集成 `Navtive`、`Hls.js`、`AvPlayer` 播放器核心，根据文件格式自动启用最优播放器。
+### 播放器功能
 
 - 🎨 `Ultra原画`
 - 👁 视频缩略图
@@ -29,18 +29,15 @@
 - ⌨️ [快捷键](#播放器快捷键)
 - 🎨 视频调色
 
-#### 播放器核心
+### 播放器核心
 
-- `Native`
-  - 原生 Video 播放器
-  - 默认启用格式: `mp4` 等
-- `Hls.js`
-  - 默认启用格式: `m3u8`
-- `AvPlayer`
-  - 默认启用格式: `mkv`
-  - 支持 mp4、mov、mpegts、flv、matroska、webm、mp3、ogg、flac、aac、wav 封装
-  - 支持视频编码格式 H265、H264、H266、VP9、VP8、AV1
-  - 支持音频编码格式 AAC、MP3、FLAC、SPEEX、OPUS、G711
+集成3种播放器核心，根据视频格式自动启用最优播放器。
+
+- [Native](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/video) 播放器，为 `Ultra画质` 下提供 `.mp4` 等其他封装格式播放，兼容性取决于浏览器。
+
+- [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player) 播放器，为 `Ultra画质` 下提供 `.mkv` 格式播放，需要支持 `webassembly` 与 `webcodecs` 的浏览器。
+
+- [Hls.js](https://github.com/video-dev/hls.js) 播放器，为非 `Ultra画质` 下提供 `.m3u8` 格式播放, 兼容性最高。
 
 ## 开发
 
@@ -125,10 +122,6 @@ pnpm build
 
     A: 因为现在只支持了绝大部分番号的识别。
 
-### Q: 啊啊啊我想要这个功能那个功能，能不能支持呀？
+## 鸣谢
 
-    A：你有想法很好！请提交到 [Issues](https://github.com/cbingb666/115master/issues)，作者脑容量有限，挂在 Issues 的会优先考虑解决。
-
-### Q: 我已经有 Emby、Jellyfin 为啥还要这个插件呀？
-
-    A: 因为这是个下载、播放、字幕、预览一条龙的插件（你会体会不一样的快乐的）。常见的影库从下载、试看、播放，整个过程还是比较割裂不方便，影库更适合做为影片收藏归档方便以后反复品味~
+- [@zhaohappy](https://github.com/zhaohappy) 提供了 [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player) 
