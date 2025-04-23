@@ -143,13 +143,13 @@ export const useHud = (ctx: PlayerContext) => {
 
 	// 显示播放速度
 	const showPlaybackRate = () => {
-		if (!ctx.playbackRate) return;
-		const { current } = ctx.playbackRate;
+		const playbackRate = ctx.playerCore.value?.playbackRate;
+		if (!playbackRate) return;
 		show({
 			title: "播放速度",
 			data: {
 				icon: TimerSvg,
-				value: current.value,
+				value: playbackRate,
 			},
 		});
 	};

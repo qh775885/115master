@@ -163,14 +163,16 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.arrowRight, KEYS.d, KEYS.D],
 		name: "快进",
 		allowRepeat: true,
-		keydown: (ctx, event) => {
+		keydown: async (ctx, event) => {
 			if (event.repeat) {
-				ctx.playbackRate?.startLongPressFastForward();
+				if (!ctx.playbackRate?.fastForward.value) {
+					ctx.playbackRate?.startLongPressFastForward();
+				}
 				ctx.hud?.showLongPressFastForward();
-			} else {
-				ctx.playerCore.value?.skip(5);
-				ctx.hud?.showFastJumpHud(1);
+				return;
 			}
+			ctx.playerCore.value?.skip(5);
+			ctx.hud?.showFastJumpHud(1);
 		},
 		keyup: async (ctx) => {
 			if (ctx.playbackRate?.fastForward.value) {
@@ -188,7 +190,7 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		name: "播放速度增大",
 		allowRepeat: true,
 		keydown: async (ctx) => {
-			await ctx.playbackRate?.up();
+			ctx.playbackRate?.up();
 			ctx.hud?.showPlaybackRate();
 		},
 	},
@@ -200,12 +202,12 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		keys: [KEYS.arrowDown, KEYS.s, KEYS.S],
 		name: "播放速度减小",
 		allowRepeat: true,
-		keydown: async (ctx, event) => {
+		keydown: (ctx, event) => {
 			if (event.repeat) {
-				await ctx.playbackRate?.downWithLowerLimit();
+				ctx.playbackRate?.downWithLowerLimit();
 				ctx.hud?.showPlaybackRate();
 			} else {
-				await ctx.playbackRate?.down();
+				ctx.playbackRate?.down();
 				ctx.hud?.showPlaybackRate();
 			}
 		},

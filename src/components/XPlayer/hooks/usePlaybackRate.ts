@@ -34,39 +34,39 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 	const fastForward = shallowRef(false);
 
 	// 设置播放速度
-	const set = async (rate: number) => {
-		await ctx.playerCore.value?.setPlaybackRate(rate);
+	const set = (rate: number) => {
+		ctx.playerCore.value?.setPlaybackRate(rate);
 	};
 
 	// 调整播放速度
-	const setByIndex = async (index: number) => {
+	const setByIndex = (index: number) => {
 		if (index < 0 || index >= rateOptions.value.length) return;
 		const newRate = rateOptions.value[index];
-		await set(newRate);
+		set(newRate);
 	};
 
 	// 增加播放速度
-	const up = async () => {
-		await setByIndex(currentRateIndex.value + 1);
+	const up = () => {
+		setByIndex(currentRateIndex.value + 1);
 	};
 
 	// 减少播放速度
-	const down = async () => {
-		await setByIndex(currentRateIndex.value - 1);
+	const down = () => {
+		setByIndex(currentRateIndex.value - 1);
 	};
 
 	// 减少播放速度并限制下限
-	const downWithLowerLimit = async () => {
+	const downWithLowerLimit = () => {
 		if (current.value <= NORMAL_RATE) return;
-		await setByIndex(currentRateIndex.value - 1);
+		setByIndex(currentRateIndex.value - 1);
 	};
 
 	// 长按快速前进
 	const holdPlaybackRate = shallowRef(1);
-	const startLongPressFastForward = async () => {
+	const startLongPressFastForward = () => {
 		if (!ctx.playerCore.value || fastForward.value) return;
 		fastForward.value = true;
-		await set(MAX_RATE);
+		set(MAX_RATE);
 		holdPlaybackRate.value = current.value;
 		if (ctx.playerCore.value.paused) {
 			ctx.playerCore.value.play();
@@ -74,10 +74,10 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 	};
 
 	// 停止长按快速前进
-	const stopLongPressFastForward = async () => {
+	const stopLongPressFastForward = () => {
 		if (!ctx.playerCore.value) return;
 		fastForward.value = false;
-		await set(holdPlaybackRate.value);
+		set(holdPlaybackRate.value);
 	};
 
 	return {
