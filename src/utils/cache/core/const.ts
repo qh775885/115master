@@ -1,3 +1,4 @@
+// 缓存名称
 export const STORE_NAME = `115master_cache${import.meta.env.DEV ? "-dev" : ""}`;
 
 // 空间限额管理相关常量
@@ -7,3 +8,9 @@ export const META_STORE_NAME = "meta"; // 元数据存储名称
 
 // CDN
 export const CDN_BASE_URL = "https://fastly.jsdelivr.net";
+
+// 文件列表预览封面数量
+export const FILELIST_PREVIEW_NUM = 5;
+
+// 播放列表预览封面数量
+export const PLAYLIST_PREVIEW_NUM = 1;

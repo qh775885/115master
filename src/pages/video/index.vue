@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
@@ -102,6 +102,8 @@ const DataPlaylist = useDataPlaylist();
 const DataHistory = useDataHistory();
 // 收藏
 const DataMark = useMark(DataFileInfo);
+// 是否正在切换视频
+const changeing = shallowRef(false);
 
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
@@ -133,22 +135,27 @@ const handleLocalPlay = async (player: LocalPlayer) => {
 
 // 播放器列表切换
 const handleChangeVideo = async (item: Entity.PlaylistItem) => {
-	if (!params.cid.value) {
-		throw new Error("cid is required");
+	try {
+		changeing.value = true;
+		if (!params.cid.value) {
+			throw new Error("cid is required");
+		}
+		goToPlayer({
+			cid: params.cid.value,
+			pickCode: item.pc,
+		});
+		params.getParams();
+		DataVideoSources.clear();
+		DataThumbnails.clear();
+		DataHistory.clear();
+		DataSubtitles.execute(0, params.pickCode.value, null);
+		DataMovieInfo.javDBState.execute(0);
+		DataMovieInfo.javBusState.execute(0);
+		await nextTick();
+		await loadData(false);
+	} finally {
+		changeing.value = false;
 	}
-	goToPlayer({
-		cid: params.cid.value,
-		pickCode: item.pc,
-	});
-	params.getParams();
-	DataVideoSources.clear();
-	DataThumbnails.clear();
-	DataHistory.clear();
-	DataSubtitles.execute(0, params.pickCode.value, null);
-	DataMovieInfo.javDBState.execute(0);
-	DataMovieInfo.javBusState.execute(0);
-	await nextTick();
-	await loadData(false);
 };
 
 // 开始自动缓冲缩略图
@@ -158,6 +165,9 @@ const handleStartAutoBuffer = () => {
 
 // 处理时间更新
 const handleTimeupdate = (time: number) => {
+	if (changeing.value) {
+		return;
+	}
 	if (!DataHistory.isinit.value) {
 		return;
 	}

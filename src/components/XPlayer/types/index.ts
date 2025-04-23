@@ -5,12 +5,20 @@ import type { Ref } from "vue";
 /**
  * 缩略图帧
  */
-export interface ThumbnailFrame {
-	// 缩略图
-	img: ImageBitmap;
-	// 时间戳
-	timestamp: number;
-}
+export type ThumbnailFrame =
+	| {
+			// 缩略图
+			img: ImageBitmap;
+			// 请求时间
+			seekTime: number;
+			// 经过模糊处理的时间
+			seekBlurTime: number;
+			// 帧实际时间
+			frameTime: number;
+			// 消耗时间
+			consumedTime: number;
+	  }
+	| undefined;
 
 /**
  * 缩略图请求
@@ -26,7 +34,7 @@ export type ThumbnailRequest = ({
 	time: number;
 	// 是否最后
 	isLast: boolean;
-}) => Promise<ThumbnailFrame | null>;
+}) => Promise<ThumbnailFrame>;
 
 /**
  * 视频源扩展名
@@ -34,6 +42,7 @@ export type ThumbnailRequest = ({
 export const VideoSourceExtension = {
 	mp4: "mp4",
 	m3u8: "m3u8",
+	m2ts: "m2ts",
 	ts: "ts",
 	flv: "flv",
 	avi: "avi",

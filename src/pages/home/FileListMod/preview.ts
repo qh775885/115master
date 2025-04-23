@@ -34,6 +34,7 @@ export class FileItemPreview {
 		const app = createApp(ExtPreview, {
 			pickCode: this.itemInfo.attributes.pick_code,
 			sha1: this.itemInfo.attributes.sha1,
+			duration: this.itemInfo.duration,
 		});
 		app.mount(previewDom);
 		this.vueApp = app;

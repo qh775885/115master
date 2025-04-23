@@ -1,9 +1,8 @@
 <template>
 	<div
 		:class="$style['box']"
-		v-show="visible"
+		v-show="props.visible"
 		:style="{
-			left: `${position}%`,
 			transform: `translateX(${previewTransform}px)`
 		}"
 	>
@@ -21,12 +20,8 @@
 			>
 				<canvas
 					ref="thumbnailCanvas"
-					:width="width"
-					:height="height"
-					:style="{
-						width: `${width}px`,
-						height: `${height}px`
-					}"
+					:width="DEFAULT_WIDTH"
+					:height="DEFAULT_HEIGHT"
 				></canvas>
 				<div :class="$style['loading']" v-show="loading">
 					<Loading/>
@@ -34,14 +29,14 @@
 			</div>
 			<div :class="$style['time-box']">
 				<div 
-					:class="[$style['time-image'], isHoveringImage && thumb.renderImage?.timestamp ? $style['show'] : '']"
+					:class="[$style['time-image'], isHoveringImage && thumb.renderImage?.frameTime ? $style['show'] : '']"
 				>
-					跳至 {{ formatTime(thumb.renderImage?.timestamp || 0) }} 预览时间
+					跳至 {{ formatTime(thumb.renderImage?.frameTime || 0) }} 预览时间
 				</div>
 				<div 
 					:class="[$style['time-normal'], isHoveringImage ? '' : $style['show']]"
 				>
-					{{ formatTime(time) }}
+					{{ formatTime(props.time) }}
 				</div>
 			</div>
 		</div>
@@ -51,71 +46,102 @@
 <script setup lang="ts">
 import { useElementBounding } from "@vueuse/core";
 import { computed, onUnmounted, reactive, ref, shallowRef, watch } from "vue";
+import { getImageResize } from "../../../../utils/image";
+import { boundary } from "../../../../utils/number";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { ThumbnailFrame } from "../../types";
 import { formatTime } from "../../utils/time";
 import Loading from "./Loading.vue";
 
 interface Props {
+	// 是否显示
 	visible: boolean;
+	// 位置 （0-100）
 	position: number;
+	// 时间
 	time: number;
+	// 进度条宽度
 	progressBarWidth: number;
 }
 
+// emit
 const emit = defineEmits<(e: "seek", time: number) => void>();
-
-const DEFAULT_WIDTH = 250;
-const DEFAULT_HEIGHT = 140;
-const isHoveringImage = ref(false);
-
+// props
 const props = withDefaults(defineProps<Props>(), {});
+// context
 const { rootProps, source } = usePlayerContext();
+
+/**
+ * 计算缩略图高度
+ * @param width 宽度
+ * @param ratioWidth 比例宽度
+ * @param ratioHeight 比例高度
+ * @returns 高度
+ */
+const ratioHeight = (
+	width: number,
+	ratioWidth: number,
+	ratioHeight: number,
+) => {
+	return (width * ratioHeight) / ratioWidth;
+};
+
+// 默认宽度
+const DEFAULT_WIDTH = 250;
+// 默认高度
+const DEFAULT_HEIGHT = ratioHeight(DEFAULT_WIDTH, 16, 9);
+// 是否正在悬停
+const isHoveringImage = ref(false);
+// 绘制缩略图请求
 const { onThumbnailRequest } = rootProps;
+// 画布
 const thumbnailCanvas = shallowRef<HTMLCanvasElement | null>(null);
+// 容器
 const thumbnailContainer = shallowRef<HTMLDivElement | null>(null);
-const width = shallowRef(DEFAULT_WIDTH);
-const height = shallowRef(DEFAULT_HEIGHT);
+// 最后一次定时器
 const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
+// 缩略图
 const thumb = reactive({
+	// 最后一次 hover 时间
 	lastHoverTime: -1,
+	// 最后一次请求时间
 	lastRequestTime: -1,
+	// 渲染时间
 	renderTime: -1,
-	renderImage: null as ThumbnailFrame | null,
+	// 渲染图片
+	renderImage: undefined as ThumbnailFrame,
 });
+// canvas 上下文
 const ctx = computed(() =>
 	thumbnailCanvas.value?.getContext("2d", {
 		alpha: false,
 		colorSpace: "srgb",
+		desynchronized: true,
 	}),
 );
+// 是否正在加载
 const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
 );
+// 缩略图矩形
 const thumbnailRect = useElementBounding(thumbnailContainer);
 
 // 计算预览容器的位移，防止超出边界
 const previewTransform = computed(() => {
-	if (!thumbnailCanvas.value) return -(thumbnailRect.width.value / 2);
+	if (!thumbnailCanvas.value) return -1;
+	if (!props.progressBarWidth) return -1;
 
 	const thumbnailWidth = thumbnailRect.width.value;
-	const centerOffset = props.progressBarWidth * (props.position / 100);
-
-	// 如果缩略图会超出左边界
-	if (centerOffset < thumbnailWidth / 2) {
-		return -centerOffset;
-	}
-
-	// 如果缩略图会超出右边界
-	if (centerOffset > props.progressBarWidth - thumbnailWidth / 2) {
-		return -(thumbnailWidth - (props.progressBarWidth - centerOffset));
-	}
-
-	// 正常情况，缩略图居中显示
-	return -(thumbnailWidth / 2);
+	const offsetCenter = -(thumbnailWidth / 2);
+	const offsetX = props.progressBarWidth * (props.position / 100);
+	const offset = offsetCenter + offsetX;
+	const min = 0;
+	const max = props.progressBarWidth - thumbnailWidth;
+	return boundary(offset, min, max);
 });
 
+// 更新缩略图
 const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	if (lastTimer.value) {
 		clearTimeout(lastTimer.value);
@@ -123,14 +149,14 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	}
 
 	// 重置缩略图
-	thumb.renderImage = null;
+	thumb.renderImage = undefined;
 
 	if (!isLast) {
 		lastTimer.value = setTimeout(() => {
 			if (hoverTime === thumb.lastHoverTime) {
 				updateThumbnail(hoverTime, true);
 			}
-		}, 300);
+		}, 50);
 	}
 
 	// 尝试从缓存中取, 其实是同步返回
@@ -172,7 +198,7 @@ watch(
 		if (!onThumbnailRequest) return;
 		if (!props.visible || !props.time) {
 			thumb.lastHoverTime = -1;
-			thumb.renderImage = null;
+			thumb.renderImage = undefined;
 			return;
 		}
 
@@ -182,75 +208,35 @@ watch(
 		await updateThumbnail(hoverTime, false);
 	},
 );
+
 // 绘制缩略图
 watch(
 	() => thumb.renderImage,
-	(newVal, oldVal) => {
+	(newVal) => {
 		if (thumbnailCanvas.value && ctx.value) {
-			width.value = newVal?.img.width ?? oldVal?.img.width ?? DEFAULT_WIDTH;
-			height.value = newVal?.img.height ?? oldVal?.img.height ?? DEFAULT_HEIGHT;
-
-			// 计算设备像素比
-			const dpr = 1; // 固定2x分辨率
-
 			requestAnimationFrame(() => {
 				if (!ctx.value) {
 					throw new Error("ctx not found");
 				}
 
-				// 重置画布变换以防止叠加效应
-				ctx.value.setTransform(1, 0, 0, 1, 0, 0);
-
 				// 清空整个画布
-				ctx.value.clearRect(0, 0, width.value * dpr, height.value * dpr);
-
-				// 应用高分辨率缩放
-				ctx.value.scale(dpr, dpr);
+				ctx.value.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
 				// 如果缩略图存在且渲染时间与最新Hover时间相同，则绘制缩略图
 				if (newVal && thumb.renderTime === thumb.lastHoverTime) {
-					// 实现 contain 模式绘制
-					const canvasWidth = width.value;
-					const canvasHeight = height.value;
 					const imgWidth = newVal.img.width;
 					const imgHeight = newVal.img.height;
-
-					// 计算宽高比
-					const canvasRatio = canvasWidth / canvasHeight;
-					const imgRatio = imgWidth / imgHeight;
-
-					let drawWidth: number;
-					let drawHeight: number;
-					let offsetX: number;
-					let offsetY: number;
-
-					// 根据比例决定如何缩放和定位图像
-					if (imgRatio > canvasRatio) {
-						// 图像更宽，以宽度为基准
-						drawWidth = canvasWidth;
-						drawHeight = canvasWidth / imgRatio;
-						offsetX = 0;
-						offsetY = (canvasHeight - drawHeight) / 2;
-					} else {
-						// 图像更高，以高度为基准
-						drawHeight = canvasHeight;
-						drawWidth = canvasHeight * imgRatio;
-						offsetX = (canvasWidth - drawWidth) / 2;
-						offsetY = 0;
-					}
-
-					// 先用黑色背景填充整个画布
-					ctx.value.fillStyle = "#000000";
-					ctx.value.fillRect(0, 0, canvasWidth, canvasHeight);
-
-					// 绘制缩略图，使用计算出的尺寸和偏移量
-					ctx.value.drawImage(
-						newVal.img,
-						offsetX,
-						offsetY,
-						drawWidth,
-						drawHeight,
+					const { width: resizeWidth, height: resizeHeight } = getImageResize(
+						imgWidth,
+						imgHeight,
+						DEFAULT_WIDTH,
+						DEFAULT_HEIGHT,
 					);
+					const dx = (DEFAULT_WIDTH - resizeWidth) / 2;
+					const dy = (DEFAULT_HEIGHT - resizeHeight) / 2;
+					ctx.value.fillStyle = "#000";
+					ctx.value.fillRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+					ctx.value.drawImage(newVal.img, dx, dy, resizeWidth, resizeHeight);
 				}
 			});
 		}
@@ -262,7 +248,7 @@ watch([source.list], () => {
 	thumb.lastHoverTime = -1;
 	thumb.lastRequestTime = -1;
 	thumb.renderTime = -1;
-	thumb.renderImage = null;
+	thumb.renderImage = undefined;
 	if (lastTimer.value) {
 		clearTimeout(lastTimer.value);
 		lastTimer.value = null;
@@ -272,9 +258,9 @@ watch([source.list], () => {
 // 处理缩略图点击事件
 const handleThumbnailMouseUp = (e: MouseEvent) => {
 	// 使用缩略图实际对应的时间点进行跳转
-	if (thumb.renderImage?.timestamp) {
+	if (thumb.renderImage?.frameTime) {
 		e.stopPropagation();
-		emit("seek", thumb.renderImage.timestamp);
+		emit("seek", thumb.renderImage.frameTime);
 	}
 };
 

@@ -1,6 +1,7 @@
 // @ts-ignore
 import MP4Box, { DataStream } from "mp4box";
-import Mux from "mux.js";
+import { DecodePipeline } from "./DecodePipeline";
+import { FetchIO } from "./FetchIO";
 
 // 视频帧
 export type ClipFrame = {
@@ -12,22 +13,6 @@ export type ClipFrame = {
 	timestamp: number;
 };
 
-// MP4 样本类型定义
-export type MP4Sample = {
-	cts: number;
-	dts: number;
-	duration: number;
-	is_sync: boolean;
-	timescale: number;
-	data: Uint8Array;
-	description: Uint8Array;
-	description_offset: number;
-	description_length: number;
-	number: number;
-	track_id: number;
-	size: number;
-};
-
 export type ClipperOptions = {
 	// 缩略图宽度
 	maxWidth: number;
@@ -37,237 +22,100 @@ export type ClipperOptions = {
 	initialChunkSize?: number;
 	// 步进块大小（字节）
 	stepChunkSize?: number;
-};
-
-// MP4 视频轨道类型定义
-type MP4VideoTrack = {
-	id: number;
-	codec: string;
-	track_width: number;
-	track_height: number;
-	timescale: number;
-};
-
-// MP4 文件信息类型定义
-type MP4Info = {
-	videoTracks: MP4VideoTrack[];
+	// 最大读取步数
+	maxSteps?: number;
 };
 
 /**
  * 视频缩略图生成器核心
- * @link https://github.com/videojs/mux.js
- * @link https://github.com/gpac/mp4box.js
+ * 负责协调FetchIO和DecodePipeline，对外提供缩略图生成功能
  */
 export class ClipperCore {
-	constructor(protected options: ClipperOptions) {}
+	private fetchIO: FetchIO;
 
-	// 辅助函数：获取解码器所需的额外数据
-	// biome-ignore lint/suspicious/noExplicitAny: <unknow>
-	private getExtradata(mp4box: any): Uint8Array | null {
-		try {
-			const entry = mp4box.moov.traks[0].mdia.minf.stbl.stsd.entries[0];
-			const box = entry.avcC ?? entry.hvcC ?? entry.vpcC;
-
-			if (box != null) {
-				const buffer = new ArrayBuffer(1024);
-				// @ts-ignore
-				const stream = new DataStream(buffer, 0, DataStream.BIG_ENDIAN);
-				box.write(stream);
-				return new Uint8Array(stream.buffer, 8, stream.position - 8);
-			}
-		} catch (error) {
-			console.error("Error in getExtradata:", error);
-		}
-		return null;
+	constructor(protected options: ClipperOptions) {
+		this.fetchIO = new FetchIO();
 	}
 
-	// 根据 URL 获取指定范围的 ArrayBuffer
-	public async fetchBufferRange(
+	/**
+	 * 生成视频缩略图
+	 * @param url 视频URL
+	 * @param nbSamples 需要获取的帧数
+	 * @returns 生成的视频帧数组
+	 */
+	public async generateClips(
 		url: string,
-		start: number,
-		end: number,
-	): Promise<ArrayBuffer> {
-		const response = await fetch(url, {
-			headers: {
-				Range: `bytes=${start}-${end}`,
-			},
-			priority: "low",
+		nbSamples: number,
+	): Promise<ClipFrame[]> {
+		// 创建解码管道
+		const pipeline = new DecodePipeline({
+			nbSamples,
+			maxWidth: this.options.maxWidth,
+			maxHeight: this.options.maxHeight,
 		});
-		return await response.arrayBuffer();
-	}
 
-	// 计算缩略图大小
-	private calcClipSize(
-		width: number,
-		height: number,
-		maxWidth: number,
-		maxHeight: number,
-	) {
-		const scale = Math.min(maxWidth / width, maxHeight / height);
-		return {
-			width: width * scale,
-			height: height * scale,
-		};
-	}
+		try {
+			// 定义数据处理回调
+			const processChunk = async (
+				buffer: ArrayBuffer,
+				position: number,
+			): Promise<boolean> => {
+				// 设置当前位置
+				pipeline.setPosition(position);
+				// 推送数据到管道
+				pipeline.pushData(new Uint8Array(buffer));
 
-	// 创建解码管道
-	createDecodePipeline({
-		nbSamples,
-		maxWidth,
-		maxHeight,
-	}: {
-		nbSamples: number;
-		maxWidth: number;
-		maxHeight: number;
-	}) {
-		let sampleCount = 0;
-		const frames: ClipFrame[] = [];
-		// @ts-ignore
-		const mp4boxfile = MP4Box.createFile();
-		// @ts-ignore
-		const transmuxer = new Mux.mp4.Transmuxer();
-		let videoDecoder: VideoDecoder | null = null;
-		let videoTrack: MP4VideoTrack | null = null;
-		let currentPosition = 0;
+				// 检查是否已经有足够的帧
+				const frames = pipeline.getFrames();
+				if (frames.length >= nbSamples) {
+					return false; // 停止继续获取数据
+				}
 
-		const promise = new Promise<ClipFrame[]>((resolve, reject) => {
-			// ts to mp4
-			transmuxer.on(
-				"data",
-				(segment: { initSegment: ArrayBuffer; data: ArrayBuffer }) => {
-					try {
-						const initSegment = new Uint8Array(segment.initSegment);
-						const data = new Uint8Array(segment.data);
-						const buffer = new ArrayBuffer(
-							initSegment.byteLength + data.byteLength,
-						);
-						const uint8View = new Uint8Array(buffer);
-						uint8View.set(initSegment, 0);
-						uint8View.set(data, initSegment.byteLength);
-
-						// @ts-ignore
-						buffer.fileStart = currentPosition;
-						mp4boxfile.appendBuffer(buffer);
-						mp4boxfile.flush();
-					} catch (error) {
-						reject(error);
+				try {
+					// 尝试等待一段时间看是否能解码出帧
+					await Promise.race([
+						pipeline.getPromise(),
+						new Promise((_, reject) =>
+							setTimeout(() => reject(new Error("Timeout")), 100),
+						),
+					]);
+					return false; // 已经成功解码
+				} catch (error: unknown) {
+					// 检查错误是否有message属性
+					if (error instanceof Error && error.message === "Timeout") {
+						return true; // 继续获取更多数据
 					}
-				},
-			);
+					throw error; // 其他错误，抛出
+				}
+			};
 
-			transmuxer.on("error", (error: unknown) => {
-				reject(error);
+			// 使用FetchIO流式获取数据
+			await this.fetchIO.streamChunks(url, processChunk, {
+				initialChunkSize: this.options.initialChunkSize,
+				stepChunkSize: this.options.stepChunkSize,
+				maxSteps: this.options.maxSteps,
 			});
 
-			// 提取帧图像
-			mp4boxfile.onReady = (info: MP4Info) => {
-				videoTrack = info.videoTracks[0];
-				if (videoTrack) {
-					mp4boxfile.setExtractionOptions(videoTrack.id, "video", {
-						nbSamples,
-					});
+			// 处理完所有数据块后，如果仍未获得足够帧，返回当前获得的帧
+			const frames = pipeline.getFrames();
 
-					const { width, height } = this.calcClipSize(
-						videoTrack.track_width,
-						videoTrack.track_height,
-						maxWidth,
-						maxHeight,
-					);
+			// 清理资源
+			pipeline.destroy();
 
-					videoDecoder = new VideoDecoder({
-						output: async (videoFrame) => {
-							const img = await createImageBitmap(videoFrame, {
-								resizeQuality: "pixelated",
-								premultiplyAlpha: "none",
-								resizeWidth: width,
-								resizeHeight: height,
-							});
-
-							const frame = {
-								img,
-								duration: videoFrame.duration,
-								timestamp: videoFrame.timestamp / 10e6,
-							};
-
-							sampleCount++;
-							frames.push(frame);
-							if (sampleCount >= nbSamples) {
-								resolve(frames);
-							}
-							videoFrame.close();
-						},
-						error: (error: unknown) => {
-							reject(error);
-						},
-					});
-
-					try {
-						videoDecoder.configure({
-							codec: videoTrack.codec,
-							codedWidth: videoTrack.track_width,
-							codedHeight: videoTrack.track_height,
-							hardwareAcceleration: "prefer-hardware",
-							optimizeForLatency: true,
-							description: this.getExtradata(mp4boxfile) as Uint8Array,
-						});
-					} catch (error) {
-						reject(error);
-					}
-
-					mp4boxfile.start();
-				}
-			};
-
-			// 处理样本
-			mp4boxfile.onSamples = (
-				trackId: number,
-				_: unknown,
-				samples: MP4Sample[],
-			) => {
-				if (videoTrack?.id === trackId) {
-					mp4boxfile.stop();
-
-					for (let i = 0; i < samples.length && sampleCount < nbSamples; i++) {
-						const sample = samples[i];
-						const isKeyFrame = sample.is_sync;
-						const chunk = new EncodedVideoChunk({
-							type: isKeyFrame ? "key" : "delta",
-							timestamp: (sample.cts * 10e6) / videoTrack.timescale,
-							duration: (sample.duration * 10e6) / videoTrack.timescale,
-							data: sample.data,
-						});
-
-						if (videoDecoder) {
-							videoDecoder.decode(chunk);
-						}
-					}
-				}
-
-				if (videoDecoder) {
-					videoDecoder.flush();
-				}
-			};
-		});
-
-		const push = (buffer: Uint8Array, pos: number) => {
-			transmuxer.push(buffer);
-			currentPosition = pos;
-		};
-
-		const pipeline = {
-			mp4boxfile,
-			transmuxer,
-			videoDecoder,
-			videoTrack,
-			promise,
-			push,
-			frames,
-		};
-
-		return pipeline;
+			return frames;
+		} catch (error: unknown) {
+			// 错误处理
+			console.error("生成缩略图失败:", error);
+			// 确保资源被清理
+			pipeline.destroy();
+			throw error;
+		}
 	}
 
-	// 流式处理单个片段
+	/**
+	 * 处理单个视频片段
+	 * 兼容旧API，直接使用新的流程处理
+	 */
 	public async processStreamingSegment({
 		url,
 		nbSamples,
@@ -278,110 +126,16 @@ export class ClipperCore {
 		nbSamples: number;
 		maxWidth: number;
 		maxHeight: number;
-		onFrame?: (frame: ClipFrame) => void;
 	}): Promise<ClipFrame[]> {
-		// 最大重试步数
-		const MAX_STEP_COUNT = 5;
-		// 默认步进块大小 256KB
-		const DEFAULT_STEP_CHUNK_SIZE = 1024 * 256;
-		// 默认初始块大小 256KB
-		const DEFAULT_INITIAL_CHUNK_SIZE = DEFAULT_STEP_CHUNK_SIZE;
-		// 初始块大小
-		const initialChunkSize =
-			this.options.initialChunkSize || DEFAULT_INITIAL_CHUNK_SIZE;
-		// 步进块大小
-		const stepChunkSize = this.options.stepChunkSize || DEFAULT_STEP_CHUNK_SIZE;
+		// 创建新选项，确保使用传递的参数
+		const optionsOverride: ClipperOptions = {
+			...this.options,
+			maxWidth: maxWidth || this.options.maxWidth,
+			maxHeight: maxHeight || this.options.maxHeight,
+		};
 
-		// 重试次数
-		let step = 0;
-		// 当前位置
-		let currentPosition = 0;
-		// 当前块大小
-		const currentChunkSize = initialChunkSize;
-
-		return new Promise((resolve, reject) => {
-			// 缓存 buffers
-			const buffers: Uint8Array[] = [];
-			// 缓存累积大小
-			let bufferCumulativeSize = 0;
-
-			const processNextChunk = async () => {
-				try {
-					// 创建解码管道
-					const pipeline = this.createDecodePipeline({
-						nbSamples,
-						maxWidth,
-						maxHeight,
-					});
-					// 获取当前块
-					const endPosition = currentPosition + currentChunkSize;
-					const buffer = await this.fetchBufferRange(
-						url,
-						currentPosition,
-						endPosition - 1,
-					);
-					// 缓存当前块
-					buffers.push(new Uint8Array(buffer));
-					// 更新缓存累积大小
-					bufferCumulativeSize += buffer.byteLength;
-
-					// 创建累积缓冲区
-					const cumulativeBuffer = new Uint8Array(bufferCumulativeSize);
-
-					// 将所有缓存块复制到累积缓冲区
-					let offset = 0;
-					for (const buf of buffers) {
-						cumulativeBuffer.set(buf, offset);
-						offset += buf.byteLength;
-					}
-
-					// 推送累积缓冲区
-					pipeline.push(cumulativeBuffer, 0);
-					// 刷新解码器
-					pipeline.transmuxer.flush();
-
-					// 如果解码器没有返回帧，则重试
-					if (pipeline.frames.length === 0) {
-						Promise.race([
-							pipeline.promise,
-							// 超时检测
-							new Promise((resolve) => {
-								setTimeout(() => {
-									resolve(new Error("timeout"));
-								}, 100);
-							}),
-						])
-							.then(async (result) => {
-								if (
-									(result instanceof Error || pipeline.frames.length === 0) &&
-									step < MAX_STEP_COUNT
-								) {
-									currentPosition += stepChunkSize;
-									step++;
-									await processNextChunk();
-								} else {
-									resolve(pipeline.frames);
-								}
-							})
-							.catch(async (error) => {
-								if (error.name === "EncodingError") {
-									// 如果解码错误，则重试
-									currentPosition += stepChunkSize;
-									step++;
-									await processNextChunk();
-								} else {
-									reject(error);
-								}
-							});
-					} else {
-						resolve(pipeline.frames);
-					}
-				} catch (error) {
-					reject(error);
-				}
-			};
-
-			processNextChunk();
-		});
+		// 创建临时核心实例处理
+		const tempCore = new ClipperCore(optionsOverride);
+		return await tempCore.generateClips(url, nbSamples);
 	}
 }

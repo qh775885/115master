@@ -1,16 +1,22 @@
 <template>
-	<div class="ext-preview" ref="rootRef">
-		<LoadingError v-if="videoData.error.value" style="margin: 0 auto" />
+	<div :class="$style['ext-preview']" ref="rootRef">
+		<LoadingError v-if="videoData.error.value" style="margin: 0 auto" :detail="videoData.error.value" />
 		<Skeleton v-else-if="videoData.isLoading.value" mode="light" width="100%" height="100%" border-radius="0"  />	
-		<div class="ext-preview-video pswp-gallery" :id="`gallery-${props.pickCode}`" v-else ref="videoRef">
+		<div
+			v-else
+			ref="videoRef"
+			class="pswp-gallery" 
+			:class="$style['ext-preview-video']"
+			:id="`gallery-${props.pickCode}`"
+		>
 			<a 
 				v-for="(thumbnail, index) in videoData.state.value"
 				:key="index"
-				class="thumb-item"
+				:class="$style['thumb-item']"
 				@click.prevent.stop="openPhotoSwipe(index)"
 			>
 				<img 
-					:src="thumbnail.img" 
+					:src="thumbnail?.img" 
 					:alt="`预览图 ${index + 1}`"
 				/>
 			</a>
@@ -26,10 +32,11 @@ import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import "photoswipe/style.css";
 import { usePreview } from "../../../../hooks/usePreview";
-
+import { FILELIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 const props = defineProps<{
 	pickCode: string;
 	sha1: string;
+	duration: number;
 }>();
 
 const rootRef = ref<HTMLElement>();
@@ -48,12 +55,14 @@ const initPhotoSwipe = () => {
 
 	lightbox.value = new PhotoSwipeLightbox({
 		dataSource:
-			videoData.state.value?.map((item) => ({
-				src: item.img,
-				width: item.width,
-				height: item.height,
-				alt: "预览图",
-			})) || [],
+			videoData.state.value
+				?.filter((item) => item !== null)
+				.map((item) => ({
+					src: item?.img ?? "",
+					width: item?.width ?? 0,
+					height: item?.height ?? 0,
+					alt: "预览图",
+				})) || [],
 		showHideAnimationType: "fade",
 		pswpModule: () => import("photoswipe"),
 		mouseMovePan: true,
@@ -80,7 +89,12 @@ watch(
 	() => rootVisibilityRef.value,
 	(visible) => {
 		if (visible) {
-			videoData.execute(0, props.sha1, props.pickCode);
+			videoData.execute(0, {
+				sha1: props.sha1,
+				pickCode: props.pickCode,
+				coverNum: FILELIST_PREVIEW_NUM,
+				duration: props.duration,
+			});
 		}
 	},
 );
@@ -105,21 +119,20 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style scoped>
+<style module>
 .ext-preview {
 	width: 100%;
-	height: 150px;
+	height: 100px;
 	display: flex;
 	align-items: center;
 	box-sizing: border-box;
 	.ext-preview-video {
-		width: 100%;
-		height: 150px;
+		height: 100%;
 		display: flex;
 		justify-content: center;
 		overflow: hidden;
 		overflow-x: auto;
-		gap: 1px;
+		gap: 8px;
 
 		/* 优化滚动条样式 */
 		&::-webkit-scrollbar {
@@ -128,17 +141,22 @@ onBeforeUnmount(() => {
 		}
 
 		.thumb-item {
-			height: 150px;
+			aspect-ratio: 16 / 9;
+			height: 100px;
 			cursor: zoom-in;
 			text-decoration: none;
+			background-color: #aaa;
+			overflow: hidden;
+			border-radius: 8px;
 
 			&:hover {
 				opacity: 0.9;
 			}
 
 			img {
-				height: 150px;
-				object-fit: cover;
+				height: 100%;
+				width: 100%;
+				object-fit: contain;
 				object-position: center;
 				vertical-align: top;
 			}

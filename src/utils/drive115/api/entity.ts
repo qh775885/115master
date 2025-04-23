@@ -15,6 +15,8 @@ export interface PlaylistItem {
 	play_long: number;
 	// 当前时间
 	current_time: number;
+	// sha1
+	sha: string;
 }
 
 // 路径项

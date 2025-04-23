@@ -24,6 +24,8 @@ export const usePlayerCoreState = () => {
 	const canplay = shallowRef(false);
 	// 加载错误
 	const loadError = shallowRef<Error | undefined>(undefined);
+	// 是否加载完成
+	const loaded = shallowRef(false);
 
 	return {
 		currentTime,
@@ -33,6 +35,7 @@ export const usePlayerCoreState = () => {
 		volume,
 		muted,
 		isLoading,
+		loaded,
 		autoPlay,
 		canplay,
 		loadError,

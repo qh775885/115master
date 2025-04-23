@@ -16,6 +16,7 @@
 				border-radius="8px"
 			/>
 			
+			<!-- 预览图 -->
 			<img v-else :src="previewImg" />
 
 			<!-- 时长 -->
@@ -55,6 +56,7 @@ import LoadingError from "../../../../components/LoadingError/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import { formatTime } from "../../../../components/XPlayer/utils/time";
 import { usePreview } from "../../../../hooks/usePreview";
+import { PLAYLIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 import type { Entity } from "../../../../utils/drive115";
 import { formatFileSize } from "../../../../utils/format";
 
@@ -92,7 +94,12 @@ const handlePlay = (item: Entity.PlaylistItem) => {
 // 监听元素可见性
 watch(visibilityRef, (newValue) => {
 	if (newValue) {
-		preview.execute(0, props.item.pc, props.item.pc);
+		preview.execute(0, {
+			pickCode: props.item.pc,
+			sha1: props.item.sha,
+			coverNum: PLAYLIST_PREVIEW_NUM,
+			duration: props.item.play_long,
+		});
 	}
 });
 </script>

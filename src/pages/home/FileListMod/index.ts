@@ -1,6 +1,8 @@
 import { ActressFaceDB } from "../../../utils/actressFaceDB";
 import { getAvNumber } from "../../../utils/getNumber";
 import "./index.css";
+import { defer } from "lodash";
+import { getDuration } from "../../../utils/time";
 import {
 	type FileItemAttributes,
 	FileListType,
@@ -58,6 +60,15 @@ class FileItemLoader {
 		);
 	}
 
+	private get durationNode(): HTMLElement | null {
+		return this.itemNode.querySelector(".duration") ?? null;
+	}
+
+	// 获取视频时长
+	private get duration(): number {
+		return getDuration(this.durationNode?.getAttribute("duration")!);
+	}
+
 	// 获取 itemInfo
 	private get itemInfo(): ItemInfo {
 		return {
@@ -65,6 +76,7 @@ class FileItemLoader {
 			attributes: this.attributes,
 			filePlayable: this.filePlayable,
 			fileListType: this.fileListType,
+			duration: this.duration,
 		};
 	}
 
@@ -164,16 +176,19 @@ class FileListMod {
 	private updateFileItem() {
 		// 遍历文件列表dom的li节点
 		for (const item of this.fileItemNodes ?? []) {
-			// 如果已经存在，则跳过
-			if (this.fileitemMaps.has(item)) {
-				return;
-			}
-			// 创建文件列表item
-			const fileItem = new FileItemLoader(item, this.fileListType);
-			// 加载文件列表item
-			fileItem.load();
-			// 设置文件列表item
-			this.fileitemMaps.set(item, fileItem);
+			defer(() => {
+				// 如果已经存在，则跳过
+				if (this.fileitemMaps.has(item)) {
+					return;
+				}
+
+				// 创建文件列表item
+				const fileItem = new FileItemLoader(item, this.fileListType);
+				// 加载文件列表item
+				fileItem.load();
+				// 设置文件列表item
+				this.fileitemMaps.set(item, fileItem);
+			});
 		}
 		// 遍历文件列表item
 		for (const [key, value] of this.fileitemMaps.entries()) {

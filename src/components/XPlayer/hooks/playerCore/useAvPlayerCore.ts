@@ -12,7 +12,7 @@ import {
 	useIntervalFn,
 } from "@vueuse/core";
 import ee from "event-emitter";
-import { get } from "lodash";
+import { defer, get } from "lodash";
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
 import { CDN_BASE_URL } from "../../../../utils/cache/core/const";
 import { loadESM } from "../../../../utils/loadESM";
@@ -50,7 +50,7 @@ type Stream = {
 };
 
 // 资源 CDN 地址
-const CDN_URL_WASM = `${CDN_BASE_URL}/gh/zhaohappy/libmedia@latest/dist`;
+const CDN_URL_WASM = `${CDN_BASE_URL}/gh/cbingb666/libmedia@latest/dist`;
 
 // 默认配置
 export const DEFAULT_OPTIONS: Partial<AVPlayerOptions> = {
@@ -66,6 +66,10 @@ export const DEFAULT_OPTIONS: Partial<AVPlayerOptions> = {
 	enableWorker: true,
 	// 缓冲时间
 	preLoadTime: 60,
+	// check mse
+	checkUseMES: () => {
+		return false;
+	},
 };
 
 // 收集统计信息
@@ -263,7 +267,10 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 	});
 	// 事件发射器
 	const customEmitter = ee();
-
+	// 是否第一次播放
+	const isFirstPlay = ref(true);
+	// 上次播放时间
+	const lastTime = ref<number | null>(null);
 	// 检查 player
 	const checkPlayer = () => {
 		if (!playerRef.value) {
@@ -316,7 +323,7 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 		init: async (container) => {
 			try {
 				const AVPlayer = await loadESM<AVPlayerConstructor>({
-					pkgName: "@libmedia/avplayer",
+					pkgName: "@libmedia-beta/avplayer",
 					path: "dist/esm/avplayer.js",
 					varName: "AVPlayer",
 				});
@@ -338,6 +345,7 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 				});
 				playerRef.value?.on("loaded", () => {
 					state.isLoading.value = false;
+					state.loaded.value = true;
 				});
 				playerRef.value?.on("error", (error) => {
 					console.error(error);
@@ -369,7 +377,8 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 				state.loadError.value = error as Error;
 			}
 		},
-		load: async (url, lastTime) => {
+		load: async (url, _lastTime) => {
+			lastTime.value = _lastTime ?? null;
 			const player = checkPlayer();
 			await player
 				.load(url)
@@ -395,14 +404,11 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 					// 设置播放速率
 					methods.setPlaybackRate(state.playbackRate.value);
 
-					// 跳转到当前时间
-					await methods.seek(lastTime ?? state.currentTime.value);
-
 					// 自动播放
 					if (state.autoPlay.value) {
 						await methods
 							.play()
-							.then(() => {
+							.then(async () => {
 								// 设置 canplay 为 true
 								state.canplay.value = true;
 								customEmitter.emit("canplay");
@@ -447,6 +453,12 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 					subtitle: false,
 				})
 				.then(async () => {
+					if (isFirstPlay.value) {
+						// 回跳到上次播放时间, 必须在播放后，否则部分高画质视频会无法播放
+						await methods.seek(lastTime.value ?? state.currentTime.value);
+						isFirstPlay.value = false;
+					}
+
 					videoStreamId.value = player.getSelectedVideoStreamId();
 					subtitleStreamId.value = player.getSelectedSubtitleStreamId();
 				});

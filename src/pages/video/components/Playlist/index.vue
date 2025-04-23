@@ -64,6 +64,7 @@ const playlistItemRefs =
 	useTemplateRef<InstanceType<typeof PlaylistItemVue>[]>("playlistItemRefs");
 const initedScroll = shallowRef(false);
 
+// 点击播放
 const handlePlay = (item: Entity.PlaylistItem) => {
 	if (item.pc === props.pickCode) {
 		return;
@@ -122,6 +123,7 @@ const handleTitleClick = () => {
 	scrollToActiveItem(true);
 };
 
+// 点击关闭按钮
 const handleClose = () => {
 	emit("close");
 };
