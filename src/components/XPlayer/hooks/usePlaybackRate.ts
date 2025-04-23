@@ -34,39 +34,39 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 	const fastForward = shallowRef(false);
 
 	// 设置播放速度
-	const set = (rate: number) => {
-		ctx.playerCore.value?.setPlaybackRate(rate);
+	const set = async (rate: number) => {
+		await ctx.playerCore.value?.setPlaybackRate(rate);
 	};
 
 	// 调整播放速度
-	const setByIndex = (index: number) => {
+	const setByIndex = async (index: number) => {
 		if (index < 0 || index >= rateOptions.value.length) return;
 		const newRate = rateOptions.value[index];
-		set(newRate);
+		await set(newRate);
 	};
 
 	// 增加播放速度
-	const up = () => {
-		setByIndex(currentRateIndex.value + 1);
+	const up = async () => {
+		await setByIndex(currentRateIndex.value + 1);
 	};
 
 	// 减少播放速度
-	const down = () => {
-		setByIndex(currentRateIndex.value - 1);
+	const down = async () => {
+		await setByIndex(currentRateIndex.value - 1);
 	};
 
 	// 减少播放速度并限制下限
-	const downWithLowerLimit = () => {
+	const downWithLowerLimit = async () => {
 		if (current.value <= NORMAL_RATE) return;
-		setByIndex(currentRateIndex.value - 1);
+		await setByIndex(currentRateIndex.value - 1);
 	};
 
 	// 长按快速前进
 	const holdPlaybackRate = shallowRef(1);
-	const startLongPressFastForward = () => {
+	const startLongPressFastForward = async () => {
 		if (!ctx.playerCore.value || fastForward.value) return;
 		fastForward.value = true;
-		set(MAX_RATE);
+		await set(MAX_RATE);
 		holdPlaybackRate.value = current.value;
 		if (ctx.playerCore.value.paused) {
 			ctx.playerCore.value.play();
@@ -74,17 +74,11 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 	};
 
 	// 停止长按快速前进
-	const stopLongPressFastForward = () => {
+	const stopLongPressFastForward = async () => {
 		if (!ctx.playerCore.value) return;
 		fastForward.value = false;
-		set(holdPlaybackRate.value);
+		await set(holdPlaybackRate.value);
 	};
-
-	// TODO 可以播放的时候刷新 playbackRate
-	// useEventListener(ctx.player.value, "canplay", () => {
-	// 	if (!ctx.player.value) return;
-	// 	ctx.player.value.setPlaybackRate(current.value);
-	// });
 
 	return {
 		MIN_RATE,

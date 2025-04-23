@@ -188,7 +188,7 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		name: "播放速度增大",
 		allowRepeat: true,
 		keydown: async (ctx) => {
-			ctx.playbackRate?.up();
+			await ctx.playbackRate?.up();
 			ctx.hud?.showPlaybackRate();
 		},
 	},
@@ -202,10 +202,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		allowRepeat: true,
 		keydown: async (ctx, event) => {
 			if (event.repeat) {
-				ctx.playbackRate?.downWithLowerLimit();
+				await ctx.playbackRate?.downWithLowerLimit();
 				ctx.hud?.showPlaybackRate();
 			} else {
-				ctx.playbackRate?.down();
+				await ctx.playbackRate?.down();
 				ctx.hud?.showPlaybackRate();
 			}
 		},
