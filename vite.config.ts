@@ -18,7 +18,7 @@ const _cdn = cdn.jsdelivrFastly;
 // https://vitejs.dev/config/
 export default defineConfig({
 	build: {
-		minify: false,
+		minify: true,
 	},
 	optimizeDeps: {
 		exclude: ["@libmedia/avplayer"],
