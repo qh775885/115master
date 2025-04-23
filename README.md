@@ -2,8 +2,6 @@
 
 115Master 是一个 115 网盘的 Tampermonkey 脚本，旨在提升 `115网盘` 的浏览体验。
 
-![preview](./docs/images/preview.png)
-
 ## 功能
 
 ### 文件列表
