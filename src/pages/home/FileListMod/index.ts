@@ -1,4 +1,3 @@
-import { ActressFaceDB } from "../../../utils/actressFaceDB";
 import { getAvNumber } from "../../../utils/getNumber";
 import "./index.css";
 import { defer } from "lodash";
@@ -124,8 +123,6 @@ class FileItemLoader {
 class FileListMod {
 	// 文件列表 ItemMaps
 	private fileitemMaps: Map<HTMLLIElement, FileItemLoader> = new Map();
-	// 演员头像数据库
-	private actressFaceDB: ActressFaceDB | null = null;
 	// 文件列表变化监听器
 	private observerContent: MutationObserver | null = null;
 
@@ -135,8 +132,6 @@ class FileListMod {
 
 	// 初始化
 	private async init(): Promise<void> {
-		this.actressFaceDB = new ActressFaceDB();
-		this.actressFaceDB.init();
 		this.updateFileItem();
 		this.watchFileItemChange();
 	}

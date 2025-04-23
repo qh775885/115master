@@ -12,9 +12,9 @@ import {
 	useIntervalFn,
 } from "@vueuse/core";
 import ee from "event-emitter";
-import { defer, get } from "lodash";
+import { get } from "lodash";
 import { computed, nextTick, ref, shallowRef, watch } from "vue";
-import { CDN_BASE_URL } from "../../../../utils/cache/core/const";
+import { CDN_BASE_URL } from "../../../../constants";
 import { loadESM } from "../../../../utils/loadESM";
 import type { PlayerContext } from "../usePlayerProvide";
 import { type PlayerCoreMethods, PlayerCoreType } from "./types";
