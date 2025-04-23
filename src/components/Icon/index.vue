@@ -6,7 +6,7 @@
 import type { Component } from "vue";
 
 defineProps<{
-	svg: Component;
+	svg: string | Component;
 	size?: string;
 	color?: string;
 }>();

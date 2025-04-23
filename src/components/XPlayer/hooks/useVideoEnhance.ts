@@ -4,9 +4,12 @@ import type { PlayerContext } from "./usePlayerProvide";
 /**
  * 视频色彩调整设置
  */
-export const useVideoEnhance = (_ctx: PlayerContext) => {
+export const useVideoEnhance = (ctx: PlayerContext) => {
 	// 滤镜名称
 	const filterName = "video-enhance";
+
+	// 禁用HDR
+	const disabledHDR = ctx.rootPropsVm.disabledHDR;
 
 	// 锐度 0-100
 	const sharpness = shallowRef(0);
@@ -268,6 +271,12 @@ export const useVideoEnhance = (_ctx: PlayerContext) => {
 	const getFilterStyle = computed(() => {
 		// 如果所有参数都为默认值(0)，不应用任何滤镜样式
 		if (!isEnabled.value) {
+			if (disabledHDR.value) {
+				return {
+					filter: "brightness(1)",
+					"webkit-filter": "brightness(1)",
+				};
+			}
 			return {};
 		}
 
@@ -289,6 +298,7 @@ export const useVideoEnhance = (_ctx: PlayerContext) => {
 	};
 
 	return {
+		disabledHDR,
 		sharpness,
 		brightness,
 		contrast,

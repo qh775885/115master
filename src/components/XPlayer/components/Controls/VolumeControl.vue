@@ -3,7 +3,7 @@
 		<button 
 			:class="$style['volume-control-button']" 
 			title="音量"
-			@click="volume.toggleMute"
+			@click="playerCore?.toggleMute"
 		>
 			<Icon :svg="VolumeIcon" :class="$style.icon" />
 		</button>
@@ -12,18 +12,18 @@
 				<div :class="$style['volume-slider-track']"></div>
 				<div 
 					:class="$style['volume-slider-fill']"
-					:style="{ width: `${volume.volume.value}%` }"
+					:style="{ width: `${playerCore?.volume}%` }"
 				></div>
 				<div 
 					:class="$style['volume-slider-thumb']"
-					:style="{ left: `${volume.volume.value}%` }"
+					:style="{ left: `${playerCore?.volume}%` }"
 				></div>
 				<input
 					type="range"
 					:class="$style['volume-slider-input']"
 					min="0"
 					max="100"
-					:value="volume.volume.value"
+					:value="playerCore?.volume"
 					@input="handleVolumeChange"
 				/>
 			</div>
@@ -39,18 +39,20 @@ import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
-const { volume } = usePlayerContext();
+const { playerCore } = usePlayerContext();
 
 const VolumeIcon = computed(() => {
-	if (volume.muted.value) {
+	if (playerCore.value?.muted) {
 		return VolumeOff;
 	}
 
-	if (volume.volume.value < 50) {
+	const volume = playerCore.value?.volume;
+
+	if (volume && volume < 50) {
 		return VolumeDown;
 	}
 
-	if (volume.volume.value >= 50) {
+	if (volume && volume >= 50) {
 		return VolumeUp;
 	}
 
@@ -59,7 +61,7 @@ const VolumeIcon = computed(() => {
 
 const handleVolumeChange = (event: Event) => {
 	const value = Number((event.target as HTMLInputElement).value);
-	volume.setVolume(value);
+	playerCore.value?.setVolume(value);
 };
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-    <div :class="$style['subtitle-container']">
+    <div :class="$style['subtitle-container']" v-if="subtitles.current.value">
         <div :class="$style['subtitle-content']" v-if="currentSubtitle">
             {{ currentSubtitle.text }}
         </div>
@@ -12,17 +12,18 @@ import { computed, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { Subtitle } from "../../types";
 
-const { subtitles, progress, cssVar, refs } = usePlayerContext();
+const { subtitles, cssVar, refs, playerCore } = usePlayerContext();
 // 安全区域底部
 const safeAreaBottom = computed(() => cssVar?.safeAreaBottom.value);
 // 当前字幕
 const current = computed(() => subtitles.current.value);
-// 视频元素的边界
+// 当前字幕文本
 const text = shallowRef<string | null>(null);
-const videoElementBounding = useElementBounding(refs.videoElementRef);
+// 视频元素的边界
+const playerElementBounding = useElementBounding(refs.playerElementRef);
 // 字幕字体大小
 const fontSize = computed(
-	() => `${videoElementBounding.height.value * 0.044}px`,
+	() => `${playerElementBounding.height.value * 0.044}px`,
 );
 
 /**
@@ -43,9 +44,12 @@ const subtitleParsed = shallowRef<
  */
 const currentSubtitle = computed(() => {
 	return subtitleParsed.value.find((subtitle) => {
+		if (!playerCore.value) {
+			return false;
+		}
 		return (
-			subtitle.st <= progress.currentTime.value &&
-			subtitle.et >= progress.currentTime.value
+			subtitle.st <= playerCore.value?.currentTime &&
+			subtitle.et >= playerCore.value?.currentTime
 		);
 	});
 });
@@ -116,8 +120,8 @@ watch(current, () => {
 .subtitle-content {
     position: absolute;
     left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(v-bind(safeAreaBottom) + 3%);
+    transform: translate(-50%, calc(0px - v-bind(safeAreaBottom)));
+    bottom: 3%;
     max-width: 80%;
     margin: 0 auto;
     padding: 0 0.25em;
@@ -126,5 +130,6 @@ watch(current, () => {
     color: #fff;
     font-size: v-bind(fontSize);
     text-align: center;
+	transition: transform 0.3s ease-in-out;
 }
 </style>

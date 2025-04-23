@@ -1,8 +1,9 @@
+import type { Preview } from "../../hooks/usePreview";
 import { CacheCore } from "./core/index";
 
-type PreviewCacheValue = Blob[];
+type PreviewCacheValue = Preview;
 
-const PREVIEW_CACHE_KEY = "preview_cache";
+const PREVIEW_CACHE_KEY = "preview_cache_v2";
 class PreviewCache extends CacheCore<PreviewCacheValue> {
 	constructor() {
 		super({

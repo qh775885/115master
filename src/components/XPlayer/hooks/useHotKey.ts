@@ -3,19 +3,42 @@ import type { PlayerContext } from "./usePlayerProvide";
 
 // 匹配热键
 type HotKeyMatch = {
+	/**
+	 * 按键
+	 */
 	key: string;
+	/**
+	 * 配置
+	 */
 	config: HotKeyConfig;
 };
 
 // 热键配置
 type HotKeyConfig = {
+	/**
+	 * 按键组
+	 */
 	keys: string[];
+	/**
+	 * 名称
+	 */
 	name: string;
+	/**
+	 * 是否重复
+	 * @default false
+	 */
+	allowRepeat?: boolean;
+	/**
+	 * 按键按下
+	 */
 	keydown: (
 		ctx: PlayerContext,
 		event: KeyboardEvent,
 		match: HotKeyMatch,
 	) => void;
+	/**
+	 * 按键抬起
+	 */
 	keyup?: (
 		ctx: PlayerContext,
 		event: KeyboardEvent,
@@ -44,22 +67,22 @@ const KEYS = {
 	arrowDown: "ArrowDown",
 	w: "w",
 	a: "a",
+	b: "b",
 	s: "s",
 	d: "d",
 	c: "c",
 	f: "f",
 	p: "p",
 	m: "m",
-	v: "v",
 	W: "W",
 	A: "A",
+	B: "B",
 	S: "S",
 	D: "D",
 	C: "C",
 	F: "F",
 	P: "P",
 	M: "M",
-	V: "V",
 	"0": "0",
 	"1": "1",
 	"2": "2",
@@ -88,6 +111,9 @@ const KEYS = {
 };
 
 const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
+	/**
+	 * 按下 0-9 进度跳转
+	 */
 	progress: {
 		keys: [
 			KEYS["0"],
@@ -108,7 +134,7 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			const percentage = digit / 10;
 
 			// 调用原始方法进行跳转
-			ctx.progress?.skip(percentage, true);
+			ctx.playerCore.value?.skip(percentage, true);
 
 			// 显示HUD消息
 			if (ctx.hud) {
@@ -116,75 +142,129 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			}
 		},
 	},
+
+	/**
+	 * 按下 ← a 快退
+	 */
 	fastBackward: {
 		keys: [KEYS.arrowLeft, KEYS.a, KEYS.A],
 		name: "快退",
+		allowRepeat: true,
 		keydown: (ctx) => {
-			ctx.progress?.skip(-5);
+			ctx.playerCore.value?.skip(-5);
+			ctx.hud?.showFastJumpHud(-1);
 		},
 	},
+
+	/**
+	 * 按下 → d 快进
+	 */
 	fastForward: {
 		keys: [KEYS.arrowRight, KEYS.d, KEYS.D],
 		name: "快进",
-		keydown: (ctx, event) => {
+		allowRepeat: true,
+		keydown: async (ctx, event) => {
 			if (event.repeat) {
-				ctx.playbackRate?.startLongPressFastForward();
-			} else {
-				ctx.progress?.skip(5);
+				if (!ctx.playbackRate?.fastForward.value) {
+					ctx.playbackRate?.startLongPressFastForward();
+				}
+				ctx.hud?.showLongPressFastForward();
+				return;
 			}
+			ctx.playerCore.value?.skip(5);
+			ctx.hud?.showFastJumpHud(1);
 		},
-		keyup: (ctx) => {
+		keyup: async (ctx) => {
 			if (ctx.playbackRate?.fastForward.value) {
 				ctx.playbackRate?.stopLongPressFastForward();
+				ctx.hud?.clear();
 			}
 		},
 	},
+
+	/**
+	 * 按下 ↑ w 播放速度增大
+	 */
 	playbackRateUp: {
 		keys: [KEYS.arrowUp, KEYS.w, KEYS.W],
 		name: "播放速度增大",
-		keydown: (ctx) => {
+		allowRepeat: true,
+		keydown: async (ctx) => {
 			ctx.playbackRate?.up();
+			ctx.hud?.showPlaybackRate();
 		},
 	},
+
+	/**
+	 * 按下 ↓ s 播放速度减小
+	 */
 	playbackRateDown: {
 		keys: [KEYS.arrowDown, KEYS.s, KEYS.S],
 		name: "播放速度减小",
+		allowRepeat: true,
 		keydown: (ctx, event) => {
 			if (event.repeat) {
 				ctx.playbackRate?.downWithLowerLimit();
+				ctx.hud?.showPlaybackRate();
 			} else {
 				ctx.playbackRate?.down();
+				ctx.hud?.showPlaybackRate();
 			}
 		},
 	},
+
+	/**
+	 * 按下 = 音量增大
+	 */
 	volumeUp: {
 		keys: [KEYS["="]],
 		name: "音量增大",
+		allowRepeat: true,
 		keydown: (ctx) => {
-			ctx.volume?.adjustVolume(5);
+			ctx.playerCore.value?.adjustVolume(5);
+			ctx.hud?.showVolume();
 		},
 	},
+
+	/**
+	 * 按下 - 音量减小
+	 */
 	volumeDown: {
 		keys: [KEYS["-"]],
 		name: "音量减小",
+		allowRepeat: true,
 		keydown: (ctx) => {
-			ctx.volume?.adjustVolume(-5);
+			ctx.playerCore.value?.adjustVolume(-5);
+			ctx.hud?.showVolume();
 		},
 	},
+
+	/**
+	 * 按下 空格 播放/暂停
+	 */
 	togglePlay: {
 		keys: [KEYS.sapce],
 		name: "播放/暂停",
 		keydown: (ctx) => {
-			ctx.playing?.togglePlay();
+			ctx.playerCore.value?.togglePlay();
 		},
 	},
+
+	/**
+	 * 按下 m 切换静音
+	 */
 	toggleMute: {
 		keys: [KEYS.m],
 		name: "切换静音",
 		keydown: (ctx) => {
-			ctx.volume?.toggleMute();
+			ctx.playerCore.value?.toggleMute();
+			ctx.hud?.showMute();
 		},
 	},
+
+	/**
+	 * 按下 c 切换字幕
+	 */
 	toggleSubtitle: {
 		keys: [KEYS.c, KEYS.C],
 		name: "切换字幕",
@@ -195,6 +275,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.subtitles?.toggleEnabled();
 		},
 	},
+
+	/**
+	 * 按下 f 切换全屏
+	 */
 	toggleFullscreen: {
 		keys: [KEYS.f, KEYS.F],
 		name: "切换全屏",
@@ -202,13 +286,21 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.fullscreen?.toggleFullscreen();
 		},
 	},
-	toggleTheaterMode: {
-		keys: [KEYS.v, KEYS.V],
-		name: "切换剧院模式",
+
+	/**
+	 * 按下 b 切换播放列表
+	 */
+	toggleShowSider: {
+		keys: [KEYS.b, KEYS.B],
+		name: "切换播放列表",
 		keydown: (ctx) => {
-			ctx.fullscreen?.toggleTheatre();
+			ctx.fullscreen?.toggleShowSider();
 		},
 	},
+
+	/**
+	 * 按下 p 切换画中画
+	 */
 	togglePictureInPicture: {
 		keys: [KEYS.p, KEYS.P],
 		name: "切换画中画",
@@ -216,6 +308,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.pictureInPicture?.toggle();
 		},
 	},
+
+	/**
+	 * 按下 [ 向左旋转
+	 */
 	rotateLeft: {
 		keys: [KEYS["["], KEYS.l, KEYS.L],
 		name: "向左旋转",
@@ -223,6 +319,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.transform?.left();
 		},
 	},
+
+	/**
+	 * 按下 ] 向右旋转
+	 */
 	rotateRight: {
 		keys: [KEYS["]"], KEYS.r, KEYS.R],
 		name: "向右旋转",
@@ -230,6 +330,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.transform?.right();
 		},
 	},
+
+	/**
+	 * 按下 \ 重置旋转
+	 */
 	resetRotation: {
 		keys: [KEYS["\\"]],
 		name: "重置旋转",
@@ -237,6 +341,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.transform?.normal();
 		},
 	},
+
+	/**
+	 * 按下 h 水平翻转
+	 */
 	toggleFlipX: {
 		keys: [KEYS.h, KEYS.H],
 		name: "水平翻转",
@@ -244,6 +352,10 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			ctx.transform?.toggleFlipX();
 		},
 	},
+
+	/**
+	 * 按下 j 垂直翻转
+	 */
 	toggleFlipY: {
 		keys: [KEYS.j, KEYS.J],
 		name: "垂直翻转",
@@ -262,6 +374,11 @@ const parseKeyConfig = (key: string) => {
 	return new Set(key.split("+").filter((item) => item !== ""));
 };
 
+/**
+ * 预处理按键事件
+ * @param event 按键事件
+ * @returns 按键事件 Set<string>
+ */
 const preseKeyEvent = (event: KeyboardEvent) => {
 	const modifiers = [
 		event.altKey ? MODIFIERS.Alt : null,
@@ -312,6 +429,9 @@ export function useHotKey(ctx: PlayerContext) {
 		const match = matchKey(event);
 		if (match?.key) {
 			event.preventDefault();
+			if (event.repeat && !match.config.allowRepeat) {
+				return;
+			}
 			match.config.keydown(ctx, event, match);
 		}
 	};

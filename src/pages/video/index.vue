@@ -1,43 +1,54 @@
 <template>
-	<div class="page-container" :class="{ 'is-theatre': preferences.theatre }">
-		<div class="page-body">
-			<div class="page-main">
-				<XPlayer
-					ref="xplayerRef"
-					class="video-player"
-					v-model:theatre="preferences.theatre"
-					v-model:volume="preferences.volume"
-					v-model:muted="preferences.muted"
-					v-model:playbackRate="preferences.playbackRate"
-					:sources="DataVideoSources.list"
-					:subtitles="DataSubtitles.state"
-					subtitleRenderType="custom"
-					:subtitlesLoading="DataSubtitles.isLoading"
-					:subtitlesReady="DataSubtitles.isReady"
-					:preferences="preferences"
-					:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
-					:onSubtitleChange="handleSubtitleChange"
-					@updateCurrentTime="DataHistory.handleUpdateCurrentTime"
-				/>
-				<div class="page-flow">
-					<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" />
-					<div class="local-player">
-						<button v-if="isMac" class="page-local-play" @click="handleLocalPlay('iina')">IINA Beta</button>
-					</div>
-					<MovieInfo 
-						:movieInfos="DataMovieInfo"
-					/>
-					<div class="page-footer">
-						<Footer></Footer>
-					</div>
-				</div>
-			</div>
-			<div class="page-sider">
-				<Playlist class="page-sider-playlist"
-					:pickCode="params.pickCode.value"
-					:playlist="DataPlaylist"
-					@play="handleChangeVideo"
-				/>
+	<div :class="[
+		$style['page-container'],
+		{
+			[`${$style['show-playlist']}`]: preferences.showPlaylist,
+		}
+	]">
+		<div :class="$style['page-main']">
+			<!-- 视频播放器 -->
+			<XPlayer
+				ref="xplayerRef"
+				:class="$style['video-player']"
+				v-model:showPlaylist="preferences.showPlaylist"
+				v-model:volume="preferences.volume"
+				v-model:muted="preferences.muted"
+				v-model:playbackRate="preferences.playbackRate"
+				v-model:autoLoadThumbnails="preferences.autoLoadThumbnails"
+				v-model:disabledHDR="preferences.disabledHDR"
+				v-model:thumbnailsSamplingInterval="preferences.thumbnailsSamplingInterval"
+				:sources="DataVideoSources.list"
+				:subtitles="DataSubtitles.state"
+				:lastTime="DataHistory.lastTime.value"
+				:subtitlesLoading="DataSubtitles.isLoading"
+				:subtitlesReady="DataSubtitles.isReady"
+				:onThumbnailRequest="DataThumbnails.onThumbnailRequest"
+				:onSubtitleChange="handleSubtitleChange"
+				:onTimeupdate="handleTimeupdate"
+				:onSeeking="DataHistory.handleSeek"
+				:onSeeked="DataHistory.handleSeek"
+				:onCanplay="handleStartAutoBuffer"
+			/>
+			<!-- 播放列表 -->
+			<Playlist
+				:class="$style['playlist']"
+				:pickCode="params.pickCode.value"
+				:playlist="DataPlaylist"
+				@play="handleChangeVideo"
+				@close="handleClosePlaylist"
+			/>
+		</div>
+		<div :class="$style['page-flow']">
+			<!-- 文件信息 -->
+			<FileInfo :fileInfo="DataFileInfo" :mark="DataMark" :playlist="DataPlaylist" @localPlay="handleLocalPlay" />
+			<!-- 电影信息 -->
+			<MovieInfo 
+				v-if="PLUS_VERSION"
+				:movieInfos="DataMovieInfo"
+			/>
+			<!-- 底部 -->
+			<div :class="$style['page-footer']">
+				<Footer></Footer>
 			</div>
 		</div>
 	</div>
@@ -45,16 +56,16 @@
 
 <script setup lang="ts">
 import { useTitle } from "@vueuse/core";
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, shallowRef } from "vue";
 import type XPlayerInstance from "../../components/XPlayer/index.vue";
 import XPlayer from "../../components/XPlayer/index.vue";
 import type { Subtitle } from "../../components/XPlayer/types";
+import { PLUS_VERSION } from "../../constants";
 import { useParamsVideoPage } from "../../hooks/useParams";
 import { subtitlePreference } from "../../utils/cache/subtitlePreference";
 import type { Entity } from "../../utils/drive115";
 import { drive115 } from "../../utils/drive115";
 import { getAvNumber } from "../../utils/getNumber";
-import { isMac } from "../../utils/platform";
 import { goToPlayer } from "../../utils/route";
 import { webLinkIINA, webLinkShortcutsMpv } from "../../utils/weblink";
 import FileInfo from "./components/FileInfo/index.vue";
@@ -90,21 +101,26 @@ const DataFileInfo = useDataFileInfo();
 // 播放列表
 const DataPlaylist = useDataPlaylist();
 // 历史记录
-const DataHistory = useDataHistory(xplayerRef);
+const DataHistory = useDataHistory();
 // 收藏
 const DataMark = useMark(DataFileInfo);
+// 是否正在切换视频
+const changeing = shallowRef(false);
 
 // 处理字幕变化
 const handleSubtitleChange = async (subtitle: Subtitle | null) => {
 	// 保存字幕选择
 	await subtitlePreference.savePreference(
-		params.pickCode.value,
+		params.pickCode.value ?? "",
 		subtitle || null,
 	);
 };
 
 // 本地播放
-const handleLocalPlay = async (player: "mpv" | "iina") => {
+const handleLocalPlay = async (player: LocalPlayer) => {
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
 	const download = await drive115.getFileDownloadUrl(params.pickCode.value);
 	switch (player) {
 		case "mpv":
@@ -121,29 +137,75 @@ const handleLocalPlay = async (player: "mpv" | "iina") => {
 
 // 播放器列表切换
 const handleChangeVideo = async (item: Entity.PlaylistItem) => {
-	goToPlayer({
-		cid: params.cid.value,
-		pickCode: item.pc,
-	});
-	params.getParams();
-	DataVideoSources.clear();
-	DataThumbnails.clear();
-	DataHistory.clear();
-	DataSubtitles.execute(0, params.pickCode.value, null);
-	DataMovieInfo.value.javDBState.execute(0, null);
-	DataMovieInfo.value.javBusState.execute(0, null);
-	await nextTick();
-	await loadData(false);
+	try {
+		changeing.value = true;
+		if (!params.cid.value) {
+			throw new Error("cid is required");
+		}
+		goToPlayer({
+			cid: params.cid.value,
+			pickCode: item.pc,
+		});
+		params.getParams();
+		DataVideoSources.clear();
+		DataThumbnails.clear();
+		DataHistory.clear();
+		DataSubtitles.execute(0, params.pickCode.value, null);
+		if (PLUS_VERSION) {
+			DataMovieInfo.javDBState.execute(0);
+			DataMovieInfo.javBusState.execute(0);
+		}
+		await nextTick();
+		await loadData(false);
+	} finally {
+		changeing.value = false;
+	}
+};
+
+// 开始自动缓冲缩略图
+const handleStartAutoBuffer = () => {
+	DataThumbnails.autoBuffer();
+};
+
+// 处理时间更新
+const handleTimeupdate = (time: number) => {
+	if (changeing.value) {
+		return;
+	}
+	if (!DataHistory.isinit.value) {
+		return;
+	}
+	if (time <= 0) {
+		return;
+	}
+	DataHistory.handleTimeupdate(time);
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
+	DataPlaylist.updateItemTime(params.pickCode.value, time);
+};
+
+// 关闭播放列表
+const handleClosePlaylist = () => {
+	preferences.value.showPlaylist = false;
 };
 
 // 加载数据
 const loadData = async (isFirst = true) => {
+	if (!params.pickCode.value) {
+		throw new Error("pickCode is required");
+	}
+	if (!params.cid.value) {
+		throw new Error("cid is required");
+	}
+	await DataHistory.fetch(params.pickCode.value);
 	// 加载视频源
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
-		// 加载历史记录
-		DataHistory.fetch(params.pickCode.value);
 		// 初始化缩略图
-		DataThumbnails.initialize(DataVideoSources.list.value);
+		DataThumbnails.initialize(
+			DataVideoSources.list.value,
+			preferences.value.thumbnailsSamplingInterval,
+		);
 	});
 
 	// 加载文件信息
@@ -153,8 +215,8 @@ const loadData = async (isFirst = true) => {
 		useTitle(DataFileInfo.state.file_name || "");
 		// 加载番号信息
 		if (avNumber) {
-			DataMovieInfo.value.javDBState.execute(0, avNumber);
-			DataMovieInfo.value.javBusState.execute(0, avNumber);
+			DataMovieInfo.javDBState.execute(0, avNumber);
+			DataMovieInfo.javBusState.execute(0, avNumber);
 		}
 		// 加载字幕
 		DataSubtitles.execute(0, params.pickCode.value, avNumber);
@@ -170,22 +232,23 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style module>
 /* 全局滚动条样式 */
 .page-container {
-	padding: 36px 0 56px;
+	--page-video-top: 36px;
+	--video-player-normal-height: calc(100vh - 24px * 2 - 28px);
+	--page-video-offset: 92px;
+	--cubic-bezier: ease-in-out;
+	--cubic-bezier-duration: 0.2s;
+	padding: 0 0 56px;
 	background: rgb(15,15,15);
 	display: flex;
 	flex-direction: column;
 	min-height: 100vh;
-	color: #fff;
+	color: #f1f1f1;
 	align-items: center;
-	--video-player-height: calc(100vh - 36px - 24px * 2 - 28px);
-	--page-main-width-a: calc(16 / 9 * (100vh - 36px - 24px * 2 - 28px));
-	--page-main-width-b: calc(100vw - 380px - 24px - 36px);
-	--page-main-width: min(var(--page-main-width-a), var(--page-main-width-b));
-	--video-player-width: var(--page-main-width);
 	-webkit-font-smoothing: antialiased;
+	gap: 24px;
 }
 
 .page-local-play {
@@ -199,67 +262,63 @@ onMounted(async () => {
 
 .page-body {
 	display: flex;
+	flex-direction: column;
 	gap: 24px;
 }
 
 .page-main {
 	display: flex;
-	flex-direction: column;
-	width: var(--page-main-width);
-	gap: 24px;
+	width: 100%;
+	height: 100vh;
+	box-sizing: border-box;
+	padding: 0;
+	transition:
+		padding var(--cubic-bezier-duration) var(--cubic-bezier),
+		height var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: padding, height;
 }
 
 .page-flow {
 	display: flex;
 	flex-direction: column;
 	gap: 24px;
-	min-height: 720px;
+	padding: 0 var(--page-video-offset);
+	width: 100%;
+	box-sizing: border-box;
 }
 
 .video-player {
-	aspect-ratio: 16 / 9;
-	width: var(--video-player-width);
-	height: auto;
-	border-radius: 16px;
+	border-radius: 0;
 	overflow: hidden;
+	transition: border-radius var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: border-radius;
 }
 
-.page-sider-playlist {
-	width: 380px;
-	height: calc(100vh - 36px - 24px - 36px);
-	flex: 1;
+.playlist {
+	width: 0;
+	height: 100%;
+	opacity: 0;
+	margin-left: 0;
+	content-visibility: auto;
+	flex-shrink: 0;
+	transition:
+		width var(--cubic-bezier-duration) var(--cubic-bezier),
+		opacity var(--cubic-bezier-duration) var(--cubic-bezier);
+	will-change: width, opacity, margin-left;
 }
 
-.is-theatre {
-	&.page-container {
-		padding: 0 0 0;
-	}
+.show-playlist {
 	.page-main {
-		width: 100%;
+		height: var(--video-player-normal-height);
+		padding: var(--page-video-top) var(--page-video-offset) 0;
 	}
-	.page-body {
-		width: 100%;
-	}
-	.page-header {
-		display: none;
-	}
-	.page-flow {
-		padding: 0 calc(86px + 380px + 24px) 56px 86px;
-		box-sizing: border-box;
-	}
-	.page-sider {
-		position: absolute;
-		top: calc(100vh + 24px);
-		right: 86px;
-	}
-	.page-sider-playlist {
-		height: 720px;
+	.playlist {
+		width: 460px;
+		opacity: 1;
+		margin-left: 16px;
 	}
 	.video-player {
-		width: 100%;
-		height: 100vh;
-		max-height: none;
-		border-radius: 0;
+		border-radius: 16px;
 	}
 }
 
@@ -268,28 +327,26 @@ onMounted(async () => {
 		padding: 0 0 56px;
 	}
 	.page-main {
-		width: auto;
-	}
-	.page-header {
-		display: none;
-	}
-	.page-flow {
-		padding: 0 calc(86px + 380px + 24px) 56px 86px;
-		box-sizing: border-box;
-	}
-	.page-sider {
-		position: absolute;
-		top: calc(100vh + 48px + 28px);
-		right: 86px;
-	}
-	.page-sider-playlist {
-		height: 720px;
+		height: 100vh;
+		padding: 0;
+		transition: none;
 	}
 	.video-player {
-		width: 100vw;
-		height: 100vh;
 		max-height: none;
 		border-radius: 0;
+		transition: none;
+	}
+	.playlist {
+		border-radius: 0;
+		margin-left: 0;
+		border-left: 1px solid rgba(255, 255, 255, 0.1);
 	}
 }
+
+@media (max-width: 1600px) {
+	.page-container {
+		--page-video-offset: 24px;
+	}
+}
+
 </style>

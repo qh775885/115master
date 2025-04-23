@@ -1,4 +1,4 @@
-import actressFaceDB from "../../../utils/actressFaceDB";
+import { actressFaceDB } from "../../../utils/actressFaceDB";
 import { imageCache } from "../../../utils/cache";
 import { compressImage } from "../../../utils/image";
 import { FileListType, type ItemInfo } from "../types";
@@ -17,6 +17,7 @@ export class FileItemActressInfo {
 			return;
 		}
 
+		await actressFaceDB.init();
 		const actress = await actressFaceDB.findActress(
 			this.itemInfo.attributes.title.trim(),
 		);

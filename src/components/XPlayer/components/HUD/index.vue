@@ -9,45 +9,16 @@
     <div :class="$style['hud-message-content']">
       <!-- 图标区域 -->
       <div :class="$style['message-icon']">
-        <template v-if="message?.type === 'volume'">
-          <Icon v-if="message.data?.value === 0" :svg="VolumeOff" />
-          <Icon v-else-if="Number(message.data?.value) < 33" :svg="VolumeDown" />
-          <Icon v-else-if="Number(message.data?.value) < 66" :svg="VolumeDown" />
-          <Icon v-else :svg="VolumeUp" />
-        </template>
-        
-        <template v-else-if="message?.type === 'mute'">
-          <Icon :svg="message.title === '静音' ? VolumeOff : VolumeUp" />
-        </template>
-        
-        <template v-else-if="message?.type === 'speed'">
-          <Icon :svg="TimerSvg" />
-        </template>
-        
-        <template v-else-if="message?.type === 'fastForward'">
-          <Icon :svg="FastForwardSvg" />
-        </template>
-        
-        <template v-else-if="message?.type === 'fastBackward'">
-          <Icon :svg="FastRewindSvg" />
-        </template>
-        
-        <template v-else-if="message?.type === 'subtitle'">
-          <Icon :svg="message.data?.value === '关闭' || message.title === '字幕' && message.data?.value === null ? SubtitlesOff : Subtitles" />
-        </template>
-        
-        <template v-else-if="message?.type === 'transform'">
-          <Icon v-if="message.title === '旋转'" :svg="RotateSvg" />
-          <Icon v-else-if="message.title === '水平翻转'" :svg="FlipSvg" style="transform: rotate(90deg);" />
-          <Icon v-else-if="message.title === '垂直翻转'" :svg="FlipSvg" />
+        <template v-if="message?.data.icon">
+          <Icon :svg="message.data.icon" />
         </template>
       </div>
       
       <!-- 内容区域 -->
       <div :class="$style['message-body']">
-        <div :class="$style['message-title']" v-if="message">{{ message.title }}</div>
+        <div :class="$style['message-title']" v-if="message">{{ message.title ?? '' }}</div>
         
-        <!-- 进度条形式的值 -->
+        <!-- 进度条 -->
         <div v-if="message && hasProgressValue(message)" :class="$style['message-progress']">
           <div 
             :class="$style['message-progress-bar']" 
@@ -55,9 +26,9 @@
           ></div>
         </div>
         
-        <!-- 文本形式的值，但是不显示布尔值 -->
+        <!-- 显示值 -->
         <div 
-          v-else-if="message?.data?.value !== undefined && typeof message.data.value !== 'boolean'" 
+          v-if="message?.data?.value !== undefined && typeof message.data.value !== 'boolean'" 
           :class="$style['message-value']"
         >
           {{ message.data.value }}
@@ -71,23 +42,11 @@
 import { computed, ref, watch } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import type { HudMessage } from "../../types/hud";
 import Popup from "../Popup/index.vue";
-
-import FastForwardSvg from "@material-symbols/svg-400/rounded/fast_forward.svg?component";
-import FastRewindSvg from "@material-symbols/svg-400/rounded/fast_rewind.svg?component";
-import FlipSvg from "@material-symbols/svg-400/rounded/flip.svg?component";
-import RotateSvg from "@material-symbols/svg-400/rounded/rotate_right.svg?component";
-import Subtitles from "@material-symbols/svg-400/rounded/subtitles.svg?component";
-import SubtitlesOff from "@material-symbols/svg-400/rounded/subtitles_off.svg?component";
-import TimerSvg from "@material-symbols/svg-400/rounded/timer.svg?component";
-import VolumeDown from "@material-symbols/svg-400/rounded/volume_down.svg?component";
-import VolumeOff from "@material-symbols/svg-400/rounded/volume_off.svg?component";
-import VolumeUp from "@material-symbols/svg-400/rounded/volume_up.svg?component";
+import type { HudMessage } from "./types";
 
 // 获取播放器上下文
-const playerContext = usePlayerContext();
-const { hud } = playerContext;
+const { hud } = usePlayerContext();
 
 // 显示状态
 const showMessage = ref(false);
@@ -140,10 +99,10 @@ const getProgressPercentage = (message: HudMessage) => {
 <style module>
 .hud-popup {
   padding: 12px;
-  max-width: 170px;
-  min-width: 120px;
+  max-width: 240px;
+  min-width: 180px;
   pointer-events: none;
-  --x-popup-bg-color: rgba(30, 30, 30, 0.35) !important;
+  --x-popup-bg-color: rgba(30, 30, 30, 0.5) !important;
   --x-popup-border-radius: 12px !important;
   --x-popup-bg-blur: 6px !important;
   --x-popup-box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
@@ -173,7 +132,7 @@ const getProgressPercentage = (message: HudMessage) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 6px;
 }
 
 .message-title {
@@ -184,10 +143,12 @@ const getProgressPercentage = (message: HudMessage) => {
 }
 
 .message-value {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   line-height: 1.2;
   color: rgba(255, 255, 255, 0.5);
+  word-break: break-all;
+  white-space: pre-wrap;
 }
 
 .message-progress {
@@ -196,7 +157,7 @@ const getProgressPercentage = (message: HudMessage) => {
   background-color: rgba(255, 255, 255, 0.2);
   border-radius: 2px;
   overflow: hidden;
-  margin-top: 3px;
+  margin-top: 4px;
 }
 
 .message-progress-bar {

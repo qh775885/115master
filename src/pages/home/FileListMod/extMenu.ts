@@ -1,4 +1,5 @@
 import { GM_openInTab } from "$";
+import iinaIcon from "../../../assets/icons/iina-icon.png";
 import { VOD_URL_115 } from "../../../constants/115";
 import { drive115 } from "../../../utils/drive115";
 import { isMac } from "../../../utils/platform";
@@ -10,6 +11,7 @@ interface ButtonConfig {
 	class: string;
 	title: string;
 	text: string;
+	icon?: string;
 	visible: boolean;
 	click: () => void;
 }
@@ -43,7 +45,8 @@ export class FileItemExtMenu {
 						{
 							class: "iina-player",
 							title: "使用【iina】",
-							text: "🎵 iina 播放",
+							text: "IINA",
+							icon: iinaIcon,
 							visible: this.itemInfo.filePlayable,
 							click: async () => {
 								try {
@@ -106,13 +109,26 @@ export class FileItemExtMenu {
 		link.href = "javascript:void(0)";
 		link.className = button.class;
 		link.title = button.title;
-		link.style.cssText =
-			"pointer-events: all; position: relative; z-index: 1000;";
+		link.style.cssText = `
+			pointer-events: all;
+			position: relative;
+			z-index: 1000;
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		`;
 
-		const span = document.createElement("span");
-		span.textContent = button.text;
-		span.style.pointerEvents = "none";
-		link.appendChild(span);
+		if (button.icon) {
+			const icon = document.createElement("img");
+			icon.src = button.icon;
+			icon.style.cssText = "width: 16px; height: 16px;";
+			link.prepend(icon);
+		}
+
+		const textSpan = document.createElement("span");
+		textSpan.textContent = button.text;
+		textSpan.style.pointerEvents = "none";
+		link.appendChild(textSpan);
 		return link;
 	}
 

@@ -1,8 +1,10 @@
 import { ref } from "vue";
 import { setVideoCookie } from "..";
 import type { VideoSource } from "../../../components/XPlayer";
+import { VideoSourceExtension } from "../../../components/XPlayer/types";
 import { qualityNumMap } from "../../../constants/quality";
 import { drive115 } from "../../../utils/drive115";
+import { getFileExtensionByUrl } from "../../../utils/file";
 
 // 视频源
 export const useDataVideoSources = () => {
@@ -28,15 +30,20 @@ export const useDataVideoSources = () => {
 						sameSite: "no_restriction",
 					});
 				} catch (error) {
-					alert("设置cookie失败");
+					alert("设置cookie失败，请升级浏览器和油猴版本");
 					throw error;
 				}
 			}
+
+			const extension =
+				getFileExtensionByUrl(download.value.url.url) ??
+				VideoSourceExtension.unknown;
 
 			list.value.unshift({
 				name: "Ultra原画",
 				url: download.value.url.url,
 				type: "auto",
+				extension,
 				quality: 99999,
 				displayQuality: "Ultra原画",
 			});
@@ -48,6 +55,7 @@ export const useDataVideoSources = () => {
 					name: `${item.quality}P`,
 					url: item.url,
 					type: "hls" as const,
+					extension: VideoSourceExtension.m3u8,
 					quality: item.quality,
 					displayQuality:
 						qualityNumMap[item.quality as keyof typeof qualityNumMap],

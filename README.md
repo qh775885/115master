@@ -8,7 +8,6 @@
 
 ### 文件列表
 
-- 👀 预览番号信息
 - 📷 预览视频缩略图
 - 📄 文件列表点击鼠标中键打开文件夹新标签页
 - ⌚ Tab 标题上显示当前目录路径
@@ -16,16 +15,27 @@
 
 ### 播放器
 
+### 播放器功能
+
 - 🎨 `Ultra原画`
 - 👁 视频缩略图
 - 🤖 在线外挂字幕
 - 🎉 支持一键唤起 [IINA](https://iina.io/) 播放
 - 🎭 剧院模式
 - 🖼 画中画
-- 🔍 番号信息展示
 - ⌚ 播放列表展示
 - ⌨️ [快捷键](#播放器快捷键)
 - 🎨 视频调色
+
+### 播放器核心
+
+集成3种播放器核心，根据视频格式自动启用最优播放器。
+
+- [Native](https://developer.mozilla.org/zh-CN/docs/Web/HTML/Reference/Elements/video) 播放器，为 `Ultra画质` 下提供 `.mp4` 等其他封装格式播放，兼容性取决于浏览器。
+
+- [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player) 播放器，为 `Ultra画质` 下提供 `.mkv` 格式播放，需要支持 `webassembly` 与 `webcodecs` 的浏览器。
+
+- [Hls.js](https://github.com/video-dev/hls.js) 播放器，为非 `Ultra画质` 下提供 `.m3u8` 格式播放, 兼容性最高。
 
 ## 开发
 
@@ -89,7 +99,7 @@ pnpm build
 | `C`       | -       | 切换字幕开关  | -                          |
 | `F`       | -       | 切换全屏      | -                          |
 | `P`       | -       | 切换画中画    | -                          |
-| `V`       | -       | 切换剧院模式  | -                          |
+| `B`       | -       | 切换播放列表  | -                          |
 | ` [ / ] ` | `L / R` | 向左/向右旋转 | -                          |
 | ` \ `     | -       | 重置旋转      | -                          |
 | `H`       | -       | 水平翻转      | -                          |
@@ -105,22 +115,11 @@ pnpm build
 
     A: 因为你是 【115Browser浏览器v27.x.x】 版本，请升级浏览器的版本。
 
-### Q: 为什么 【Ultra原画】 部分视频无法播放、黑屏、没有声音？
-
-    A: 因为部分视频格式浏览器不支持播放。如：常见的 `.mkv` 可能没有声音，部分 `.mp4` 由于视频内部编码不兼容也会有些意外的情况。
-
-      1. 请降低画质播放
-      2. 使用 IINA 本地播放（仅支持 MacOS 系统）
-      3. Windows 系统用户，请关注项目更新，后续会支持
 
 ### Q: 为什么有些视频没有字幕？
 
     A: 因为现在只支持了绝大部分番号的识别。
 
-### Q: 啊啊啊我想要这个功能那个功能，能不能支持呀？
+## 鸣谢
 
-    A：你有想法很好！请提交到 [Issues](https://github.com/cbingb666/115master/issues)，作者脑容量有限，挂在 Issues 的会优先考虑解决。
-
-### Q: 我已经有 Emby、Jellyfin 为啥还要这个插件呀？
-
-    A: 因为这是个下载、播放、字幕、预览一条龙的插件（你会体会不一样的快乐的）。常见的影库从下载、试看、播放，整个过程还是比较割裂不方便，影库更适合做为影片收藏归档方便以后反复品味~
+- [@zhaohappy](https://github.com/zhaohappy) 提供了 [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player) 

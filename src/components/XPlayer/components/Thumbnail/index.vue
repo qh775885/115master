@@ -1,84 +1,147 @@
 <template>
 	<div
-		class="preview-container"
-		v-show="visible"
+		:class="$style['box']"
+		v-show="props.visible"
 		:style="{
-			left: `${position}%`,
 			transform: `translateX(${previewTransform}px)`
 		}"
 	>
-		<div class="thumbnail-container">
-			<canvas
-				ref="thumbnailCanvas"
-				:width="width"
-				:height="height"
-			></canvas>
-			<div class="thumbnail-loading" v-show="loading">
-				<Loading/>
+		<div :class="$style['container']">
+			<div 
+				:class="$style['image']" 
+				ref="thumbnailContainer"
+				:style="{
+					width: `${DEFAULT_WIDTH}px`,
+					height: `${DEFAULT_HEIGHT}px`
+				}"
+				@mouseenter="isHoveringImage = true"
+				@mouseleave="isHoveringImage = false"
+				@mouseup="handleThumbnailMouseUp"
+			>
+				<canvas
+					ref="thumbnailCanvas"
+					:width="DEFAULT_WIDTH"
+					:height="DEFAULT_HEIGHT"
+				></canvas>
+				<div :class="$style['loading']" v-show="loading">
+					<Loading/>
+				</div>
 			</div>
-		</div>
-		<div class="time-tooltip">
-			{{ formatTime(time) }}
+			<div :class="$style['time-box']">
+				<div 
+					:class="[$style['time-image'], isHoveringImage && thumb.renderImage?.frameTime ? $style['show'] : '']"
+				>
+					跳至 {{ formatTime(thumb.renderImage?.frameTime || 0) }} 预览时间
+				</div>
+				<div 
+					:class="[$style['time-normal'], isHoveringImage ? '' : $style['show']]"
+				>
+					{{ formatTime(props.time) }}
+				</div>
+			</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, reactive, shallowRef, watch } from "vue";
+import { useElementBounding } from "@vueuse/core";
+import { computed, onUnmounted, reactive, ref, shallowRef, watch } from "vue";
+import { getImageResize } from "../../../../utils/image";
+import { boundary } from "../../../../utils/number";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import type { ThumbnailFrame } from "../../types";
 import { formatTime } from "../../utils/time";
 import Loading from "./Loading.vue";
 
 interface Props {
+	// 是否显示
 	visible: boolean;
+	// 位置 （0-100）
 	position: number;
+	// 时间
 	time: number;
+	// 进度条宽度
 	progressBarWidth: number;
 }
 
-const DEFAULT_WIDTH = 320;
-const DEFAULT_HEIGHT = 180;
-
+// emit
+const emit = defineEmits<(e: "seek", time: number) => void>();
+// props
 const props = withDefaults(defineProps<Props>(), {});
+// context
 const { rootProps, source } = usePlayerContext();
+
+/**
+ * 计算缩略图高度
+ * @param width 宽度
+ * @param ratioWidth 比例宽度
+ * @param ratioHeight 比例高度
+ * @returns 高度
+ */
+const ratioHeight = (
+	width: number,
+	ratioWidth: number,
+	ratioHeight: number,
+) => {
+	return (width * ratioHeight) / ratioWidth;
+};
+
+// 默认宽度
+const DEFAULT_WIDTH = 250;
+// 默认高度
+const DEFAULT_HEIGHT = ratioHeight(DEFAULT_WIDTH, 16, 9);
+// 是否正在悬停
+const isHoveringImage = ref(false);
+// 绘制缩略图请求
 const { onThumbnailRequest } = rootProps;
+// 画布
 const thumbnailCanvas = shallowRef<HTMLCanvasElement | null>(null);
-const width = shallowRef(DEFAULT_WIDTH);
-const height = shallowRef(DEFAULT_HEIGHT);
+// 容器
+const thumbnailContainer = shallowRef<HTMLDivElement | null>(null);
+// 最后一次定时器
 const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
+// 缩略图
 const thumb = reactive({
+	// 最后一次 hover 时间
 	lastHoverTime: -1,
+	// 最后一次请求时间
 	lastRequestTime: -1,
+	// 渲染时间
 	renderTime: -1,
-	renderImage: null as ImageBitmap | null,
+	// 渲染图片
+	renderImage: undefined as ThumbnailFrame,
 });
-const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
+// canvas 上下文
+const ctx = computed(() =>
+	thumbnailCanvas.value?.getContext("2d", {
+		alpha: false,
+		colorSpace: "srgb",
+		desynchronized: true,
+	}),
+);
+// 是否正在加载
 const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
 );
+// 缩略图矩形
+const thumbnailRect = useElementBounding(thumbnailContainer);
 
 // 计算预览容器的位移，防止超出边界
 const previewTransform = computed(() => {
-	if (!thumbnailCanvas.value) return -(width.value / 2);
+	if (!thumbnailCanvas.value) return -1;
+	if (!props.progressBarWidth) return -1;
 
-	const thumbnailWidth = width.value;
-	const centerOffset = props.progressBarWidth * (props.position / 100);
-
-	// 如果缩略图会超出左边界
-	if (centerOffset < thumbnailWidth / 2) {
-		return -centerOffset;
-	}
-
-	// 如果缩略图会超出右边界
-	if (centerOffset > props.progressBarWidth - thumbnailWidth / 2) {
-		return -(thumbnailWidth - (props.progressBarWidth - centerOffset));
-	}
-
-	// 正常情况，缩略图居中显示
-	return -(thumbnailWidth / 2);
+	const thumbnailWidth = thumbnailRect.width.value;
+	const offsetCenter = -(thumbnailWidth / 2);
+	const offsetX = props.progressBarWidth * (props.position / 100);
+	const offset = offsetCenter + offsetX;
+	const min = 0;
+	const max = props.progressBarWidth - thumbnailWidth;
+	return boundary(offset, min, max);
 });
 
+// 更新缩略图
 const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	if (lastTimer.value) {
 		clearTimeout(lastTimer.value);
@@ -86,18 +149,18 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	}
 
 	// 重置缩略图
-	thumb.renderImage = null;
+	thumb.renderImage = undefined;
 
 	if (!isLast) {
 		lastTimer.value = setTimeout(() => {
 			if (hoverTime === thumb.lastHoverTime) {
 				updateThumbnail(hoverTime, true);
 			}
-		}, 300);
+		}, 50);
 	}
 
 	// 尝试从缓存中取, 其实是同步返回
-	const cacheImage = await onThumbnailRequest({
+	const cacheImage = await onThumbnailRequest?.({
 		type: "Cache",
 		time: hoverTime,
 		isLast,
@@ -113,7 +176,7 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 	}
 
 	thumb.lastRequestTime = hoverTime;
-	const newImage = await onThumbnailRequest({
+	const newImage = await onThumbnailRequest?.({
 		type: "Must",
 		time: hoverTime,
 		isLast,
@@ -135,7 +198,7 @@ watch(
 		if (!onThumbnailRequest) return;
 		if (!props.visible || !props.time) {
 			thumb.lastHoverTime = -1;
-			thumb.renderImage = null;
+			thumb.renderImage = undefined;
 			return;
 		}
 
@@ -145,33 +208,61 @@ watch(
 		await updateThumbnail(hoverTime, false);
 	},
 );
+
 // 绘制缩略图
 watch(
 	() => thumb.renderImage,
-	(newVal, oldVal) => {
+	(newVal) => {
 		if (thumbnailCanvas.value && ctx.value) {
-			width.value = newVal?.width ?? oldVal?.width ?? DEFAULT_WIDTH;
-			height.value = newVal?.height ?? oldVal?.height ?? DEFAULT_HEIGHT;
 			requestAnimationFrame(() => {
-				ctx.value.fillRect(0, 0, width.value, height.value);
+				if (!ctx.value) {
+					throw new Error("ctx not found");
+				}
+
+				// 清空整个画布
+				ctx.value.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+
+				// 如果缩略图存在且渲染时间与最新Hover时间相同，则绘制缩略图
 				if (newVal && thumb.renderTime === thumb.lastHoverTime) {
-					ctx.value.drawImage(newVal, 0, 0, width.value, height.value);
+					const imgWidth = newVal.img.width;
+					const imgHeight = newVal.img.height;
+					const { width: resizeWidth, height: resizeHeight } = getImageResize(
+						imgWidth,
+						imgHeight,
+						DEFAULT_WIDTH,
+						DEFAULT_HEIGHT,
+					);
+					const dx = (DEFAULT_WIDTH - resizeWidth) / 2;
+					const dy = (DEFAULT_HEIGHT - resizeHeight) / 2;
+					ctx.value.fillStyle = "#000";
+					ctx.value.fillRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
+					ctx.value.drawImage(newVal.img, dx, dy, resizeWidth, resizeHeight);
 				}
 			});
 		}
 	},
 );
+
 // 监听源列表
 watch([source.list], () => {
 	thumb.lastHoverTime = -1;
 	thumb.lastRequestTime = -1;
 	thumb.renderTime = -1;
-	thumb.renderImage = null;
+	thumb.renderImage = undefined;
 	if (lastTimer.value) {
 		clearTimeout(lastTimer.value);
 		lastTimer.value = null;
 	}
 });
+
+// 处理缩略图点击事件
+const handleThumbnailMouseUp = (e: MouseEvent) => {
+	// 使用缩略图实际对应的时间点进行跳转
+	if (thumb.renderImage?.frameTime) {
+		e.stopPropagation();
+		emit("seek", thumb.renderImage.frameTime);
+	}
+};
 
 onUnmounted(() => {
 	if (lastTimer.value) {
@@ -181,34 +272,86 @@ onUnmounted(() => {
 });
 </script>
 
-<style scoped>
-.preview-container {
+<style module>
+.box {
 	position: absolute;
 	bottom: 100%;
-	margin-bottom: 10px;
-	pointer-events: none;
+	pointer-events: auto;
 	will-change: transform;
+	padding-bottom: 0;
 }
 
-.thumbnail-container {
+.container {
 	display: flex;
+	flex-direction: column;
+	align-items: center;
+}	
+
+.image {
 	position: relative;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	border-radius: 16px;
-	box-shadow: 0 2px 8px rgba(15, 15, 15, 0.7);
 	overflow: hidden;
-	canvas {
-		background: rgba(15, 15, 15, 0.9);
+	box-sizing: border-box;
+	background: rgba(0,0,0, 1);
+	box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.4);
+	pointer-events: auto;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+	margin-bottom: 10px;
+	
+	&:hover {
+		transform: scale(1.02);
+		box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 2px rgba(255, 255, 255, 0.9);
+	}
+	
+	&:active {
+		transform: scale(0.98);
 	}
 }
 
-.time-tooltip {
-	text-align: center;
-	margin-top: 4px;
-	color: #fff;
-	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+.time-box {
+	position: relative;
+	height: 20px;
+	width: 100%;
+	overflow: hidden;
+	
+	.time-normal, 
+	.time-image {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 100%;
+		text-align: center;
+		color: #fff;
+		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+		transition: all .25s ease;
+		font-size: 12px;
+		opacity: 0;
+		line-height: 1.2;
+		display: block;
+	}
+
+	.time-normal {
+		transform: translate(-50%, 150%);
+	}
+
+	.time-image {
+		transform: translate(-50%, -150%);
+		font-weight: bold;
+	}
+
+	.time-normal.show, 
+	.time-image.show {
+		opacity: 1;
+		transform: translate(-50%, -50%);
+	}
 }
 
-.thumbnail-loading {
+.loading {
 	position: absolute;
 	top: 0;
 	left: 0;

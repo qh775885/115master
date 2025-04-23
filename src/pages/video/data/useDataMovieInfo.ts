@@ -1,5 +1,4 @@
 import { useAsyncState } from "@vueuse/core";
-import { computed } from "vue";
 import { JavBus, JavDB } from "../../../utils/jav";
 
 export const useDataMovieInfo = () => {
@@ -33,12 +32,8 @@ export const useDataMovieInfo = () => {
 		},
 	);
 
-	const movieInfo = computed(() => {
-		return {
-			javDBState,
-			javBusState,
-		};
-	});
-
-	return movieInfo;
+	return {
+		javBusState,
+		javDBState,
+	};
 };

@@ -12,51 +12,31 @@
 			<div
 				:class="$style['x-player-video-container']"
 			>
-				<!-- 视频元素 -->
-				<video
-					ref="videoElementRef"
-					:key="source.videoKey.value"
-					:poster="source.current.value?.poster"
-					:muted="volume.muted.value"
-					:volume="volume.volume.value / 100"
-					:autoplay="playing.autoplay.value"
-					:loop="playing.loop.value"
-					:controls="false"
-					:playsinline="true"
-					:webkit-playsinline="true"
-					:style="[transform.transformStyle.value, videoEnhance.getFilterStyle.value]"
-					@click="playing.togglePlay"
+				<div 
+					ref="playerElementRef"
+					:class="$style['x-player-video-player']"
+					:style="[
+						transform.transformStyle.value,
+						videoEnhance.getFilterStyle.value
+					]"
 				>
-					<!-- 字幕 -->
-					<template v-if="props.subtitleRenderType === 'native'">
-						<track
-							v-for="(subtitle, index) in subtitles.list.value"
-							:key="index"
-							:src="subtitle.url"
-							:label="subtitle.label"
-							:srclang="subtitle.srclang"
-							:kind="subtitle.kind"
-							:default="subtitle.default"
-						/>
-					</template>
-				</video>
+				</div>
 
 				<!-- 播放/暂停动画 -->
 				<PlayAnimation />
 
+				<!-- 错误提示 -->
+				<LoadingError 
+					v-if="playerCore?.loadError" 
+					:class="$style['x-player-error']" 
+					:detail="playerCore?.loadError"
+				/>
+
 				<!-- 加载动画 -->
-				<Loading :show="playing.isLoading.value" />
+				<Loading v-else-if="playerCore?.isLoading" />
 
 				<!-- 字幕 -->
-				<Subtitle v-if="props.subtitleRenderType === 'custom'" />
-
-				<!-- 视频遮罩 -->
-				<div
-					:class="$style['x-player-video-mask']"
-					ref="videoMaskRef"
-					@click="playing.togglePlay"
-					@dblclick="fullscreen.toggleFullscreen"
-				></div>
+				<Subtitle />
 
 				<!-- 视频控制栏 -->
 				<VideoControls />
@@ -72,6 +52,9 @@
 		<!-- 状态HUD显示 -->
 		<HUD />
 
+		<!-- 调试面板 -->
+		<Statistics v-if="statistics?.visible.value" />
+
 		<!-- 恢复容器 -->
 		<div
 			:class="$style['x-player-resume-container']"
@@ -83,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch } from "vue";
+import { shallowRef } from "vue";
 import VideoControls from "./components/Controls/index.vue";
 import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
@@ -93,45 +76,40 @@ import { usePlayerProvide } from "./hooks/usePlayerProvide";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
 import "./styles/theme.css";
+import LoadingError from "../../components/LoadingError/index.vue";
+import Statistics from "./components/Statistics/index.vue";
 
 // 属性
 const props = withDefaults(defineProps<XPlayerProps>(), {
-	subtitleRenderType: "native",
 	onThumbnailRequest: undefined,
 	onSubtitleChange: undefined,
-	sharpen: 10,
+	hlsConfig: () => ({}),
+	avPlayerConfig: () => ({}),
 });
 // 事件
 const emit = defineEmits<XPlayerEmit>();
 // 根元素
 const rootRef = shallowRef<HTMLElement | null>(null);
-// 视频元素
-const videoElementRef = shallowRef<HTMLVideoElement | null>(null);
-// Mask
-const videoMaskRef = shallowRef<HTMLDivElement | null>(null);
+// 原生视频元素
+const playerElementRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const {
-	fullscreen,
-	volume,
-	playing,
-	source,
-	subtitles,
-	progress,
-	transform,
-	videoEnhance,
-} = usePlayerProvide(props, emit, {
-	rootRef,
-	videoElementRef,
-	videoMaskRef,
-});
+const { fullscreen, source, transform, videoEnhance, playerCore, statistics } =
+	usePlayerProvide(
+		{
+			rootRef,
+			playerElementRef,
+		},
+		props,
+		emit,
+	);
 
 // 暴露方法
 defineExpose({
-	togglePlay: playing.togglePlay,
+	togglePlay: playerCore.value?.togglePlay,
 	interruptSource: source.interruptSource,
-	seekTo: progress.seekTo,
+	seekTo: playerCore.value?.seek,
 });
 </script>
 
@@ -166,19 +144,20 @@ defineExpose({
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	video {
+	.x-player-video-player {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		width: 100%;
 		height: 100%;
 	}
-}
-
-.x-player-video-mask {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	z-index: 2;
+	.x-player-error {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		z-index: 3;
+	}
 }
 
 .x-player-portal-container {

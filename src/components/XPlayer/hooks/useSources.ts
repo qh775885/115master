@@ -1,104 +1,110 @@
-import { computed, nextTick, ref, shallowRef, watch } from "vue";
-import type { VideoSource } from "../types";
-import { useHls } from "./useHls";
+import { ref, shallowRef, toValue, watch } from "vue";
+import { type VideoSource, VideoSourceExtension } from "../types";
+import { PlayerCoreType } from "./playerCore/types";
 import type { PlayerContext } from "./usePlayerProvide";
 
-export const useSource = (ctx: PlayerContext) => {
+/**
+ * 视频源
+ */
+export const useSources = (ctx: PlayerContext) => {
 	// 视频元素
-	const videoElementRef = ctx.refs.videoElementRef;
+	const playerElementRef = ctx.refs.playerElementRef;
+	// 播放器
+	const playerCore = ctx?.playerCore;
 	// 视频源列表
 	const list = ctx.rootProps.sources;
 	// 当前视频源
 	const current = ref<VideoSource | null>(null);
-	// 视频源唯一标识
-	const videoKey = computed(() => current.value?.url);
-	// hls
-	const hls = useHls(videoElementRef);
-	// 清理函数
-	const cleanupRef = shallowRef<(() => void) | undefined>(() => void 0);
 	// 是否中断
 	const isInterrupt = shallowRef(false);
 
+	// 获取 hls 视频源
+	const getHlsSource = () => {
+		return list.value.find((item) => item.type === "hls");
+	};
+
+	const getDefaultPlayerCore = (source: VideoSource) => {
+		if (source.type === "hls") {
+			return PlayerCoreType.Hls;
+		}
+		if ([VideoSourceExtension.mkv].includes(source.extension)) {
+			return PlayerCoreType.AvPlayer;
+		}
+		return PlayerCoreType.Native;
+	};
+
 	// 初始化视频
-	const initializeVideo = async (source: VideoSource) => {
-		let promise: Promise<void> | undefined;
+	const initializeVideo = async (
+		source: VideoSource,
+		playerCoreType?: PlayerCoreType,
+		lastTime?: number,
+	) => {
+		if (!ctx.driver) {
+			throw new Error("videoDriver is not found");
+		}
+
 		// 更新当前源
 		current.value = source;
 
-		// 等待新的 videoElementRef 更新
-		await nextTick();
+		try {
+			await ctx.driver?.switchDriver(
+				playerCoreType ?? getDefaultPlayerCore(source),
+			);
 
-		if (!videoElementRef.value) {
-			throw new Error("videoElementRef is not found");
-		}
-
-		// 清理之前的视频源
-		if (videoElementRef.value.src) {
-			videoElementRef.value.src = "";
-		}
-
-		// 如果视频源是 hls
-		if (source.type === "hls") {
-			hls.initHls(source.url, source.hlsConfig);
-		} else {
-			// 设置视频源
-			videoElementRef.value.src = source.url;
-			videoElementRef.value.load();
-			promise = videoElementRef.value.play().catch(async (error) => {
-				if (error instanceof DOMException && error.name === "AbortError") {
-					return;
-				}
-				if (
-					error instanceof DOMException &&
-					error.name === "NotSupportedError"
-				) {
-					console.warn(
-						"Unsupported video sources, try switching to the next video source",
-					);
-					const { promise: nextPromise, clear: nextClear } =
-						await initializeVideo(list.value[1]);
-					cleanupRef.value = nextClear;
-					promise = nextPromise;
-					return;
-				}
-				throw error;
-			});
-		}
-
-		const clear = () => {
-			if (videoElementRef.value) {
-				videoElementRef.value.src = "";
-				hls.destroy();
+			if (!playerCore.value) {
+				throw new Error("player is not found");
 			}
-		};
 
-		return { promise, clear };
+			if (!playerElementRef.value) {
+				throw new Error("playerElementRef is not found");
+			}
+
+			// 初始化播放器
+			await playerCore.value.init(playerElementRef.value);
+
+			// 加载视频源
+			await playerCore.value.load(source.url, lastTime ?? 0);
+		} catch (error) {
+			if (error instanceof DOMException && error.name === "AbortError") {
+				return;
+			}
+			if (error instanceof Error) {
+				const hlsSource = getHlsSource();
+
+				if (hlsSource && playerCore?.value?.type !== PlayerCoreType.Hls) {
+					await initializeVideo(hlsSource, undefined, lastTime ?? 0);
+				}
+
+				return;
+			}
+
+			throw error;
+		}
 	};
 
 	// 切换视频源
 	const changeQuality = async (source: VideoSource) => {
+		if (!playerCore.value) {
+			throw new Error("player is not found");
+		}
 		// 记住当前播放时间和播放状态
-		const currentTime = videoElementRef.value?.currentTime || 0;
-		const wasPlaying = !videoElementRef.value?.paused;
+		const currentTime = playerCore.value.currentTime || 0;
 
-		cleanupRef.value?.();
-		// 切换视频源
-		const { clear } = await initializeVideo(source);
-		cleanupRef.value = clear;
+		// 初始化新视频驱动
+		await initializeVideo(source);
 
 		// 恢复播放时间和状态
-		if (videoElementRef.value) {
-			videoElementRef.value.currentTime = currentTime;
-			if (wasPlaying) {
-				videoElementRef.value.play();
-			}
-		}
+		playerCore.value.seek(currentTime);
 	};
 
 	// 中断源
 	const interruptSource = () => {
 		isInterrupt.value = true;
-		cleanupRef.value?.();
+		if (playerCore.value) {
+			playerCore.value
+				.destroy()
+				.catch((e: Error) => console.error("销毁播放器失败:", e));
+		}
 	};
 
 	// 恢复源
@@ -107,27 +113,40 @@ export const useSource = (ctx: PlayerContext) => {
 		initializeVideo(current.value!);
 	};
 
+	// 切换播放器核心
+	const switchPlayerCore = async (type: PlayerCoreType) => {
+		const currentTime = playerCore.value?.currentTime || 0;
+
+		if (!playerCore.value) {
+			throw new Error("player is not found");
+		}
+		await initializeVideo(current.value!, type);
+		playerCore.value?.seek(currentTime);
+	};
+
 	watch(
 		list,
 		async () => {
-			cleanupRef.value?.();
 			isInterrupt.value = false;
 			if (list.value.length === 0) {
 				return;
 			}
-			const { clear } = await initializeVideo(list.value[0]);
-			cleanupRef.value = clear;
+			await initializeVideo(
+				list.value[0],
+				undefined,
+				toValue(ctx.rootProps.lastTime),
+			);
 		},
 		{ immediate: true, deep: true },
 	);
 
 	return {
-		videoKey,
 		list,
 		current,
 		changeQuality,
 		interruptSource,
 		resumeSource,
 		isInterrupt,
+		switchPlayerCore,
 	};
 };

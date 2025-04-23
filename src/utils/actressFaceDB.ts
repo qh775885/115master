@@ -1,27 +1,42 @@
 import { GM_notification } from "$";
+import { CDN_BASE_URL } from "../constants";
 import type { ActressImageInfo, ActressImageMap } from "../types/actress";
 import { actressFaceCache } from "./cache/actressFaceCache";
 
+// 头像数据库仓库地址
+const GFRIENDS_REP_URL = `${CDN_BASE_URL}/gh/gfriends/gfriends@latest`;
+
+// 头像数据库API地址
+const GFRIENDS_GITHUB_API_URL = `${GFRIENDS_REP_URL}/Filetree.json`;
+
+/**
+ * 演员头像数据库
+ */
 export class ActressFaceDB {
 	private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 1天的毫秒数
-	private static readonly API_URL =
-		"https://raw.githubusercontent.com/gfriends/gfriends/refs/heads/master/Filetree.json";
+	private static readonly API_URL = GFRIENDS_GITHUB_API_URL;
 
 	private imageMap: ActressImageMap;
 	private lastUpdateTime = -1;
 	private updateTimer: number | null;
 	private initPromise: Promise<ActressFaceDB> | null = null;
+	private isInit = false;
 
 	constructor() {
 		this.imageMap = new Map();
 		this.updateTimer = null;
-		this.init();
 	}
 
 	/**
 	 * 初始化数据库
+	 * @description 重复调用会返回同一个promise
 	 */
-	async init(): Promise<ActressFaceDB> {
+	async init(): Promise<void> {
+		if (this.isInit) {
+			await this.initPromise;
+			return;
+		}
+		this.isInit = true;
 		// biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
 		const promise = new Promise<ActressFaceDB>(async (resolve) => {
 			this.lastUpdateTime = await actressFaceCache.getLastUpdateTime();
@@ -33,7 +48,6 @@ export class ActressFaceDB {
 		});
 		this.initPromise = promise;
 		await promise;
-		return this;
 	}
 
 	/**
@@ -83,7 +97,7 @@ export class ActressFaceDB {
 		const file = actress[0];
 		return {
 			...file,
-			url: `https://raw.githubusercontent.com/gfriends/gfriends/refs/heads/master/Content/${file.folder}/${file.filename}`,
+			url: `${GFRIENDS_REP_URL}/Content/${file.folder}/${file.filename}`,
 		};
 	}
 
@@ -167,6 +181,5 @@ export class ActressFaceDB {
 	}
 }
 
-const actressFaceDB = new ActressFaceDB();
-
-export default actressFaceDB;
+// 演员头像数据库实例
+export const actressFaceDB = new ActressFaceDB();

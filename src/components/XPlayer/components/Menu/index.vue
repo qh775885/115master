@@ -41,6 +41,8 @@ const visibleModel = useVModel(props, "visible", emit);
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
+	max-height: 460px;
+	overflow-y: auto;
 }
 </style>
 <style scoped>

@@ -20,14 +20,14 @@ const props = withDefaults(defineProps<Props>(), {
 
 <template>
   <div class="empty">
-    <div v-if="showImage" class="empty-image">
-      <template v-if="image">
-        <img :src="image" :style="{ width: `${imageSize}px` }" />
+    <div v-if="props.showImage" class="empty-image">
+      <template v-if="props.image">
+        <img :src="props.image" :style="{ width: `${props.imageSize}px` }" />
       </template>
       <template v-else>
         <!-- 默认空状态图标 -->
         <svg
-          :style="{ width: `${imageSize}px`, height: `${imageSize}px` }"
+          :style="{ width: `${props.imageSize}px`, height: `${props.imageSize}px` }"
           viewBox="0 0 184 152"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -71,7 +71,7 @@ const props = withDefaults(defineProps<Props>(), {
         </svg>
       </template>
     </div>
-    <div class="empty-description">{{ description }}</div>
+    <div class="empty-description">{{ props.description }}</div>
     <div v-if="$slots.default" class="empty-footer">
       <slot />
     </div>

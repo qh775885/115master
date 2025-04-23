@@ -1,6 +1,8 @@
 // 播放列表项
 export interface PlaylistItem {
 	cid: string;
+	// 星标
+	m: number;
 	// 文件名
 	n: string;
 	// pickcode
@@ -11,6 +13,10 @@ export interface PlaylistItem {
 	createTime: number;
 	// 播放时长
 	play_long: number;
+	// 当前时间
+	current_time: number;
+	// sha1
+	sha: string;
 }
 
 // 路径项

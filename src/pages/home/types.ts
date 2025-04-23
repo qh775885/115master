@@ -18,7 +18,7 @@ export interface FileItemAttributes {
 	cid: string;
 	// 是否可播放
 	iv: IvType;
-	// 视频时长
+	// unknown
 	vdi: string;
 	// 标题
 	title: string;
@@ -59,6 +59,7 @@ export interface ItemInfo {
 	attributes: FileItemAttributes;
 	filePlayable: boolean;
 	fileListType: FileListType;
+	duration: number;
 }
 
 export enum FileListType {

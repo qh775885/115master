@@ -16,7 +16,7 @@
 				v-for="item in source.list.value"
 				:key="item.quality"
 				class="menu-item"
-				:class="{ active: item.quality === source.current?.value.quality }"
+				:class="{ active: item.quality === source.current.value?.quality }"
 				@click="handleQualityChange(item)"
 			>
 				{{ getDisplayQuality(item) }}
@@ -32,7 +32,7 @@ import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { VideoSource } from "../../types";
 import Menu from "../Menu/index.vue";
 
-const { source, subtitles } = usePlayerContext();
+const { source } = usePlayerContext();
 const menuVisible = shallowRef(false);
 const buttonRef = shallowRef<HTMLElement>();
 

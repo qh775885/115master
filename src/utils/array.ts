@@ -1,19 +1,23 @@
 /**
- * 均匀采样
- * @param array 数组
- * @param sampleSize 采样数量
- * @returns 采样后的数组
+ * 生成间隔数组
+ * @param start 开始
+ * @param end 结束
+ * @param interval 间隔
+ * @returns 间隔数组
+ * @example
+ * intervalArray(0, 10, 1) // [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+ * intervalArray(0, 10, 2) // [0, 2, 4, 6, 8]
+ * intervalArray(0, 10, 3) // [0, 3, 6, 9]
  */
-export const getUniformSample = <T>(array: T[], sampleSize: number): T[] => {
-	if (array.length < sampleSize) {
-		return array;
+export const intervalArray = (
+	start: number,
+	end: number,
+	interval: number,
+): number[] => {
+	const diff = end - start;
+	const array = [];
+	for (let i = 0; i < diff; i += interval) {
+		array.push(i);
 	}
-	if (sampleSize === 0) return [];
-	if (sampleSize === 1) return [array[0]];
-
-	const step = (array.length - 1) / (sampleSize - 1);
-	const indices = Array.from({ length: sampleSize }, (_, i) =>
-		Math.round(i * step),
-	);
-	return indices.map((index) => array[index]);
+	return array;
 };

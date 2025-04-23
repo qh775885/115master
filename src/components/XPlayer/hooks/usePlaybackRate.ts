@@ -1,10 +1,8 @@
-import { useEventListener, useVModel } from "@vueuse/core";
 import { computed, shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 // 播放速度
 export const usePlaybackRate = (ctx: PlayerContext) => {
-	const videoElementRef = ctx.refs.videoElementRef;
 	// 正常倍速
 	const NORMAL_RATE = 1;
 	// 最小倍速
@@ -27,7 +25,7 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 		MAX_RATE,
 	]);
 	// 播放速度
-	const current = useVModel(ctx.rootProps, "playbackRate", ctx.rootEmit);
+	const current = ctx.rootPropsVm.playbackRate;
 	// 当前倍速的索引
 	const currentRateIndex = computed(
 		() => rateOptions.value.findIndex((r) => r === current.value) ?? -1,
@@ -37,9 +35,7 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 
 	// 设置播放速度
 	const set = (rate: number) => {
-		if (!videoElementRef.value) return;
-		videoElementRef.value.playbackRate = rate;
-		current.value = rate;
+		ctx.playerCore.value?.setPlaybackRate(rate);
 	};
 
 	// 调整播放速度
@@ -66,27 +62,23 @@ export const usePlaybackRate = (ctx: PlayerContext) => {
 	};
 
 	// 长按快速前进
+	const holdPlaybackRate = shallowRef(1);
 	const startLongPressFastForward = () => {
-		if (!videoElementRef.value) return;
+		if (!ctx.playerCore.value || fastForward.value) return;
 		fastForward.value = true;
-		videoElementRef.value.playbackRate = MAX_RATE;
-		if (videoElementRef.value.paused) {
-			videoElementRef.value.play();
+		set(MAX_RATE);
+		holdPlaybackRate.value = current.value;
+		if (ctx.playerCore.value.paused) {
+			ctx.playerCore.value.play();
 		}
 	};
 
 	// 停止长按快速前进
 	const stopLongPressFastForward = () => {
-		if (!videoElementRef.value) return;
+		if (!ctx.playerCore.value) return;
 		fastForward.value = false;
-		videoElementRef.value.playbackRate = current.value;
+		set(holdPlaybackRate.value);
 	};
-
-	// 可以播放的时候刷新 playbackRate
-	useEventListener(videoElementRef, "canplay", () => {
-		if (!videoElementRef.value) return;
-		videoElementRef.value.playbackRate = current.value;
-	});
 
 	return {
 		MIN_RATE,

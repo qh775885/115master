@@ -93,6 +93,7 @@
                                 <span>预览图</span>
                             </div>
                             <div :class="$style['chunk-content']">
+                                <!-- 自动缓冲 -->
                                 <div :class="$style['button-group']">
                                     <button 
                                         :class="[$style['option-button'], { [$style.active]: thumbnailSettings.autoLoadThumbnails.value }]" 
@@ -103,19 +104,26 @@
                                         </div>
                                         <span>自动缓冲</span>
                                     </button>
-                                    <button 
-                                        :class="[$style['option-button'], { 
-                                            [$style.active]: thumbnailSettings.superAutoBuffer.value
-                                        }]" 
-                                        :disabled="!thumbnailSettings.autoLoadThumbnails.value"
-                                        @click="thumbnailSettings.toggleSuperBuffer"
-                                    >
-                                        <div :class="$style['item-icon']">
-                                            <Icon :svg="AllInclusiveSvg" class="icon icon-sm" />
-                                        </div>
-                                        <span>全量缓冲</span>
-                                    </button>
+                                  
                                 </div>
+                                
+                                <!-- 采样间隔设置 -->
+                                <div :class="$style['sampling-interval']">
+                                    <div :class="$style['sampling-label']">采样间隔 (S)</div>
+                                    <div :class="$style['sampling-options']">
+                                        <button
+                                            v-for="interval in samplingIntervals"
+                                            :key="interval"
+                                            :class="[$style['interval-option'], { 
+                                                [$style.active]: thumbnailSettings.samplingInterval.value === interval 
+                                            }]"
+                                            @click="thumbnailSettings.setSamplingInterval(interval)"
+                                        >
+                                            {{ interval }}
+                                        </button>
+                                    </div>
+                                </div>
+                                
                                 <div :class="$style['tip-text']">刷新后生效</div>
                             </div>
                         </div>
@@ -136,6 +144,7 @@
                                 </button>
                             </div>
                             <div :class="$style['chunk-content']">
+                                
                                 <!-- 亮度 -->
                                 <div :class="$style['slider-item']">
                                     <div :class="$style['slider-label']">
@@ -231,6 +240,18 @@
                                         v-model.number="videoEnhance.sharpness.value"
                                     />
                                 </div>
+
+                                <!-- 禁用HDR -->
+                                <div :class="$style['slider-item']">
+                                    <div :class="$style['slider-label']">
+                                        <span>禁用HDR</span>
+                                        <div :class="$style['toggle-switch']" @click="videoEnhance.disabledHDR.value = !videoEnhance.disabledHDR.value">
+                                            <div :class="[$style['toggle-track'], { [$style.active]: videoEnhance.disabledHDR.value }]">
+                                                <div :class="[$style['toggle-thumb'], { [$style.active]: videoEnhance.disabledHDR.value }]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -241,7 +262,6 @@
 </template>
 
 <script setup lang="ts">
-import AllInclusiveSvg from "@material-symbols/svg-400/rounded/all_inclusive.svg?component";
 import AutorenewSvg from "@material-symbols/svg-400/rounded/autorenew.svg?component";
 import BlockSvg from "@material-symbols/svg-400/rounded/block.svg?component";
 import FlipSvg from "@material-symbols/svg-400/rounded/flip.svg?component";
@@ -255,6 +275,8 @@ import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Popup from "../Popup/index.vue";
 const { transform, thumbnailSettings, videoEnhance } = usePlayerContext();
 
+// 采样间隔选项
+const samplingIntervals = [30, 60, 120];
 const buttonRef = shallowRef<HTMLElement>();
 const menuVisible = shallowRef(false);
 const toggleMenu = () => {
@@ -295,7 +317,7 @@ const toggleMenu = () => {
     flex-direction: column;
     padding: 4px 0;
     margin-bottom: 12px;
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(55,55,55,.5);
     border-radius: 8px;
 }
 
@@ -495,9 +517,9 @@ const toggleMenu = () => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 4px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 8px;
 }
 
 .slider-value {
@@ -544,6 +566,78 @@ const toggleMenu = () => {
 
     &:hover::-moz-range-thumb {
         box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.3);
+    }
+}
+
+.toggle-switch {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle-track {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    background: #505050;
+    border-radius: 22px;
+    transition: background 0.2s;
+    
+    &.active {
+        background: #0078FF;
+    }
+}
+
+.toggle-thumb {
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: white;
+    transition: left 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    
+    &.active {
+        left: calc(100% - 21px);
+    }
+}
+
+.sampling-interval {
+    margin-top: 12px;
+}
+
+.sampling-label {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 6px;
+}
+
+.sampling-options {
+    display: flex;
+    gap: 8px;
+}
+
+.interval-option {
+    flex: 1;
+    padding: 5px 0;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+    
+    &.active {
+        color: var(--x-player-color-primary, #007aff);
+        background: rgba(0, 122, 255, 0.15);
+        font-weight: 500;
     }
 }
 </style>

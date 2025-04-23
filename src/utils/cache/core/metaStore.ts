@@ -24,7 +24,7 @@ export class MetaStore {
 		this.name = name;
 		this.storeName = storeName;
 		this.storage = localforage.createInstance({
-			name: STORE_NAME,
+			name: this.name,
 			storeName: META_STORE_NAME,
 			version: 1,
 			description: "缓存元数据",

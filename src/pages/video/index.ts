@@ -30,7 +30,8 @@ const resetDocument = () => {
 		}
 
 		/* 隐藏滚动条 */
-		:fullscreen ::-webkit-scrollbar {
+		:fullscreen html::-webkit-scrollbar,
+		:fullscreen body::-webkit-scrollbar {
 			width: 0 !important;
 			height: 0 !important;
 			display: none !important

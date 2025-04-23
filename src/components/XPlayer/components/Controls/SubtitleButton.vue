@@ -1,29 +1,27 @@
 <template>
-	<div :class="$style['subtitle-button']">
-		<button
-			ref="buttonRef"
-			:class="$style['control-button']"
-			:title="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
-			:disabled="subtitles.loading.value || !subtitles.ready.value|| subtitles.list.value?.length === 0"
-			@click="toggleMenu"
-		>
-			<!-- loading -->
-			<Icon 
-				v-if="subtitles.loading.value || !subtitles.ready.value"
-				:class="$style['loading-icon']"
-				:svg="ProgressActivity"
-			/>
-			<!-- found 字幕 -->
-			<Icon 
-				v-else 
-				:svg="subtitles.current.value ? Subtitles : SubtitlesOff"
-				:class="[
-					$style['subtitle-icon'],
-					{
-						[$style['disabled']]: subtitles.list.value?.length === 0
-					}
-				]"/>
-		</button>
+	<button
+		ref="buttonRef"
+		:title="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
+		:disabled="subtitles.loading.value || !subtitles.ready.value|| subtitles.list.value?.length === 0"
+		@click="toggleMenu"
+	>
+		<!-- loading -->
+		<Icon 
+			v-if="subtitles.loading.value || !subtitles.ready.value"
+			:class="$style['loading-icon']"
+			:svg="ProgressActivity"
+		/>
+		<!-- found 字幕 -->
+		<Icon 
+			v-else 
+			:svg="subtitles.current.value ? Subtitles : SubtitlesOff"
+			:class="[
+				$style['subtitle-icon'],
+				{
+					[$style['disabled']]: subtitles.list.value?.length === 0
+				}
+			]"/>
+
 		<Menu
 			v-model:visible="menuVisible"
 			:triggerRef="buttonRef"
@@ -52,7 +50,7 @@
 				
 			</div>
 		</Menu>
-	</div>
+	</button>
 </template>
 
 <script setup lang="ts">
@@ -85,24 +83,6 @@ const handleDisableSubtitle = () => {
 </script>
 
 <style module>
-.subtitle-button {
-	position: relative;
-	display: inline-block;
-}
-
-.control-button {
-	background: none;
-	border: none;
-	color: #fff;
-	cursor: pointer;
-	padding: 8px;
-	transition: all 0.2s;
-}
-
-.control-button:hover {
-	opacity: 0.8;
-}
-
 .subtitle-icon {
 	width: 24px;
 	height: 24px;

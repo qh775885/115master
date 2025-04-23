@@ -3,18 +3,27 @@ import { shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 export const usePictureInPicture = (ctx: PlayerContext) => {
-	const videoElementRef = ctx.refs.videoElementRef;
-
 	const isPip = shallowRef(!!document.pictureInPictureElement);
 
 	const isSupport = "pictureInPictureEnabled" in document;
+
+	const getRenderElement = () => {
+		return ctx.playerCore.value?.getRenderElement();
+	};
 
 	const toggle = async () => {
 		try {
 			if (isPip.value && document.pictureInPictureElement) {
 				await document.exitPictureInPicture();
 			} else {
-				await videoElementRef.value?.requestPictureInPicture();
+				const el = await getRenderElement();
+				if (el) {
+					if (el instanceof HTMLVideoElement) {
+						await el.requestPictureInPicture();
+					} else {
+						throw new Error("Not supported element");
+					}
+				}
 			}
 		} catch (error) {
 			console.error("Failed to toggle picture in picture:", error);

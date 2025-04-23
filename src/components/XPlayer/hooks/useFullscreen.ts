@@ -1,13 +1,15 @@
-import { useEventListener, useVModel } from "@vueuse/core";
+import { useEventListener } from "@vueuse/core";
 import { shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
-// 全屏和剧院模式
+/**
+ * 全屏和播放列表
+ */
 export function useFullscreen(ctx: PlayerContext) {
 	// 是否全屏
 	const isFullscreen = shallowRef(false);
-	// 剧院模式
-	const theatre = useVModel(ctx.rootProps, "theatre", ctx.rootEmit);
+	// 显示播放列表
+	const showPlaylist = ctx.rootPropsVm.showPlaylist;
 
 	// 监听全屏变化
 	const handleFullscreenChange = () => {
@@ -20,6 +22,7 @@ export function useFullscreen(ctx: PlayerContext) {
 			if (!document.fullscreenElement) {
 				window.scrollTo(0, 0);
 				await document.documentElement.requestFullscreen();
+				showPlaylist.value = false;
 			} else {
 				await document.exitFullscreen();
 			}
@@ -28,19 +31,10 @@ export function useFullscreen(ctx: PlayerContext) {
 		}
 	};
 
-	// 剧院模式
-	const toggleTheatre = async () => {
-		const newValue = !theatre.value;
-		if (newValue) {
-			if (isFullscreen.value) {
-				await toggleFullscreen();
-			}
-		}
-
-		if (ctx.pictureInPicture?.isPip.value) {
-			await ctx.pictureInPicture?.close();
-		}
-		theatre.value = newValue;
+	// 播放列表
+	const toggleShowSider = async () => {
+		const newValue = !showPlaylist.value;
+		showPlaylist.value = newValue;
 	};
 
 	useEventListener(document, "fullscreenchange", handleFullscreenChange);
@@ -49,9 +43,9 @@ export function useFullscreen(ctx: PlayerContext) {
 	useEventListener(document, "MSFullscreenChange", handleFullscreenChange);
 
 	return {
-		theatre,
+		showPlaylist,
 		isFullscreen,
 		toggleFullscreen,
-		toggleTheatre,
+		toggleShowSider,
 	};
 }

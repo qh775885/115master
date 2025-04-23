@@ -1,10 +1,51 @@
-// 压缩图片
+/**
+ * 获取图片裁剪尺寸
+ * @param originalWidth 原始宽度
+ * @param originalHeight 原始高度
+ * @param maxWidth 最大宽度
+ * @param maxHeight 最大高度
+ * @returns 裁剪后的尺寸
+ */
+export const getImageResize = (
+	originalWidth: number,
+	originalHeight: number,
+	maxWidth: number,
+	maxHeight: number,
+): { width: number; height: number } => {
+	let width = originalWidth;
+	let height = originalHeight;
+
+	if (width > height) {
+		if (width > maxWidth) {
+			height = Math.round(height * (maxWidth / width));
+			width = maxWidth;
+		}
+	} else {
+		if (height > maxHeight) {
+			width = Math.round(width * (maxHeight / height));
+			height = maxHeight;
+		}
+	}
+
+	return { width, height };
+};
+
+/**
+ * 压缩图片
+ * @param blob Blob
+ * @param options 选项
+ * @returns Blob
+ */
 export async function compressImage(
 	blob: Blob,
 	options: {
+		// 最大宽度
 		maxWidth?: number;
+		// 最大高度
 		maxHeight?: number;
+		// 质量 0-1
 		quality?: number;
+		// 类型
 		type?: string;
 	} = {},
 ): Promise<Blob> {
@@ -22,20 +63,12 @@ export async function compressImage(
 			const canvas = document.createElement("canvas");
 
 			// 计算新的尺寸，保持宽高比
-			let width = img.width;
-			let height = img.height;
-
-			if (width > height) {
-				if (width > maxWidth) {
-					height = Math.round(height * (maxWidth / width));
-					width = maxWidth;
-				}
-			} else {
-				if (height > maxHeight) {
-					width = Math.round(width * (maxHeight / height));
-					height = maxHeight;
-				}
-			}
+			const { width, height } = getImageResize(
+				img.width,
+				img.height,
+				maxWidth,
+				maxHeight,
+			);
 
 			// 设置Canvas尺寸
 			canvas.width = width;
@@ -73,7 +106,10 @@ export async function compressImage(
 	});
 }
 
-// 将Base64编码的图片转换为Blob对象
+/**
+ * 将 Base64 编码的图片转换为 Blob 对象
+ * @param base64 Base64
+ */
 export function base64ToBlob(base64: string): Promise<Blob> {
 	return new Promise((resolve, reject) => {
 		try {
@@ -112,7 +148,11 @@ export function base64ToBlob(base64: string): Promise<Blob> {
 	});
 }
 
-// 将ImageBitmap转换为Blob
+/**
+ * 将 ImageBitmap 转换为 Blob
+ * @param imageBitmap ImageBitmap
+ * @param quality 质量
+ */
 export const imageBitmapToBlob = async (
 	imageBitmap: ImageBitmap,
 	quality = 0.85,
@@ -146,7 +186,10 @@ export const imageBitmapToBlob = async (
 	});
 };
 
-// 检测图像是否为黑帧
+/**
+ * 检测图像是否为黑帧
+ * @param imageBitmap ImageBitmap
+ */
 export const isBlackFrame = async (
 	imageBitmap: ImageBitmap,
 ): Promise<boolean> => {
@@ -205,7 +248,11 @@ export const isBlackFrame = async (
 	return darkRatio >= darkPixelRatio && avgBrightness <= 25;
 };
 
-// 将Blob转换为Base64
+/**
+ * 将 Blob 转换为 base64
+ * @param blob Blob
+ * @returns base64
+ */
 export const blobToBase64 = (blob: Blob): Promise<string> => {
 	return new Promise((resolve, reject) => {
 		const reader = new FileReader();
@@ -223,11 +270,16 @@ export const blobToBase64 = (blob: Blob): Promise<string> => {
 	});
 };
 
+/**
+ * 获取图片尺寸
+ * @param src 图片base64、url
+ * @returns 图片尺寸
+ */
 export function getImageSize(
-	base64: string,
+	src: string,
 ): Promise<{ width: number; height: number }> {
 	const img = new Image();
-	img.src = base64;
+	img.src = src;
 	return new Promise((resolve, reject) => {
 		img.onload = () => {
 			resolve({ width: img.width, height: img.height });
@@ -237,3 +289,31 @@ export function getImageSize(
 		};
 	});
 }
+
+/**
+ * 将 ImageBitmap 转换为 base64
+ * @param imageBitmap ImageBitmap
+ * @param quality 质量 0-1
+ * @returns base64
+ */
+export const imageBitmapToBase64 = (
+	imageBitmap: ImageBitmap,
+	quality = 0.85,
+): Promise<string> => {
+	return new Promise((resolve, reject) => {
+		const canvas = document.createElement("canvas");
+		canvas.width = imageBitmap.width;
+		canvas.height = imageBitmap.height;
+
+		const ctx = canvas.getContext("2d");
+		if (!ctx) {
+			reject(new Error("无法创建Canvas上下文"));
+			return;
+		}
+
+		ctx.drawImage(imageBitmap, 0, 0);
+
+		const base64 = canvas.toDataURL("image/webp", quality);
+		resolve(base64);
+	});
+};

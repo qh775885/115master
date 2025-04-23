@@ -1,11 +1,19 @@
+import { useVModels } from "@vueuse/core";
 import {
 	type EmitFn,
 	type InjectionKey,
+	type Ref,
 	type ShallowRef,
+	type ToRefs,
 	inject,
 	provide,
+	ref,
 } from "vue";
 import type { XPlayerEmit, XPlayerProps } from "../types";
+import {
+	type usePlayerCoreDecorator,
+	useSwitchPlayerCore,
+} from "./playerCore/usePlayerCore";
 import { useControls } from "./useControls";
 import { useCssVar } from "./useCssVar";
 import { useFullscreen } from "./useFullscreen";
@@ -13,79 +21,98 @@ import { useHotKey } from "./useHotKey";
 import { useHud } from "./useHud";
 import { usePictureInPicture } from "./usePictureInPicture";
 import { usePlaybackRate } from "./usePlaybackRate";
-import { usePlaying } from "./usePlaying";
-import { useProgress } from "./useProgress";
 import { useProgressBar } from "./useProgressBar";
-import { useSource } from "./useSources";
+import { useSources } from "./useSources";
+import { useStatistics } from "./useStatistics";
 import { useSubtitles } from "./useSubtitles";
 import { useThumbnailSettings } from "./useThumbnailSettings";
 import { useTransform } from "./useTransform";
 import { useVideoEnhance } from "./useVideoEnhance";
-import { useVolume } from "./useVolume";
 
-export interface PlayerContext {
-	rootProps: XPlayerProps;
-	rootEmit: EmitFn<XPlayerEmit>;
-	fullscreen?: ReturnType<typeof useFullscreen>;
-	pictureInPicture?: ReturnType<typeof usePictureInPicture>;
-	volume?: ReturnType<typeof useVolume>;
-	playbackRate?: ReturnType<typeof usePlaybackRate>;
-	progress?: ReturnType<typeof useProgress>;
-	progressBar?: ReturnType<typeof useProgressBar>;
-	playing?: ReturnType<typeof usePlaying>;
-	controls?: ReturnType<typeof useControls>;
-	subtitles?: ReturnType<typeof useSubtitles>;
-	source?: ReturnType<typeof useSource>;
-	hotKey: ReturnType<typeof useHotKey>;
-	transform?: ReturnType<typeof useTransform>;
-	thumbnailSettings?: ReturnType<typeof useThumbnailSettings>;
-	hud?: ReturnType<typeof useHud>;
-	cssVar?: ReturnType<typeof useCssVar>;
-	videoEnhance?: ReturnType<typeof useVideoEnhance>;
-	refs: {
-		videoElementRef: ShallowRef<HTMLVideoElement | null>;
-		rootRef: ShallowRef<HTMLElement | null>;
-		videoMaskRef: ShallowRef<HTMLDivElement | null>;
-	};
+/**
+ * 播放器引用
+ */
+export interface PlayerRefs {
+	// 播放器元素引用
+	playerElementRef: ShallowRef<HTMLDivElement | null>;
+	// 根引用
+	rootRef: ShallowRef<HTMLElement | null>;
 }
 
+/**
+ * 播放器上下文
+ */
+export interface PlayerContext {
+	// 根引用
+	refs: PlayerRefs;
+	// 根事件
+	rootEmit: EmitFn<XPlayerEmit>;
+	// 根属性
+	rootProps: XPlayerProps;
+	// 根属性
+	rootPropsVm: ToRefs<XPlayerProps>;
+	// 驱动
+	driver: ReturnType<typeof useSwitchPlayerCore>;
+	// 全屏
+	fullscreen: ReturnType<typeof useFullscreen>;
+	// 画中画
+	pictureInPicture: ReturnType<typeof usePictureInPicture>;
+	// 播放速度
+	playbackRate: ReturnType<typeof usePlaybackRate>;
+	// 进度条
+	progressBar: ReturnType<typeof useProgressBar>;
+	// 控制栏
+	controls: ReturnType<typeof useControls>;
+	// 字幕
+	subtitles: ReturnType<typeof useSubtitles>;
+	// 视频源
+	source: ReturnType<typeof useSources>;
+	// 热键
+	hotKey: ReturnType<typeof useHotKey>;
+	// 画面转换
+	transform: ReturnType<typeof useTransform>;
+	// 预览图设置
+	thumbnailSettings: ReturnType<typeof useThumbnailSettings>;
+	// HUD显示
+	hud: ReturnType<typeof useHud>;
+	// 变量
+	cssVar: ReturnType<typeof useCssVar>;
+	// 视频增强
+	videoEnhance: ReturnType<typeof useVideoEnhance>;
+	// 调试面板
+	statistics: ReturnType<typeof useStatistics>;
+	// 播放器核心
+	playerCore: Ref<ReturnType<typeof usePlayerCoreDecorator> | undefined>;
+}
+
+/**
+ * 播放器上下文符号
+ */
 export const PlayerSymbol: InjectionKey<PlayerContext> = Symbol("XPlayer");
 
+/**
+ * 播放器 Provide
+ */
 export function usePlayerProvide(
+	// 根引用
+	refs: PlayerRefs,
+	// 根属性
 	rootProps: XPlayerProps,
+	// 根事件
 	rootEmit: EmitFn<XPlayerEmit>,
-	refs: {
-		rootRef: ShallowRef<HTMLElement | null>;
-		videoElementRef: ShallowRef<HTMLVideoElement | null>;
-		videoMaskRef: ShallowRef<HTMLDivElement | null>;
-	},
 ) {
 	const context: PlayerContext = {
 		refs: {
 			rootRef: refs.rootRef,
-			videoElementRef: refs.videoElementRef,
-			videoMaskRef: refs.videoMaskRef,
+			playerElementRef: refs.playerElementRef,
 		},
-		rootProps,
 		rootEmit,
-		fullscreen: undefined,
-		volume: undefined,
-		playbackRate: undefined,
-		progress: undefined,
-		progressBar: undefined,
-		playing: undefined,
-		controls: undefined,
-		subtitles: undefined,
-		source: undefined,
-		hotKey: undefined,
-		thumbnailSettings: undefined,
-		cssVar: undefined,
-		videoEnhance: undefined,
-	};
+		rootProps,
+		rootPropsVm: useVModels(rootProps, rootEmit),
+		playerCore: ref(),
+	} as PlayerContext;
 
-	// 音量
-	const volume = useVolume(context);
-	context.volume = volume;
+	context.driver = useSwitchPlayerCore(context);
 
 	// 播放速度
 	const playbackRate = usePlaybackRate(context);
@@ -95,17 +122,9 @@ export function usePlayerProvide(
 	const fullscreen = useFullscreen(context);
 	context.fullscreen = fullscreen;
 
-	// 进度
-	const progress = useProgress(context);
-	context.progress = progress;
-
 	// 进度条
 	const progressBar = useProgressBar(context);
 	context.progressBar = progressBar;
-
-	// 播放
-	const playing = usePlaying(context);
-	context.playing = playing;
 
 	// 控制栏
 	const controls = useControls(context);
@@ -116,7 +135,7 @@ export function usePlayerProvide(
 	context.subtitles = subtitles;
 
 	// 源
-	const source = useSource(context);
+	const source = useSources(context);
 	context.source = source;
 
 	// 热键
@@ -147,11 +166,17 @@ export function usePlayerProvide(
 	const videoEnhance = useVideoEnhance(context);
 	context.videoEnhance = videoEnhance;
 
+	// 调试面板
+	const debugPanel = useStatistics();
+	context.statistics = debugPanel;
+
 	provide(PlayerSymbol, context);
 	return context;
 }
 
-// 使用播放器上下文的 hook
+/**
+ * 使用播放器上下文
+ */
 export function usePlayerContext() {
 	const context = inject(PlayerSymbol);
 	if (!context) {

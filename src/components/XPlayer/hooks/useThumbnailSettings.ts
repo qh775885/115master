@@ -1,30 +1,26 @@
-import { toRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
-// 预览图设置
+/**
+ * 预览图设置
+ */
 export const useThumbnailSettings = (ctx: PlayerContext) => {
-	const preferences = ctx.rootProps.preferences;
-
-	if (!preferences) {
-		throw new Error("播放器的 preferences 配置不存在，请先配置");
-	}
-
 	// 切换自动加载预览图
 	const toggleAutoLoad = () => {
-		preferences.autoLoadThumbnails = !preferences.autoLoadThumbnails;
+		ctx.rootPropsVm.autoLoadThumbnails.value =
+			!ctx.rootPropsVm.autoLoadThumbnails.value;
 	};
 
-	// 切换全量预览图缓冲
-	const toggleSuperBuffer = () => {
-		preferences.superAutoBuffer = !preferences.superAutoBuffer;
+	// 设置采样间隔
+	const setSamplingInterval = (interval: number) => {
+		ctx.rootPropsVm.thumbnailsSamplingInterval.value = interval;
 	};
 
 	return {
 		// 状态
-		autoLoadThumbnails: toRef(preferences, "autoLoadThumbnails"),
-		superAutoBuffer: toRef(preferences, "superAutoBuffer"),
+		autoLoadThumbnails: ctx.rootPropsVm.autoLoadThumbnails,
+		samplingInterval: ctx.rootPropsVm.thumbnailsSamplingInterval,
 		// 方法
 		toggleAutoLoad,
-		toggleSuperBuffer,
+		setSamplingInterval,
 	};
 };

@@ -12,8 +12,8 @@ export const fillZero = (value: number): string => {
  * @param seconds 秒
  * @returns 格式化后的时间 例如：01:02:03
  */
-export const formatTime = (seconds: number): string => {
-	if (Number.isNaN(seconds)) {
+export const formatTime = (seconds: number | undefined): string => {
+	if (Number.isNaN(seconds) || seconds === undefined) {
 		return "--:--";
 	}
 

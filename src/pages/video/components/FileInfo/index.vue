@@ -1,7 +1,7 @@
 <template>
     <!-- 文件名 -->
     <div :class="$style['header-file']" v-if="fileInfo.error">
-        <div class="header-file-error">
+        <div :class="$style['header-file-error']">
             <div>❌ 获取文件信息失败</div>
             <div>{{ fileInfo.error }}</div>
         </div>
@@ -19,8 +19,16 @@
             </span>
         </div>
         <div :class="$style['action-bar']">
-            <button :class="$style['action-bar-button']" @click="mark.toggleMark">
-                <Icon class="action-bar-button-icon" :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
+            <button 
+                v-if="isMac" 
+                :class="$style['action-bar__button']"
+                @click="handleLocalPlay('iina')"
+            >
+                <img :class="$style['action-bar__button-icon']" :src="iinaIcon" alt="IINA" />
+				<span>IINA</span>
+			</button>
+            <button :class="$style['action-bar__button']" @click="handleMark">
+                <Icon :class="$style['action-bar__button-icon']" :svg="mark.isMark.value ? StarFillSvg : StarSvg" />
                 <span>收藏</span>
             </button>
         </div>
@@ -29,16 +37,40 @@
 <script setup lang="ts">
 import StarFillSvg from "@material-symbols/svg-400/rounded/star-fill.svg?component";
 import StarSvg from "@material-symbols/svg-400/rounded/star.svg?component";
+import iinaIcon from "../../../../assets/icons/iina-icon.png";
 import Icon from "../../../../components/Icon/index.vue";
 import Skeleton from "../../../../components/Skeleton/index.vue";
 import { formatFileSize } from "../../../../utils/format";
+import { isMac } from "../../../../utils/platform";
 import type { useDataFileInfo } from "../../data/useDataFileInfo";
 import type { useMark } from "../../data/useDataMark";
-
+import type { useDataPlaylist } from "../../data/useDataPlaylist";
 const props = defineProps<{
+	// 文件信息
 	fileInfo: ReturnType<typeof useDataFileInfo>;
+	// 星标
 	mark: ReturnType<typeof useMark>;
+	// 播放列表
+	playlist: ReturnType<typeof useDataPlaylist>;
 }>();
+
+const emit = defineEmits<{
+	localPlay: [LocalPlayer];
+}>();
+
+const handleLocalPlay = (player: LocalPlayer) => {
+	emit("localPlay", player);
+};
+
+const handleMark = async () => {
+	// 切换星标
+	await props.mark.toggleMark();
+	// 更新播放列表项星标
+	props.playlist.updateItemMark(
+		props.fileInfo.state.pick_code,
+		!!props.mark.isMark.value,
+	);
+};
 </script>
 
 <style module>
@@ -48,6 +80,7 @@ const props = defineProps<{
     align-items: flex-start;
     width: 100%;
     margin-bottom: 8px;
+    content-visibility: auto;
 }
 
 .header-file {
@@ -81,7 +114,7 @@ const props = defineProps<{
     flex-shrink: 0;
 }
 
-.action-bar-button {
+.action-bar__button {
     display: flex;
     align-items: center;
     gap: 4px;
@@ -95,12 +128,12 @@ const props = defineProps<{
     transition: all 0.2s ease;
 }
 
-.action-bar-button:hover {
+.action-bar__button:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-.action-bar-button svg {
-    width: 24px !important;
-    height: 24px !important;
+.action-bar__button-icon {
+    width: 24px;
+    height: 24px;
 }
 </style>
