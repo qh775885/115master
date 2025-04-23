@@ -13,7 +13,7 @@
 		"moduleResolution": "bundler",
 		"isolatedModules": false,
 		"moduleDetection": "force",
-		"noEmit": false,
+		"noEmit": true,
 		"jsx": "preserve",
 		"strict": true,
 		"noUnusedLocals": true,

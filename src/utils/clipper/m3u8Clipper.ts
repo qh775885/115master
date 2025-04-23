@@ -1,6 +1,6 @@
 import { promiseDelay } from "../promise";
-import { FetchIO } from "./FetchIO";
 import { DemuxerTs } from "./demuxerTs";
+import { FetchIO } from "./io/FetchIO";
 import { HlsIO, type Segment } from "./io/HlsIO";
 import { microsecTimebase, secTimebase, timebaseConvert } from "./timebase";
 
@@ -71,6 +71,7 @@ export class M3U8ClipperNew {
 		const segment = await this.hlsIo.seek(time);
 		// 流式读取
 		const io = new FetchIO();
+		const sampleQueue: EncodedVideoChunk[] = [];
 		// 销毁
 		const destroy = () => {
 			loop = false;
@@ -113,13 +114,19 @@ export class M3U8ClipperNew {
 					if (videoDecoder.state === "closed") {
 						return;
 					}
+
+					// 添加错误处理
+					if (!sample.data || sample.data.byteLength === 0) {
+						console.warn("跳过空样本");
+						continue;
+					}
 					const chunk = new EncodedVideoChunk({
 						type: sample.is_sync ? "key" : "delta",
 						timestamp: (sample.cts * 1_000_000) / sample.timescale,
 						duration: (sample.duration * 1_000_000) / sample.timescale,
 						data: sample.data,
 					});
-					videoDecoder.decode(chunk);
+					sampleQueue.push(chunk);
 				}
 			},
 			onError: (error) => {
@@ -139,6 +146,8 @@ export class M3U8ClipperNew {
 					// 如果已经找到关键帧，则停止读取
 					return false;
 				}
+
+				console.count("继续读取");
 				// 如果未找到关键帧，则继续读取
 				return true;
 			});
@@ -149,6 +158,7 @@ export class M3U8ClipperNew {
 		}
 
 		while (loop) {
+			// 如果已经找到关键帧，则停止读取
 			if (frame) {
 				destroy();
 				return {
@@ -158,12 +168,23 @@ export class M3U8ClipperNew {
 					consumedTime: Date.now() - now,
 				};
 			}
+			// 如果超过超时时间，则销毁
 			if (Date.now() - now > TIMEOUT_MS) {
 				console.error(`m3u8Clipper seek timeout, time: ${time}`);
 				destroy();
 				return undefined;
 			}
-			await promiseDelay(0);
+
+			// 如果存在样本队列，则解码
+			if (sampleQueue.length > 0) {
+				const chunk = sampleQueue.shift();
+				if (chunk) {
+					videoDecoder.decode(chunk);
+					await videoDecoder.flush();
+				}
+			} else {
+				await promiseDelay(0);
+			}
 		}
 	}
 

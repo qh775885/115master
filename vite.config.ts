@@ -44,7 +44,6 @@ export default defineConfig({
 					{
 						type: "program",
 						factory: (program) => {
-							// console.log(program.);
 							return transformer.before(program);
 						},
 					},
