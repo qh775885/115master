@@ -276,7 +276,7 @@ import Popup from "../Popup/index.vue";
 const { transform, thumbnailSettings, videoEnhance } = usePlayerContext();
 
 // 采样间隔选项
-const samplingIntervals = [10, 30, 60, 120];
+const samplingIntervals = [30, 60, 120];
 const buttonRef = shallowRef<HTMLElement>();
 const menuVisible = shallowRef(false);
 const toggleMenu = () => {
