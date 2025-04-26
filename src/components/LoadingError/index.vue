@@ -27,16 +27,7 @@
     <p class="loading-error-text">
       <slot>{{ message || defaultMessage }}</slot>
     </p>
-    <p v-if="props.detail" class="loading-error-detail">
-      <template v-if="props.detail instanceof Error">
-        {{ props.detail.name }} <br />
-        [Error message]: {{ props.detail.message }} <br />
-        [Error stack]:  <br />{{ props.detail.stack }}
-      </template>
-      <template v-else>
-        {{ detail }}
-      </template>
-    </p>
+    <p v-if="props.detail" class="loading-error-detail" v-html="handleDetail(props.detail)"></p>
     <button 
       v-if="props.retryable" 
       class="loading-error-retry"
@@ -76,6 +67,13 @@ const props = withDefaults(
 defineEmits<(e: "retry") => void>();
 
 const defaultMessage = "加载失败";
+
+const handleDetail = (detail: string | Error | unknown) => {
+	if (detail instanceof Error) {
+		return `[Error name]: ${detail.name} \n[Error message]: ${detail.message} \n[Error stack]: ${detail.stack}`;
+	}
+	return detail;
+};
 </script>
 
 <style scoped>
