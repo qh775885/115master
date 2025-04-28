@@ -1,7 +1,7 @@
 import { promiseDelay } from "../promise";
-import { DemuxerTs } from "./demuxerTs";
+import { DemuxerTsNew } from "./demuxerTsNew";
 import { FetchIO } from "./io/FetchIO";
-import { HlsIO, type Segment } from "./io/HlsIO";
+import { HlsIO } from "./io/HlsIO";
 import { microsecTimebase, secTimebase, timebaseConvert } from "./timebase";
 
 // 超时时间
@@ -82,7 +82,7 @@ export class M3U8ClipperNew {
 		// 解码器
 		const videoDecoder = new VideoDecoder({
 			output: (videoFrame) => {
-				const frameTime = this._getFrameRealTime(videoFrame.timestamp, segment);
+				const frameTime = this._getFrameRealTime(videoFrame.timestamp);
 				if (stream && !frame) {
 					frame = videoFrame;
 					return;
@@ -95,58 +95,45 @@ export class M3U8ClipperNew {
 				videoFrame.close();
 			},
 			error: (error) => {
-				console.error(error);
+				console.error(error.message);
+				console.error("解码器错误", this.hlsIo.segmentUrl);
 				destroy();
 			},
 		});
 
 		// 解复用器
-		const demuxer = new DemuxerTs({
+		const demuxer = new DemuxerTsNew({
 			onConfig: (config) => {
-				videoDecoder.configure(config);
+				videoDecoder.configure({
+					codec: config.codec,
+				});
 			},
-			onSamples: (_trackId, _user, samples) => {
-				if (_user !== "video") {
-					return;
-				}
-				for (const sample of samples) {
-					// 解码器关闭
-					if (videoDecoder.state === "closed") {
-						return;
-					}
-
-					// 添加错误处理
-					if (!sample.data || sample.data.byteLength === 0) {
-						console.warn("跳过空样本");
-						continue;
-					}
-					const chunk = new EncodedVideoChunk({
-						type: sample.is_sync ? "key" : "delta",
-						timestamp: (sample.cts * 1_000_000) / sample.timescale,
-						duration: (sample.duration * 1_000_000) / sample.timescale,
-						data: sample.data,
-					});
-					sampleQueue.push(chunk);
-				}
+			onDecodeChunk: (encodeChunk) => {
+				const chunk = new EncodedVideoChunk({
+					type: encodeChunk.avcFrame.keyframe ? "key" : "delta",
+					timestamp: encodeChunk.avcFrame.pts! * 1_000_000,
+					duration: encodeChunk.avcFrame.duration! * 1_000_000,
+					data: encodeChunk.rawData,
+				});
+				sampleQueue.push(chunk);
 			},
-			onError: (error) => {
-				console.error(error);
+			onDone: () => {
+				videoDecoder.flush();
 			},
 		});
 
 		if (stream) {
 			io.streamChunks(segment.url, async (buffer) => {
-				const insufficient = await demuxer.push(new Uint8Array(buffer));
-				if (insufficient) {
-					return true;
+				if (demuxer.demux) {
+					demuxer.push(new Uint8Array(buffer));
+				} else {
+					return false;
 				}
-				// 延迟 100ms 后检查 frame
 				await promiseDelay(100);
 				if (frame) {
 					// 如果已经找到关键帧，则停止读取
 					return false;
 				}
-
 				console.count("继续读取");
 				// 如果未找到关键帧，则继续读取
 				return true;
@@ -154,7 +141,9 @@ export class M3U8ClipperNew {
 		} else {
 			const response = await io.fetchBufferRange(segment.url, 0, -1);
 			const buffer = await response.arrayBuffer();
-			await demuxer.push(new Uint8Array(buffer));
+			demuxer.push(buffer, {
+				done: true,
+			});
 		}
 
 		while (loop) {
@@ -163,7 +152,7 @@ export class M3U8ClipperNew {
 				destroy();
 				return {
 					videoFrame: frame,
-					frameTime: this._getFrameRealTime(frame.timestamp, segment),
+					frameTime: this._getFrameRealTime(frame.timestamp),
 					seekTime: time,
 					consumedTime: Date.now() - now,
 				};
@@ -191,19 +180,17 @@ export class M3U8ClipperNew {
 	/**
 	 * 获取帧的实际时间
 	 * @param timestamp 时间戳 (微秒) 来源与 VideoFrame 或 EncodedVideoChunk
-	 * @param segment 片段
 	 * @returns 实际时间 (秒)
 	 */
-	private _getFrameRealTime(timestamp: number, segment: Segment): number {
+	private _getFrameRealTime(timestamp: number): number {
 		// 转换时间基
 		const videoFrameTime = timebaseConvert(
-			// Tips: 不知道为什么需要除以2,似乎是 mux.js 在封装 mp4 上有问题
-			timestamp / 2,
+			timestamp,
 			microsecTimebase,
 			secTimebase,
 		);
 		// 转换时间基
-		const frameTime = segment.timestamp + videoFrameTime;
+		const frameTime = videoFrameTime;
 		return frameTime;
 	}
 

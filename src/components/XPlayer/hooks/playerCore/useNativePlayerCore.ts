@@ -9,7 +9,7 @@ import { usePlayerCoreState } from "./usePlayerCoreState";
  */
 export const useNativePlayerCore = (_ctx: PlayerContext) => {
 	// 视频元素
-	const renderElementRef = shallowRef<HTMLVideoElement | null>(null);
+	const renderElementRef = shallowRef<HTMLVideoElement>();
 	// 状态
 	const state = usePlayerCoreState();
 
@@ -77,8 +77,8 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 			// 初始化倍速（必须在src赋值后设置）
 			methods.setPlaybackRate(state.playbackRate.value);
 
-			await new Promise<void>((resolve, reject) => {
-				useEventListener(videoElement, "loadedmetadata", () => {
+			return new Promise((resolve, reject) => {
+				useEventListener(renderElementRef, "loadedmetadata", () => {
 					state.duration.value = videoElement.duration;
 					resolve();
 
@@ -86,8 +86,14 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 						methods.play();
 					}
 				});
-				useEventListener(videoElement, "error", (_event) => {
-					state.loadError.value = new Error("NotSupportedError");
+				useEventListener(renderElementRef, "error", (_event: Event) => {
+					if (_event.target instanceof HTMLVideoElement) {
+						const error = new Error(_event.target.error?.message);
+						error.name = "Media Error";
+						state.loadError.value = error;
+					} else {
+						state.loadError.value = new Error("Video element unknown error");
+					}
 					reject(state.loadError.value);
 				});
 			});
@@ -102,13 +108,18 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 				.then(() => {
 					state.paused.value = false;
 				})
-				.catch((error) => {
+				.catch((error: DOMException) => {
 					if (error.name === "NotAllowedError") {
 						console.warn(error);
-						return;
+						throw error;
+					}
+					if (error.name === "AbortError") {
+						console.warn(error);
+						throw error;
 					}
 					console.error("native player play error", error);
 					state.loadError.value = error;
+					throw error;
 				});
 		},
 		pause: () => {
@@ -198,10 +209,13 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 			);
 		},
 		destroy: () => {
-			const videoElement = getVideoElementRef();
-			state.reset();
+			const videoElement = renderElementRef.value;
+			if (!videoElement) return Promise.resolve();
+
+			renderElementRef.value = undefined;
 			videoElement.src = "";
 			videoElement.remove();
+			state.reset();
 			return Promise.resolve();
 		},
 	};

@@ -129,6 +129,7 @@ export const useSources = (ctx: PlayerContext) => {
 		async () => {
 			isInterrupt.value = false;
 			if (list.value.length === 0) {
+				await ctx.playerCore.value?.destroy();
 				return;
 			}
 			await initializeVideo(

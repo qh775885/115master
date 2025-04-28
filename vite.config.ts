@@ -119,9 +119,6 @@ export default defineConfig({
 					dayjs: _cdn("dayjs", "dayjs.min.js").concat(
 						util.dataUrl(";window.dayjs=dayjs;"),
 					),
-					"mux.js": _cdn("muxjs", "dist/mux.min.js").concat(
-						util.dataUrl(";window.Mux=muxjs;"),
-					),
 					"hls.js": _cdn("Hls", "dist/hls.min.js"),
 					"m3u8-parser": _cdn("m3u8Parser", "dist/m3u8-parser.min.js"),
 					photoswipe: _cdn(
