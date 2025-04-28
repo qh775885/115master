@@ -16,6 +16,7 @@ export class FetchIO {
 		end: number,
 	): Promise<Response> {
 		const response = fetch(url, {
+			method: "GET",
 			headers: {
 				Range: `bytes=${start}-${end}`,
 			},
@@ -34,34 +35,17 @@ export class FetchIO {
 		url: string,
 		callback: (buffer: ArrayBuffer, position: number) => Promise<boolean>,
 		options: {
-			initialChunkSize?: number;
 			stepChunkSize?: number;
 			maxSteps?: number;
 		} = {},
 	): Promise<void> {
-		// 初始块大小
-		const initialChunkSize = options.initialChunkSize || 188 * 1536;
 		// 步进块大小
 		const stepChunkSize = options.stepChunkSize || 188 * 1024;
-
 		let currentPosition = 0;
 		let shouldContinue = true;
 
 		// 读取初始块
 		try {
-			const response = await this.fetchBufferRange(
-				url,
-				currentPosition,
-				currentPosition + initialChunkSize - 1,
-			);
-
-			// 调用回调处理数据
-			shouldContinue = await callback(
-				await response.arrayBuffer(),
-				currentPosition,
-			);
-			currentPosition += initialChunkSize;
-
 			// 继续读取后续数据块，直到达到最大步数或回调返回false
 			while (shouldContinue) {
 				const response = await this.fetchBufferRange(
@@ -69,12 +53,10 @@ export class FetchIO {
 					currentPosition,
 					currentPosition + stepChunkSize - 1,
 				);
-
-				if (response.status === 416) {
+				if (response.status !== 206) {
 					shouldContinue = false;
 					break;
 				}
-
 				shouldContinue = await callback(
 					await response.arrayBuffer(),
 					currentPosition,
