@@ -1,7 +1,7 @@
 <template>
 	<div
 		:class="$style['box']"
-		v-show="props.visible"
+		v-show="boxVisible"
 		:style="{
 			transform: `translateX(${previewTransform}px)`
 		}"
@@ -9,10 +9,9 @@
 		<div :class="$style['container']">
 			<div 
 				:class="$style['image']" 
-				ref="thumbnailContainer"
 				:style="{
-					width: `${DEFAULT_WIDTH}px`,
-					height: `${DEFAULT_HEIGHT}px`
+					width: `${thumbnailContainerSize.width}px`,
+					height: `${thumbnailContainerSize.height}px`
 				}"
 				@mouseenter="isHoveringImage = true"
 				@mouseleave="isHoveringImage = false"
@@ -44,8 +43,15 @@
 </template>
 
 <script setup lang="ts">
-import { useElementBounding } from "@vueuse/core";
-import { computed, onUnmounted, reactive, ref, shallowRef, watch } from "vue";
+import {
+	computed,
+	nextTick,
+	onUnmounted,
+	reactive,
+	ref,
+	shallowRef,
+	watch,
+} from "vue";
 import { getImageResize } from "../../../../utils/image";
 import { boundary } from "../../../../utils/number";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
@@ -96,8 +102,11 @@ const isHoveringImage = ref(false);
 const { onThumbnailRequest } = rootProps;
 // 画布
 const thumbnailCanvas = shallowRef<HTMLCanvasElement | null>(null);
-// 容器
-const thumbnailContainer = shallowRef<HTMLDivElement | null>(null);
+// 缩略图容器尺寸
+const thumbnailContainerSize = shallowRef({
+	width: DEFAULT_WIDTH,
+	height: DEFAULT_HEIGHT,
+});
 // 最后一次定时器
 const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
 // 缩略图
@@ -111,6 +120,8 @@ const thumb = reactive({
 	// 渲染图片
 	renderImage: undefined as ThumbnailFrame,
 });
+// 是否显示
+const boxVisible = computed(() => props.visible && previewTransform.value > -1);
 // canvas 上下文
 const ctx = computed(() =>
 	thumbnailCanvas.value?.getContext("2d", {
@@ -124,22 +135,33 @@ const loading = computed(
 	() =>
 		thumb.lastRequestTime >= 0 && thumb.lastRequestTime === thumb.lastHoverTime,
 );
-// 缩略图矩形
-const thumbnailRect = useElementBounding(thumbnailContainer);
+// 预览容器的位移
+const previewTransform = shallowRef(-1);
 
 // 计算预览容器的位移，防止超出边界
-const previewTransform = computed(() => {
-	if (!thumbnailCanvas.value) return -1;
-	if (!props.progressBarWidth) return -1;
+watch(
+	() => [props.position],
+	async () => {
+		if (!props.visible) {
+			previewTransform.value = -1;
+			return;
+		}
 
-	const thumbnailWidth = thumbnailRect.width.value;
-	const offsetCenter = -(thumbnailWidth / 2);
-	const offsetX = props.progressBarWidth * (props.position / 100);
-	const offset = offsetCenter + offsetX;
-	const min = 0;
-	const max = props.progressBarWidth - thumbnailWidth;
-	return boundary(offset, min, max);
-});
+		if (props.progressBarWidth < 0) {
+			previewTransform.value = -1;
+			return;
+		}
+
+		const thumbnailWidth = thumbnailContainerSize.value.width;
+		const offsetCenter = -(thumbnailWidth / 2);
+		const offsetX = props.progressBarWidth * (props.position / 100);
+		const offset = offsetCenter + offsetX;
+		const min = 0;
+		const max = props.progressBarWidth - thumbnailWidth;
+		const result = boundary(offset, min, max);
+		previewTransform.value = result;
+	},
+);
 
 // 更新缩略图
 const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
