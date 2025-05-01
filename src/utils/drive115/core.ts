@@ -12,6 +12,7 @@ import { AppLogger } from "../logger";
 import { is115Browser } from "../platform";
 import { fetchRequest } from "../request/fetchRequest";
 import { GMRequest } from "../request/gmRequst";
+import { getXUrl } from "../url";
 import type { NormalApi, ProApi, WebApi } from "./api";
 import { Crypto115 } from "./crypto";
 
@@ -148,7 +149,7 @@ export class Drive115Core {
 						name,
 						quality:
 							qualityCodeMap[name as unknown as keyof typeof qualityCodeMap],
-						url,
+						url: getXUrl(url),
 					});
 				}
 			}
