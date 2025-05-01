@@ -40,7 +40,7 @@ export class FetchIO {
 		} = {},
 	): Promise<void> {
 		// 步进块大小
-		const stepChunkSize = options.stepChunkSize || 188 * 1024;
+		const stepChunkSize = options.stepChunkSize || 188 * 1024 * 2;
 		let currentPosition = 0;
 		let shouldContinue = true;
 
