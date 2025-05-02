@@ -7,12 +7,9 @@ import RotateSvg from "@material-symbols/svg-400/rounded/rotate_right.svg";
 import SubtitlesSvg from "@material-symbols/svg-400/rounded/subtitles.svg";
 import SubtitlesOffSvg from "@material-symbols/svg-400/rounded/subtitles_off.svg";
 import TimerSvg from "@material-symbols/svg-400/rounded/timer.svg";
-import VolumeDownSvg from "@material-symbols/svg-400/rounded/volume_down.svg";
-import VolumeOffSvg from "@material-symbols/svg-400/rounded/volume_off.svg";
-import VolumeUpSvg from "@material-symbols/svg-400/rounded/volume_up.svg";
-
 import { computed, onUnmounted, shallowRef, watch } from "vue";
 import type { HudMessage } from "../components/HUD/index";
+import { getVolumeIcon } from "../utils/icon";
 import { formatTime } from "../utils/time";
 import type { PlayerContext } from "./usePlayerProvide";
 
@@ -108,14 +105,11 @@ export const useHud = (ctx: PlayerContext) => {
 
 	// 显示音量
 	const showVolume = () => {
-		let icon = VolumeUpSvg;
 		const value = ctx.playerCore.value?.volume;
-
-		if (value === undefined) return;
-
-		if (value < 66) {
-			icon = VolumeDownSvg;
-		}
+		const icon = getVolumeIcon(
+			ctx.playerCore.value?.volume ?? 0,
+			ctx.playerCore.value?.muted ?? false,
+		) as unknown as string;
 
 		show({
 			title: "音量",
@@ -131,7 +125,10 @@ export const useHud = (ctx: PlayerContext) => {
 	// 显示静音
 	const showMute = () => {
 		const muted = ctx.playerCore.value?.muted;
-		const icon = muted ? VolumeOffSvg : VolumeUpSvg;
+		const icon = getVolumeIcon(
+			ctx.playerCore.value?.volume ?? 0,
+			muted ?? false,
+		) as unknown as string;
 		const value = muted ? "静音" : "取消静音";
 		show({
 			data: {
