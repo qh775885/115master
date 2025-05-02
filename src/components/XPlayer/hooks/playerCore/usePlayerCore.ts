@@ -26,9 +26,18 @@ export const usePlayerCoreDecorator = (
 	player.on("seeked", ctx.rootProps.onSeeked ?? noop);
 
 	// 同步响应式数据
-	syncRef(ctx.rootPropsVm.muted, player.muted);
-	syncRef(ctx.rootPropsVm.playbackRate, player.playbackRate);
-	syncRef(ctx.rootPropsVm.volume, player.volume);
+	const syncRefList = [
+		syncRef(ctx.rootPropsVm.muted, player.muted),
+		syncRef(ctx.rootPropsVm.playbackRate, player.playbackRate),
+		syncRef(ctx.rootPropsVm.volume, player.volume),
+	];
+
+	// 取消同步响应式数据
+	const unSyncRefList = () => {
+		syncRefList.forEach((unSyncRef) => {
+			unSyncRef();
+		});
+	};
 
 	return toReactive({
 		...player,
@@ -44,6 +53,11 @@ export const usePlayerCoreDecorator = (
 				: player.currentTime.value + value;
 			const clampedTime = Math.min(Math.max(0, newTime), player.duration.value);
 			player.seek(clampedTime);
+		},
+		// 销毁
+		destroy: () => {
+			unSyncRefList();
+			player.destroy();
 		},
 	});
 };
