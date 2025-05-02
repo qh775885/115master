@@ -57,6 +57,9 @@ export function useHlsPlayerCore(ctx: PlayerContext) {
 			const hls = getHlsRef();
 			hls.loadSource(url);
 			hls.attachMedia(videoElement);
+			videoElement.muted = videoNative.muted.value;
+			videoElement.playbackRate = videoNative.playbackRate.value;
+			videoElement.volume = videoNative.volume.value / 100;
 			return new Promise<void>((resolve, reject) => {
 				useEventListener(videoElement, "loadedmetadata", () => {
 					videoNative.duration.value = videoElement.duration;
