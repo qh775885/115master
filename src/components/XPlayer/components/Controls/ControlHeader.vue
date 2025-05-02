@@ -60,6 +60,7 @@ const { controls } = usePlayerContext();
 		backdrop-filter: blur(20px) saturate(180%);
 		padding: 8px;
 		cursor: pointer;
+		color: #fff;
 	}
 }
 </style>
