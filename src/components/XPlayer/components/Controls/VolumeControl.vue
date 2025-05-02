@@ -32,31 +32,18 @@
 </template>
 
 <script setup lang="ts">
-import VolumeDown from "@material-symbols/svg-400/rounded/volume_down.svg?component";
-import VolumeOff from "@material-symbols/svg-400/rounded/volume_off.svg?component";
-import VolumeUp from "@material-symbols/svg-400/rounded/volume_up.svg?component";
 import { computed } from "vue";
 import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { getVolumeIcon } from "../../utils/icon";
 
 const { playerCore } = usePlayerContext();
 
 const VolumeIcon = computed(() => {
-	if (playerCore.value?.muted) {
-		return VolumeOff;
-	}
-
-	const volume = playerCore.value?.volume;
-
-	if (volume && volume < 50) {
-		return VolumeDown;
-	}
-
-	if (volume && volume >= 50) {
-		return VolumeUp;
-	}
-
-	return VolumeUp;
+	return getVolumeIcon(
+		playerCore.value?.volume ?? 0,
+		playerCore.value?.muted ?? false,
+	);
 });
 
 const handleVolumeChange = (event: Event) => {
