@@ -16,15 +16,27 @@ export function useFullscreen(ctx: PlayerContext) {
 		isFullscreen.value = !!document.fullscreenElement;
 	};
 
+	// 全屏前播放列表状态
+	const prevShowPlaylist = shallowRef(false);
+
 	// 全屏控制
 	const toggleFullscreen = async () => {
 		try {
+			// 请求全屏
 			if (!document.fullscreenElement) {
 				window.scrollTo(0, 0);
 				await document.documentElement.requestFullscreen();
-				showPlaylist.value = false;
-			} else {
+				prevShowPlaylist.value = showPlaylist.value;
+				if (showPlaylist.value) {
+					showPlaylist.value = false;
+				}
+			}
+			// 退出全屏
+			else {
 				await document.exitFullscreen();
+				if (prevShowPlaylist.value) {
+					showPlaylist.value = true;
+				}
 			}
 		} catch (error) {
 			console.error("Failed to toggle fullscreen:", error);
