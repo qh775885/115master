@@ -1,7 +1,10 @@
 <template>
 	<div
 		ref="rootRef"
-		:class="[$style['x-player'], { 'is-fullscreen': fullscreen.isFullscreen.value }]"
+		:class="[$style['x-player'], { 
+			[$style['is-fullscreen']]: fullscreen.isFullscreen.value,
+			[$style['show-controls']]: controls.visible.value
+		 }]"
 	>
 		<!-- SVG滤镜定义，使用v-html渲染 -->
 		<div v-html="videoEnhance.renderFilter.value"></div>
@@ -95,15 +98,22 @@ const playerElementRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
 // 视频播放器上下文
-const { fullscreen, source, transform, videoEnhance, playerCore, statistics } =
-	usePlayerProvide(
-		{
-			rootRef,
-			playerElementRef,
-		},
-		props,
-		emit,
-	);
+const {
+	fullscreen,
+	source,
+	transform,
+	videoEnhance,
+	playerCore,
+	statistics,
+	controls,
+} = usePlayerProvide(
+	{
+		rootRef,
+		playerElementRef,
+	},
+	props,
+	emit,
+);
 
 // 暴露方法
 defineExpose({
@@ -120,12 +130,16 @@ defineExpose({
 	position: relative;
 	background-color: var(--x-player-background-color);
 	-webkit-font-smoothing: antialiased;
+	cursor: none;
 	* {
 		user-select: none;
 	}
 	&.is-fullscreen {
 		width: 100vw;
 		height: 100vh;
+	}
+	&.show-controls {
+		cursor: default;
 	}
 }
 
