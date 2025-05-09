@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@cbingbing/demuxer':
-        specifier: ^2.4.0
-        version: 2.4.0
+        specifier: ^2.4.1
+        version: 2.4.1
       '@libmedia/avcodec':
         specifier: ^0.6.1
         version: 0.6.1
@@ -375,8 +375,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@cbingbing/demuxer@2.4.0':
-    resolution: {integrity: sha512-fVRFShrIR02YwX+1EzU5sjPxHbgh0NP96tr+fM5GYMDFY4n2VydkRAlWMdtsU5DHcVtAxoxp/8kyf2RA9m8aAA==}
+  '@cbingbing/demuxer@2.4.1':
+    resolution: {integrity: sha512-scUTIPFx5mlaDC6UKdyqjUwfzdCdtAg5izF1XBPryQrn39TnvwBMMNgOHLNwj5CkoqpOZOpbj8bfQfkieJSs9w==}
 
   '@esbuild/aix-ppc64@0.24.2':
     resolution: {integrity: sha512-thpVCb/rhxE/BnMLQ7GReQLLN8q9qbHmI55F4489/ByVg2aQaQ6kbcLb6FHkocZzQhxc4gx0sCk0tJkKBFzDhA==}
@@ -947,6 +947,11 @@ packages:
 
   acorn@8.14.0:
     resolution: {integrity: sha512-cl669nCJTZBsL97OF4kUQm5g5hC2uihk0NxY3WENAC0TYdILVkAyHymAntgxGkl7K+t0cXIrH5siy5S4XkFycA==}
+    engines: {node: '>=0.4.0'}
+    hasBin: true
+
+  acorn@8.14.1:
+    resolution: {integrity: sha512-OvQ/2pUDKmgfCg++xsTX1wGxfTaszcHVcTctW4UJB4hibJx2HXxxO5UmVgyjMa+ZDsiaf5wWLXYpRWMmBI0QHg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -2478,7 +2483,7 @@ snapshots:
   '@biomejs/cli-win32-x64@1.9.4':
     optional: true
 
-  '@cbingbing/demuxer@2.4.0': {}
+  '@cbingbing/demuxer@2.4.1': {}
 
   '@esbuild/aix-ppc64@0.24.2':
     optional: true
@@ -3124,6 +3129,9 @@ snapshots:
       acorn: 8.14.0
 
   acorn@8.14.0: {}
+
+  acorn@8.14.1:
+    optional: true
 
   alien-signals@1.0.3: {}
 
@@ -4399,7 +4407,7 @@ snapshots:
   terser@5.39.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.14.0
+      acorn: 8.14.1
       commander: 2.20.3
       source-map-support: 0.5.21
     optional: true
