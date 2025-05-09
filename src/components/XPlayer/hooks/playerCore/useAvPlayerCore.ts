@@ -552,9 +552,16 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 				},
 			);
 		},
+
+		// 销毁
 		destroy: async () => {
+			// 销毁事件监听
+			destoryListeners();
+			// 暂停收集统计信息
 			pauseCollectStats();
+			// 重置状态
 			state.reset();
+			// 销毁播放器
 			if (playerRef.value) {
 				playerRef.value.pause();
 				await playerRef.value.destroy();
@@ -562,6 +569,17 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 			playerRef.value = null;
 			return Promise.resolve();
 		},
+	};
+
+	// 销毁事件监听
+	const destoryListeners = () => {
+		for (const [key, events] of Object.entries(
+			playerRef.value?.listeners ?? {},
+		)) {
+			for (const event of events) {
+				playerRef.value?.off(key, event.fn);
+			}
+		}
 	};
 
 	const setAudioStream = async (id: number) => {
