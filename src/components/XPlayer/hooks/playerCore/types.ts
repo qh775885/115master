@@ -90,9 +90,4 @@ export type PlayerCoreMethods = {
 		name: keyof PlayerCoreEvents,
 		callback: PlayerCoreEvents[keyof PlayerCoreEvents],
 	) => void;
-	// 事件移除
-	off: (
-		name: keyof PlayerCoreEvents,
-		callback: PlayerCoreEvents[keyof PlayerCoreEvents],
-	) => void;
 };

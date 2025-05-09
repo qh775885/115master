@@ -80,6 +80,8 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 			return new Promise((resolve, reject) => {
 				useEventListener(renderElementRef, "loadedmetadata", () => {
 					state.duration.value = videoElement.duration;
+					state.videoWidth.value = videoElement.videoWidth;
+					state.videoHeight.value = videoElement.videoHeight;
 					resolve();
 
 					if (state.autoPlay.value) {
@@ -223,6 +225,7 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 	return {
 		...state,
 		...methods,
+		renderElementRef,
 		type: PlayerCoreType.Native as const,
 	};
 };
