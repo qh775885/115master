@@ -1,7 +1,7 @@
 <template>
     <div :class="$style['subtitle-container']" v-if="subtitles.current.value">
         <div :class="$style['subtitle-content']" v-if="currentSubtitle">
-            {{ currentSubtitle.text }}
+            {{ cleanedText }}
         </div>
     </div>
 </template>
@@ -25,6 +25,10 @@ const playerElementBounding = useElementBounding(refs.playerElementRef);
 const fontSize = computed(
 	() => `${playerElementBounding.height.value * 0.044}px`,
 );
+// 清理后的字幕文本
+const cleanedText = computed(() => {
+	return currentSubtitle.value?.text.replace(/<[^>]*>?/g, "");
+});
 
 /**
  * 解析后的字幕
