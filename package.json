@@ -28,7 +28,7 @@
 		"preinstall": "npx -y only-allow pnpm"
 	},
 	"dependencies": {
-		"@cbingbing/demuxer": "^2.4.0",
+		"@cbingbing/demuxer": "^2.4.1",
 		"@libmedia/avcodec": "^0.6.1",
 		"@libmedia/avformat": "^0.6.1",
 		"@libmedia/avnetwork": "^0.6.1",
