@@ -55,9 +55,9 @@ export const usePlayerCoreDecorator = (
 			player.seek(clampedTime);
 		},
 		// 销毁
-		destroy: () => {
+		destroy: async () => {
 			unSyncRefList();
-			player.destroy();
+			await player.destroy();
 		},
 	});
 };

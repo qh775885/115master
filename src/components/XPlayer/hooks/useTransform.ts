@@ -1,38 +1,39 @@
+import { useElementSize } from "@vueuse/core";
 import { type CSSProperties, computed, shallowRef } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
 
 /**
- * 保持矩形旋转后的原始高度
- * @param width 宽度
- * @param height 高度
+ * 计算旋转视频后的缩放比例，使视频在容器中保持原始比例且不超出容器
+ * @param videoWidth 视频宽度
+ * @param videoHeight 视频高度
+ * @param containerWidth 容器宽度
+ * @param containerHeight 容器高度
  * @param angle 旋转角度（度）
  * @returns 缩放比例
  */
-const maintainRectangleHeight = (
-	width: number,
-	height: number,
+const calculateScale = (
+	videoWidth: number,
+	videoHeight: number,
+	containerWidth: number,
+	containerHeight: number,
 	angle: number,
 ) => {
-	// 将角度转换为弧度
-	const radians = (angle * Math.PI) / 180;
+	const ratio = videoWidth / videoHeight;
+	const radians = (angle * Math.PI) / 180; // 角度转弧度
+	const cos = Math.abs(Math.cos(radians)); // 绝对值处理镜像情况
+	const sin = Math.abs(Math.sin(radians));
 
-	// 计算旋转后的新高度
-	const newHeight =
-		Math.abs(width * Math.sin(radians)) + Math.abs(height * Math.cos(radians));
+	// 计算旋转后的逻辑包围盒尺寸
+	const rotatedWidth = containerWidth * cos + containerHeight * sin;
+	const rotatedHeight = containerWidth * sin + containerHeight * cos;
 
-	// 计算需要的缩放比例以保持原始高度
-	const scale = height / newHeight;
-
-	// 应用变换
-	return scale;
+	const scaleW = containerWidth / rotatedWidth;
+	const scaleH = containerHeight / rotatedHeight;
+	return ratio > 1 ? Math.min(scaleW, scaleH) : Math.max(scaleW, scaleH);
 };
 
 // 画面转换
 export const useTransform = (_ctx: PlayerContext) => {
-	// 宽度比
-	const WIDTH_RATIO = 16;
-	// 高度比
-	const HEIGHT_RATIO = 9;
 	// 旋转角度
 	const ROTATE_ANGLE = 90;
 	// 最大旋转角度
@@ -43,9 +44,17 @@ export const useTransform = (_ctx: PlayerContext) => {
 	const flipX = shallowRef(false);
 	// 垂直翻转
 	const flipY = shallowRef(false);
+	// 播放器元素尺寸
+	const playerSize = useElementSize(_ctx.refs.playerElementRef);
 	// 缩放比例
 	const scale = computed(() => {
-		return maintainRectangleHeight(WIDTH_RATIO, HEIGHT_RATIO, rotate.value);
+		return calculateScale(
+			_ctx.playerCore.value?.videoWidth ?? 16,
+			_ctx.playerCore.value?.videoHeight ?? 9,
+			playerSize.width.value,
+			playerSize.height.value,
+			rotate.value,
+		);
 	});
 	// 样式
 	const style = computed((): CSSProperties => {

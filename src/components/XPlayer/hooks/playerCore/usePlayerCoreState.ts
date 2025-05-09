@@ -26,6 +26,10 @@ export const usePlayerCoreState = () => {
 	const loadError = shallowRef<Error | undefined>(undefined);
 	// 是否加载完成
 	const loaded = shallowRef(false);
+	// 视频宽度
+	const videoWidth = shallowRef(0);
+	// 视频高度
+	const videoHeight = shallowRef(0);
 
 	return {
 		currentTime,
@@ -39,6 +43,8 @@ export const usePlayerCoreState = () => {
 		autoPlay,
 		canplay,
 		loadError,
+		videoWidth,
+		videoHeight,
 		reset: () => {
 			currentTime.value = 0;
 			duration.value = 0;
@@ -48,7 +54,11 @@ export const usePlayerCoreState = () => {
 			muted.value = false;
 			autoPlay.value = true;
 			canplay.value = false;
+			isLoading.value = true;
+			loaded.value = false;
 			loadError.value = undefined;
+			videoWidth.value = 0;
+			videoHeight.value = 0;
 		},
 	};
 };

@@ -265,6 +265,12 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 	const videoStreams = computed(() => {
 		return streams.value.filter((stream) => stream.mediaType === "Video");
 	});
+	// 当前视频流
+	const currentVideoStream = computed(() => {
+		return videoStreams.value.find(
+			(stream) => stream.id === videoStreamId.value,
+		);
+	});
 	// 事件发射器
 	const customEmitter = ee();
 	// 是否第一次播放
@@ -278,6 +284,13 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 		}
 		return playerRef.value;
 	};
+	// 监听当前视频流
+	watch(currentVideoStream, (stream) => {
+		if (stream) {
+			state.videoWidth.value = stream.codecparProxy.width;
+			state.videoHeight.value = stream.codecparProxy.height;
+		}
+	});
 
 	// 收集统计信息
 	const { pause: pauseCollectStats, resume: resumeCollectStats } =
@@ -384,6 +397,8 @@ export const useAvPlayerCore = (ctx: PlayerContext) => {
 				.load(url)
 				.then(async () => {
 					streams.value = await player.getStreams();
+
+					console.log(videoStreams.value);
 
 					// 设置首选音频流
 					const preferredAudioStream = getPreferredAudioStream(streams.value);
