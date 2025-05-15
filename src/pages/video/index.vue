@@ -198,7 +198,11 @@ const loadData = async (isFirst = true) => {
 	if (!params.cid.value) {
 		throw new Error("cid is required");
 	}
-	await DataHistory.fetch(params.pickCode.value);
+	try {
+		await DataHistory.fetch(params.pickCode.value);
+	} catch (error) {
+		console.error(error);
+	}
 	// 加载视频源
 	DataVideoSources.fetch(params.pickCode.value).then(() => {
 		// 初始化缩略图
