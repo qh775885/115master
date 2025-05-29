@@ -1,36 +1,50 @@
 <template>
 	<button 
+		:class="styles.btnText.root"
 		ref="buttonRef"
-		class="quality-button"
-		title="画质"
+		data-tip="画质"
 		@click="toggleMenu"
 	>
 		<span>{{ currentQuality }}</span>
-		
-		<Menu
-			v-model:visible="menuVisible"
-			:triggerRef="buttonRef"
-			placement="top"
-		>
-			<div
+	</button>
+	<Popup
+		v-model:visible="menuVisible"
+		:trigger="buttonRef"
+		placement="top"
+	>
+		<ul :class="styles.menu.root">
+			<li
 				v-for="item in source.list.value"
 				:key="item.quality"
-				class="menu-item"
-				:class="{ active: item.quality === source.current.value?.quality }"
-				@click="handleQualityChange(item)"
 			>
-				{{ getDisplayQuality(item) }}
-			</div>
-		</Menu>
-
-	</button>
+				<a
+					
+					:class="[
+						styles.menu.a,
+						{ 
+							[styles.menu.active]: item.quality === source.current.value?.quality
+						 }
+					]"
+					@click="handleQualityChange(item)"
+				>
+					{{ getDisplayQuality(item) }}
+				</a>
+			</li>
+		</ul>
+		
+	</Popup>
 </template>
 
 <script setup lang="ts">
 import { computed, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { controlStyles } from "../../styles/common";
 import type { VideoSource } from "../../types";
-import Menu from "../Menu/index.vue";
+import Popup from "../Popup/index.vue";
+
+const styles = {
+	...controlStyles,
+};
 
 const { source } = usePlayerContext();
 const menuVisible = shallowRef(false);
@@ -57,68 +71,3 @@ const handleQualityChange = async (sourceValue: VideoSource) => {
 	await source.changeQuality(sourceValue);
 };
 </script>
-
-<style scoped>
-.quality-button {
-	position: relative;
-	padding: 6px 12px;
-	color: #fff;
-	cursor: pointer;
-	border-radius: 6px;
-	transition: all 0.2s;
-	font-size: 14px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	user-select: none;
-}
-
-.quality-button:hover {
-	background: rgba(255, 255, 255, 0.15);
-}
-
-.tooltip {
-	padding: 6px 12px;
-	color: #fff;
-	font-size: 12px;
-	white-space: nowrap;
-	background: rgba(28, 28, 28, 0.95);
-	backdrop-filter: blur(20px);
-	border-radius: 6px;
-}
-
-:deep(.menu-item) {
-	position: relative;
-	padding: 8px 12px;
-	color: #fff;
-	cursor: pointer;
-	transition: all 0.2s;
-	font-size: 14px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	border-radius: 6px;
-	margin: 2px 0;
-}
-
-:deep(.menu-item:hover) {
-	background: rgba(255, 255, 255, 0.1);
-}
-
-:deep(.menu-item.active) {
-	color: var(--x-player-color-primary, #007aff);
-	background: rgba(0, 122, 255, 0.1);
-}
-
-:deep(.menu-item.active::after) {
-	content: "";
-	position: absolute;
-	right: 12px;
-	width: 16px;
-	height: 16px;
-	background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23007aff"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
-	background-size: contain;
-	background-repeat: no-repeat;
-	background-position: center;
-}
-</style> 

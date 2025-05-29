@@ -1,126 +1,107 @@
 <template>
-	<Transition name="fade">
-		<div 
-			v-if="visible"
-			class="play-animation"
-		>
-			<div class="play-animation-icon">
-				<div class="icon-wrapper">
-					<Icon :svg="isShowPause ? Pause : Play" size="50px" />
-				</div>
-			</div>
-		</div>
-	</Transition>
+	<div 
+		v-if="visible"
+		:class="[styles.container, animationClass]"
+	>
+		<Icon :icon="isShowPause ? ICON_PASUE : ICON_PLAY" :class="styles.icon" />
+	</div>
 </template>
 
 <script setup lang="ts">
-import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
-import Play from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import { shallowRef, watch } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
+import { Icon } from "@iconify/vue";
+import { computed, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { ICON_PASUE, ICON_PLAY } from "../../utils/icon";
+
+// 样式抽象
+const styles = {
+	container: [
+		"absolute inset-0 m-auto",
+		"flex items-center justify-center",
+		"size-20 bg-black/30 rounded-full drop-shadow-xs/60",
+	],
+	icon: "size-[61.8%]",
+};
 
 const { playerCore } = usePlayerContext();
 const visible = shallowRef(false);
-const timer = shallowRef<number | null>(null);
 const isShowPause = shallowRef(false);
+const shouldAnimate = shallowRef(false);
 
-const showAnimation = (paused: boolean) => {
-	// 显示动画
-	visible.value = true;
-	isShowPause.value = paused;
-
-	// 清除之前的定时器
-	if (timer.value) {
-		clearTimeout(timer.value);
+// 计算动画类名
+const animationClass = computed(() => {
+	if (shouldAnimate.value) {
+		return "animate-[fadeOut_350ms_linear_forwards]";
 	}
+	return "";
+});
 
-	// 设置新的定时器，800ms 后隐藏动画
-	timer.value = window.setTimeout(() => {
-		visible.value = false;
-	}, 250);
-};
-
+// 显示播放按钮（无动画，一直显示）
 const showPlayButton = () => {
 	visible.value = true;
 	isShowPause.value = false;
+	shouldAnimate.value = false;
 };
 
+// 显示动画按钮（有淡出动画）
+const showAnimationButton = (paused: boolean) => {
+	visible.value = true;
+	isShowPause.value = paused;
+	shouldAnimate.value = true;
+
+	// 300ms 后隐藏
+	setTimeout(() => {
+		visible.value = false;
+		shouldAnimate.value = false;
+	}, 300);
+};
+
+// 隐藏按钮
 const hideButton = () => {
 	visible.value = false;
+	shouldAnimate.value = false;
 };
 
+// 监听 canplay 状态
 watch(
 	() => playerCore.value?.canplay,
 	(value) => {
 		if (value) {
-			if (!playerCore?.value?.paused) {
-				showAnimation(false);
-				return;
+			// canplay 为 true 时，如果是暂停状态则立刻无动画显示播放按钮
+			if (playerCore?.value?.paused) {
+				showPlayButton();
 			}
-			showPlayButton();
-			return;
+		} else {
+			// canplay 为 false 时隐藏按钮
+			hideButton();
 		}
-
-		hideButton();
 	},
 );
 
-// 监听播放状态变化
+// 监听播放状态变化（仅在 canplay 为 true 时生效）
 watch(
 	() => playerCore?.value?.paused,
 	(value) => {
+		// 只有在 canplay 为 true 时才响应 paused 变化
 		if (!playerCore?.value?.canplay) {
 			return;
 		}
-		showAnimation(!!value);
+
+		// paused 变化时显示动画按钮并300ms内淡出
+		showAnimationButton(!!value);
 	},
 );
 </script>
 
-<style scoped>
-.play-animation {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	z-index: 10;
-	pointer-events: none;
-}
-
-.play-animation-icon {
-	width: 80px;
-	height: 80px;
-	background-color: rgba(0, 0, 0, 0.6);
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.icon-wrapper {
-	width: 40px;
-	height: 40px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-/* 淡入淡出动画 */
-.fade-enter-active,
-.fade-leave-active {
-	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
-	transform: translate(-50%, -50%) scale(0.8);
-}
-
-.fade-enter-to,
-.fade-leave-from {
-	opacity: 1;
-	transform: translate(-50%, -50%) scale(1);
+<style>
+@keyframes fadeOut {
+	0% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.4);
+	}
 }
 </style> 

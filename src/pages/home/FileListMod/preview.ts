@@ -1,5 +1,6 @@
 import { type App, createApp } from "vue";
 import { PLUS_VERSION } from "../../../constants";
+import mainStyles from "../../../styles/main.css?inline";
 import ExtPreview from "../components/ExtPreview/index.vue";
 import { FileListType, type ItemInfo } from "../types";
 
@@ -29,9 +30,26 @@ export class FileItemPreview {
 		}
 
 		this.itemNode.classList.add("with-ext-preview");
+
+		// 创建容器元素
+		const extPreviewContainer = document.createElement("div");
+		extPreviewContainer.style.width = "100%";
+		this.itemNode.append(extPreviewContainer);
+
+		// 创建 shadow DOM
+		const shadowRoot = extPreviewContainer.attachShadow({ mode: "open" });
+
+		// 在 shadow DOM 中添加样式
+		const styleElement = document.createElement("style");
+		styleElement.textContent = mainStyles;
+		shadowRoot.appendChild(styleElement);
+
+		// 在 shadow DOM 中创建挂载点
 		const previewDom = document.createElement("div");
 		previewDom.className = "ext-preview-root";
-		this.itemNode.append(previewDom);
+		shadowRoot.appendChild(previewDom);
+
+		// 创建并挂载 Vue 应用
 		const app = createApp(ExtPreview, {
 			pickCode: this.itemInfo.attributes.pick_code,
 			sha1: this.itemInfo.attributes.sha1,

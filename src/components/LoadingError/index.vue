@@ -1,36 +1,16 @@
 <template>
-  <div class="loading-error" :class="{ 'no-padding': noPadding, [size]: size }">
-    <svg
-      class="loading-error-icon"
-      viewBox="0 0 24 24"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <!-- 圆圈 -->
-      <circle
-        class="loading-error-circle"
-        cx="12"
-        cy="12"
-        r="10"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      />
-      <!-- 叉号 -->
-      <path
-        class="loading-error-cross"
-        d="M8 8L16 16M8 16L16 8"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-      />
-    </svg>
-    <p class="loading-error-text">
+  <div :class="styles.container">
+    <Icon :icon="iconName" :class="styles.icon" />
+    <p :class="styles.text">
       <slot>{{ message || defaultMessage }}</slot>
     </p>
-    <p v-if="props.detail" class="loading-error-detail" v-html="handleDetail(props.detail)"></p>
+	<template v-if="props.detail">
+		<p v-if="!props.fold" :class="styles.detail" v-html="handleDetail(props.detail)"></p>
+		<button v-else :class="styles.detailButton" @click="handleShowDetail">查看错误</button>
+	</template>
     <button 
       v-if="props.retryable" 
-      class="loading-error-retry"
+      :class="styles.retryButton"
       @click="$emit('retry')"
     >
       {{ props.retryText }}
@@ -39,6 +19,11 @@
 </template>
 
 <script lang="ts" setup>
+import { Icon } from "@iconify/vue";
+import { useClipboard } from "@vueuse/core";
+import { computed } from "vue";
+import { ICON_ERROR } from "../../icons";
+
 const props = withDefaults(
 	defineProps<{
 		// 是否可重试
@@ -53,6 +38,10 @@ const props = withDefaults(
 		noPadding?: boolean;
 		// 大小
 		size?: "mini" | "small" | "medium" | "large";
+		// 图标名称
+		icon?: string;
+		// 是否折叠显示详情
+		fold?: boolean;
 	}>(),
 	{
 		retryable: false,
@@ -61,6 +50,7 @@ const props = withDefaults(
 		retryText: "重试",
 		noPadding: false,
 		size: "medium",
+		icon: ICON_ERROR,
 	},
 );
 
@@ -68,139 +58,75 @@ defineEmits<(e: "retry") => void>();
 
 const defaultMessage = "加载失败";
 
-const handleDetail = (detail: string | Error | unknown) => {
+const iconName = computed(() => props.icon);
+
+// 样式常量定义
+const styles = computed(() => ({
+	// 容器样式
+	container: [
+		"flex flex-col items-center justify-center text-base-content/70",
+		// 间距和内边距
+		props.size === "mini" ? "gap-1" : "gap-2",
+		!props.noPadding && props.size !== "mini" && "p-2",
+		// 动画效果
+		"animate-in fade-in duration-300",
+	],
+	// 图标样式
+	icon: [
+		"text-error",
+		// 根据尺寸调整图标大小
+		{
+			mini: "text-2xl",
+			small: "text-3xl",
+			medium: "text-5xl",
+			large: "text-6xl",
+		}[props.size],
+	],
+	// 文本样式
+	text: [
+		"text-center m-0 select-text font-medium",
+		// 根据尺寸调整字体大小
+		{
+			mini: "text-xs",
+			small: "text-sm",
+			medium: "text-base",
+			large: "text-lg",
+		}[props.size],
+	],
+	// 详情样式
+	detail: [
+		"text-center m-0 text-base-content/50 select-text whitespace-pre-line font-mono",
+		// 根据尺寸调整字体大小
+		{
+			mini: "text-xs",
+			small: "text-xs",
+			medium: "text-sm",
+			large: "text-base",
+		}[props.size],
+	],
+	// 详情按钮样式
+	detailButton: ["btn btn-error btn-xs"],
+	// 重试按钮样式
+	retryButton: [
+		"btn btn-error btn-sm transition-all duration-200",
+		"hover:btn-error hover:scale-105 active:scale-95",
+	],
+}));
+
+// 处理错误详情
+const handleDetail = (detail: string | Error | unknown): string => {
 	if (detail instanceof Error) {
-		return `[Error name]: ${detail.name} \n[Error message]: ${detail.message} \n[Error stack]: ${detail.stack}`;
+		return `[Error name]: ${detail.name}\n[Error message]: ${detail.message}\n[Error stack]: ${detail.stack}`;
 	}
-	return detail;
+	return detail as string;
 };
-</script>
 
-<style scoped>
-.loading-error {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 24px;
-  color: #666;
-  &.no-padding {
-    padding: 0;
-  }
-  &.mini {
-    padding: 0;
-    gap: 4px;
-    .loading-error-icon {
-      width: 24px;
-      height: 24px;
-    }
-    .loading-error-text {
-      font-size: 10px;
-    }
-    .loading-error-detail {
-      font-size: 8px;
-    }
-  }
-}
-
-.loading-error-icon {
-  width: 48px;
-  height: 48px;
-  color: #ff4d4f;
-  animation: error-appear 0.3s ease-out;
-}
-
-.loading-error-circle {
-  opacity: 0;
-  animation: circle-appear 0.3s ease-out 0.2s forwards;
-  transform-origin: center;
-}
-
-.loading-error-cross {
-  opacity: 0;
-  animation: cross-appear 0.3s ease-out 0.4s forwards;
-  transform-origin: center;
-}
-
-.loading-error-text {
-  font-size: 14px;
-  animation: text-appear 0.3s ease-out 0.5s both;
-  user-select: text;
-  margin: 0;
-}
-
-.loading-error-detail {
-  font-size: 12px;
-  color: #999;
-  animation: text-appear 0.3s ease-out 0.5s both;
-  user-select: text;
-  margin: 0;
-}
-
-.loading-error-retry {
-  padding: 6px 16px;
-  border: none;
-  border-radius: 4px;
-  background: #ff4d4f;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  animation: text-appear 0.3s ease-out 0.6s both;
-}
-
-.loading-error-retry:hover {
-  background: #ff7875;
-}
-
-.loading-error-retry:active {
-  background: #d9363e;
-}
-
-@keyframes error-appear {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes circle-appear {
-  from {
-    stroke-dasharray: 0 100;
-    transform: rotate(-90deg);
-    opacity: 0;
-  }
-  to {
-    stroke-dasharray: 100 100;
-    transform: rotate(90deg);
-    opacity: 1;
-  }
-}
-
-@keyframes cross-appear {
-  from {
-    transform: scale(0);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-@keyframes text-appear {
-  from {
-    transform: translateY(-10px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-</style> 
+// 显示详情
+const handleShowDetail = () => {
+	const detail = handleDetail(props.detail);
+	const { copy } = useClipboard();
+	copy(detail);
+	alert(detail);
+	alert("已将错误信息复制到剪贴板");
+};
+</script> 

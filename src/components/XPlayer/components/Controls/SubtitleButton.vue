@@ -1,71 +1,94 @@
 <template>
 	<button
 		ref="buttonRef"
-		:title="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
-		:disabled="subtitles.loading.value || !subtitles.ready.value|| subtitles.list.value?.length === 0"
+		:class="[styles.btn.root]"
+		:data-tip="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
+		:disabled="subtitles.loading.value || !subtitles.ready.value || subtitles.list.value?.length === 0"
 		@click="toggleMenu"
 	>
 		<!-- loading -->
 		<Icon 
 			v-if="subtitles.loading.value || !subtitles.ready.value"
-			:class="$style['loading-icon']"
-			:svg="ProgressActivity"
+			:class="[styles.btn.icon]"
+			:icon="ICON_LOADING"
 		/>
 		<!-- found 字幕 -->
 		<Icon 
-			v-else 
-			:svg="subtitles.current.value ? Subtitles : SubtitlesOff"
-			:class="[
-				$style['subtitle-icon'],
-				{
-					[$style['disabled']]: subtitles.list.value?.length === 0
-				}
-			]"/>
+			:icon="subtitles.current.value ? ICON_SUBTITLES : ICON_SUBTITLES_OFF"
+			:class="[styles.btn.icon]"
+			:disabled="subtitles.list.value?.length === 0"
+		/>
 
-		<Menu
+		<Popup
 			v-model:visible="menuVisible"
-			:triggerRef="buttonRef"
+			:trigger="buttonRef"
 			placement="top"
 		>
-			<div
-				class="menu-item"
-				:class="{ active: subtitles.current.value === null }"
-				@click="handleDisableSubtitle"
-			>
-				关闭字幕
-			</div>
-			<div
-				v-for="subtitle in subtitles.list.value"
-				:key="subtitle.url"
-				class="menu-item"
-				:class="{ active: subtitles.current.value?.url === subtitle.url }"
-				@click="handleSubtitleSelect(subtitle)"
-			>
-				<div :class="$style['menu-item-content']">
-					<span :class="$style['subtitle-label']">{{ subtitle.label }}</span>
-					<span v-if="subtitle.source" :class="$style['subtitle-source']">
-						{{ subtitle.source }}
-					</span>
-				</div>
-				
-			</div>
-		</Menu>
+			<ul :class="[styles.menu.root]">
+				<li
+					v-for="item in menuItems"
+					:key="item.id"
+				>
+					<a
+						:class="[
+							styles.menu.a,
+							{
+								[styles.menu.active]: item.value?.url === subtitles.current.value?.url
+							}
+						]"
+						@click="handleSubtitleSelect(item.value)"
+					>
+						<Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon"></Icon>
+						<span :class="[styles.menu.label]">{{ item.label }}</span>
+						<span :class="[styles.menu.desc]">{{ item.value?.source }}</span>
+					</a>
+				</li>
+			</ul>
+		</Popup>
 	</button>
 </template>
 
 <script setup lang="ts">
-import ProgressActivity from "@material-symbols/svg-400/rounded/progress_activity.svg?component";
-import Subtitles from "@material-symbols/svg-400/rounded/subtitles.svg?component";
-import SubtitlesOff from "@material-symbols/svg-400/rounded/subtitles_off.svg?component";
-import { shallowRef } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
+import { Icon } from "@iconify/vue";
+import { computed, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { controlStyles } from "../../styles/common";
 import type { Subtitle } from "../../types";
-import Menu from "../Menu/index.vue";
+import {
+	ICON_LOADING,
+	ICON_SUBTITLES,
+	ICON_SUBTITLES_OFF,
+} from "../../utils/icon";
+import Popup from "../Popup/index.vue";
 
-const { subtitles } = usePlayerContext();
+const styles = {
+	menu: {
+		...controlStyles.menu,
+		a: [controlStyles.menu.a, "py-2"],
+	},
+	btn: controlStyles.btn,
+};
+
+const { subtitles, playerCore } = usePlayerContext();
 const menuVisible = shallowRef(false);
 const buttonRef = shallowRef<HTMLElement>();
+
+const menuItems = computed(() => {
+	return [
+		{
+			id: -1,
+			label: "关闭字幕",
+			value: null,
+			icon: ICON_SUBTITLES_OFF,
+		},
+		...(subtitles.list.value ?? []).map((item) => ({
+			id: item.url,
+			label: item.label,
+			value: item,
+			icon: undefined,
+		})),
+	];
+});
 
 const toggleMenu = () => {
 	menuVisible.value = !menuVisible.value;
@@ -75,56 +98,4 @@ const handleSubtitleSelect = (subtitle: Subtitle | null) => {
 	menuVisible.value = false;
 	subtitles.change(subtitle);
 };
-
-const handleDisableSubtitle = () => {
-	menuVisible.value = false;
-	subtitles.change(null);
-};
 </script>
-
-<style module>
-.subtitle-icon {
-	width: 24px;
-	height: 24px;
-	&.disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-}
-
-.loading-icon {
-	animation: spin 1s linear infinite;
-}
-
-.menu-item-content {
-	display: flex;
-	flex-direction: column;
-	align-items: flex-start;
-	gap: 6px;
-	flex: 1;
-}
-
-.subtitle-label {
-	font-size: 14px;
-}
-
-.subtitle-source {
-	display: inline-flex;
-	align-items: center;
-	font-size: 8px;
-	color: #000;
-	background-color: rgba(195, 195, 195, 0.5);
-	padding: 2px 6px;
-	border-radius: 8px;
-	flex-shrink: 0;
-}
-
-@keyframes spin {
-	from {
-		transform: rotate(0deg);
-	}
-	to {
-		transform: rotate(360deg);
-	}
-}
-</style> 

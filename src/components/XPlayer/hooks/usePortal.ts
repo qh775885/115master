@@ -1,14 +1,14 @@
 import { type InjectionKey, type Ref, inject, provide, ref } from "vue";
 
 export interface PortalContext {
-	container: Ref<HTMLElement | null>;
+	container: Ref<HTMLElement | undefined>;
 }
 
 export const PortalSymbol: InjectionKey<PortalContext> =
 	Symbol("XPlayerPortal");
 
 export function usePortalProvider() {
-	const container = ref<HTMLElement | null>(null);
+	const container = ref<HTMLElement>();
 
 	const context: PortalContext = {
 		container,

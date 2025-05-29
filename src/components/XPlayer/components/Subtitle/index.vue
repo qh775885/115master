@@ -1,6 +1,13 @@
 <template>
-    <div :class="$style['subtitle-container']" v-if="subtitles.current.value">
-        <div :class="$style['subtitle-content']" v-if="currentSubtitle">
+    <div :class="styles.container" v-if="subtitles.current.value">
+        <div 
+            :class="styles.content" 
+            v-if="currentSubtitle"
+            :style="{
+                fontSize: fontSize,
+                transform: `translate(-50%, calc(0px - ${safeAreaBottom}))`
+            }"
+        >
             {{ cleanedText }}
         </div>
     </div>
@@ -11,6 +18,15 @@ import { useElementBounding } from "@vueuse/core";
 import { computed, shallowRef, watch } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { Subtitle } from "../../types";
+
+const styles = {
+	container: "absolute inset-0",
+	content: [
+		"absolute left-1/2 bottom-[3%] max-w-[80%] mx-auto px-1",
+		"bg-black/75 whitespace-pre-wrap text-white text-center",
+		"transition-transform duration-200 ease-in-out",
+	],
+};
 
 const { subtitles, cssVar, refs, playerCore } = usePlayerContext();
 // 安全区域底部
@@ -112,28 +128,3 @@ watch(current, () => {
 	loadSubtitle(current.value);
 });
 </script>
-
-<style module>
-.subtitle-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-}
-.subtitle-content {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%, calc(0px - v-bind(safeAreaBottom)));
-    bottom: 3%;
-    max-width: 80%;
-    margin: 0 auto;
-    padding: 0 0.25em;
-	background-color: rgba(8, 8, 8, 0.75);
-	white-space: pre-wrap;
-    color: #fff;
-    font-size: v-bind(fontSize);
-    text-align: center;
-	transition: transform 0.3s ease-in-out;
-}
-</style>

@@ -1,46 +1,46 @@
 <template>
     <div 
 		ref="rootRef"
-		:class="[$style['playlist-item'],{ [$style['active']]: props.active }]"
+		:class="[styles.item.base, { [styles.item.active]: props.active }]"
         @click="handlePlay(item)"
     >
-		<div :class="$style['playlist-item__preview']">
-			<LoadingError v-if="preview.error.value"
+		<div :class="styles.preview.container">
+			<LoadingError 
+				v-if="preview.error.value"
+				:class="styles.preview.imageError"
 				:detail="preview.error.value"
+				:fold="true"
 				size="mini"
 			/>
 
-			<Skeleton v-else-if="preview.isLoading.value" 
-				width="100%"
-				height="100%"
-				border-radius="8px"
-			/>
+			<div v-else-if="preview.isLoading.value" :class="styles.preview.skeleton">
+			</div>
 			
 			<!-- 预览图 -->
-			<img v-else :src="previewImg" />
+			<img v-else-if="preview.isReady.value" :src="previewImg" :class="styles.preview.image" />
 
 			<!-- 时长 -->
-			<div :class="$style['playlist-item__duration']">
+			<div :class="styles.duration.container">
 				{{ formatTime(item.play_long) }}
 			</div>
 
 			<!-- 收藏 -->
-			<div :class="$style['playlist-item__mark']" v-if="item.m">
-				<Icon :class="$style['playlist-item__mark-icon']" :svg="StarFillSvg" />
+			<div :class="styles.mark.container" v-if="item.m">
+				<Icon :icon="ICON_STAR_FILL" :class="styles.mark.icon" />
 			</div>
 
 			<!-- 进度条 -->
-			<div :class="$style['playlist-item__progress']" v-if="item.current_time > 0">
-				<div :class="$style['playlist-item__progress-bar']" :style="{ width: `${progressPercent * 100}%` }"></div>
+			<div :class="styles.progress.container" v-if="item.current_time > 0">
+				<div :class="styles.progress.bar" :style="{ width: `${progressPercent * 100}%` }"></div>
 			</div>
 		</div>
-        <div :class="$style['playlist-item__info']">
+        <div :class="styles.info.container">
 			<!-- 标题 -->
-			<div :class="$style['playlist-item__title']">
+			<div :class="[styles.info.title, { [styles.info.titleActive]: props.active }]" :title="item.n">
 				{{ item.n }}
 			</div>
 			<!-- 大小 -->
-			<div :class="$style['playlist-item__size']">
+			<div :class="styles.info.size">
 				{{ formatFileSize(item.s) }}
 			</div>
 		</div>
@@ -48,14 +48,13 @@
 </template>
 
 <script setup lang="ts">
-import StarFillSvg from "@material-symbols/svg-400/rounded/star-fill.svg?component";
+import { Icon } from "@iconify/vue";
 import { useElementVisibility } from "@vueuse/core";
 import { computed, shallowRef, watch } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
-import Skeleton from "../../../../components/Skeleton/index.vue";
 import { formatTime } from "../../../../components/XPlayer/utils/time";
 import { usePreview } from "../../../../hooks/usePreview";
+import { ICON_STAR_FILL } from "../../../../icons";
 import { PLAYLIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 import type { Entity } from "../../../../utils/drive115";
 import { formatFileSize } from "../../../../utils/format";
@@ -63,11 +62,63 @@ import { formatFileSize } from "../../../../utils/format";
 const props = defineProps<{
 	item: Entity.PlaylistItem;
 	active: boolean;
+	visible?: boolean;
 }>();
 
 const emit = defineEmits<{
 	play: [Entity.PlaylistItem];
 }>();
+
+// 样式常量定义
+const styles = {
+	item: {
+		base: [
+			"flex cursor-pointer break-words hover:bg-base-content/5",
+			"rounded-lg",
+			"transition-colors duration-200",
+		],
+		active: "bg-primary/10 hover:bg-primary/15",
+	},
+	preview: {
+		container: [
+			"relative flex items-center justify-center flex-shrink-0",
+			"overflow-hidden rounded-lg",
+			"w-50 h-28 aspect-video",
+			"before:content-[''] before:absolute before:inset-0 before:bg-black before:rounded-xl",
+		],
+		skeleton: "relative w-full h-full rounded-lg",
+		imageError: "relative!",
+		image: "relative block w-full w-full object-contain",
+	},
+	duration: {
+		container: [
+			"absolute bottom-1.5 right-1.5 rounded-lg",
+			"px-1.5 py-1",
+			"backdrop-blur-xs",
+			"text-xs bg-base-100/60 text-base-content/80",
+		],
+	},
+	mark: {
+		container: [
+			"absolute top-1.5 left-1.5 p-0.5",
+			"rounded-lg",
+			"bg-base-100/60",
+			"backdrop-blur-xs",
+		],
+		icon: "size-7 drop-shadow-xs/90",
+	},
+	progress: {
+		container: "absolute bottom-0 right-0 w-full h-1",
+		bar: "absolute top-0 left-0 w-0 h-full bg-primary opacity-80",
+	},
+	info: {
+		container: "flex flex-col justify-between gap-1 p-2.5 px-4",
+		title:
+			"text-sm font-medium break-all leading-6 text-base-content line-clamp-3",
+		titleActive: "text-primary",
+		size: "text-xs text-base-content/60",
+	},
+};
 
 // 根元素
 const rootRef = shallowRef<HTMLElement>();
@@ -85,120 +136,22 @@ const previewImg = computed(() => {
 const progressPercent = computed(() => {
 	return props.item.current_time / props.item.play_long;
 });
-
 // 播放
 const handlePlay = (item: Entity.PlaylistItem) => {
 	emit("play", item);
 };
-
 // 监听元素可见性
-watch(visibilityRef, (newValue) => {
-	if (newValue) {
-		preview.execute(0, {
-			pickCode: props.item.pc,
-			sha1: props.item.sha,
-			coverNum: PLAYLIST_PREVIEW_NUM,
-			duration: props.item.play_long,
-		});
-	}
-});
-</script>
-
-<style module>
-.playlist-item {
-	display: flex;
-	transition: background-color 0.2s ease;
-	cursor: pointer;
-	word-wrap: break-word;
-	gap: 8px;
-	&.active {
-		.playlist-item__title {
-			color: var(--color-primary);
+watch(
+	[visibilityRef, () => props.visible],
+	([elementVisible, playlistVisible]) => {
+		if (elementVisible && playlistVisible) {
+			preview.execute(0, {
+				pickCode: props.item.pc,
+				sha1: props.item.sha,
+				coverNum: PLAYLIST_PREVIEW_NUM,
+				duration: props.item.play_long,
+			});
 		}
-	}
-}
-
-.playlist-item__preview {
-	position: relative;
-	width: 168px;
-	height: 94.5px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	flex-shrink: 0;
-	border-radius: 8px;
-	overflow: hidden;
-	img {
-		display: block;
-		width: 100%;
-		height: 100%;
-		object-fit: contain;
-		background-color: #f1f1f1;
-	}
-}
-
-.playlist-item__duration {
-	position: absolute;
-	bottom: 6px;
-	right: 6px;
-	font-size: 12px;
-	font-weight: bold;
-	background-color: rgba(0, 0, 0, 0.6);
-	padding: 2px 4px;
-	border-radius: 4px;
-}
-
-.playlist-item__mark {
-	position: absolute;
-	top: 6px;
-	left: 6px;
-	background-color: rgba(0, 0, 0, 0.6);
-	padding: 2px;
-	border-radius: 4px;
-	.playlist-item__mark-icon {
-		display: block;
-		width: 14px;
-		height: 14px;
-		
-	}
-}
-
-.playlist-item__progress {
-	position: absolute;
-	bottom: 0;
-	right: 0;
-	width: 100%;
-	height: 3px;
-	background-color: rgba(0, 0, 0, 0.6);
-	box-shadow: 0 -1px 4px 0 rgba(0, 0, 0, 0.3);
-	.playlist-item__progress-bar {
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 0;
-		height: 100%;
-		background-color: var(--color-primary);
-		opacity: 0.8;
-	}
-}
-
-.playlist-item__info {
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	gap: 4px;
-}
-
-.playlist-item__title {
-	font-size: 14px;
-	font-weight: 500;
-	word-break: break-all;
-	line-height: 1.5;
-	color: #f1f1f1;
-}
-
-.playlist-item__size {
-	font-size: 12px;
-	color: #aaa;
-}
-</style>
+	},
+);
+</script>

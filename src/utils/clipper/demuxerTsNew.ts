@@ -42,11 +42,6 @@ export class DemuxerTsNew {
 	private _onConfig: DemuxerTsOptions["onConfig"];
 
 	/**
-	 * 解复用完成回调
-	 */
-	private _onDone: DemuxerTsOptions["onDone"];
-
-	/**
 	 * 构造函数
 	 * @param options 解复用器选项
 	 */
@@ -65,7 +60,6 @@ export class DemuxerTsNew {
 		);
 		this._onDecodeChunk = options.onDecodeChunk;
 		this._onConfig = options.onConfig;
-		this._onDone = options.onDone;
 	}
 
 	/**

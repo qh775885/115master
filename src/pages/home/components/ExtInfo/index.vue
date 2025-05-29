@@ -1,133 +1,138 @@
 <template>
-    <div class="ext-info " ref="extInfoRef">
-        <div class="ext-info-container" >
-            <div class="ext-info-error" v-if="extInfo.error.value">
+    <div :class="styles.container.main" ref="extInfoRef">
+        <div :class="styles.container.content">
+            <!-- 错误状态 -->
+            <div :class="styles.states.error" v-if="extInfo.error.value">
                 <LoadingError :message="`获取番号 [${props.avNumber}] 失败`" :detail="`可能由于网络原因，请检查是否科学网络${extInfo.error.value}`" />
             </div>
-             <!-- loading骨架 -->
+            
+            <!-- 加载骨架 -->
             <template v-else-if="extInfo.isLoading.value || (!extInfo.isLoading.value && !extInfo.isReady.value)">
-                <div class="ext-info-cover">
-                    <Skeleton height="100%" width="100%" mode="light" />
-                </div>
-                <div class="ext-info-main">
-                    <div class="ext-info-header">
-                        <Skeleton height="24px" width="80%" mode="light" />
-                    </div>
-                    <div class="ext-info-content">
-                        <div class="ext-info-content__group">
-                            <div class="ext-info-item" v-for="i in Array.from({ length: 4}, (_, i) => i)" :key="i">
-                                <Skeleton height="24px" :width="`${200 + Math.random() * 200}px`" mode="light" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="skeleton w-full h-26 rounded-xl bg-neutral-100"></div>
             </template>
-              <!-- 空 -->
-            <div class="ext-info-empty" v-else-if="!extInfo.state.value" >
-                <Empty style="padding: 0;" :description="`未找到番号 [${props.avNumber}] 信息`" />
+            
+            <!-- 空状态 -->
+            <div :class="styles.states.empty" v-else-if="!extInfo.state.value">
+                <Empty :description="`未找到番号 [${props.avNumber}] 信息`" />
             </div>
 
             <!-- 内容 -->
             <template v-else-if="extInfo.state.value">
-                <div class="ext-info-cover">
-                    <a href="javascript:void(0)" :alt="extInfo.state.value?.title">
-                        <Image skeleton-mode="light" :src="extInfo.state.value?.cover?.url ?? ''" :alt="extInfo.state.value?.title ?? ''" :referer="extInfo.state.value?.cover?.referer" cache />
+                <div :class="styles.cover.container">
+                    <a href="javascript:void(0)" :alt="extInfo.state.value?.title" :class="styles.cover.link">
+                        <Image
+                            skeleton-mode="light" 
+                            :src="extInfo.state.value?.cover?.url ?? ''" 
+                            :alt="extInfo.state.value?.title ?? ''" 
+                            :referer="extInfo.state.value?.cover?.referer" 
+                            cache
+                        />
                     </a>
                 </div>
-                <div class="ext-info-main">
-                    <div class="ext-info-title">
-                        <a :href="extInfo.state.value?.detailUrl" target="_blank" :alt="extInfo.state.value?.title">
-                            {{ extInfo.state.value?.title }}
+                
+                <div :class="styles.main.container">
+                    <div :class="styles.title.container">
+                        <a 
+                            :href="extInfo.state.value?.detailUrl" 
+                            target="_blank" 
+                            :title="extInfo.state.value?.title"
+                            :alt="extInfo.state.value?.title"
+                            :class="styles.title.link"
+                        >
+                            {{extInfo.state.value?.source}} {{ extInfo.state.value?.title }}
                         </a>
                     </div>
                     
-                    <div class="ext-info-content">
-                        <div class="ext-info-content__group">
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">番号</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.avNumber">
-                                    <a :href="extInfo.state.value?.detailUrl" target="_blank" :alt="extInfo.state.value?.title">
+                    <div :class="styles.content.container">
+                        <div :class="styles.content.group">
+                            <div :class="styles.item.container">
+                                <span :class="styles.item.label">番号</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.avNumber">
+                                    <a 
+                                        :href="extInfo.state.value?.detailUrl" 
+                                        target="_blank" 
+                                        :alt="extInfo.state.value?.title"
+                                        :class="styles.item.link"
+                                    >
                                         {{ extInfo.state.value?.avNumber }}
                                     </a>
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">日期</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.date">
+                            <div :class="styles.item.container">
+                                <span :class="styles.item.label">日期</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.date">
                                     {{ formatDate(extInfo.state.value?.date) }}
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">时长</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.duration">
+                            <div :class="styles.item.container">
+                                <span :class="styles.item.label">时长</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.duration">
                                     {{ formatDuration(extInfo.state.value?.duration) }}
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
-                            </div>
-
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">来源</span>
-                                <a class="ext-info-item-value" :href="extInfo.state.value?.baseUrl" target="_blank">
-                                    {{ extInfo.state.value?.source }}
-                                </a>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
                         </div>
 
-                        <div class="ext-info-content__group">
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">演员</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.actors">
-                                    <a v-for="actor in extInfo.state.value?.actors" 
+                        <div :class="styles.content.group">
+                            <div :class="styles.item.container">
+                                <span :class="styles.item.label">演员</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.actors">
+                                    <a 
+                                        v-for="actor in extInfo.state.value?.actors" 
                                         :href="actor.url" 
                                         target="_blank"
                                         :alt="actor.name"
                                         :key="actor.url"
-                                        >
+                                        :class="styles.item.link"
+                                    >
                                         {{ actor.name }}
                                     </a>
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div class="ext-info-item">
-                                <span class="ext-info-item-label">导演</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.director">
-                                    <a v-for="director in extInfo.state.value?.director" 
+                            <div :class="styles.item.container">
+                                <span :class="styles.item.label">导演</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.director">
+                                    <a 
+                                        v-for="director in extInfo.state.value?.director" 
                                         :href="director.url" 
                                         target="_blank" 
                                         :alt="director.name"
                                         :key="director.url"
-                                        >
+                                        :class="styles.item.link"
+                                    >
                                         {{ director.name }}
                                     </a>
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div class="ext-info-item" v-if="extInfo.state.value?.category">
-                                <span class="ext-info-item-label">分类</span>
-                                <span class="ext-info-item-value" v-if="extInfo.state.value?.category">
-                                    <a v-for="category in extInfo.state.value?.category" 
+                            <div :class="styles.item.container" v-if="extInfo.state.value?.category">
+                                <span :class="styles.item.label">分类</span>
+                                <span :class="styles.item.value" v-if="extInfo.state.value?.category">
+                                    <a 
+                                        v-for="category in extInfo.state.value?.category" 
                                         :href="category.url" 
                                         target="_blank" 
                                         :alt="category.name"
                                         :key="category.url"
-                                        >
+                                        :class="styles.item.badge"
+                                    >
                                         {{ category.name }}
                                     </a>
                                 </span>
-                                <span class="ext-info-item-value" v-else>-</span>
+                                <span :class="styles.item.value" v-else>-</span>
                             </div>
                         </div>
                     </div>
-
-                   
                 </div>
-                <div class="ext-info-av-number">
+                
+                <div :class="styles.meta.avNumber">
                     {{ props.avNumber }}
                 </div>
             </template>
@@ -140,7 +145,6 @@ import { useAsyncState, useElementVisibility } from "@vueuse/core";
 import { onMounted, ref, watch } from "vue";
 import Image from "../../../../components/Image/index.vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
-import Skeleton from "../../../../components/Skeleton/index.vue";
 import Empty from "../../../../components/empty/Empty.vue";
 import { formatDate, formatDuration } from "../../../../utils/format";
 import { Jav, JavBus, JavDB } from "../../../../utils/jav";
@@ -149,6 +153,53 @@ import { MissAV } from "../../../../utils/jav/missAV";
 const javBus = new JavBus();
 const javDB = new JavDB();
 const missAV = new MissAV();
+
+// 样式常量定义
+const styles = {
+	// 容器样式
+	container: {
+		main: "w-full px-20",
+		content: "relative flex items-center rounded-2xl gap-2 border rounded-2xl",
+	},
+	// 状态样式
+	states: {
+		error: "flex items-center justify-center flex-1",
+		empty: "flex items-center justify-center flex-1",
+	},
+	// 封面样式
+	cover: {
+		container:
+			"flex items-center justify-center w-42 h-28 overflow-hidden rounded-xl",
+		link: "block w-full h-full",
+	},
+	// 主要内容样式
+	main: {
+		container: "flex-1 flex flex-col gap-4",
+	},
+	// 标题样式
+	title: {
+		container: "text-md font-medium text-neutral-700 ml-2",
+		link: "hover:underline line-clamp-1 hover:text-primary transition-colors",
+	},
+	// 内容样式
+	content: {
+		container: "flex flex-1 items-start gap-10 ml-2",
+		group: "flex flex-col gap-2 min-w-32",
+	},
+	// 项目样式
+	item: {
+		container: "flex items-start gap-2 text-xs",
+		label: "w-8 h-5 text-neutral-400 shrink-0",
+		value: "flex flex-1 gap-2 flex-wrap text-neutral-600",
+		link: "hover:text-primary transition-colors font-medium underline-offset-2 hover:underline",
+		badge:
+			"bg-neutral-200/50 hover:bg-neutral-200 rounded-full px-2 py-0.5 text-xs",
+	},
+	// 元信息样式
+	meta: {
+		avNumber: "absolute right-4 bottom-2 text-xs text-neutral-300",
+	},
+};
 
 const props = defineProps<{
 	avNumber: string;
@@ -193,114 +244,6 @@ const extInfo = useAsyncState(
 		immediate: false,
 	},
 );
+
 onMounted(async () => {});
 </script>
-
-<style scoped>
-
-.ext-info {
-    width: 100%;
-    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-    padding-left: 34px;
-    padding-right: 74px;
-
-    .ext-info-container {
-        position: relative;
-        min-height: 212px;
-        background-color: #f8f8fa;
-        gap: 24px;
-        display: flex;
-        padding: 16px;
-        border-radius: 16px;
-        box-sizing: border-box;
-    }
-
-    .ext-info-cover {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 267.65px;
-        height: 180px;
-        overflow: hidden;
-        border-radius: 12px;
-        box-shadow: 0 0 10px 1px rgba(0, 0, 0, 0.1);
-        a {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-        img {
-            display: block;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    }
-    .ext-info-main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-    .ext-info-content {
-        display: flex;
-        flex: 1;
-        align-items: flex-start;
-    }
-    .ext-info-content__group {
-        display: flex;
-        flex-direction: column;
-        row-gap: 12px;
-        &:first-of-type {
-            min-width: 160px;
-        }
-    }
-    .ext-info-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 12px;
-        .ext-info-item-label {
-            width: 32px;
-            color: #999;
-        }
-        .ext-info-item-value {
-            display: flex;
-            flex: 1;
-            column-gap: 8px;
-            flex-wrap: wrap;
-        }
-    }
-    .ext-info-title {
-        font-size: 18px;
-        font-weight: 600;
-
-        a {
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            line-clamp: 1;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-    }
-    .ext-info-av-number {
-        position: absolute;
-        right: 16px;
-        bottom: 8px;
-        font-size: 12px;
-        color: #999;
-        opacity: 0.3;
-    }
-    .ext-info-error {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex: 1;
-    }
-    .ext-info-empty {
-       display: flex;
-       align-items: center;
-       justify-content: center;
-       flex: 1;
-    }
-}
-</style>

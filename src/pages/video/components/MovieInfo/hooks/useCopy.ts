@@ -5,7 +5,7 @@ import { ref } from "vue";
  * @param duration 复制成功后状态保持的时间（毫秒）
  * @returns 复制相关的状态和方法
  */
-export function useCopy(duration = 2000) {
+export function useCopy(duration = 300) {
 	const isCopied = ref(false);
 
 	/**

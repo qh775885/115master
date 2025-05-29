@@ -1,5 +1,5 @@
 import { type Segment as M3U8Segment, Parser } from "m3u8-parser";
-import { IO, type Range } from "./IO";
+import type { Range } from "./IO";
 
 type FetchInfo = {
 	url: string;

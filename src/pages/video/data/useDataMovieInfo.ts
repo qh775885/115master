@@ -1,5 +1,6 @@
 import { useAsyncState } from "@vueuse/core";
 import { JavBus, JavDB } from "../../../utils/jav";
+import { promiseDelay } from "../../../utils/promise";
 
 export const useDataMovieInfo = () => {
 	const javDB = new JavDB();
@@ -11,6 +12,7 @@ export const useDataMovieInfo = () => {
 				return null;
 			}
 			const res = await javDB.getInfo(avNumber);
+			await promiseDelay(1000);
 			return res;
 		},
 		undefined,

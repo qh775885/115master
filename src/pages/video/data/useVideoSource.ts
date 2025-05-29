@@ -40,12 +40,12 @@ export const useDataVideoSources = () => {
 				VideoSourceExtension.unknown;
 
 			list.value.unshift({
-				name: "Ultra原画",
+				name: "Ultra",
 				url: download.value.url.url,
 				type: "auto",
 				extension,
 				quality: 99999,
-				displayQuality: "Ultra原画",
+				displayQuality: "Ultra",
 			});
 		}
 

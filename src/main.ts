@@ -6,7 +6,6 @@ import HomePage from "./pages/home/index";
 import { videoPage, videoTokenPage } from "./pages/video";
 import { checkUserAgent } from "./utils/checkUserAgent";
 import { debugInfo } from "./utils/debugInfo";
-import "./styles/theme.css";
 
 checkUserAgent();
 

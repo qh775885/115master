@@ -21,6 +21,7 @@ import { useHotKey } from "./useHotKey";
 import { useHud } from "./useHud";
 import { usePictureInPicture } from "./usePictureInPicture";
 import { usePlaybackRate } from "./usePlaybackRate";
+import { usePopupManager } from "./usePopupManager";
 import { useProgressBar } from "./useProgressBar";
 import { useSources } from "./useSources";
 import { useStatistics } from "./useStatistics";
@@ -81,6 +82,8 @@ export interface PlayerContext {
 	videoEnhance: ReturnType<typeof useVideoEnhance>;
 	// 调试面板
 	statistics: ReturnType<typeof useStatistics>;
+	// Popup管理器
+	popupManager: ReturnType<typeof usePopupManager>;
 	// 播放器核心
 	playerCore: Ref<ReturnType<typeof usePlayerCoreDecorator> | undefined>;
 }
@@ -113,6 +116,10 @@ export function usePlayerProvide(
 	} as PlayerContext;
 
 	context.driver = useSwitchPlayerCore(context);
+
+	// Popup管理器
+	const popupManager = usePopupManager();
+	context.popupManager = popupManager;
 
 	// 播放速度
 	const playbackRate = usePlaybackRate(context);

@@ -1,4 +1,3 @@
-import { getSpeedingTsUrl } from "../hls";
 import { promiseDelay } from "../promise";
 import { DemuxerTsNew } from "./demuxerTsNew";
 import { FetchIO } from "./io/FetchIO";

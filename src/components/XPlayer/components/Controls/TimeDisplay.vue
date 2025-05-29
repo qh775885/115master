@@ -1,29 +1,28 @@
 <template>
-	<div :class="$style['time-display']">
+	<div 
+		:class="[
+			styles.root,
+			{ 
+				'opacity-0': !playerCore?.canplay,
+				'opacity-100': playerCore?.canplay
+			}
+		]"
+		class="transition-opacity duration-200"
+	>
 		<span>{{ formatTime(playerCore?.currentTime) }}</span>
-		<span :class="$style['time-separator']">/</span>
+		<span :class="styles.separator">/</span>
 		<span>{{ formatTime(playerCore?.duration) }}</span>
 	</div>
 </template>
 
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { controlStyles } from "../../styles/common";
 import { formatTime } from "../../utils/time";
 const { playerCore } = usePlayerContext();
+
+const styles = {
+	root: [controlStyles.text, "flex items-center gap-1.5 select-none"],
+	separator: controlStyles.subtext,
+};
 </script>
-
-<style module>
-.time-display {
-	color: #fff;
-	font-size: 13px;
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	user-select: none;
-	margin-left: 6px;
-}
-
-.time-separator {
-	opacity: 0.7;
-}
-</style> 

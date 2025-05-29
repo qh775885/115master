@@ -5,7 +5,7 @@ export enum PlayerCoreType {
 	// 原生
 	Native = "Native",
 	// AvPlayer
-	AvPlayer = "AvPlayer Beta",
+	AvPlayer = "AvPlayer",
 	// hls.js
 	Hls = "HLS.js",
 }

@@ -1,58 +1,61 @@
 <template>
-	<div class="progress-bar">
+	<div :class="styles.progressBar.root">
 		<!-- 进度条外容器 -->
 		<div 
 			ref="progressBarWrapperRef"
-			class="progress-bar-wrapper"
+			:class="styles.progressBar.wrapper"
 			@mousedown="handleBarWrapperMouseDown"
 			@mouseenter="handleBarWrapperMouseEnter"
 			@mousemove="handleBarWrapperMouseMove"
 			@mouseleave="handleBarWrapperMouseLeave"
 		>
 			<!-- 进度条内容器 -->
-			<div class="progress-bar-container">
+			<div :class="[styles.progressBar.track]">
 				<!-- 原始播放进度（拖拽时保持显示） -->
 				<div 
-					class="progress-current"
+					:class="styles.thumb.current"
 					:style="{ 
 						width: `${progressValue}%`,
-						opacity: isDragging ? 0.5 : 1
+						opacity: isDragging ? 0 : 1
 					}"
 				></div>
 
 				<!-- 拖拽时的实时进度 -->
 				<div 
-					v-if="isDragging"
-					class="progress-current progress-dragging"
+					v-if="isDragging && !progressBar.isLongPressDragging.value"
+					:class="[styles.thumb.current, styles.thumb.dragging]"
 					:style="{ width: `${dragProgress}%` }"
 				></div>
 
 				<!-- 预览进度 -->
 				<div 
 					v-show="isPreviewVisible && !isDragging"
-					class="progress-hover" 
+					:class="styles.thumb.hover" 
 					:style="{ width: `${previewProgress}%` }"
 				></div>
 
 				<!-- 原始进度拖拽点 -->
 				<div 
 					v-if="isDragging"
-					class="progress-handle-container"
+					:class="styles.handle.container"
 					:style="{ left: `${originalProgress}%` }"
 				>
-					<div class="progress-handle progress-handle-original"></div>
+					<div :class="[styles.handle.base, styles.handle.original]"></div>
 				</div>
 
 				<!-- 当前进度拖拽点 -->
 				<div 
-					class="progress-handle-container"
+					:class="styles.handle.container"
 					:style="{ 
 						left: `${isDragging ? dragProgress : progressValue}%` 
 					}"
 				>
 					<div 
-						class="progress-handle"
-						:class="{ 'is-dragging': isDragging }"
+						:class="[
+							styles.handle.base,
+							isHovering && styles.handle.visible,
+							isDragging && styles.handle.dragging
+						]"
 					></div>
 				</div>
 			</div>
@@ -76,6 +79,34 @@ import { computed, onUnmounted, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import Thumbnail from "../Thumbnail/index.vue";
 
+// 样式抽象
+const styles = {
+	progressBar: {
+		root: "relative",
+		wrapper: "py-2 cursor-pointer relative",
+		track:
+			"h-1 bg-base-content/30 relative transition-[height] duration-100 ease-linear shadow-xl/60",
+	},
+	thumb: {
+		current:
+			"absolute h-full bg-primary transition-[width] duration-100 linear",
+		dragging: "transition-none",
+		hover: "absolute h-full bg-primary pointer-events-none",
+	},
+	handle: {
+		container: "absolute h-full -translate-x-1/2",
+		base: [
+			"absolute top-1/2 left-1/2 size-3.5",
+			"bg-primary rounded-full drop-shadow-xs/60",
+			"-translate-x-1/2 -translate-y-1/2 scale-0",
+			"transition-all duration-100 ease-linear pointer-events-none",
+		],
+		visible: "scale-100",
+		dragging: "!scale-80 bg-base-content! duration-450 ring-4 ring-primary",
+		original: "!bg-white/50 !scale-100",
+	},
+};
+
 const { progressBar, playerCore: player } = usePlayerContext();
 
 const progressValue = computed(() => {
@@ -93,6 +124,8 @@ const { width: progressBarWidth } = useElementSize(progressBarWrapperRef);
 const isDragging = progressBar.isDragging;
 // 是否在进度条内
 const isInProgressBar = shallowRef(false);
+// 是否悬停
+const isHovering = computed(() => isInProgressBar.value || isDragging.value);
 // 拖拽进度
 const dragProgress = shallowRef(0);
 // 原始进度
@@ -223,80 +256,4 @@ onUnmounted(() => {
 	document.removeEventListener("mousemove", handleGlobalMouseMove);
 	document.removeEventListener("mouseup", handleGlobalMouseUp);
 });
-</script>
-
-<style scoped>
-.progress-bar {
-	margin-bottom: 10px;
-	position: relative;
-	font-size: 13px;
-}
-
-.progress-bar-wrapper {
-	padding: 8px 0;
-	cursor: pointer;
-	position: relative;
-}
-
-.progress-bar-container {
-	height: 3px;
-	background-color: rgba(255, 255, 255, 0.2);
-	position: relative;
-	transition: height 0.1s ease;
-}
-
-.progress-bar-wrapper:hover .progress-bar-container {
-	height: 5px;
-}
-
-.progress-current {
-	position: absolute;
-	height: 100%;
-	background-color: var(--x-player-controller-progress-bar-color);
-	transition: width 0.1s linear;
-}
-
-.progress-current.progress-dragging {
-	background-color: var(--x-player-controller-progress-bar-color);
-	transition: none;
-}
-
-.progress-hover {
-	position: absolute;
-	height: 100%;
-	background-color: var(--x-player-controller-progress-bar-color-hover);
-	pointer-events: none;
-}
-
-.progress-handle-container {
-	position: absolute;
-	height: 100%;
-	transform: translateX(-50%);
-}
-
-.progress-handle {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 13px;
-	height: 13px;
-	background-color: var(--x-player-controller-progress-bar-color);
-	border-radius: 50%;
-	transform: translate(-50%, -50%) scale(0);
-	transition: transform 0.1s ease;
-	pointer-events: none;
-}
-
-.progress-bar-wrapper:hover .progress-handle {
-	transform: translate(-50%, -50%) scale(1);
-}
-
-.progress-handle.is-dragging {
-	transform: translate(-50%, -50%) scale(1);
-}
-
-.progress-handle-original {
-	background-color: rgba(255, 255, 255, 0.5);
-	transform: translate(-50%, -50%) scale(1) !important;
-}
-</style> 
+</script> 

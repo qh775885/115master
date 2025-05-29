@@ -1,45 +1,55 @@
 <template>
-	<div class="playback-rate-button">
-		<button 
-			ref="buttonRef"
-			class="control-button"
-			title="倍速 (↑/↓)"
-			@click="toggleSpeedMenu"
-		>
-			{{ playbackRate.current.value }} X
-		</button>
-		<Menu
-			v-model:visible="menuVisible"
-			class="menu"
-			:triggerRef="buttonRef"
-			placement="top"
-		>
-			<div class="menu-items">
-				<div
-					v-for="rate in rateOptions"
-					:key="rate"
-					class="menu-item"
-					:class="{ active: playbackRate.current.value === rate }"
-					@click="handleSpeedChange(rate)"
-				>
-					{{ rate }}
-				</div>
-			</div>
-		</Menu>
-	</div>
+	<button 
+		ref="buttonRef"
+		:class="[styles.btnText.root]"
+		:disabled="!playerCore?.canplay"
+		data-tip="倍速 (↑/↓)"
+		@click="toggleSpeedMenu"
+	>
+		{{ buttonText }}
+	</button>
+	<Popup
+		v-model:visible="menuVisible"
+		:trigger="buttonRef"
+		placement="top"
+	>
+		<ul :class="[styles.menu.root]">
+			<li
+				v-for="rate in rateOptions"
+				:key="rate"
+				@click="handleSpeedChange(rate)"
+			>
+				<a 
+					:class="[styles.menu.a, {
+						[styles.menu.active]: playbackRate.current.value === rate
+					}]"
+				>{{ rate }}</a>
+			</li>
+		</ul>
+	</Popup>
 </template>
 
 <script setup lang="ts">
 import { computed, ref, shallowRef } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import Menu from "../Menu/index.vue";
+import { controlStyles } from "../../styles/common";
+import Popup from "../Popup/index.vue";
 
-const { playbackRate } = usePlayerContext();
+const styles = {
+	...controlStyles,
+};
+
+const { playbackRate, playerCore } = usePlayerContext();
 const rateOptions = computed(() =>
 	[...playbackRate.rateOptions.value].reverse(),
 );
 const menuVisible = shallowRef(false);
 const buttonRef = ref<HTMLElement>();
+const buttonText = computed(() => {
+	return playbackRate.current.value === 1
+		? "倍速"
+		: `${playbackRate.current.value}X`;
+});
 
 // 切换菜单显示
 const toggleSpeedMenu = () => {
@@ -52,27 +62,3 @@ const handleSpeedChange = (rate: number) => {
 	menuVisible.value = false;
 };
 </script>
-
-<style scoped>
-.playback-rate-button {
-	position: relative;
-}
-
-.control-button {
-	display: flex;
-	align-items: center;
-	gap: 4px;
-	background: none;
-	border: none;
-	color: #fff;
-	cursor: pointer;
-	padding: 4px 8px;
-	font-size: 13px;
-	border-radius: 4px;
-	transition: background-color 0.2s;
-}
-
-.control-button:hover {
-	background-color: rgba(255, 255, 255, 0.1);
-}
-</style> 
