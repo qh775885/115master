@@ -88,8 +88,7 @@ const styles = {
 	},
 	// 快捷键样式
 	shortcutKeys: "flex gap-1 justify-end",
-	keyBadge:
-		"px-2 py-1 bg-base-200 text-xs rounded font-mono text-base-content/80 border border-base-content/20",
+	keyBadge: "kbd kbd-sm rounded",
 	// 关闭按钮样式
 	closeButton: "btn btn-ghost btn-circle btn-xs",
 	// 标题容器样式
