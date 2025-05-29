@@ -62,7 +62,7 @@
 			:class="styles.resumeContainer"
 			v-if="source.isInterrupt.value"
 		>
-			<button :class="styles.resumeButton" @click="source.resumeSource">恢复</button>
+			<button :class="styles.resumeButton" @click="source.resumeSource">恢复播放</button>
 		</div>
 	</div>
 </template>
@@ -92,9 +92,8 @@ const styles = {
 	error:
 		"absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
 	resumeContainer:
-		"absolute top-0 left-0 w-full h-full flex justify-center items-center",
-	resumeButton:
-		"bg-black text-white rounded-3xl px-8 py-2 text-sm cursor-pointer",
+		"absolute inset-0 flex justify-center items-center bg-black/90 z-2",
+	resumeButton: "btn",
 };
 
 // 属性
