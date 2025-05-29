@@ -57,6 +57,13 @@
 		<!-- 调试面板 -->
 		<Statistics />
 
+		<!-- 右键菜单 -->
+		<ContextMenu>
+			<template #about-content>
+				<slot name="about-content"></slot>
+			</template>
+		</ContextMenu>
+
 		<!-- 恢复容器 -->
 		<div
 			:class="styles.resumeContainer"
@@ -70,6 +77,7 @@
 <script setup lang="ts">
 import { shallowRef, watch, watchEffect } from "vue";
 import LoadingError from "../../components/LoadingError/index.vue";
+import ContextMenu from "./components/ContextMenu/index.vue";
 import ControlsBar from "./components/Controls/ControlBar.vue";
 import ControlsHeader from "./components/Controls/ControlHeader.vue";
 import ControlsMask from "./components/Controls/ControlMask.vue";

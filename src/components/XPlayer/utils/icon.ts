@@ -16,8 +16,6 @@ export const ICON_PLAY = "material-symbols:play-arrow-rounded";
 export const ICON_PLAYER_CORE = "lucide:atom";
 // 音频轨道
 export const ICON_AUDIO_TRACK = "material-symbols:audio-file";
-// 统计
-export const ICON_STATISTICS = "material-symbols:analytics-rounded";
 // loading
 export const ICON_LOADING = "line-md:loading-loop";
 // 快速前进
@@ -54,6 +52,12 @@ export const ICON_VOLUME_MUTE = "material-symbols:volume-mute-rounded";
 export const ICON_VOLUME_DOWN = "material-symbols:volume-down-rounded";
 // 音量升高
 export const ICON_VOLUME_UP = "material-symbols:volume-up-rounded";
+// 统计信息
+export const ICON_STATISTICS_INFO = "material-symbols:analytics-outline";
+// 快捷键
+export const ICON_SHORTCUTS = "material-symbols:keyboard-outline";
+// 关于
+export const ICON_ABOUT = "material-symbols:info-outline";
 
 /**
  * 获取音量图标 Symbol

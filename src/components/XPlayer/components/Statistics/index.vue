@@ -6,7 +6,10 @@
     <div :class="styles.container.main">
       <!-- 头部 -->
       <div :class="styles.container.header">
-        <h3 :class="styles.container.headerTitle">Statistics</h3>
+        <div :class="styles.titleContainer">
+					<Icon :icon="ICON_STATISTICS_INFO" :class="styles.titleIcon" />
+					<h3 :class="styles.container.headerTitle">Statistics</h3>
+				</div>
         <button :class="styles.closeButton" @click="statistics.toggleVisible">
           <Icon icon="material-symbols:close-rounded" class="size-4" />
         </button>
@@ -115,11 +118,16 @@ import { Icon } from "@iconify/vue";
 import { computed } from "vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { ICON_STATISTICS_INFO } from "../../utils/icon";
 import Popup from "../Popup/index.vue";
 
 const styles = {
 	// 根元素样式
 	root: "top-4! left-4! w-lg h-2/3 p-0!",
+	// 标题容器样式
+	titleContainer: "flex items-center space-x-2 gap-2",
+	// 标题图标样式
+	titleIcon: "size-6",
 	// 容器样式
 	container: {
 		main: "bg-base-100 h-full rounded-xl flex flex-col",
