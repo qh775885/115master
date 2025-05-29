@@ -47,6 +47,7 @@ export class FileItemPreview {
 		// 在 shadow DOM 中创建挂载点
 		const previewDom = document.createElement("div");
 		previewDom.className = "ext-preview-root";
+		previewDom.setAttribute("data-theme", "light");
 		shadowRoot.appendChild(previewDom);
 
 		// 创建并挂载 Vue 应用

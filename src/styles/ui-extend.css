@@ -13,6 +13,13 @@
     --range-p: 0rem;
 }
 
-.skeleton {
-    background-image: linear-gradient(105deg,#0000 0% 40%,color-mix(in oklch, #fff 30%, transparent) 50%,#0000 60% 100%);
+[data-theme="dark"] {
+    .skeleton {
+        background-image: linear-gradient(
+            105deg,
+            #0000 0% 40%,
+            #fff5 50%,
+            #0000 60% 100%
+        );
+    }
 }

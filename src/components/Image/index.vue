@@ -31,8 +31,8 @@ type Props = {
 // 样式常量定义
 const styles = {
 	container: "flex justify-center items-center w-full h-full",
-	image: "w-full h-full object-cover rounded-lg",
-	skeleton: "skeleton w-full h-full bg-neutral-200 rounded-lg",
+	image: "w-full h-full object-cover rounded",
+	skeleton: "skeleton w-full h-full rounded",
 };
 
 const props = defineProps<Props>();

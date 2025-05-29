@@ -4,7 +4,7 @@
         <div>{{ fileInfo.error }}</div>
     </div>
     <div v-else-if="fileInfo.isLoading || (!fileInfo.isLoading && !fileInfo.isReady)" :class="styles.container.loading">
-        <div class="skeleton w-80 h-7"></div>
+        <div class="skeleton w-80 h-7 rounded-lg"></div>
     </div>
     <div v-else :class="styles.container.main">
         <div :class="styles.fileInfo.container">

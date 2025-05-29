@@ -8,7 +8,7 @@
 			
 			<!-- 加载骨架 -->
 			<template v-else-if="videoData.isLoading.value">
-				<div class="skeleton w-full h-28 rounded-xl bg-neutral-100"></div>
+				<div class="skeleton w-full h-24"></div>
 			</template>
 			
 			<!-- 预览内容 -->
@@ -22,7 +22,7 @@
 				<a 
 					v-for="(thumbnail, index) in videoData.state.value"
 					:key="index"
-					:class="styles.preview.thumbItem"
+					:class="[styles.preview.thumbItem]"
 					@click.prevent.stop="openPhotoSwipe(index)"
 				>
 					<img 
@@ -49,7 +49,7 @@ import { FILELIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 const styles = {
 	// 容器样式
 	container: {
-		main: "w-full px-20 pr-10",
+		main: "w-full max-w-214 px-20",
 		content: "relative flex items-center",
 	},
 	// 状态样式
@@ -58,10 +58,12 @@ const styles = {
 	},
 	// 预览样式
 	preview: {
-		container: "h-28 flex overflow-hidden gap-2 select-none",
+		container: [
+			"h-24 flex overflow-hidden select-none rounded overflow-hidden",
+		],
 		thumbItem:
-			"aspect-video h-28 cursor-zoom-in no-underline bg-neutral-300 overflow-hidden rounded-lg hover:opacity-90 transition-opacity shrink-0",
-		thumbImage: "h-full w-full object-contain object-center align-top",
+			"aspect-video h-24 cursor-zoom-in no-underline bg-neutral-100 overflow-hidden hover:opacity-90 transition-opacity",
+		thumbImage: ["h-full w-full object-contain object-center align-top"],
 	},
 };
 
