@@ -14,38 +14,39 @@
 		/>
 		<!-- found 字幕 -->
 		<Icon 
+			v-else
 			:icon="subtitles.current.value ? ICON_SUBTITLES : ICON_SUBTITLES_OFF"
 			:class="[styles.btn.icon]"
 			:disabled="subtitles.list.value?.length === 0"
 		/>
-
-		<Popup
-			v-model:visible="menuVisible"
-			:trigger="buttonRef"
-			placement="top"
-		>
-			<ul :class="[styles.menu.root]">
-				<li
-					v-for="item in menuItems"
-					:key="item.id"
-				>
-					<a
-						:class="[
-							styles.menu.a,
-							{
-								[styles.menu.active]: item.value?.url === subtitles.current.value?.url
-							}
-						]"
-						@click="handleSubtitleSelect(item.value)"
-					>
-						<Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon"></Icon>
-						<span :class="[styles.menu.label]">{{ item.label }}</span>
-						<span :class="[styles.menu.desc]">{{ item.value?.source }}</span>
-					</a>
-				</li>
-			</ul>
-		</Popup>
 	</button>
+
+	<Popup
+		v-model:visible="menuVisible"
+		:trigger="buttonRef"
+		placement="top"
+	>
+		<ul :class="[styles.menu.root]">
+			<li
+				v-for="item in menuItems"
+				:key="item.id"
+			>
+				<a
+					:class="[
+						styles.menu.a,
+						{
+							[styles.menu.active]: item.value?.url === subtitles.current.value?.url
+						}
+					]"
+					@click="handleSubtitleSelect(item.value)"
+				>
+					<Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon"></Icon>
+					<span :class="[styles.menu.label]">{{ item.label }}</span>
+					<span :class="[styles.menu.desc]">{{ item.value?.source }}</span>
+				</a>
+			</li>
+		</ul>
+	</Popup>
 </template>
 
 <script setup lang="ts">
@@ -69,7 +70,7 @@ const styles = {
 	btn: controlStyles.btn,
 };
 
-const { subtitles, playerCore } = usePlayerContext();
+const { subtitles } = usePlayerContext();
 const menuVisible = shallowRef(false);
 const buttonRef = shallowRef<HTMLElement>();
 
