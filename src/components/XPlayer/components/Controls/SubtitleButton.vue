@@ -38,6 +38,7 @@
 							[styles.menu.active]: item.value?.url === subtitles.current.value?.url
 						}
 					]"
+					:title="item.label"
 					@click="handleSubtitleSelect(item.value)"
 				>
 					<Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon"></Icon>
@@ -65,7 +66,13 @@ import Popup from "../Popup/index.vue";
 const styles = {
 	menu: {
 		...controlStyles.menu,
-		a: [controlStyles.menu.a, "py-2"],
+		root: [
+			controlStyles.menu.root,
+			"max-h-72 max-w-xl overflow-y-auto overflow-x-hidden !flex-nowrap",
+		],
+		a: [controlStyles.menu.a, "flex py-2 flex-wrap w-full"],
+		label: [controlStyles.menu.label, "w-xs flex-1 line-clamp-2"],
+		desc: [controlStyles.menu.desc],
 	},
 	btn: controlStyles.btn,
 };

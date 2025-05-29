@@ -17,10 +17,10 @@ export const controlStyles = {
 		],
 	},
 	menu: {
-		root: "menu p-0 min-w-32",
+		root: "menu p-0 min-w-32 gap-1",
 		a: "rounded-lg",
 		active: "menu-active",
-		icon: "size-4",
+		icon: "size-6",
 		label: "text-base-content",
 		desc: "text-base-content/60",
 	},
