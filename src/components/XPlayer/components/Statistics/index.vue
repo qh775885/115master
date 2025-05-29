@@ -1,297 +1,360 @@
 <template>
-  <div
-    :class="$style['panel']"
+  <Popup
+    :class="styles.root"
+    :visible="statistics.visible.value"
   >
-    <div :class="$style['panel-header']">
-      <h3>Statistics</h3>
-      <button :class="$style['close']" @click="statistics.toggleVisible" title="关闭">
-        <Icon :svg="CloseSvg"></Icon>
-      </button>
-    </div>
-    <div :class="$style['panel-body']">
-      <div :class="$style['section']">
-        <h4>Player Core</h4>
-        <div :class="$style['section-body']">
-          <div :class="$style['section-item']">
-            <span>Core Type:</span>
-            <span>{{ playerCore?.type ?? 'unknown' }}</span>
-          </div>
-        </div>
+    <div :class="styles.container.main">
+      <!-- 头部 -->
+      <div :class="styles.container.header">
+        <h3 :class="styles.container.headerTitle">Statistics</h3>
+        <button :class="styles.closeButton" @click="statistics.toggleVisible">
+          <Icon icon="material-symbols:close-rounded" class="size-4" />
+        </button>
       </div>
-
-      <div :class="$style['section']">
-        <h4>Source Info</h4>
-        <div :class="$style['section-body']">
-          <div :class="$style['section-item']">
-            <span>Current Source:</span>
-            <span>{{ source?.current.value?.name || '未加载' }}</span>
-          </div>
-          <div :class="$style['section-item']">
-            <span>Type:</span>
-            <span>{{ source?.current.value?.type || '未知' }}</span>
-          </div>
-          <div :class="$style['section-item']">
-            <span>Extension:</span>
-            <span>{{ source?.current.value?.extension || 'unknown' }}</span>
-          </div>
-          <div :class="$style['section-item']">
-            <span>URL:</span>
-            <span :class="$style['url-text']">{{ source?.current.value?.url || '未加载' }}</span>
-          </div>
-        </div>
-      </div>
-
-      <template v-if="playerCore?.type === PlayerCoreType.AvPlayer">
-        <div v-if="playerCore.streams" :class="$style['section']">
-          <h4>
-            Streams 
-            <span :class="$style['stream-count']">({{ playerCore.streams.length }})</span>
-          </h4>
-          <div v-for="stream in playerCore.streams" :key="stream.id" 
-            :class="[
-              $style['subsection'], 
-              {
-                [$style['active']]: [playerCore.audioStreamId, playerCore.videoStreamId, playerCore.subtitleStreamId].includes(stream.id)
-              }
-            ]"
-          >
-            <div :class="$style['subsection-header']">
-              <span :class="$style['stream-type']">{{ stream.mediaType }}</span>
-              <span :class="$style['stream-id']">ID: {{ stream.id }}</span>
-            </div>
-            <div :class="$style['subsection-content']">
-              <div :class="$style['section-item']">
-                <span>support:</span>
-                <span>{{ playerCore.isSupportStream(stream) ? 'Yes' : 'No' }}</span>
-              </div>
-              <div :class="$style['section-item']">
-                <span>codecId:</span>
-                <span>{{ stream.codecparProxy.codecId }}</span>
-              </div>
-              <template v-if="stream.mediaType === 'Audio'">
-                <div :class="$style['section-item']">
-                  <span>nbChannels:</span>
-                  <span>{{ stream.codecparProxy.chLayout.nbChannels }}</span>
-                </div>
-              </template>
-              <div :class="$style['section-item']" v-for="(value, key) of stream.metadata" :key="key">
-                <span>{{ key }}:</span>
-                <span>{{ value }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="playerCore.stats" :class="$style['section']">
-          <h4>Core Stats</h4>
-          <div 
-            :class="$style['section-item']"
-            v-for="key in Object.keys(playerCore.stats)" :key="key">
-            <span>{{ key }}</span>
-            <span>{{ playerCore.stats[key as keyof Stats] }}</span>
-          </div>
-          <div :class="$style['section-item']">
-            <span>A-V:</span>
-            <span>{{ playerCore.stats.audioCurrentTime - playerCore.stats.videoCurrentTime }}</span>
-          </div>
-        </div>
-      </template>
       
+      <!-- 滚动内容区 -->
+      <div :class="styles.container.content">
+        <div :class="styles.container.sectionsWrapper">
+          <!-- Player Core -->
+          <div :class="styles.section.wrapper">
+            <h4 :class="styles.section.title">Player Core</h4>
+            <div :class="styles.section.content">
+              <table :class="styles.table.wrapper">
+                <tbody>
+                  <tr>
+                    <td :class="styles.table.labelCell">Core Type:</td>
+                    <td :class="styles.table.valueCell">{{ playerCoreType }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
-      <div v-if="playerCore?.loadError" :class="$style['section']">
-        <h4>错误信息</h4>
-        <div :class="$style['error']">
-          {{ formatError(playerCore.loadError) }}
+          <!-- Source Info -->
+          <div :class="styles.section.wrapper">
+            <h4 :class="styles.section.title">Source Info</h4>
+            <div :class="styles.section.content">
+              <table :class="[styles.table.wrapper, styles.table.fixedLayout]">
+                <tbody>
+                  <tr v-for="(value, key) in sourceInfoItems" :key="key">
+                    <td :class="styles.table.labelCell">{{ key }}:</td>
+                    <td :class="styles.table.breakableValueCell">{{ value }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Streams -->
+          <div v-if="hasStreams" :class="styles.section.wrapper">
+            <div :class="styles.section.title">
+              <h4 :class="styles.container.headerTitle">Streams</h4>
+              <span :class="styles.streamCount">{{ streamsCount }}</span>
+            </div>
+            <div :class="styles.section.content">
+              <div :class="styles.stream.wrapper">
+                <div 
+                  v-for="stream in streams" 
+                  :key="stream.id"
+                  :class="[styles.stream.item, isActiveStream(stream.id) ? styles.stream.activeItem : '']"
+                >
+                  <div :class="styles.stream.header">
+                    <span :class="styles.stream.title">{{ stream.mediaType }}</span>
+                    <span :class="styles.stream.id">ID: {{ stream.id }}</span>
+                  </div>
+                  
+                  <table :class="styles.table.wrapper">
+                    <tbody>
+                      <tr v-for="(value, label) in getStreamProperties(stream)" :key="label">
+                        <td :class="styles.stream.labelCell">{{ label }}:</td>
+                        <td :class="styles.stream.valueCell">{{ value }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Core Stats -->
+          <div v-if="hasStats" :class="styles.section.wrapper">
+            <h4 :class="styles.section.title">Core Stats</h4>
+            <div :class="styles.section.content">
+              <table :class="styles.table.wrapper">
+                <tbody>
+                  <tr v-for="(value, key) in statsItems" :key="key">
+                    <td :class="styles.table.labelCell">{{ key }}:</td>
+                    <td :class="styles.table.valueCell">{{ value }}</td>
+                  </tr>
+                  <tr v-if="hasAudioVideoTimes">
+                    <td :class="styles.table.labelCell">A-V:</td>
+                    <td :class="styles.table.valueCell">{{ audioVideoTimeDiff }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 错误信息 -->
+          <div v-if="hasLoadError" :class="styles.section.wrapper">
+            <h4 :class="styles.section.title">错误信息</h4>
+            <div :class="styles.section.content">
+              <div :class="styles.error">
+                {{ errorMessage }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </Popup>
 </template>
 
 <script setup lang="ts">
-import Stats from "@libmedia/avpipeline/struct/stats";
-import CloseSvg from "@material-symbols/svg-400/rounded/close.svg?component";
-import Icon from "../../../Icon/index.vue";
+import { Icon } from "@iconify/vue";
+import { computed } from "vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import Popup from "../Popup/index.vue";
+
+const styles = {
+	// 根元素样式
+	root: "top-4! left-4! w-lg h-2/3 p-0!",
+	// 容器样式
+	container: {
+		main: "bg-base-100 h-full rounded-xl flex flex-col",
+		header:
+			"flex justify-between items-center px-4 py-2 bg-base-200 rounded-t-xl",
+		headerTitle: "text-base font-medium text-base-content",
+		content: "overflow-y-auto flex-1",
+		sectionsWrapper: "space-y-6 text-sm",
+	},
+	// 章节样式
+	section: {
+		wrapper: "stats-section",
+		title:
+			"sticky top-0 z-10 bg-base-100 py-2 px-6 text-base font-medium mb-2 text-base-content border-b border-base-content/10 shadow-sm",
+		content: "px-6 pt-2",
+	},
+	// 表格样式
+	table: {
+		wrapper: "w-full",
+		fixedLayout: "table-fixed",
+		labelCell: "text-base-content py-1 w-1/3 align-top",
+		valueCell: "text-base-content/60 py-1 text-right",
+		breakableValueCell: "text-base-content/60 py-1 break-words text-right",
+	},
+	// 流信息样式
+	stream: {
+		wrapper: "space-y-2",
+		item: "p-2 bg-base-200 rounded-lg",
+		activeItem: "bg-primary/30",
+		header: "flex justify-between items-center mb-1",
+		title: "text-base-content font-medium",
+		id: "text-base-content/60 text-xs",
+		labelCell: "text-base-content py-0.5 w-1/3",
+		valueCell: "text-base-content/60 py-0.5 text-right",
+	},
+	// 统计信息样式
+	streamCount: "ml-2 text-xs bg-base-200 px-1.5 py-0.5 rounded-full",
+	// 错误信息样式
+	error:
+		"p-2 bg-error/10 border-l-2 border-error rounded text-xs font-mono whitespace-pre-wrap text-error-content",
+	// 关闭按钮样式
+	closeButton: "btn btn-ghost btn-circle btn-xs",
+};
 
 // 读取播放器上下文
 const { playerCore, source, statistics } = usePlayerContext();
 
+// 基础类型定义
+interface StreamInfo {
+	id: number;
+	mediaType: string;
+	[key: string]: unknown;
+}
+
+// ==================== Player Core 信息 ====================
+const playerCoreType = computed(() => {
+	if (!playerCore.value) return "unknown";
+	// 使用类型保护机制处理类型问题
+	const core = playerCore.value as unknown as { type?: PlayerCoreType };
+	return core.type ?? "unknown";
+});
+
+// ==================== Source 信息 ====================
+const sourceInfoItems = computed(() => ({
+	"Current Source": source?.current.value?.name || "未加载",
+	Type: source?.current.value?.type || "未知",
+	Extension: source?.current.value?.extension || "unknown",
+	URL: source?.current.value?.url || "未加载",
+}));
+
+// ==================== Streams 信息 ====================
+// 是否有流
+const hasStreams = computed(() => {
+	if (!playerCore.value) return false;
+	const core = playerCore.value as unknown as {
+		type?: PlayerCoreType;
+		streams?: Array<StreamInfo>;
+	};
+	return (
+		core.type === PlayerCoreType.AvPlayer &&
+		core.streams !== undefined &&
+		core.streams.length > 0
+	);
+});
+
+// 流的数量
+const streamsCount = computed(() => {
+	if (!playerCore.value) return 0;
+	const core = playerCore.value as unknown as { streams?: Array<StreamInfo> };
+	return core.streams?.length ?? 0;
+});
+
+// 获取所有流
+const streams = computed((): Array<StreamInfo> => {
+	if (!playerCore.value) return [];
+	const core = playerCore.value as unknown as { streams?: Array<StreamInfo> };
+	return core.streams ?? [];
+});
+
+// 判断是否是活动流
+const isActiveStream = (id: number): boolean => {
+	if (!playerCore.value) return false;
+
+	const core = playerCore.value as unknown as {
+		audioStreamId?: number;
+		videoStreamId?: number;
+		subtitleStreamId?: number;
+	};
+
+	const streamIds = [
+		core.audioStreamId,
+		core.videoStreamId,
+		core.subtitleStreamId,
+	].filter(Boolean);
+
+	return streamIds.includes(id);
+};
+
+// 获取流的所有属性（用于渲染）
+const getStreamProperties = (stream: StreamInfo) => {
+	const properties: Record<string, unknown> = {};
+
+	// 支持情况
+	if (playerCore.value) {
+		const core = playerCore.value as unknown as {
+			isSupportStream?: (stream: StreamInfo) => boolean;
+		};
+
+		if (typeof core.isSupportStream === "function") {
+			properties["support"] = core.isSupportStream(stream) ? "Yes" : "No";
+		}
+	}
+
+	// 编解码器ID
+	if (stream.codecparProxy) {
+		const codecPar = stream.codecparProxy as Record<string, unknown>;
+		if (codecPar.codecId) {
+			properties["codecId"] = codecPar.codecId;
+		}
+
+		// 音频通道数（仅音频流）
+		if (stream.mediaType === "Audio" && codecPar.chLayout) {
+			const chLayout = codecPar.chLayout as Record<string, unknown>;
+			if (chLayout.nbChannels) {
+				properties["nbChannels"] = chLayout.nbChannels;
+			}
+		}
+	}
+
+	// 元数据
+	if (stream.metadata) {
+		const metadata = stream.metadata as Record<string, string>;
+		Object.entries(metadata).forEach(([key, value]) => {
+			properties[key] = value;
+		});
+	}
+
+	return properties;
+};
+
+// ==================== Stats 信息 ====================
+// 是否有统计信息
+const hasStats = computed(() => {
+	if (!playerCore.value) return false;
+	const core = playerCore.value as unknown as {
+		stats?: Record<string, unknown>;
+	};
+	return !!core.stats;
+});
+
+// 统计信息项目
+const statsItems = computed(() => {
+	if (!playerCore.value) return {};
+
+	const core = playerCore.value as unknown as {
+		stats?: Record<string, unknown>;
+	};
+	if (!core.stats) return {};
+
+	const result: Record<string, unknown> = {};
+	for (const key in core.stats) {
+		if (key !== "audioCurrentTime" && key !== "videoCurrentTime") {
+			result[key] = core.stats[key];
+		}
+	}
+
+	return result;
+});
+
+// 是否有音频和视频时间
+const hasAudioVideoTimes = computed(() => {
+	if (!playerCore.value) return false;
+
+	const core = playerCore.value as unknown as {
+		stats?: Record<string, unknown>;
+	};
+	if (!core.stats) return false;
+
+	return "audioCurrentTime" in core.stats && "videoCurrentTime" in core.stats;
+});
+
+// 音频和视频时间差
+const audioVideoTimeDiff = computed(() => {
+	if (!hasAudioVideoTimes.value || !playerCore.value) return 0;
+
+	const core = playerCore.value as unknown as {
+		stats: {
+			audioCurrentTime: number;
+			videoCurrentTime: number;
+		};
+	};
+
+	return (
+		Number(core.stats.audioCurrentTime) - Number(core.stats.videoCurrentTime)
+	);
+});
+
+// ==================== 错误信息 ====================
+// 是否有加载错误
+const hasLoadError = computed(() => {
+	if (!playerCore.value) return false;
+	const core = playerCore.value as unknown as { loadError?: unknown };
+	return !!core.loadError;
+});
+
 // 格式化错误信息
-const formatError = (error: unknown): string => {
+const errorMessage = computed(() => {
+	if (!playerCore.value) return "";
+
+	const core = playerCore.value as unknown as { loadError?: unknown };
+	const error = core.loadError;
+
 	if (error instanceof Error) {
 		return `${error.name}: ${error.message}`;
 	}
-	return String(error);
-};
+	return String(error || "");
+});
 </script>
-
-<style module>
-.panel {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 680px;
-  max-height: calc(80% - 20px);
-  background-color: rgba(0, 0, 0, 0.9);
-  border-radius: 16px;
-  color: #fff;
-  z-index: 1000;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  font-size: 12px;
-  backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.panel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 15px;
-  background-color: rgba(0, 0, 0, 0.3);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.panel-header h3 {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.close {
-  display: flex;
-  gap: 8px;
-  background: none;
-  border: none;
-  color: #fff;
-  opacity: 0.7;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  transition: opacity 0.2s, background-color 0.2s;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-}
-
-.panel-body {
-  padding: 10px 15px;
-  overflow-y: auto;
-  flex: 1;
-  * {
-    user-select: text !important;
-  }
-}
-
-.section {
-  margin-bottom: 20px;
-}
-
-.section h4 {
-  font-size: 13px;
-  font-weight: 500;
-  margin: 0 0 8px 0;
-  color: #ddd;
-}
-
-.section-body {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4px;
-}
-
-.section-item {
-  display: flex;
-  justify-content: space-between;
-  /* flex-wrap: wrap; */
-  padding: 4px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  gap: 8px;
-  &:last-child {
-    border-bottom: none;
-  }
-  span {
-    white-space: pre-wrap;
-    word-break: break-all;
-    &:first-of-type {
-      min-width: 100px;
-      flex-shrink: 0;
-    }
-  }
-}
-
-.section-item span:first-child {
-  color: #aaa;
-}
-
-.url-text {
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.error {
-  padding: 8px;
-  background-color: rgba(255, 50, 50, 0.1);
-  border-left: 3px solid rgba(255, 50, 50, 0.5);
-  border-radius: 4px;
-  word-break: break-word;
-  font-family: monospace;
-  white-space: pre-wrap;
-}
-
-.subsection {
-  margin-bottom: 10px;
-  padding: 12px;
-  background-color: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-  }
-  &.active {
-    background-color: color-mix(in srgb, var(--color-primary) 15%, transparent);
-  }
-  &.active:hover {
-    background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
-  }
-}
-
-.subsection-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.stream-type {
-  font-weight: 500;
-}
-
-.stream-id {
-  color: #aaa;
-}
-
-.subsection-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.stream-count {
-  font-size: 12px;
-  color: #999;
-  font-weight: normal;
-  margin-left: 5px;
-}
-</style> 

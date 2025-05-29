@@ -1,66 +1,51 @@
 <template>
-	<div
-        :class="$style['control-header']" 
-		@mouseenter="controls.setIsMouseInControls(true)"
-		@mouseleave="controls.setIsMouseInControls(false)"
-		>
-		<div 
-			:class="[
-				$style['control-header__content'],
-				{
-					[$style['is-visible']]: controls.visible.value
-				}
-			]">
-			<div :class="$style['control-header__left']">
-				<div :class="$style['control-header__left-item']">
-				</div>
-			</div>
-			<div :class="$style['control-header__right']">
-				<div :class="$style['control-header__right-item']">
-					<StatisticsButton />
-					<PlaylistButton />
+	<transition
+		enter-active-class="transition-all duration-200 ease-out"
+		leave-active-class="transition-all duration-200 ease-out"
+		enter-from-class="opacity-0"
+		enter-to-class="opacity-100"
+		leave-from-class="opacity-100"
+		leave-to-class="opacity-0"
+	>
+		<div
+			v-if="!progressBar?.isLongPressDragging.value"
+			:class="[styles.root]" 
+			@mouseenter="controls.setIsMouseInControls(true)"
+			@mouseleave="controls.setIsMouseInControls(false)"
+			>
+			<div :class="[styles.bg]"></div>
+			<div 
+				:class="[
+					styles.content.root,
+				]"
+				>
+				<slot name="left"></slot>
+				<div :class="[styles.content.left]">
+					{{ props.title }}
 				</div>
 			</div>
 		</div>
-	</div>
+	</transition>
 </template>
 
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import PlaylistButton from "./PlaylistButton.vue";
-import StatisticsButton from "./StatisticsButton.vue";
-const { controls } = usePlayerContext();
-</script>
+const { controls, progressBar } = usePlayerContext();
 
-<style module>
-.control-header {
-	position: relative;
-}
-.control-header__content {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-    padding: 24px 24px;
-	transition: opacity 0.2s ease;
-	opacity: 0;
-	&.is-visible {
-		opacity: 1;
-	}
-}
-.control-header__right-item {
-	display: flex;
-	align-items: center;
-	gap: 16px;
-	button {
-		background-color: transparent;
-		border: none;
-		padding: 0;
-		border-radius: 50%;
-		background-color: rgba(15, 15, 15, 0.7);
-		backdrop-filter: blur(20px) saturate(180%);
-		padding: 8px;
-		cursor: pointer;
-		color: #fff;
-	}
-}
-</style>
+const styles = {
+	root: "relative",
+	content: {
+		root: "relative flex justify-between items-center p-7",
+		left: "flex-1 font-bold",
+		right: {
+			root: "flex-1",
+			item: "flex justify-end gap-2",
+		},
+	},
+	bg: "absolute inset-0 bottom-[-50px] bg-linear-to-b from-black/30 to-transparent pointer-events-none",
+};
+
+const props = defineProps<{
+	title?: string;
+}>();
+</script>

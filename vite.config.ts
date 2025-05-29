@@ -1,5 +1,6 @@
 import transformer from "@libmedia/cheap/build/transformer";
 import typescript from "@rollup/plugin-typescript";
+import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig } from "vite";
@@ -51,6 +52,7 @@ export default defineConfig({
 			},
 		}),
 		vue(),
+		tailwindcss(),
 		svgLoader(),
 		visualizer({
 			filename: "dist/stats.html",

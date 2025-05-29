@@ -1,42 +1,57 @@
 <template>
 	<button 
+		:class="[styles.btn.root]"
 		ref="buttonRef"
-		title="播放器核心"
+		data-tip="播放器核心"
 		@click="toggleVisible"
-        :disabled="true || source?.current?.value?.type === 'hls'"
+        :disabled="source?.current?.value?.type === 'hls'"
 	>
-		<span>
-			{{ playerCore?.type }}
-		</span>
-		
-		<Menu
-			v-model:visible="menuVisible"
-			:triggerRef="buttonRef"
-			placement="top"
-		>
-			<div
+		<Icon :class="[styles.btn.icon, 'transition-transform', {
+			'rotate-90': menuVisible,
+		}]" :icon="ICON_PLAYER_CORE"></Icon>
+	</button>
+	<Popup
+		v-model:visible="menuVisible"
+		:trigger="buttonRef"
+		placement="top"
+	>
+		<ul :class="[styles.menu.root]">
+			<li
 				v-for="(type) in [PlayerCoreType.Native, PlayerCoreType.AvPlayer]"
 				:key="type"
-				:class="[
-					$style['menu-item'],
-                    {
-                        [$style['active']]: playerCore?.type === type,
-                    }
-				]"
-				@click="source.switchPlayerCore(type), menuVisible = false"
 			>
-				{{ type }}
-			</div>
-		</Menu>
-
-	</button>
+				<a
+					:class="[
+						styles.menu.a,
+						{
+							[styles.menu.active]: playerCore?.type === type,
+						}
+					]"
+					@click="source.switchPlayerCore(type), menuVisible = false"
+				>
+					{{ type }}
+				</a>
+			</li>
+		</ul>
+	</Popup>
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 import { shallowRef } from "vue";
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import Menu from "../Menu/index.vue";
+import { controlStyles } from "../../styles/common";
+import { ICON_PLAYER_CORE } from "../../utils/icon";
+import Popup from "../Popup/index.vue";
+
+const styles = {
+	...controlStyles,
+	btn: {
+		...controlStyles.btn,
+		root: [controlStyles.btn.root, "btn-"],
+	},
+};
 
 const { source, playerCore } = usePlayerContext();
 const menuVisible = shallowRef(false);
@@ -46,34 +61,3 @@ const toggleVisible = () => {
 	menuVisible.value = !menuVisible.value;
 };
 </script>
-
-<style module>
-.menu-item {
-	position: relative;
-	padding: 8px 12px;
-	color: #fff;
-	cursor: pointer;
-	transition: all 0.2s;
-	font-size: 14px;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	border-radius: 6px;
-	margin: 2px 0;
-	
-	&:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
-
-	&.active {
-		color: var(--x-player-color-primary, #007aff);
-		background: rgba(0, 122, 255, 0.1);
-	}
-
-	&.disabled {
-		color: rgba(255, 255, 255, 0.5);
-		background: rgba(255, 255, 255, 0.05);
-		cursor: not-allowed;
-	}	
-}
-</style> 

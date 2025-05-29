@@ -10,8 +10,6 @@ export const useControls = (ctx: PlayerContext) => {
 	const visible = shallowRef(true);
 	// 鼠标是否在控制栏
 	const isMouseInControls = shallowRef(false);
-	// 鼠标是否在弹出层
-	const isMouseInPopup = shallowRef(false);
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
 	// 控制栏高度
@@ -25,11 +23,6 @@ export const useControls = (ctx: PlayerContext) => {
 		if (value) {
 			hideControlsTimer = null;
 		}
-	};
-
-	// 设置鼠标是否在弹出层
-	const setIsMouseInPopup = (value: boolean) => {
-		isMouseInPopup.value = value;
 	};
 
 	// 显示控制栏
@@ -62,8 +55,8 @@ export const useControls = (ctx: PlayerContext) => {
 		hideControlsTimer = window.setTimeout(() => {
 			if (
 				isMouseInControls.value ||
-				isMouseInPopup.value ||
-				ctx.progressBar?.isDragging.value
+				ctx.progressBar?.isDragging.value ||
+				ctx.popupManager?.hasOpenPopup.value
 			) {
 				return;
 			}
@@ -77,9 +70,11 @@ export const useControls = (ctx: PlayerContext) => {
 	};
 	// 鼠标离开
 	const handleRootMouseLeave = async () => {
-		if (isMouseInPopup.value) {
+		// 如果弹出层打开，则不隐藏控制栏
+		if (ctx.popupManager?.hasOpenPopup.value) {
 			return;
 		}
+		// 如果进度条正在拖动，则等待拖动结束再隐藏控制栏
 		if (ctx.progressBar?.isDragging.value) {
 			await ctx.progressBar?.waitDragEnd();
 			return hideWithDelay();
@@ -112,13 +107,6 @@ export const useControls = (ctx: PlayerContext) => {
 	return {
 		visible,
 		mainRef,
-		controlsMainHeight,
-		show,
-		hide,
-		showWithAutoHide,
-		hideWithDelay,
-		clearHideControlsTimer,
 		setIsMouseInControls,
-		setIsMouseInPopup,
 	};
 };

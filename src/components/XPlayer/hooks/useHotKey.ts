@@ -418,14 +418,6 @@ const matchKey = (event: KeyboardEvent) => {
 export function useHotKey(ctx: PlayerContext) {
 	// 按键按下
 	const handleKeydown = (event: KeyboardEvent) => {
-		// 忽略输入框的按键事件
-		if (
-			event.target instanceof HTMLInputElement ||
-			event.target instanceof HTMLTextAreaElement
-		) {
-			return;
-		}
-
 		const match = matchKey(event);
 		if (match?.key) {
 			event.preventDefault();

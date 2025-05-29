@@ -1,13 +1,13 @@
 <template>
-  <div :class="$style['loading']">
-    <div :class="$style['loading-animation']">
-      <span></span>
-      <span></span>
-      <span></span>
+  <div :class="styles.container">
+    <div :class="styles.animation.wrapper">
+      <span :class="[styles.animation.dot, styles.animation.dot1]"></span>
+      <span :class="[styles.animation.dot, styles.animation.dot2]"></span>
+      <span :class="[styles.animation.dot, styles.animation.dot3]"></span>
     </div>
 
-    <div v-if="playerCore?.type === PlayerCoreType.AvPlayer && (playerCore.stats?.bandwidth ?? 0) >0" 
-        :class="$style['loading-speed']">
+    <div v-if="playerCore?.type === PlayerCoreType.AvPlayer && (playerCore.stats?.bandwidth ?? 0) > 0" 
+         :class="styles.speed">
       {{ Math.round((playerCore.stats?.bandwidth ?? 0) / 1024 / 1024 * 100) / 100 }} Mbps/s
     </div>
   </div>
@@ -17,51 +17,28 @@
 import { PlayerCoreType } from "../../hooks/playerCore/types";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 
+// 样式抽象
+const styles = {
+	container:
+		"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2] flex flex-col items-center gap-2 drop-shadow-xl/30",
+	animation: {
+		wrapper: "inline-flex items-center justify-between gap-2.5",
+		dot: [
+			"w-2.5 h-2.5 bg-white rounded-full",
+			"animate-[bounce_1.4s_infinite_ease-in-out_both]",
+		],
+		dot1: "[animation-delay:-0.32s]",
+		dot2: "[animation-delay:-0.16s]",
+		dot3: "",
+	},
+	speed: "text-sm font-semibold text-base-content",
+};
+
 const { playerCore } = usePlayerContext();
 </script>
 
-<style module>
-.loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.loading-animation {
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  span {
-    width: 10px;
-    height: 10px;
-    background-color: #eee;
-    box-shadow: 0 0 5px 0 rgba(15, 15, 15, 0.5);
-    box-sizing: border-box;
-    border-radius: 50%;
-    display: inline-block;
-    animation: bounce 1.4s infinite ease-in-out both;
-  }
-  span:nth-child(1) {
-    animation-delay: -0.32s;
-  }
-  span:nth-child(2) {
-    animation-delay: -0.16s;
-  }
-}
-
-.loading-speed {
-  font-size: 12px;
-  text-shadow: 0 0 5px 2px rgba(15, 15, 15, 0.9);
-  font-weight: bold;
-}
-
+<style>
+/* 自定义动画关键帧 */
 @keyframes bounce {
   0%, 80%, 100% {
     transform: scale(0);

@@ -1,43 +1,47 @@
 <template>
-	<div :class="$style['volume-control']">
+	<div :class="[styles.root]">
 		<button 
-			:class="$style['volume-control-button']" 
-			title="音量"
+			:class="[styles.btn.root, 'swap swap-rotate', {
+				'swap-active': playerCore?.muted
+			}]"
+			data-tip="静音 (M)"
+			:disabled="!playerCore?.canplay"
 			@click="playerCore?.toggleMute"
 		>
-			<Icon :svg="VolumeIcon" :class="$style.icon" />
+			<Icon
+				:class="[styles.btn.icon, 'swap-off']" 
+				:icon="VolumeIcon"
+			/>
+			<Icon 
+				:class="[styles.btn.icon, 'swap-on']" 
+				:icon="VolumeIcon"
+			/>
 		</button>
-		<div :class="$style['volume-slider']">
-			<div :class="$style['volume-slider-container']">
-				<div :class="$style['volume-slider-track']"></div>
-				<div 
-					:class="$style['volume-slider-fill']"
-					:style="{ width: `${playerCore?.volume}%` }"
-				></div>
-				<div 
-					:class="$style['volume-slider-thumb']"
-					:style="{ left: `${playerCore?.volume}%` }"
-				></div>
-				<input
-					type="range"
-					:class="$style['volume-slider-input']"
-					min="0"
-					max="100"
-					:value="playerCore?.volume"
-					@input="handleVolumeChange"
-				/>
-			</div>
-		</div>
+		<input
+			type="range"
+			:class="[styles.range]"
+			min="0"
+			max="100"
+			:value="playerCore?.volume ?? 0"
+			:disabled="!playerCore?.canplay"
+			@input="handleVolumeChange"
+		/>
 	</div>
 </template>
 
 <script setup lang="ts">
+import { Icon } from "@iconify/vue";
 import { computed } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { controlStyles } from "../../styles/common";
 import { getVolumeIcon } from "../../utils/icon";
-
 const { playerCore } = usePlayerContext();
+
+const styles = {
+	root: "flex items-center gap-2 mr-2",
+	btn: controlStyles.btn,
+	range: "range range-2xs w-24 range-primary",
+};
 
 const VolumeIcon = computed(() => {
 	return getVolumeIcon(
@@ -51,90 +55,3 @@ const handleVolumeChange = (event: Event) => {
 	playerCore.value?.setVolume(value);
 };
 </script>
-
-<style module>
-.volume-control {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin-right: 8px;
-}
-
-.volume-control-button {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 32px;
-	height: 32px;
-	padding: 4px;
-	border: none;
-	background: transparent;
-	cursor: pointer;
-	color: white;
-}
-
-.volume-control-button:hover {
-	opacity: 0.8;
-}
-
-.volume-slider {
-	width: 90px;
-	height: 24px;
-	display: flex;
-	align-items: center;
-}
-
-.volume-slider-container {
-	position: relative;
-	width: 100%;
-	height: 4px;
-}
-
-.volume-slider-track {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	background-color: rgba(255, 255, 255, 0.3);
-	border-radius: 2px;
-}
-
-.volume-slider-fill {
-	position: absolute;
-	height: 100%;
-	background-color: var(--x-player-color-primary);
-	border-radius: 2px;
-}
-
-.volume-slider-thumb {
-	position: absolute;
-	width: 12px;
-	height: 12px;
-	background-color: #fff;
-	border-radius: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
-	pointer-events: none;
-	opacity: 0;
-	transition: opacity 0.2s;
-}
-
-.volume-slider:hover .volume-slider-thumb {
-	opacity: 1;
-}
-
-.volume-slider-input {
-	position: absolute;
-	top: -8px;
-	left: 0;
-	width: 100%;
-	height: 20px;
-	opacity: 0;
-	cursor: pointer;
-	margin: 0;
-	padding: 0;
-}
-
-.icon {
-	font-size: 24px;
-}
-</style> 

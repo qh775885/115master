@@ -1,29 +1,29 @@
 <template>
-	<div :class="$style['playlist']">
-		<div 
-			:class="$style['playlist__header']" 
-			@click="handleClose"
-			>
-			<div :class="$style['playlist__header-title']" @click.stop="handleTitleClick" :title="'点击滚动到当前播放项'">
-				<Icon :svg="SubscriptionSvg" size="24" />
+	<div :class="styles.playlist.container">
+		<div :class="styles.playlist.header.root">
+			<div :class="styles.playlist.header.title">
+				<Icon :icon="ICON_PLAYLIST" class="size-8" />
 				播放列表
-				<span :class="$style['playlist__header-title-count']">({{ playlist.state.length }})</span>
+				<span 
+					v-if="playlist.state.length > 0"
+					:class="styles.playlist.header.count"
+				>({{ playlist.state.length }})</span>
 			</div>
-
-			<Icon :class="$style['playlist__header-close']" :svg="CloseSvg" size="30" />
+			<button :class="styles.playlist.header.close">
+				<Icon :icon="ICON_CLOSE" :class="styles.playlist.header.closeIcon" @click="emit('close')" />
+			</button>
 		</div>
 
-		<div :class="$style['playlist__list']" v-if="playlist.error">
-			<LoadingError :detail="playlist.error"></LoadingError>
+		<div :class="styles.playlist.content" v-if="playlist.error">
+			<LoadingError :detail="playlist.error" :fold="true"></LoadingError>
 		</div>
-		<div :class="$style['playlist__list']" v-else-if="playlist.isLoading || (!playlist.isLoading && !playlist.isReady)">
-			<Skeleton width="100%" height="94.5px" border-radius="8px" />
+		<div :class="styles.playlist.content" v-else-if="playlist.isLoading || (!playlist.isLoading && !playlist.isReady)">
+			<div class="skeleton h-24 w-full rounded-lg"></div>
 		</div>
-		
 		<div 
 			v-else
 			ref="playlistRef"
-			:class="$style['playlist__list']"
+			:class="[styles.playlist.content, 'custom-scrollbar']"
 		>
 			<PlaylistItem
 				v-for="item in playlist.state"
@@ -31,19 +31,19 @@
 				:key="item.pc"
 				:item="item"
 				:active="item.pc === pickCode"
+				:visible="visible"
 				@play="handlePlay"
 			/>
+			<div :class="styles.playlist.divider">没有更多了</div>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import SubscriptionSvg from "@material-symbols/svg-400/rounded/subscriptions.svg?component";
-import CloseSvg from "@material-symbols/svg-400/rounded/unfold_less-fill.svg?component";
+import { Icon } from "@iconify/vue";
 import { nextTick, ref, shallowRef, useTemplateRef, watch } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
-import Skeleton from "../../../../components/Skeleton/index.vue";
+import { ICON_CLOSE, ICON_PLAYLIST } from "../../../../icons";
 import type { Entity } from "../../../../utils/drive115";
 import type { useDataPlaylist } from "../../data/useDataPlaylist";
 import PlaylistItem from "./item.vue";
@@ -52,12 +52,48 @@ import type PlaylistItemVue from "./item.vue";
 const props = defineProps<{
 	playlist: ReturnType<typeof useDataPlaylist>;
 	pickCode?: string;
+	visible?: boolean;
 }>();
 
 const emit = defineEmits<{
 	(e: "play", item: Entity.PlaylistItem): void;
 	(e: "close"): void;
 }>();
+
+// 样式常量定义
+const styles = {
+	playlist: {
+		container: [
+			"relative flex flex-col text-white box-border h-full",
+			"bg-base-100",
+			"border-l border-base-300/15",
+			"[--app-playlist-space:calc(var(--spacing)*4)]",
+			"[--app-playlist-header-height:calc(var(--spacing)*16)]",
+		],
+		header: {
+			root: [
+				"absolute inset-x-0 top-0 z-1",
+				"flex items-center justify-between flex-shrink-0",
+				"h-(--app-playlist-header-height)",
+				"px-(--app-playlist-space) py-4",
+				"text-base-content",
+				"bg-base-100/60",
+				"backdrop-blur-2xl backdrop-saturate-200 backdrop-brightness-50",
+			],
+			title: "flex items-center text-xl gap-2.5",
+			count: "text-xs text-base-content/50",
+			close: "btn btn-ghost btn-circle",
+			closeIcon: "size-8",
+		},
+		content: [
+			"flex flex-col gap-5 flex-1",
+			"overflow-y-auto",
+			"px-(--app-playlist-space) pb-5 pt-[calc(var(--app-playlist-header-height)+var(--spacing)*5)]",
+			"[&::-webkit-scrollbar-track]:mt-(--app-playlist-header-height)",
+		],
+		divider: "divider w-1/3 mx-auto text-base-content/30",
+	},
+};
 
 const playlistRef = ref<HTMLElement | null>(null);
 const playlistItemRefs =
@@ -80,6 +116,8 @@ const scrollToActiveItem = async (withAnimation = true) => {
 	await nextTick();
 
 	if (!playlistItemRefs.value) return;
+
+	initedScroll.value = true;
 
 	// 查找激活的项目
 	const activeItem = playlistItemRefs.value.find((ref) => ref.$props.active);
@@ -114,18 +152,6 @@ const scrollToActiveItem = async (withAnimation = true) => {
 		top: Math.max(0, scrollTop),
 		behavior: withAnimation ? "smooth" : "instant",
 	});
-
-	initedScroll.value = true;
-};
-
-// 点击标题时调用的滚动函数
-const handleTitleClick = () => {
-	scrollToActiveItem(true);
-};
-
-// 点击关闭按钮
-const handleClose = () => {
-	emit("close");
 };
 
 // 监听 pickCode 的变化，滚动到激活的项目
@@ -137,81 +163,3 @@ watch(
 	},
 );
 </script>
-
-<style module>
-.playlist {
-	--x-playlist-header-height: 68px;
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	background-color: rgba(0,0,0, 0.9);
-	color: #fff;
-    box-sizing: border-box;
-    border-radius: 16px;
-    z-index: 1;
-	overflow: hidden;
-}
-
-.playlist__header {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	z-index: 2;
-	font-size: 20px;
-	color: #eee;
-	padding: 0 28px;
-	height: var(--x-playlist-header-height);
-	box-sizing: border-box;
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	user-select: none;
-	background-color: rgba(0,0,0, 0.8);
-	cursor: pointer;
-	backdrop-filter: blur(20px) saturate(180%);
-}
-
-.playlist__header-title {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	transition: color 0.2s ease;
-}
-
-.playlist__header-title-count {
-	font-size: 12px;
-	color: #aaa;
-}
-
-.playlist__header-close {
-	transition: color 0.2s ease;
-	fill: #f1f1f1;
-}
-
-.playlist__list {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	padding: calc(var(--x-playlist-header-height) + 12px) 16px 20px;
-	overflow-y: auto;
-}
-
-/* 自定义滚动条样式 */
-.playlist__list::-webkit-scrollbar {
-	width: 6px;
-}
-
-.playlist__list::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-.playlist__list::-webkit-scrollbar-thumb {
-	background-color: rgba(255, 255, 255, 0.2);
-	border-radius: 3px;
-}
-
-.playlist__list::-webkit-scrollbar-thumb:hover {
-	background-color: rgba(255, 255, 255, 0.3);
-}
-</style>

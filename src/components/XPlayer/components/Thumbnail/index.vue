@@ -1,63 +1,82 @@
 <template>
-	<div
-		:class="$style['box']"
+	<div 
 		v-show="boxVisible"
+		:class="styles.root"
 		:style="{
-			transform: `translateX(${previewTransform}px)`
+			transform: `translateX(${previewTransform}px) translateY(-100%)`,
 		}"
 	>
-		<div :class="$style['container']">
-			<div 
-				:class="$style['image']" 
-				:style="{
-					width: `${thumbnailContainerSize.width}px`,
-					height: `${thumbnailContainerSize.height}px`
-				}"
-				@mouseenter="isHoveringImage = true"
-				@mouseleave="isHoveringImage = false"
-				@mouseup="handleThumbnailMouseUp"
+		<div
+			:class="[
+				styles.image.root,
+				{
+					[styles.image.pressing]: progressBar.isDragging.value,
+				}
+			]"
+			:style="{
+				width: `${thumbnailContainerSize.width}px`,
+				height: `${thumbnailContainerSize.height}px`
+			}"
+			@mouseenter="isHoveringImage = true"
+			@mouseleave="isHoveringImage = false"
+			@mouseup="handleThumbnailMouseUp"
+		>
+			<canvas
+				ref="thumbnailCanvas"
+				:width="DEFAULT_WIDTH"
+				:height="DEFAULT_HEIGHT"
+			></canvas>
+			
+			<transition
+				enter-active-class="transition-opacity duration-150 ease-out delay-60"
+				leave-active-class="transition-opacity duration-150 ease-out delay-60"
+				enter-from-class="opacity-0"
+				leave-to-class="opacity-0"
 			>
-				<canvas
-					ref="thumbnailCanvas"
-					:width="DEFAULT_WIDTH"
-					:height="DEFAULT_HEIGHT"
-				></canvas>
-				<div :class="$style['loading']" v-show="loading">
-					<Loading/>
-				</div>
-			</div>
-			<div :class="$style['time-box']">
-				<div 
-					:class="[$style['time-image'], isHoveringImage && thumb.renderImage?.frameTime ? $style['show'] : '']"
-				>
-					跳至 {{ formatTime(thumb.renderImage?.frameTime || 0) }} 预览时间
-				</div>
-				<div 
-					:class="[$style['time-normal'], isHoveringImage ? '' : $style['show']]"
-				>
-					{{ formatTime(props.time) }}
-				</div>
-			</div>
+				<div v-if="loading" :class="styles.image.loading"></div>
+			</transition>
+		</div>
+		<div :class="styles.timeBox.container">
+			<span 
+				v-if="isHoveringImage && thumb.renderImage?.frameTime"
+			>
+				跳至 {{ formatTime(thumb.renderImage?.frameTime || 0) }} 预览时间
+			</span>
+			<span
+				v-else
+			>
+				{{ formatTime(props.time) }}
+			</span>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import {
-	computed,
-	nextTick,
-	onUnmounted,
-	reactive,
-	ref,
-	shallowRef,
-	watch,
-} from "vue";
+import { computed, onUnmounted, reactive, ref, shallowRef, watch } from "vue";
 import { getImageResize } from "../../../../utils/image";
 import { boundary } from "../../../../utils/number";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 import type { ThumbnailFrame } from "../../types";
 import { formatTime } from "../../utils/time";
-import Loading from "./Loading.vue";
+
+const styles = {
+	root: ["absolute top-0", "[will-change:transform]"],
+	image: {
+		root: [
+			"relative flex items-center justify-center rounded-xl overflow-hidden mb-2",
+			"bg-black shadow-xs/30",
+			"cursor-pointer transition-all duration-550 ease-out",
+			"hover:scale-[1.02]",
+		],
+		pressing: "ring-4 ring-base-content/90",
+		loading:
+			"absolute loading loading-spinner size-12 m-auto rounded-full text-base-content/80",
+	},
+	timeBox: {
+		container:
+			"text-sm py-0.5 text-neutral-300 subpixel-antialiased text-center select-none text-shadow-[0_0_1px_rgb(0_0_0_/0.5),0_0_2px_rgb(55_55_55_/0.7)]",
+	},
+};
 
 interface Props {
 	// 是否显示
@@ -75,7 +94,7 @@ const emit = defineEmits<(e: "seek", time: number) => void>();
 // props
 const props = withDefaults(defineProps<Props>(), {});
 // context
-const { rootProps, source } = usePlayerContext();
+const { rootProps, source, progressBar } = usePlayerContext();
 
 /**
  * 计算缩略图高度
@@ -123,13 +142,7 @@ const thumb = reactive({
 // 是否显示
 const boxVisible = computed(() => props.visible && previewTransform.value > -1);
 // canvas 上下文
-const ctx = computed(() =>
-	thumbnailCanvas.value?.getContext("2d", {
-		alpha: false,
-		colorSpace: "srgb",
-		desynchronized: true,
-	}),
-);
+const ctx = computed(() => thumbnailCanvas.value?.getContext("2d"));
 // 是否正在加载
 const loading = computed(
 	() =>
@@ -294,92 +307,3 @@ onUnmounted(() => {
 });
 </script>
 
-<style module>
-.box {
-	position: absolute;
-	bottom: 100%;
-	pointer-events: auto;
-	will-change: transform;
-	padding-bottom: 0;
-}
-
-.container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}	
-
-.image {
-	position: relative;
-	z-index: 1;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 16px;
-	overflow: hidden;
-	box-sizing: border-box;
-	background: rgba(0,0,0, 1);
-	box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.4);
-	pointer-events: auto;
-	cursor: pointer;
-	transition: transform 0.2s ease, box-shadow 0.2s ease;
-	margin-bottom: 10px;
-	
-	&:hover {
-		transform: scale(1.02);
-		box-shadow: 0 0 4px 0 rgba(15, 15, 15, 0.8), 0 0 0 2px rgba(255, 255, 255, 0.9);
-	}
-	
-	&:active {
-		transform: scale(0.98);
-	}
-}
-
-.time-box {
-	position: relative;
-	height: 20px;
-	width: 100%;
-	overflow: hidden;
-	
-	.time-normal, 
-	.time-image {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		width: 100%;
-		text-align: center;
-		color: #fff;
-		text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
-		transition: all .25s ease;
-		font-size: 12px;
-		opacity: 0;
-		line-height: 1.2;
-		display: block;
-	}
-
-	.time-normal {
-		transform: translate(-50%, 150%);
-	}
-
-	.time-image {
-		transform: translate(-50%, -150%);
-		font-weight: bold;
-	}
-
-	.time-normal.show, 
-	.time-image.show {
-		opacity: 1;
-		transform: translate(-50%, -50%);
-	}
-}
-
-.loading {
-	position: absolute;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background: rgba(0, 0, 0, 0.5);
-	border-radius: 16px;
-}
-</style>

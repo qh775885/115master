@@ -1,86 +1,101 @@
 <template>
 	<div
 		ref="rootRef"
-		:class="[$style['x-player'], { 
-			[$style['is-fullscreen']]: fullscreen.isFullscreen.value,
-			[$style['show-controls']]: controls.visible.value
-		 }]"
+		:class="[
+			styles.root, 
+			{ [styles.fullscreen]: fullscreen.isFullscreen },
+		]"
 	>
 		<!-- SVG滤镜定义，使用v-html渲染 -->
 		<div v-html="videoEnhance.renderFilter.value"></div>
 		
-		<!-- 播放器容器 -->
-		<div :class="$style['x-player-container']">
-			<!-- 视频容器 -->
-			<div
-				:class="$style['x-player-video-container']"
-			>
-				<div 
-					ref="playerElementRef"
-					:class="$style['x-player-video-player']"
-					:style="[
-						transform.transformStyle.value,
-						videoEnhance.getFilterStyle.value
-					]"
-				>
-				</div>
-
-				<!-- 播放/暂停动画 -->
-				<PlayAnimation />
-
-				<!-- 错误提示 -->
-				<LoadingError 
-					v-if="playerCore?.loadError" 
-					:class="$style['x-player-error']" 
-					:detail="playerCore?.loadError"
-				/>
-
-				<!-- 加载动画 -->
-				<Loading v-else-if="playerCore?.isLoading" />
-
-				<!-- 字幕 -->
-				<Subtitle />
-
-				<!-- 视频控制栏 -->
-				<VideoControls />
-			</div>
+		<!-- 视频容器 -->
+		<div 
+			ref="playerElementRef"
+			:class="styles.videoPlayer"
+			:style="[
+				transform.transformStyle.value,
+				videoEnhance.getFilterStyle.value
+			]"
+		>
 		</div>
 
-		<!-- 弹出层容器 -->
-		<div
-			:class="$style['x-player-portal-container']"
-			:ref="portalContext.container"
-		></div>
+		<!-- 播放/暂停动画 -->
+		<PlayAnimation />
+
+		<!-- 字幕 -->
+		<Subtitle />
+
+		<!-- 错误提示 -->
+		<LoadingError 
+				v-if="playerCore?.loadError" 
+				:class="styles.error" 
+				:detail="playerCore?.loadError"
+			/>
+
+		<!-- 加载动画 -->
+		<Loading v-else-if="playerCore?.isLoading" />
+
+		<!-- 视频控制栏 -->
+		<Controls>
+			<ControlsHeader>
+				<template #left>
+					<slot name="header-left"></slot>
+				</template>
+			</ControlsHeader>
+			<ControlsMask>
+				<ControlsRight>
+					<slot name="controls-right"></slot>
+				</ControlsRight>
+			</ControlsMask>
+			<ControlsBar />
+		</Controls>
 
 		<!-- 状态HUD显示 -->
 		<HUD />
 
 		<!-- 调试面板 -->
-		<Statistics v-if="statistics?.visible.value" />
+		<Statistics />
 
 		<!-- 恢复容器 -->
 		<div
-			:class="$style['x-player-resume-container']"
+			:class="styles.resumeContainer"
 			v-if="source.isInterrupt.value"
 		>
-			<button @click="source.resumeSource">恢复</button>
+			<button :class="styles.resumeButton" @click="source.resumeSource">恢复</button>
 		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-import { shallowRef } from "vue";
-import VideoControls from "./components/Controls/index.vue";
+import { shallowRef, watch, watchEffect } from "vue";
+import LoadingError from "../../components/LoadingError/index.vue";
+import ControlsBar from "./components/Controls/ControlBar.vue";
+import ControlsHeader from "./components/Controls/ControlHeader.vue";
+import ControlsMask from "./components/Controls/ControlMask.vue";
+import ControlsRight from "./components/Controls/ControlsRight.vue";
+import Controls from "./components/Controls/index.vue";
 import HUD from "./components/HUD/index.vue";
 import Loading from "./components/Loading/index.vue";
 import PlayAnimation from "./components/PlayAnimation/index.vue";
+import Statistics from "./components/Statistics/index.vue";
 import Subtitle from "./components/Subtitle/index.vue";
 import { usePlayerProvide } from "./hooks/usePlayerProvide";
 import { usePortalProvider } from "./hooks/usePortal";
 import type { XPlayerEmit, XPlayerProps } from "./types";
-import "./styles/theme.css";
-import LoadingError from "../../components/LoadingError/index.vue";
-import Statistics from "./components/Statistics/index.vue";
+
+const styles = {
+	root: "relative bg-black",
+	fullscreen: "w-100vw h-100vh",
+	container: "relative w-full h-full overflow-hidden",
+	videoPlayer: "flex items-center justify-center w-full h-full",
+	error:
+		"absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2",
+	resumeContainer:
+		"absolute top-0 left-0 w-full h-full flex justify-center items-center",
+	resumeButton:
+		"bg-black text-white rounded-3xl px-8 py-2 text-sm cursor-pointer",
+};
 
 // 属性
 const props = withDefaults(defineProps<XPlayerProps>(), {
@@ -97,22 +112,34 @@ const rootRef = shallowRef<HTMLElement | null>(null);
 const playerElementRef = shallowRef<HTMLDivElement | null>(null);
 // 弹出层上下文
 const portalContext = usePortalProvider();
+
+// 使用 rootRef 作为弹出层容器
+watchEffect(() => {
+	portalContext.container.value = rootRef.value ?? undefined;
+});
+
 // 视频播放器上下文
-const {
-	fullscreen,
-	source,
-	transform,
-	videoEnhance,
-	playerCore,
-	statistics,
-	controls,
-} = usePlayerProvide(
+const context = usePlayerProvide(
 	{
 		rootRef,
 		playerElementRef,
 	},
 	props,
 	emit,
+);
+
+const { fullscreen, source, transform, videoEnhance, playerCore, controls } =
+	context;
+
+// 监听控制栏可见性，直接设置光标样式
+watch(
+	() => controls.visible.value,
+	(visible) => {
+		if (rootRef.value) {
+			rootRef.value.style.cursor = visible ? "auto" : "none";
+		}
+	},
+	{ immediate: true },
 );
 
 // 暴露方法
@@ -122,88 +149,3 @@ defineExpose({
 	seekTo: playerCore.value?.seek,
 });
 </script>
-
-<style module>
-.x-player {
-	width: 100%;
-	height: 100%;
-	position: relative;
-	background-color: var(--x-player-background-color);
-	-webkit-font-smoothing: antialiased;
-	cursor: none;
-	* {
-		user-select: none;
-	}
-	&.is-fullscreen {
-		width: 100vw;
-		height: 100vh;
-	}
-	&.show-controls {
-		cursor: default;
-	}
-}
-
-.x-player-container {
-	position: relative;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-}
-
-.x-player-video-container {
-	position: relative;
-	z-index: 1;
-	width: 100%;
-	height: 100%;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	.x-player-video-player {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 100%;
-		height: 100%;
-	}
-	.x-player-error {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		z-index: 3;
-	}
-}
-
-.x-player-portal-container {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
-	z-index: 9999;
-	> * {
-		pointer-events: auto;
-	}
-}
-
-.x-player-resume-container {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 9999;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	button {
-		background-color: var(--x-player-background-color);
-		color: var(--x-player-text-color);
-		border-radius: 32px;
-		padding: 8px 16px;
-		font-size: 14px;
-		cursor: pointer;
-	}
-}
-</style>

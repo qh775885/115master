@@ -1,25 +1,39 @@
 <template>
-	<button 
+	<button
+		:class="[
+			styles.btn.root,
+			'swap swap-rotate',
+			{
+				'swap-active': playerCore?.paused
+			}
+		]"
+		:disabled="!playerCore?.canplay"
+		data-tip="播放/暂停 (Space)"
 		@click="playerCore?.togglePlay"
-		:title="playerCore?.paused ? '播放(Space)' : '暂停(Space)'"
 	>
-		<Icon :svg="icon" />
+		<Icon :icon="ICON_PASUE" :class="[
+			styles.btn.icon,
+			'swap-off'
+		]" />
+		<Icon :icon="ICON_PLAY" :class="[
+			styles.btn.icon,
+			'swap-on'
+		]" />
 	</button>
 </template>
 
 <script setup lang="ts">
-import Pause from "@material-symbols/svg-400/rounded/pause.svg?component";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow.svg?component";
-import { computed } from "vue";
-import Icon from "../../../../components/Icon/index.vue";
+import { Icon } from "@iconify/vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+import { controlStyles } from "../../styles/common";
+import { ICON_PASUE, ICON_PLAY } from "../../utils/icon";
+
+const styles = {
+	btn: {
+		...controlStyles.btn,
+		root: [controlStyles.btn.root, "before:ml-8"],
+	},
+};
 
 const { playerCore } = usePlayerContext();
-
-const icon = computed(() => {
-	return playerCore.value?.paused ? PlayArrow : Pause;
-});
 </script>
-
-<style scoped>
-</style>

@@ -1,15 +1,18 @@
-import FastForwardSvg from "@material-symbols/svg-400/rounded/fast_forward.svg";
-import FastRewindSvg from "@material-symbols/svg-400/rounded/fast_rewind.svg";
-import FlipSvg from "@material-symbols/svg-400/rounded/flip.svg";
-import LocationOnSvg from "@material-symbols/svg-400/rounded/location_on.svg";
-import RocketLaunchSvg from "@material-symbols/svg-400/rounded/rocket_launch.svg";
-import RotateSvg from "@material-symbols/svg-400/rounded/rotate_right.svg";
-import SubtitlesSvg from "@material-symbols/svg-400/rounded/subtitles.svg";
-import SubtitlesOffSvg from "@material-symbols/svg-400/rounded/subtitles_off.svg";
-import TimerSvg from "@material-symbols/svg-400/rounded/timer.svg";
 import { computed, onUnmounted, shallowRef, watch } from "vue";
 import type { HudMessage } from "../components/HUD/index";
-import { getVolumeIcon } from "../utils/icon";
+import {
+	ICON_FAST_FORWARD,
+	ICON_FAST_REWIND,
+	ICON_FLIP_X,
+	ICON_FLIP_Y,
+	ICON_LOCATION_ON,
+	ICON_ROCKET_LAUNCH,
+	ICON_ROTATE,
+	ICON_SUBTITLES,
+	ICON_SUBTITLES_OFF,
+	ICON_TIMER,
+	getVolumeIcon,
+} from "../utils/icon";
 import { formatTime } from "../utils/time";
 import type { PlayerContext } from "./usePlayerProvide";
 
@@ -93,12 +96,12 @@ export const useHud = (ctx: PlayerContext) => {
 		// 显示HUD
 		show({
 			title: digit === 0 ? "跳转到开头" : `跳转到 ${digit}0%`,
-			data: {
-				icon: LocationOnSvg,
-				value: timeString,
+			icon: ICON_LOCATION_ON,
+			value: timeString,
+			progress: {
 				max: 100,
 				min: 0,
-				progress: percentage * 100,
+				value: percentage * 100,
 			},
 		});
 	};
@@ -109,12 +112,13 @@ export const useHud = (ctx: PlayerContext) => {
 		const icon = getVolumeIcon(
 			ctx.playerCore.value?.volume ?? 0,
 			ctx.playerCore.value?.muted ?? false,
-		) as unknown as string;
+		);
 
 		show({
 			title: "音量",
-			data: {
-				icon,
+			icon,
+			value: `${value}`,
+			progress: {
 				value,
 				max: 100,
 				min: 0,
@@ -128,13 +132,11 @@ export const useHud = (ctx: PlayerContext) => {
 		const icon = getVolumeIcon(
 			ctx.playerCore.value?.volume ?? 0,
 			muted ?? false,
-		) as unknown as string;
+		);
 		const value = muted ? "静音" : "取消静音";
 		show({
-			data: {
-				icon,
-				value,
-			},
+			icon,
+			value,
 		});
 	};
 
@@ -144,10 +146,8 @@ export const useHud = (ctx: PlayerContext) => {
 		if (!playbackRate) return;
 		show({
 			title: "播放速度",
-			data: {
-				icon: TimerSvg,
-				value: playbackRate,
-			},
+			icon: ICON_TIMER,
+			value: playbackRate,
 		});
 	};
 
@@ -156,13 +156,11 @@ export const useHud = (ctx: PlayerContext) => {
 		const { current } = ctx.subtitles;
 		watch(current, (newSubtitle) => {
 			const value = newSubtitle ? newSubtitle.label : "关闭";
-			const icon = newSubtitle ? SubtitlesSvg : SubtitlesOffSvg;
+			const icon = newSubtitle ? ICON_SUBTITLES : ICON_SUBTITLES_OFF;
 			show({
 				title: "字幕",
-				data: {
-					icon,
-					value,
-				},
+				icon,
+				value,
 			});
 		});
 	}
@@ -176,10 +174,8 @@ export const useHud = (ctx: PlayerContext) => {
 			if (oldRotate === undefined) return;
 			show({
 				title: "旋转",
-				data: {
-					icon: RotateSvg,
-					value: `${newRotate}°`,
-				},
+				icon: ICON_ROTATE,
+				value: `${newRotate}°`,
 			});
 		});
 
@@ -187,10 +183,9 @@ export const useHud = (ctx: PlayerContext) => {
 		watch(flipX, (newFlipX: boolean) => {
 			show({
 				title: "水平翻转",
-				data: {
-					icon: FlipSvg,
-					value: newFlipX ? "开启" : "关闭",
-				},
+				icon: ICON_FLIP_X,
+				value: newFlipX ? "开启" : "关闭",
+				iconClass: newFlipX ? "text-base-content" : "text-base-content/50",
 			});
 		});
 
@@ -198,10 +193,9 @@ export const useHud = (ctx: PlayerContext) => {
 		watch(flipY, (newFlipY: boolean) => {
 			show({
 				title: "垂直翻转",
-				data: {
-					icon: FlipSvg,
-					value: newFlipY ? "开启" : "关闭",
-				},
+				icon: ICON_FLIP_Y,
+				value: newFlipY ? "开启" : "关闭",
+				iconClass: newFlipY ? "text-base-content" : "text-base-content/50",
 			});
 		});
 	}
@@ -215,13 +209,12 @@ export const useHud = (ctx: PlayerContext) => {
 		// 创建消息并添加进度信息
 		show({
 			title,
-			data: {
-				icon: dir === 1 ? FastForwardSvg : FastRewindSvg,
+			value: formatTime(ctx.playerCore.value?.currentTime || 0),
+			icon: dir === 1 ? ICON_FAST_FORWARD : ICON_FAST_REWIND,
+			progress: {
 				max: 100,
 				min: 0,
-				// 直接把当前进度作为消息的属性
-				progress: currentProgress,
-				value: formatTime(ctx.playerCore.value?.currentTime || 0),
+				value: currentProgress,
 			},
 			duration: DurationOptions.Fast,
 		});
@@ -233,12 +226,12 @@ export const useHud = (ctx: PlayerContext) => {
 		const currentProgress = getCurrentProgressPercentage();
 		show({
 			title: "快速播放",
-			data: {
-				icon: RocketLaunchSvg,
-				value: `${formatTime(ctx.playerCore.value?.currentTime || 0)}`,
+			icon: ICON_ROCKET_LAUNCH,
+			value: `${formatTime(ctx.playerCore.value?.currentTime || 0)}`,
+			progress: {
 				max: 100,
 				min: 0,
-				progress: currentProgress,
+				value: currentProgress,
 			},
 		});
 	};

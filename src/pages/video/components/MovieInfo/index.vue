@@ -1,126 +1,137 @@
 <template>
-
-	
-	<div class="movie-info">
-		<div class="movie-info-main">
-			<div class="movie-info-source-switch">
-				<div 
-					class="movie-info-source-switch-item" 
-					:class="{ active: activeSource === 'javDBState' }"
+	<div :class="styles.container.main">
+		<div :class="styles.container.content">
+			<!-- 源切换 Tab -->
+			<div :class="styles.tabs.container">
+				<a 
+					:class="[
+						styles.tabs.item,
+						activeSource === 'javDBState' ? styles.tabs.active : ''
+					]"
 					@click="activeSource = 'javDBState'"
 				>
-					<span class="movie-info-source-switch-item-text">JavDB</span>
-				</div>
-				<div 
-					class="movie-info-source-switch-item" 
-					:class="{ active: activeSource === 'javBusState' }"
+					JavDB
+				</a>
+				<a 
+					:class="[
+						styles.tabs.item,
+						activeSource === 'javBusState' ? styles.tabs.active : ''
+					]"
 					@click="activeSource = 'javBusState'"
 				>
-					<span class="movie-info-source-switch-item-text">JavBus</span>
-				</div>
+					JavBus
+				</a>
 			</div>
 
 			<template v-if="movieInfo.error.value">
 				<LoadingError 
-					style="margin: 80px auto 40px"
+					:class="styles.states.error"
 					message="获取影片信息失败，可能由于网络异常或者您没有科学上网"
 					:detail="movieInfo.error.value.toString()"
 				/>
 			</template>
 
+			<!-- 加载中 -->
 			<template v-else-if="movieInfo.isLoading.value">
-				<div class="movie-info-header">
-					<div class="movie-info-header-title">
-						<Skeleton width="80%" height="56px" />
+				<div :class="styles.header.container">
+					<div :class="styles.header.title">
+						<div :class="styles.skeleton.title"></div>
 					</div>
 				</div>
-				<div class="movie-info-header-actors">
-					<div class="movie-info-header-actors-item" v-for="i in 1" :key="i">
-						<div class="movie-info-header-actors-item-content">
-							<div class="movie-info-header-actors-item-avatar">
-								<Skeleton circle width="60px" height="60px" />
-							</div>
-							<Skeleton width="100px" height="22.5px" />
+				<div :class="styles.actors.container">
+					<div :class="styles.actors.item" v-for="i in 1" :key="i">
+						<div :class="styles.actors.content">
+							<div :class="styles.skeleton.avatar"></div>
+							<div :class="styles.skeleton.name"></div>
 						</div>
 					</div>
 				</div>
-				<div class="movie-info-content" style="margin-top: 24px">
-					<div class="movie-info-content-item" v-for="i in 7" :key="i">
-						<Skeleton :width="`${80 + Math.random() * 80}px`" height="20px" />
+				<div :class="styles.content.container">
+					<div :class="styles.content.item" v-for="i in 7" :key="i">
+						<div :class="styles.skeleton.contentLine"></div>
 					</div>
 				</div>
 			</template>
 
 			<template v-else-if="!movieInfo.state.value">
 				<Empty 
-					style="margin: 80px auto 40px"
+					:class="styles.states.empty"
 					description="暂无影片信息，可能番号无法识别" 
-					:image-size="200"
+					size="2xl"
 				/>
 			</template>
 			
 			<template v-else>
 				<!-- header -->
-				<div class="movie-info-header" :key="activeSource">
+				<div :class="styles.header.container" :key="activeSource">
 					<!-- 标题 -->
-					<div class="movie-info-header-title">
-						<span class="movie-info-header-title-text">
+					<div :class="styles.header.title">
+						<span :class="styles.header.titleText">
 							{{ movieInfo.state.value?.title }}
 						</span>
 					</div>
-					<!-- 演员列表 -->
-					<div class="movie-info-header-actors">
-						<div class="movie-info-header-actors-item" v-for="actor in movieInfo.state.value?.actors" :key="actor.name">
-							<a 
-								class="movie-info-header-actors-item-content"
-								:href="actor.url" 
-								target="_blank"
-								v-if="actor.url"
-							>
-								<div class="movie-info-header-actors-item-avatar">
-									<img :src="actor.face || DEFAULT_AVATAR" :alt="actor.name">
-									<span 
-										v-if="actor.sex !== undefined"
-										class="movie-info-header-actors-item-sex" 
-										:class="{ female: actor.sex === 1, male: actor.sex === 0 }"
-									>
-										{{ actor.sex === 1 ? '♀' : '♂' }}
-									</span>
+				</div>
+
+				<!-- 演员列表 -->
+				<div :class="styles.actors.container">
+					<div :class="styles.actors.item" v-for="actor in movieInfo.state.value?.actors" :key="actor.name">
+						<a 
+							:class="styles.actors.content"
+							:href="actor.url" 
+							target="_blank"
+							v-if="actor.url"
+						>
+							<div :class="styles.actors.avatarWrapper">
+								<div :class="styles.actors.avatarContainer">
+									<img :src="actor.face || DEFAULT_AVATAR" :alt="actor.name" :class="styles.actors.avatarImage">
 								</div>
-								<span class="movie-info-header-actors-item-name">
-									{{ actor.name }}
-								</span>
-							</a>
-							<div 
-								class="movie-info-header-actors-item-content"
-								v-else
-							>
-								<div class="movie-info-header-actors-item-avatar">
-									<img :src="actor.face || DEFAULT_AVATAR" :alt="actor.name">
-									<span 
-										v-if="actor.sex !== undefined"
-										class="movie-info-header-actors-item-sex" 
-										:class="{ female: actor.sex === 1, male: actor.sex === 0 }"
-									>
-										{{ actor.sex === 1 ? '♀' : '♂' }}
-									</span>
-								</div>
-								<span class="movie-info-header-actors-item-name">
-									{{ actor.name }}
+								<span 
+									v-if="actor.sex !== undefined"
+									:class="[
+										styles.actors.sexBadge.base,
+										actor.sex === 1 ? styles.actors.sexBadge.female : styles.actors.sexBadge.male
+									]"
+								>
+									{{ actor.sex === 1 ? '♀' : '♂' }}
 								</span>
 							</div>
+							<span :class="styles.actors.name">
+								{{ actor.name }}
+							</span>
+						</a>
+						<div 
+							:class="styles.actors.content"
+							v-else
+						>
+							<div :class="styles.actors.avatarWrapper">
+								<div :class="styles.actors.avatarContainer">
+									<img :src="actor.face || DEFAULT_AVATAR" :alt="actor.name" :class="styles.actors.avatarImage">
+								</div>
+								<span 
+									v-if="actor.sex !== undefined"
+									:class="[
+										styles.actors.sexBadge.base,
+										actor.sex === 1 ? styles.actors.sexBadge.female : styles.actors.sexBadge.male
+									]"
+								>
+									{{ actor.sex === 1 ? '♀' : '♂' }}
+								</span>
+							</div>
+							<span :class="styles.actors.name">
+								{{ actor.name }}
+							</span>
 						</div>
 					</div>
 				</div>
 
 				<!-- content -->	
-				<div class="movie-info-content">
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							番号：
+				<div :class="styles.content.container">
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							番号
 						</span>
-						<span class="movie-info-content-item-value">
-							<a :href="movieInfo.state.value?.detailUrl" target="_blank">
+						<span :class="styles.content.value">
+							<a :href="movieInfo.state.value?.detailUrl" target="_blank" :class="styles.content.link">
 								{{ movieInfo.state.value?.avNumber ?? '-' }}
 							</a>
 							<CopyButton 
@@ -130,84 +141,83 @@
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							日期：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							日期
 						</span>
-						<span class="movie-info-content-item-value">
+						<span :class="styles.content.value">
 							{{ formatDate(movieInfo.state.value?.date) ?? '-' }}
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							时长：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							时长
 						</span>
-						<span class="movie-info-content-item-value">
+						<span :class="styles.content.value">
 							{{ formatDuration(movieInfo.state.value?.duration) ?? '-' }}
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							导演：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							导演
 						</span>
-						<span class="movie-info-content-item-value" v-if="!movieInfo.state.value?.director">-</span>
-						<span class="movie-info-content-item-value" v-else>
-							<a v-for="director in movieInfo.state.value?.director" :key="director.name" :href="director.url" target="_blank">
+						<span :class="styles.content.value" v-if="!movieInfo.state.value?.director">-</span>
+						<span :class="styles.content.value" v-else>
+							<a v-for="director in movieInfo.state.value?.director" :key="director.name" :href="director.url" target="_blank" :class="styles.content.link">
 								{{ director.name }}
 							</a>
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							片商：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							片商
 						</span>
-						<span class="movie-info-content-item-value" v-if="!movieInfo.state.value?.studio">-</span>
-						<span class="movie-info-content-item-value" v-else>
-							<a v-for="studio in movieInfo.state.value?.studio" :key="studio.name" :href="studio.url" target="_blank">
+						<span :class="styles.content.value" v-if="!movieInfo.state.value?.studio">-</span>
+						<span :class="styles.content.value" v-else>
+							<a v-for="studio in movieInfo.state.value?.studio" :key="studio.name" :href="studio.url" target="_blank" :class="styles.content.link">
 								{{ studio.name }}
 							</a>
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							系列：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							系列
 						</span>
-						<span class="movie-info-content-item-value" v-if="!movieInfo.state.value?.series">-</span>
-						<span class="movie-info-content-item-value" v-else>
-							<a v-for="serie in movieInfo.state.value?.series" :key="serie.name" :href="serie.url" target="_blank">
+						<span :class="styles.content.value" v-if="!movieInfo.state.value?.series">-</span>
+						<span :class="styles.content.value" v-else>
+							<a v-for="serie in movieInfo.state.value?.series" :key="serie.name" :href="serie.url" target="_blank" :class="styles.content.badge">
 								{{ serie.name }}
 							</a>
 						</span>
 					</div>
 
-					<div class="movie-info-content-item">
-						<span class="movie-info-content-item-label">
-							类别：
+					<div :class="styles.content.item">
+						<span :class="styles.content.label">
+							类别
 						</span>
-						<span class="movie-info-content-item-value" v-if="!movieInfo.state.value?.category">-</span>
-						<span class="movie-info-content-item-value" v-else>
-							<a v-for="category in movieInfo.state.value?.category" :key="category.name" :href="category.url" target="_blank">
+						<span :class="styles.content.value" v-if="!movieInfo.state.value?.category">-</span>
+						<span :class="styles.content.value" v-else>
+							<a v-for="category in movieInfo.state.value?.category" :key="category.name" :href="category.url" target="_blank" :class="styles.content.badge">
 								{{ category.name }}
 							</a>
 						</span>
 					</div>
 				</div>
 
-
 				<!-- 缩略图 -->
-				<div class="movie-info-thumb" ref="movieInfoThumb">
+				<div :class="styles.thumbnails.container" ref="movieInfoThumb">
 					<a 
-						class="movie-info-thumb-item" 
+						:class="styles.thumbnails.item" 
 						v-for="(item) in movieInfo.state.value?.preview" 
 						:key="item.thumbnail"
 						:href="item.raw"
 						target="_blank"
 					>
-						<img :src="item.raw" alt="thumb" loading="lazy" />
+						<img :src="item.raw" alt="thumb" loading="lazy" :class="styles.thumbnails.image" />
 					</a>
 				</div>
 			</template>
@@ -219,7 +229,6 @@
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { computed, nextTick, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
-import Skeleton from "../../../../components/Skeleton/index.vue";
 import Empty from "../../../../components/empty/Empty.vue";
 import { formatDate, formatDuration } from "../../../../utils/format";
 import "photoswipe/style.css";
@@ -229,6 +238,69 @@ import CopyButton from "./components/CopyButton.vue";
 const props = defineProps<{
 	movieInfos: ReturnType<typeof useDataMovieInfo>;
 }>();
+
+const styles = {
+	// 容器样式
+	container: {
+		main: "relative flex flex-col",
+		content: "flex flex-col gap-8",
+	},
+	// Tab 样式
+	tabs: {
+		container: "tabs tabs-border absolute top-0 right-0",
+		item: "tab",
+		active: "tab-active",
+	},
+	// Skeleton
+	skeleton: {
+		title: "skeleton h-14 w-4/5",
+		avatar: "skeleton w-15 h-15 rounded-full shrink-0",
+		name: "skeleton h-4 w-20",
+		contentLine: "skeleton h-4 w-xs",
+	},
+	// 状态样式
+	states: {
+		error: "my-20 mx-auto",
+		empty: "my-20 mx-auto",
+	},
+	// 头部样式
+	header: {
+		container: "mb-6",
+		title: "text-xl font-bold break-words break-all text-base-content pr-36",
+		titleText: "",
+	},
+	// 演员
+	actors: {
+		container: "flex flex-wrap gap-2",
+		item: "relative w-fit",
+		content: "flex items-center gap-3 no-underline w-full",
+		avatarWrapper: "avatar relative",
+		avatarContainer: "w-18 rounded-full",
+		avatarImage: "rounded-full",
+		name: "text-base text-base-content pr-2",
+		sexBadge: {
+			base: "absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs rotate-45",
+			female: "bg-pink-400/80",
+			male: "bg-primary/80",
+		},
+	},
+	// 内容样式
+	content: {
+		container: "flex flex-col gap-3",
+		item: "flex gap-2 text-sm",
+		label: "text-base-content/50 min-w-10",
+		value: "flex flex-wrap gap-2 items-center",
+		link: "link",
+		badge: "badge badge-neutral rounded-full",
+	},
+	// 缩略图样式
+	thumbnails: {
+		container:
+			"grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9 gap-3",
+		item: "aspect-square overflow-hidden hover:opacity-80",
+		image: "size-full object-cover",
+	},
+};
 
 const movieInfoThumb = ref<HTMLElement | null>(null);
 const lightbox = ref<PhotoSwipeLightbox | null>(null);
@@ -248,7 +320,7 @@ watch(movieInfoThumb, async () => {
 	await nextTick();
 	lightbox.value = new PhotoSwipeLightbox({
 		gallery: movieInfoThumb.value,
-		children: ".movie-info-thumb-item",
+		children: "a",
 		pswpModule: () => import("photoswipe"),
 		mouseMovePan: true,
 		initialZoomLevel: "fit",
@@ -262,194 +334,3 @@ watch(movieInfoThumb, async () => {
 	});
 });
 </script>
-
-<style scoped>
-.movie-info {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	content-visibility: auto;
-}
-
-.movie-info-main {
-	position: relative;
-	z-index: 1;
-	color: #e1e1e1;
-	margin-top: 24px;
-}
-
-.movie-info-content {
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-}
-
-.movie-info-header {
-	margin-bottom: 24px;
-}
-
-.movie-info-header-title {
-	font-size: 20px;
-	font-weight: bold;
-	margin-bottom: 4px;
-	word-wrap: break-word;
-	word-break: break-all;
-	color: #f1f1f1;
-    padding-right: 140px;
-}
-
-
-.movie-info-content-item {
-	display: flex;
-	gap: 8px;
-	font-size: 14px;
-}
-
-.movie-info-content-item-label {
-	color: #999;
-	min-width: 40px;
-}
-
-.movie-info-content-item-value {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	align-items: center;
-}
-
-.movie-info-content-item-value a {
-	color: #60a5fa;
-	text-decoration: none;
-	transition: color 0.2s ease;
-}
-
-.movie-info-content-item-value a:hover {
-	color: #3b82f6;
-}
-
-.movie-info-header-actors {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	margin-top: 16px;
-}
-
-.movie-info-header-actors-item {
-	position: relative;
-	padding: 4px;
-	border-radius: 8px;
-	width: fit-content;
-}
-
-.movie-info-header-actors-item-avatar {
-	position: relative;
-	width: 60px;
-	height: 60px;
-}
-
-.movie-info-header-actors-item img {
-	display: block;
-	width: 60px;
-	height: 60px;
-	border-radius: 50%;
-	object-fit: cover;
-	border: 2px solid #f1f1f1;
-	box-sizing: border-box;
-	background-color: #f1f1f1;
-}
-
-.movie-info-header-actors-item-name {
-	font-size: 16px;
-	color: #f1f1f1;
-	padding-right: 8px;
-}
-
-.movie-info-header-actors-item-sex {
-	position: absolute;
-	top: -2px;
-	right: -2px;
-	width: 16px;
-	height: 16px;
-	border-radius: 50%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background-color: rgba(0, 0, 0, 0.6);
-	color: #fff;
-	font-size: 12px;
-}
-
-.movie-info-header-actors-item-sex.female {
-	background-color: rgba(244, 114, 182, 0.8);
-}
-
-.movie-info-header-actors-item-sex.male {
-	background-color: rgba(59, 130, 246, 0.8);
-}
-
-.movie-info-header-actors-item-content {
-	display: flex;
-	align-items: center;
-	gap: 12px;
-	text-decoration: none;
-	width: 100%;
-}
-
-.movie-info-source-switch {
-	position: absolute;
-	top: 0;
-	right: 0;
-	display: flex;
-	gap: 8px;
-	z-index: 2;
-}
-
-.movie-info-source-switch-item {
-	padding: 6px 12px;
-	border-radius: 4px;
-	background: rgba(0, 0, 0, 0.5);
-	cursor: pointer;
-	transition: all 0.2s ease;
-}
-
-.movie-info-source-switch-item:hover {
-	background: rgba(0, 0, 0, 0.7);
-}
-
-.movie-info-source-switch-item.active {
-	background: #60a5fa;
-}
-
-.movie-info-source-switch-item-text {
-	font-size: 12px;
-	color: #fff;
-}
-
-.movie-info-thumb {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px;
-	margin-top: 24px;
-}
-
-.movie-info-thumb-item {
-	width: calc(12.5% - 12px);
-	aspect-ratio: 1 / 1;
-	border-radius: 5px;
-	overflow: hidden;
-	cursor: pointer;
-	transition: opacity 0.2s;
-	display: block;  /* 因为现在是 <a> 标签 */
-	text-decoration: none;
-}
-
-.movie-info-thumb-item:hover {
-	opacity: 0.8;
-}
-
-.movie-info-thumb-item img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-</style>

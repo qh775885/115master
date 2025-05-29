@@ -1,11 +1,12 @@
 import { GM_addStyle, GM_cookie } from "$";
 import { createApp, defineAsyncComponent } from "vue";
 import { DL_URL_115, NORMAL_URL_115 } from "../../constants/115";
+import mainStyles from "../../styles/main.css?inline";
 
 const resetDocument = () => {
 	document.body.style.backgroundColor = "#000";
 	document.body.style.margin = "0";
-	document.body.innerHTML = `<div id="app"></div>`;
+	document.body.innerHTML = `<div id="my-app" data-theme="dark"></div>`;
 	document.title = "";
 
 	// fix scrollbar 在主页下丢失，因为 vite-plugin-monkey 的 css 处理会造成全局污染
@@ -97,11 +98,21 @@ export const videoTokenPage = () => {
 	});
 };
 
-export const videoPage = () => {
+export const videoPage = async () => {
 	resetDocument();
+	const style = document.createElement("style");
+	style.textContent = mainStyles;
+	style.dataset.v = "style_css";
+	if (import.meta.hot) {
+		import.meta.hot.accept("../../styles/main.css?inline", (newModule) => {
+			style.textContent = newModule?.default || "";
+		});
+	}
+	document.head.append(style);
+
 	createApp(
 		defineAsyncComponent({
 			loader: () => import("./index.vue"),
 		}),
-	).mount("#app");
+	).mount("#my-app");
 };

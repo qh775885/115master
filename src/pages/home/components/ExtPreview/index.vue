@@ -1,25 +1,37 @@
 <template>
-	<div :class="$style['ext-preview']" ref="rootRef">
-		<LoadingError v-if="videoData.error.value" style="margin: 0 auto" :detail="videoData.error.value" />
-		<Skeleton v-else-if="videoData.isLoading.value" mode="light" width="100%" height="100%" border-radius="0"  />	
-		<div
-			v-else
-			ref="videoRef"
-			class="pswp-gallery" 
-			:class="$style['ext-preview-video']"
-			:id="`gallery-${props.pickCode}`"
-		>
-			<a 
-				v-for="(thumbnail, index) in videoData.state.value"
-				:key="index"
-				:class="$style['thumb-item']"
-				@click.prevent.stop="openPhotoSwipe(index)"
+	<div :class="styles.container.main" ref="rootRef">
+		<div :class="styles.container.content">
+			<!-- 错误状态 -->
+			<div :class="styles.states.error" v-if="videoData.error.value">
+				<LoadingError style="margin: 0 auto" :detail="videoData.error.value" />
+			</div>
+			
+			<!-- 加载骨架 -->
+			<template v-else-if="videoData.isLoading.value">
+				<div class="skeleton w-full h-28 rounded-xl bg-neutral-100"></div>
+			</template>
+			
+			<!-- 预览内容 -->
+			<div
+				v-else
+				ref="videoRef"
+				class="pswp-gallery" 
+				:class="styles.preview.container"
+				:id="`gallery-${props.pickCode}`"
 			>
-				<img 
-					:src="thumbnail?.img" 
-					:alt="`预览图 ${index + 1}`"
-				/>
-			</a>
+				<a 
+					v-for="(thumbnail, index) in videoData.state.value"
+					:key="index"
+					:class="styles.preview.thumbItem"
+					@click.prevent.stop="openPhotoSwipe(index)"
+				>
+					<img 
+						:src="thumbnail?.img" 
+						:alt="`预览图 ${index + 1}`"
+						:class="styles.preview.thumbImage"
+					/>
+				</a>
+			</div>
 		</div>
 	</div>
 </template>
@@ -29,10 +41,30 @@ import { useElementVisibility } from "@vueuse/core";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
-import Skeleton from "../../../../components/Skeleton/index.vue";
 import "photoswipe/style.css";
 import { usePreview } from "../../../../hooks/usePreview";
 import { FILELIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
+
+// 样式常量定义
+const styles = {
+	// 容器样式
+	container: {
+		main: "w-full px-20 pr-10",
+		content: "relative flex items-center",
+	},
+	// 状态样式
+	states: {
+		error: "flex items-center justify-center flex-1",
+	},
+	// 预览样式
+	preview: {
+		container: "h-28 flex overflow-hidden gap-2 select-none",
+		thumbItem:
+			"aspect-video h-28 cursor-zoom-in no-underline bg-neutral-300 overflow-hidden rounded-lg hover:opacity-90 transition-opacity shrink-0",
+		thumbImage: "h-full w-full object-contain object-center align-top",
+	},
+};
+
 const props = defineProps<{
 	pickCode: string;
 	sha1: string;
@@ -118,49 +150,3 @@ onBeforeUnmount(() => {
 	}
 });
 </script>
-
-<style module>
-.ext-preview {
-	width: 100%;
-	height: 100px;
-	display: flex;
-	align-items: center;
-	box-sizing: border-box;
-	.ext-preview-video {
-		height: 100%;
-		display: flex;
-		justify-content: center;
-		overflow: hidden;
-		overflow-x: auto;
-		gap: 8px;
-
-		/* 优化滚动条样式 */
-		&::-webkit-scrollbar {
-			height: 0; /* 减小滚动条高度 */
-			width: 0;
-		}
-
-		.thumb-item {
-			aspect-ratio: 16 / 9;
-			height: 100px;
-			cursor: zoom-in;
-			text-decoration: none;
-			background-color: #aaa;
-			overflow: hidden;
-			border-radius: 8px;
-
-			&:hover {
-				opacity: 0.9;
-			}
-
-			img {
-				height: 100%;
-				width: 100%;
-				object-fit: contain;
-				object-position: center;
-				vertical-align: top;
-			}
-		}
-	}
-}
-</style>

@@ -1,8 +1,5 @@
 import HUD from "./index.vue";
 
-export type {
-	HudMessage,
-	HudMessageData,
-} from "./types";
+export type { HudMessage } from "./types";
 export { HUD };
 export default HUD;

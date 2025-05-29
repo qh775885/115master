@@ -1,16 +1,22 @@
 <template>
 	<button 
-		:title="fullscreen.isFullscreen.value ? '退出全屏(F)' : '全屏(F)'"
+		class="btn btn-ghost btn-circle tooltip"
+		:class="{'swap-active': !fullscreen.isFullscreen.value}"
+		data-tip="全屏 (F)"
 		@click="fullscreen.toggleFullscreen"
 	>
-		<Icon :svg="fullscreen.isFullscreen.value ? FullscreenExit : Fullscreen" class="icon" />
+		<Icon class="size-7" :icon="icon"/>
 	</button>
 </template>
 
 <script setup lang="ts">
-import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen.svg?component";
-import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit.svg?component";
-import Icon from "../../../../components/Icon/index.vue";
+import { Icon } from "@iconify/vue";
+import { computed } from "vue";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
 const { fullscreen } = usePlayerContext();
+const icon = computed(() => {
+	return fullscreen.isFullscreen.value
+		? "material-symbols:fullscreen-exit-rounded"
+		: "material-symbols:fullscreen-rounded";
+});
 </script>

@@ -1,8 +1,15 @@
 <template>
-	<div class="image-container">
-		<Skeleton width="100%" height="100%" :mode="skeletonMode" v-if="loading" />
+	<div :class="styles.container">
+		<div :class="styles.skeleton" v-if="loading"></div>
 		<LoadingError v-else-if="error" />
-		<img v-else :src="src" :origin-src="props.src" :refferer="props.referer" v-bind="$attrs" />
+		<img 
+			v-else 
+			:src="src" 
+			:origin-src="props.src" 
+			:refferer="props.referer" 
+			:class="styles.image"
+			v-bind="$attrs" 
+		/>
 	</div>
 </template>
 
@@ -12,13 +19,20 @@ import { imageCache } from "../../utils/cache/imageCache";
 import { blobToBase64, compressImage } from "../../utils/image";
 import { GMRequest } from "../../utils/request/gmRequst";
 import LoadingError from "../LoadingError/index.vue";
-import Skeleton from "../Skeleton/index.vue";
+
 type Props = {
 	referer?: string;
 	src: string;
 	alt: string;
 	skeletonMode?: "light" | "dark";
 	cache?: boolean;
+};
+
+// 样式常量定义
+const styles = {
+	container: "flex justify-center items-center w-full h-full",
+	image: "w-full h-full object-cover rounded-lg",
+	skeleton: "skeleton w-full h-full bg-neutral-200 rounded-lg",
 };
 
 const props = defineProps<Props>();
@@ -80,18 +94,3 @@ watch(
 	{ immediate: true },
 );
 </script>
-
-<style scoped>
-.image-container {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100%;
-	height: 100%;
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-}
-</style>

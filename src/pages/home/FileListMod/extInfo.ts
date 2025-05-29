@@ -1,4 +1,5 @@
 import { type App, createApp } from "vue";
+import mainStyles from "../../../styles/main.css?inline";
 import ExtInfo from "../components/ExtInfo/index.vue";
 import { FileListType, FileType, type ItemInfo, IvType } from "../types";
 
@@ -32,9 +33,26 @@ export class FileItemExtInfo {
 		}
 
 		this.itemNode.classList.add("with-ext-info");
+
+		// 创建容器元素
+		const extInfoContainer = document.createElement("div");
+		extInfoContainer.style.width = "100%";
+		this.itemNode.append(extInfoContainer);
+
+		// 创建 shadow DOM
+		const shadowRoot = extInfoContainer.attachShadow({ mode: "open" });
+
+		// 在 shadow DOM 中添加样式
+		const styleElement = document.createElement("style");
+		styleElement.textContent = mainStyles;
+		shadowRoot.appendChild(styleElement);
+
+		// 在 shadow DOM 中创建挂载点
 		const extInfoDom = document.createElement("div");
-		this.itemNode.append(extInfoDom);
 		extInfoDom.className = "ext-info-root";
+		shadowRoot.appendChild(extInfoDom);
+
+		// 创建并挂载 Vue 应用
 		const app = createApp(ExtInfo, {
 			avNumber: this.itemInfo.avNumber,
 		});
