@@ -1,3 +1,4 @@
+import { useDebounceFn } from "@vueuse/core";
 import { ref, shallowRef, toValue, watch } from "vue";
 import { type VideoSource, VideoSourceExtension } from "../types";
 import { PlayerCoreType } from "./playerCore/types";
@@ -17,6 +18,8 @@ export const useSources = (ctx: PlayerContext) => {
 	const current = ref<VideoSource | null>(null);
 	// 是否中断
 	const isInterrupt = shallowRef(false);
+	// 是否正在切换播放器核心
+	const isSwitching = shallowRef(false);
 
 	// 获取 hls 视频源
 	const getHlsSource = () => {
@@ -113,16 +116,45 @@ export const useSources = (ctx: PlayerContext) => {
 		initializeVideo(current.value!);
 	};
 
-	// 切换播放器核心
-	const switchPlayerCore = async (type: PlayerCoreType) => {
-		const currentTime = playerCore.value?.currentTime || 0;
-
-		if (!playerCore.value) {
-			throw new Error("player is not found");
+	// 切换播放器核心的实际实现
+	const switchPlayerCoreImpl = async (type: PlayerCoreType) => {
+		if (isSwitching.value) {
+			console.warn("正在切换播放器核心，忽略此次操作");
+			return;
 		}
-		await initializeVideo(current.value!, type);
-		playerCore.value?.seek(currentTime);
+
+		if (!current.value) {
+			throw new Error("当前没有视频源");
+		}
+
+		isSwitching.value = true;
+
+		try {
+			const currentTime = playerCore.value?.currentTime || 0;
+			const wasPaused = playerCore.value?.paused ?? true;
+
+			// 确保当前播放器完全停止
+			if (playerCore.value && !playerCore.value.paused) {
+				await playerCore.value.pause();
+			}
+
+			await initializeVideo(current.value, type);
+
+			if (playerCore.value) {
+				await playerCore.value.seek(currentTime);
+
+				// 恢复播放状态
+				if (!wasPaused) {
+					await playerCore.value.play();
+				}
+			}
+		} finally {
+			isSwitching.value = false;
+		}
 	};
+
+	// 使用防抖的切换播放器核心方法
+	const switchPlayerCore = useDebounceFn(switchPlayerCoreImpl, 300);
 
 	watch(
 		list,
@@ -148,6 +180,7 @@ export const useSources = (ctx: PlayerContext) => {
 		interruptSource,
 		resumeSource,
 		isInterrupt,
+		isSwitching,
 		switchPlayerCore,
 	};
 };

@@ -4,10 +4,11 @@
 		ref="buttonRef"
 		data-tip="播放器核心"
 		@click="toggleVisible"
-        :disabled="source?.current?.value?.type === 'hls'"
+        :disabled="source?.current?.value?.type === 'hls' || source?.isSwitching?.value"
 	>
 		<Icon :class="[styles.btn.icon, 'transition-transform', {
 			'rotate-90': menuVisible,
+			'motion-safe:animate-spin': source?.isSwitching?.value,
 		}]" :icon="ICON_PLAYER_CORE"></Icon>
 	</button>
 	<Popup
