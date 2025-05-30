@@ -20,7 +20,7 @@ import { usePlayerContext } from "../../hooks/usePlayerProvide";
 // 样式抽象
 const styles = {
 	container:
-		"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[2] flex flex-col items-center gap-2 drop-shadow-xl/30",
+		"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 drop-shadow-xl/30",
 	animation: {
 		wrapper: "inline-flex items-center justify-between gap-2.5",
 		dot: [

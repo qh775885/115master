@@ -214,10 +214,17 @@ export const useNativePlayerCore = (_ctx: PlayerContext) => {
 			const videoElement = renderElementRef.value;
 			if (!videoElement) return Promise.resolve();
 
-			renderElementRef.value = undefined;
+			// 停止播放并清理
+			videoElement.pause();
+			videoElement.currentTime = 0;
 			videoElement.src = "";
+			videoElement.load(); // 清空缓冲区
 			videoElement.remove();
+
+			// 重置状态
 			state.reset();
+			renderElementRef.value = undefined;
+
 			return Promise.resolve();
 		},
 	};

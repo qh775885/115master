@@ -14,7 +14,7 @@ type HotKeyMatch = {
 };
 
 // 热键配置
-type HotKeyConfig = {
+export type HotKeyConfig = {
 	/**
 	 * 按键组
 	 */
@@ -127,7 +127,7 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 			KEYS["8"],
 			KEYS["9"],
 		],
-		name: "进度",
+		name: "进度跳转",
 		keydown: (ctx, event) => {
 			const key = event.key;
 			const digit = Number(key);
@@ -364,6 +364,13 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
 		},
 	},
 };
+
+/**
+ * 获取热键配置
+ */
+export function getHotKeysConfig(): Record<string, HotKeyConfig> {
+	return HOT_KEYS_CONFIG;
+}
 
 /**
  * 解析按键组

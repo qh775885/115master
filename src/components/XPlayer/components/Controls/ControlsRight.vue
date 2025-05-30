@@ -11,14 +11,12 @@
 			v-if="!progressBar?.isLongPressDragging.value"
 			:class="styles.root">
 			<slot></slot>
-			<StatisticsButton />
 		</div>
 	</transition>
 </template>
 
 <script setup lang="ts">
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-import StatisticsButton from "./StatisticsButton.vue";
 
 const { progressBar } = usePlayerContext();
 

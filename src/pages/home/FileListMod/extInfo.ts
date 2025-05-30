@@ -50,6 +50,7 @@ export class FileItemExtInfo {
 		// 在 shadow DOM 中创建挂载点
 		const extInfoDom = document.createElement("div");
 		extInfoDom.className = "ext-info-root";
+		extInfoDom.setAttribute("data-theme", "light");
 		shadowRoot.appendChild(extInfoDom);
 
 		// 创建并挂载 Vue 应用

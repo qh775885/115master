@@ -1,11 +1,12 @@
 <template>
 	<Teleport :to="portalContainer" :disabled="!portalContainer">
 		<Transition
-			enter-active-class="transition-opacity duration-200"
-			leave-active-class="transition-opacity duration-200"
+			:enter-active-class="`transition-opacity duration-200`"
+			:leave-active-class="`transition-opacity duration-200`"
 			enter-from-class="opacity-0"
 			leave-to-class="opacity-0"
 			@enter="onEnter"
+			@after-leave="onAfterLeave"
 		>
 			<div
 				ref="popupRef"
@@ -36,7 +37,7 @@ import { isInContainsTrigger, triggerSet } from "./utils";
 
 const styles = {
 	popup:
-		"x-popup bg-black/90 rounded-2xl p-2 border border-neutral-950 relative overflow-hidden",
+		"x-popup bg-base-100/90 rounded-2xl p-2 border border-neutral-950 relative overflow-hidden",
 };
 
 interface Props {
@@ -54,15 +55,21 @@ interface Props {
 	offset?: number;
 	// 点击外部是否阻止冒泡
 	outsideStopPropagation?: boolean;
+	// 允许阻止控制栏关闭
+	allowPreventControlsClose?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
 	x: 0,
 	y: 0,
 	outsideStopPropagation: false,
+	allowPreventControlsClose: true,
 });
 
-const emit = defineEmits<(e: "update:visible", value: boolean) => void>();
+const emit = defineEmits<{
+	"update:visible": [value: boolean];
+	"after-leave": [];
+}>();
 
 const { container } = usePortal();
 const { popupManager } = usePlayerContext();
@@ -108,6 +115,7 @@ onMounted(() => {
 		trigger: props.trigger,
 		container: popupRef.value!,
 		portalContainer: portalContainerEl.value!,
+		allowPreventControlsClose: props.allowPreventControlsClose,
 	});
 });
 // 组件卸载时确保清理popup状态
@@ -243,6 +251,13 @@ onClickOutside(popupRef, (event) => {
 		visibleModel.value = false;
 	}
 });
+
+/**
+ * 离开
+ */
+const onAfterLeave: BaseTransitionProps["onAfterLeave"] = () => {
+	emit("after-leave");
+};
 </script>
 
 <style scoped>

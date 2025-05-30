@@ -1,11 +1,6 @@
 <template>
     <footer :class="styles.container.main">
-        <p :class="styles.text.description">如果觉得这个脚本爆赞 👍</p>
-        <p :class="styles.text.description">
-            请帮我点个 
-            <a :href="info.homepage" target="_blank" :class="styles.text.link">⭐</a> 
-            支持我开发更多有趣的功能吧~
-        </p>
+        <h1 :class="styles.title">{{ info.name }}</h1>
         <div :class="styles.badges.container">
             <!-- github -->
             <a :href="info.homepage" target="_blank" :class="styles.badges.link">
@@ -21,6 +16,24 @@
             <a href="https://github.com/cbingb666" target="_blank" :class="styles.badges.link">
                 <img :src="`https://img.shields.io/badge/Author-${info.author}-red`" alt="Author" :class="styles.badges.image">
             </a>
+
+        </div>
+
+        <div :class="styles.badges.container">
+            <!-- license -->
+            <a href="https://github.com/cbingb666/115master/blob/main/LICENSE" target="_blank" :class="styles.badges.link">
+                <img :src="`https://img.shields.io/badge/License-MIT-green`" alt="License" :class="styles.badges.image">
+            </a>
+
+            <!-- issues -->
+            <a href="https://github.com/cbingb666/115master/issues" target="_blank" :class="styles.badges.link">
+                <img :src="`https://img.shields.io/badge/Issues-red`" alt="Issues" :class="styles.badges.image">
+            </a>
+
+            <!-- 常见问题 -->
+            <a href="https://github.com/cbingb666/115master/discussions/categories/q-a" target="_blank" :class="styles.badges.link">
+                <img :src="`https://img.shields.io/badge/Q&A-blue`" alt="Issues" :class="styles.badges.image">
+            </a>
         </div>
     </footer>
 </template>
@@ -34,6 +47,7 @@ const styles = {
 	container: {
 		main: "py-8 text-base-content/60 gap-4 text-center flex flex-col",
 	},
+	title: "text-2xl font-bold mb-4",
 	// 文本样式
 	text: {
 		description: "text-xs",
@@ -52,6 +66,7 @@ const info = computed(() => {
 		version: GM_info.script.version,
 		author: GM_info.script.author,
 		homepage: GM_info.script.homepage,
+		name: GM_info.script.name,
 	};
 });
 </script>

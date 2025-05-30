@@ -14,6 +14,7 @@ import {
 	type usePlayerCoreDecorator,
 	useSwitchPlayerCore,
 } from "./playerCore/usePlayerCore";
+import { useContextMenu } from "./useContextMenu";
 import { useControls } from "./useControls";
 import { useCssVar } from "./useCssVar";
 import { useFullscreen } from "./useFullscreen";
@@ -84,6 +85,8 @@ export interface PlayerContext {
 	statistics: ReturnType<typeof useStatistics>;
 	// Popup管理器
 	popupManager: ReturnType<typeof usePopupManager>;
+	// 右键菜单
+	contextMenu: ReturnType<typeof useContextMenu>;
 	// 播放器核心
 	playerCore: Ref<ReturnType<typeof usePlayerCoreDecorator> | undefined>;
 }
@@ -176,6 +179,10 @@ export function usePlayerProvide(
 	// 调试面板
 	const debugPanel = useStatistics();
 	context.statistics = debugPanel;
+
+	// 右键菜单
+	const contextMenu = useContextMenu(context);
+	context.contextMenu = contextMenu;
 
 	provide(PlayerSymbol, context);
 	return context;

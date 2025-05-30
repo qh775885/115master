@@ -3,7 +3,7 @@
 		ref="buttonRef"
 		:class="[styles.btnText.root]"
 		:disabled="!playerCore?.canplay"
-		data-tip="倍速 (↑/↓)"
+		data-tip="倍速 (ArrowUp/ArrowDown)"
 		@click="toggleSpeedMenu"
 	>
 		{{ buttonText }}

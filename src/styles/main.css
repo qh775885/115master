@@ -2,7 +2,7 @@
 
 
 @plugin "daisyui" {
-	themes: dark;
+	themes: dark, light;
   exclude:  scrollbar;
 }
 
@@ -34,7 +34,22 @@
   --radius-box: 1rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 2px;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@plugin "daisyui/theme" {
+	name: "light";
+	color-scheme: "light";
+  --color-primary: oklch(62% 0.214 259.815);
+  --color-primary-content: oklch(98% 0 0);
+  --radius-selector: 2rem;
+  --radius-field: 2rem;
+  --radius-box: 1rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 1px;
   --depth: 0;
   --noise: 0;
 }

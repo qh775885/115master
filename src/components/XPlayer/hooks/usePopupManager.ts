@@ -9,6 +9,8 @@ interface Popup {
 	container: HTMLElement;
 	// 弹出层容器元素
 	portalContainer: HTMLElement;
+	// 是否允许阻止控制栏关闭
+	allowPreventControlsClose: boolean;
 }
 
 /**
@@ -40,7 +42,9 @@ export const usePopupManager = () => {
 
 	// 是否有任何popup打开
 	const hasOpenPopup = computed(() =>
-		Array.from(popups.values()).some((popup) => popup.visible),
+		Array.from(popups.values()).some(
+			(popup) => popup.visible && popup.allowPreventControlsClose,
+		),
 	);
 
 	// 添加阻止冒泡元素

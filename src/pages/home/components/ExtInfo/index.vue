@@ -3,17 +3,17 @@
         <div :class="styles.container.content">
             <!-- 错误状态 -->
             <div :class="styles.states.error" v-if="extInfo.error.value">
-                <LoadingError :message="`获取番号 [${props.avNumber}] 失败`" :detail="`可能由于网络原因，请检查是否科学网络${extInfo.error.value}`" />
+                <LoadingError :message="`获取番号 [${props.avNumber}] 失败`" :detail="`可能由于网络原因，请检查是否科学网络${extInfo.error.value}`" fold size="mini"/>
             </div>
             
             <!-- 加载骨架 -->
             <template v-else-if="extInfo.isLoading.value || (!extInfo.isLoading.value && !extInfo.isReady.value)">
-                <div class="skeleton w-full h-26 rounded-xl bg-neutral-100"></div>
+                <div class="skeleton w-full h-24"></div>
             </template>
             
             <!-- 空状态 -->
             <div :class="styles.states.empty" v-else-if="!extInfo.state.value">
-                <Empty :description="`未找到番号 [${props.avNumber}] 信息`" />
+                <Empty :description="`未找到番号 [${props.avNumber}] 信息`" size="sm"/>
             </div>
 
             <!-- 内容 -->
@@ -60,7 +60,7 @@
                                 <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div :class="styles.item.container">
+                            <div :class="[styles.item.container, styles.secondary]">
                                 <span :class="styles.item.label">日期</span>
                                 <span :class="styles.item.value" v-if="extInfo.state.value?.date">
                                     {{ formatDate(extInfo.state.value?.date) }}
@@ -68,7 +68,7 @@
                                 <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div :class="styles.item.container">
+                            <div :class="[styles.item.container, styles.secondary]">
                                 <span :class="styles.item.label">时长</span>
                                 <span :class="styles.item.value" v-if="extInfo.state.value?.duration">
                                     {{ formatDuration(extInfo.state.value?.duration) }}
@@ -95,7 +95,7 @@
                                 <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div :class="styles.item.container">
+                            <div :class="[styles.item.container, styles.secondary]">
                                 <span :class="styles.item.label">导演</span>
                                 <span :class="styles.item.value" v-if="extInfo.state.value?.director">
                                     <a 
@@ -112,7 +112,7 @@
                                 <span :class="styles.item.value" v-else>-</span>
                             </div>
 
-                            <div :class="styles.item.container" v-if="extInfo.state.value?.category">
+                            <div :class="[styles.item.container, styles.secondary]" v-if="extInfo.state.value?.category">
                                 <span :class="styles.item.label">分类</span>
                                 <span :class="styles.item.value" v-if="extInfo.state.value?.category">
                                     <a 
@@ -159,7 +159,7 @@ const styles = {
 	// 容器样式
 	container: {
 		main: "w-full px-20",
-		content: "relative flex items-center rounded-2xl gap-2 border rounded-2xl",
+		content: "relative flex items-center gap-1 group min-h-24",
 	},
 	// 状态样式
 	states: {
@@ -168,33 +168,33 @@ const styles = {
 	},
 	// 封面样式
 	cover: {
-		container:
-			"flex items-center justify-center w-42 h-28 overflow-hidden rounded-xl",
+		container: "flex items-center justify-center w-36 h-24",
 		link: "block w-full h-full",
 	},
 	// 主要内容样式
 	main: {
-		container: "flex-1 flex flex-col gap-4",
+		container: "flex-1 flex flex-col gap-2",
 	},
 	// 标题样式
 	title: {
-		container: "text-md font-medium text-neutral-700 ml-2",
+		container: "text-md text-neutral-500 ml-2",
 		link: "hover:underline line-clamp-1 hover:text-primary transition-colors",
 	},
 	// 内容样式
 	content: {
-		container: "flex flex-1 items-start gap-10 ml-2",
-		group: "flex flex-col gap-2 min-w-32",
+		container: "flex flex-1 items-start gap-5 ml-2",
+		group: "flex flex-col gap-0.5 min-w-32",
 	},
 	// 项目样式
 	item: {
 		container: "flex items-start gap-2 text-xs",
-		label: "w-8 h-5 text-neutral-400 shrink-0",
-		value: "flex flex-1 gap-2 flex-wrap text-neutral-600",
-		link: "hover:text-primary transition-colors font-medium underline-offset-2 hover:underline",
-		badge:
-			"bg-neutral-200/50 hover:bg-neutral-200 rounded-full px-2 py-0.5 text-xs",
+		label: "w-8 h-5 text-neutral-500 shrink-0",
+		value: "flex flex-1 gap-2 flex-wrap text-neutral-500",
+		link: "hover:text-primary transition-colors hover:underline",
+		badge: "bg-neutral-100 hover:bg-neutral-100 rounded px-1 py-[1px] text-xs",
 	},
+	// 次要信息样式
+	secondary: "opacity-40",
 	// 元信息样式
 	meta: {
 		avNumber: "absolute right-4 bottom-2 text-xs text-neutral-300",

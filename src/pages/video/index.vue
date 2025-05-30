@@ -103,19 +103,19 @@
 									/>
 								</button>
 							</template>
+							<template #about-content>
+								<About />
+							</template>
 						</XPlayer>
 					</div>
 				</div>
 				
 				<!-- 页面下方内容 -->
-				<div :class="styles.container.pageFlow">
+				<div v-if="PLUS_VERSION" :class="styles.container.pageFlow">
 					<!-- 电影信息 -->
 					<MovieInfo 
-						v-if="PLUS_VERSION"
 						:movieInfos="DataMovieInfo"
 					/>
-					<!-- 底部 -->
-					<Footer></Footer>
 				</div>
 			</div>
 			
@@ -161,7 +161,7 @@ import { getAvNumber } from "../../utils/getNumber";
 import { isMac } from "../../utils/platform";
 import { goToPlayer } from "../../utils/route";
 import { webLinkIINA, webLinkShortcutsMpv } from "../../utils/weblink";
-import Footer from "./components/Footer/index.vue";
+import About from "./components/About/index.vue";
 import HeaderInfo from "./components/HeaderInfo/index.vue";
 import MovieInfo from "./components/MovieInfo/index.vue";
 import Playlist from "./components/Playlist/index.vue";
