@@ -185,7 +185,7 @@ export const useHud = (ctx: PlayerContext) => {
 				title: "水平翻转",
 				icon: ICON_FLIP_X,
 				value: newFlipX ? "开启" : "关闭",
-				iconClass: newFlipX ? "text-base-content" : "text-base-content/50",
+				iconClass: newFlipX ? "text-base-content" : "text-base-content/70",
 			});
 		});
 
@@ -195,7 +195,7 @@ export const useHud = (ctx: PlayerContext) => {
 				title: "垂直翻转",
 				icon: ICON_FLIP_Y,
 				value: newFlipY ? "开启" : "关闭",
-				iconClass: newFlipY ? "text-base-content" : "text-base-content/50",
+				iconClass: newFlipY ? "text-base-content" : "text-base-content/70",
 			});
 		});
 	}
