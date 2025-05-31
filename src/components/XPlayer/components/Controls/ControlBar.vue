@@ -40,6 +40,8 @@
 					<AudioTrackButton />
 					<!-- 播放器核心 -->
 					<PlayerCoreButton />
+					<!-- 颜色调整 -->
+					<VideoEnhanceSettings />
 					<!-- 设置 -->
 					<SettingsButton />
 					<!-- 画中画 -->
@@ -66,6 +68,7 @@ import QualityButton from "./QualityButton.vue";
 import SettingsButton from "./SettingsButton.vue";
 import SubtitleButton from "./SubtitleButton.vue";
 import TimeDisplay from "./TimeDisplay.vue";
+import VideoEnhanceSettings from "./VideoEnhanceSettings.vue";
 import VolumeControl from "./VolumeControl.vue";
 
 // 视频播放器上下文
