@@ -1,5 +1,5 @@
 <template>
-    <div class="card card-sm bg-neutral-800 flex-1">
+    <div class="card card-sm bg-neutral-800">
         <div class="card-body">
             <h3 class="card-title flex justify-between">预览图 <span class="text-xs font-normal text-base-content/50 text-center">刷新后生效</span></h3>
             <div>

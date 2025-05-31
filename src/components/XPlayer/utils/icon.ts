@@ -58,6 +58,8 @@ export const ICON_STATISTICS_INFO = "material-symbols:analytics-outline";
 export const ICON_SHORTCUTS = "material-symbols:keyboard-outline";
 // 关于
 export const ICON_ABOUT = "material-symbols:info-outline";
+// 颜色调整
+export const ICON_COLOR_ADJUST = "mdi:color";
 
 /**
  * 获取音量图标 Symbol
