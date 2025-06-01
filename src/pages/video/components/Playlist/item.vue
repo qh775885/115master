@@ -84,11 +84,11 @@ const styles = {
 			"relative flex items-center justify-center flex-shrink-0",
 			"overflow-hidden rounded-lg",
 			"w-50 h-28 aspect-video",
-			"before:content-[''] before:absolute before:inset-0 before:bg-black before:rounded-xl",
+			"before:content-[''] before:absolute before:inset-0 before:bg-black before:rounded-lg",
 		],
-		skeleton: "relative w-full h-full rounded-lg",
+		skeleton: "relative skeleton w-full h-full rounded-lg",
 		imageError: "relative!",
-		image: "relative block w-full w-full object-contain",
+		image: "relative block w-full h-full object-contain",
 	},
 	duration: {
 		container: [
