@@ -107,7 +107,7 @@ const styles = {
 	},
 };
 
-const { progressBar, playerCore: player } = usePlayerContext();
+const { progressBar, playerCore: player, controls } = usePlayerContext();
 
 const progressValue = computed(() => {
 	return (
@@ -199,6 +199,8 @@ const updatePreview = (position: number) => {
 
 // 开始拖拽
 const startDragging = (position: number) => {
+	controls.addDisabledAutoHide();
+	controls.setDisabledHideOnMouseLeave(true);
 	isDragging.value = true;
 	originalProgress.value = progressValue.value;
 	dragProgress.value = position * 100;
@@ -223,6 +225,8 @@ const stopDragging = (position: number) => {
 		previewTime.value = finalTime;
 	}
 	isDragging.value = false;
+	controls.removeDisabledAutoHide();
+	controls.setDisabledHideOnMouseLeave(false);
 };
 
 // 显示预览

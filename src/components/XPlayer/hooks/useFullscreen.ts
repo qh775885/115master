@@ -6,21 +6,20 @@ import type { PlayerContext } from "./usePlayerProvide";
  * 全屏和播放列表
  */
 export function useFullscreen(ctx: PlayerContext) {
-	// 是否全屏
-	const isFullscreen = shallowRef(false);
 	// 显示播放列表
 	const showPlaylist = ctx.rootPropsVm.showPlaylist;
-
+	// 是否全屏
+	const isFullscreen = shallowRef(false);
+	// 全屏前播放列表状态
+	const prevShowPlaylist = shallowRef(false);
 	// 监听全屏变化
 	const handleFullscreenChange = () => {
 		isFullscreen.value = !!document.fullscreenElement;
 	};
 
-	// 全屏前播放列表状态
-	const prevShowPlaylist = shallowRef(false);
-
 	// 全屏控制
 	const toggleFullscreen = async () => {
+		ctx.controls.lockControlsWithTimeoutUnlock();
 		try {
 			// 请求全屏
 			if (!document.fullscreenElement) {

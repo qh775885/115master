@@ -8,10 +8,9 @@
 		leave-to-class="opacity-0"
 	>
 		<div
-			v-if="!progressBar?.isLongPressDragging.value"
+			v-if="show"
 			:class="[styles.root]" 
-			@mouseenter="controls.setIsMouseInControls(true)"
-			@mouseleave="controls.setIsMouseInControls(false)"
+			ref="controlHeaderRef"
 			>
 			<div :class="[styles.bg]"></div>
 			<div 
@@ -29,7 +28,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed, shallowRef } from "vue";
+import { useControlsMouseDetection } from "../../hooks/useControlsMouseDetection";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
+
 const { controls, progressBar } = usePlayerContext();
 
 const styles = {
@@ -44,6 +46,15 @@ const styles = {
 	},
 	bg: "absolute inset-0 bottom-[-50px] bg-linear-to-b from-black/30 to-transparent pointer-events-none",
 };
+
+const controlHeaderRef = shallowRef<HTMLDivElement | null>(null);
+
+useControlsMouseDetection(controlHeaderRef);
+
+// 显示/隐藏控制栏
+const show = computed(() => {
+	return controls.visible.value && !progressBar.isLongPressDragging.value;
+});
 
 const props = defineProps<{
 	title?: string;

@@ -1,6 +1,15 @@
-import { useEventListener } from "@vueuse/core";
+import { useDebounceFn, useEventListener, useThrottleFn } from "@vueuse/core";
 import { computed, onUnmounted, shallowRef, watch } from "vue";
 import type { PlayerContext } from "./usePlayerProvide";
+
+// 延迟隐藏控制栏时间
+const DELAY_HIDE_CONTROLS_TIME = 1000;
+// 控制栏鼠标移动节流时间
+const ROOT_MOUSE_MOVE_THROTTLE_TIME = 200;
+// 控制栏鼠标离开防抖时间
+const ROOT_MOUSE_LEAVE_DEBOUNCE_TIME = 30;
+// 控制栏锁定时间
+const LOCK_CONTROLS_TIMEOUT = 1000;
 
 // 控制栏
 export const useControls = (ctx: PlayerContext) => {
@@ -8,22 +17,26 @@ export const useControls = (ctx: PlayerContext) => {
 
 	// 控制栏是否显示
 	const visible = shallowRef(true);
-	// 鼠标是否在控制栏
-	const isMouseInControls = shallowRef(false);
+
+	// 禁止自动隐藏的引用计数
+	const disabledAutoHideCount = shallowRef(0);
+
+	// 是否禁止自动隐藏控制栏（基于引用计数）
+	const disabledAutoHide = computed(() => disabledAutoHideCount.value > 0);
+
+	// 是否禁止鼠标离开控制栏
+	const disabledHideOnMouseLeave = shallowRef(false);
+
 	// 隐藏控制栏计时器
 	let hideControlsTimer: number | null = null;
+
+	// 控制栏离开隐藏锁定计时器
+	let hideControlsLeaveLockTimer: number | null = null;
+
 	// 控制栏高度
 	const controlsMainHeight = computed(() => {
 		return mainRef.value?.offsetHeight;
 	});
-
-	// 设置鼠标是否在控制栏
-	const setIsMouseInControls = (value: boolean) => {
-		isMouseInControls.value = value;
-		if (value) {
-			hideControlsTimer = null;
-		}
-	};
 
 	// 显示控制栏
 	const show = () => {
@@ -35,53 +48,97 @@ export const useControls = (ctx: PlayerContext) => {
 		visible.value = false;
 	};
 
+	// 增加禁止自动隐藏的引用计数
+	const addDisabledAutoHide = () => {
+		disabledAutoHideCount.value++;
+		if (disabledAutoHideCount.value === 1) {
+			stopAutoHideTimer();
+		}
+	};
+
+	// 减少禁止自动隐藏的引用计数
+	const removeDisabledAutoHide = () => {
+		disabledAutoHideCount.value = Math.max(0, disabledAutoHideCount.value - 1);
+	};
+
+	// 设置是否禁止自动隐藏控制栏（保持向后兼容）
+	const setDisabledAutoHide = (value: boolean) => {
+		if (value) {
+			addDisabledAutoHide();
+		} else {
+			removeDisabledAutoHide();
+		}
+	};
+
+	// 设置是否禁止鼠标离开控制栏
+	const setDisabledHideOnMouseLeave = (value: boolean) => {
+		disabledHideOnMouseLeave.value = value;
+	};
+
+	/**
+	 * 锁定控制栏，在指定时间后自动解锁
+	 * @description
+	 * 1. 锁定期间，控制栏不会自动隐藏
+	 * 2. 锁定期间，鼠标离开控制栏不会触发隐藏
+	 * 3. 超时解锁后，恢复上锁前的状态
+	 * @param timeout 锁定时间，单位：毫秒
+	 */
+	const lockControlsWithTimeoutUnlock = (timeout = LOCK_CONTROLS_TIMEOUT) => {
+		if (hideControlsLeaveLockTimer) {
+			clearTimeout(hideControlsLeaveLockTimer);
+		}
+
+		disabledHideOnMouseLeave.value = true;
+		stopAutoHideTimer();
+		hideControlsLeaveLockTimer = window.setTimeout(() => {
+			disabledHideOnMouseLeave.value = false;
+			startAutoHideTimer();
+		}, timeout);
+	};
+
+	// 延迟隐藏控制栏
+	const startAutoHideTimer = () => {
+		if (disabledAutoHide.value) {
+			return;
+		}
+		stopAutoHideTimer();
+		hideControlsTimer = window.setTimeout(
+			handleAutoHide,
+			DELAY_HIDE_CONTROLS_TIME,
+		);
+	};
+
 	// 清除隐藏控制栏计时器
-	const clearHideControlsTimer = () => {
+	const stopAutoHideTimer = () => {
 		if (hideControlsTimer) {
 			clearTimeout(hideControlsTimer);
 			hideControlsTimer = null;
 		}
 	};
 
-	// 显示控制栏并延迟隐藏
-	const showWithAutoHide = () => {
-		show();
-		hideWithDelay();
-	};
-
-	// 延迟隐藏控制栏
-	const hideWithDelay = () => {
-		clearHideControlsTimer();
-		hideControlsTimer = window.setTimeout(() => {
-			if (
-				isMouseInControls.value ||
-				ctx.progressBar?.isDragging.value ||
-				ctx.popupManager?.hasOpenPopup.value
-			) {
-				return;
-			}
-			hide();
-		}, 1000);
+	// 处理自动隐藏控制栏
+	const handleAutoHide = () => {
+		if (disabledAutoHide.value) {
+			return;
+		}
+		hide();
 	};
 
 	// 鼠标移动
-	const handleRootMouseMove = () => {
-		showWithAutoHide();
-	};
+	const handleRootMouseMove = useThrottleFn(() => {
+		show();
+		startAutoHideTimer();
+	}, ROOT_MOUSE_MOVE_THROTTLE_TIME);
+
 	// 鼠标离开
-	const handleRootMouseLeave = async () => {
-		// 如果弹出层打开，则不隐藏控制栏
-		if (ctx.popupManager?.hasOpenPopup.value) {
+	const handleRootMouseLeave = useDebounceFn(() => {
+		if (disabledHideOnMouseLeave.value) {
 			return;
 		}
-		// 如果进度条正在拖动，则等待拖动结束再隐藏控制栏
-		if (ctx.progressBar?.isDragging.value) {
-			await ctx.progressBar?.waitDragEnd();
-			return hideWithDelay();
-		}
-		clearHideControlsTimer();
+
+		stopAutoHideTimer();
 		hide();
-	};
+	}, ROOT_MOUSE_LEAVE_DEBOUNCE_TIME);
 
 	// 监听控制栏高度
 	watch([visible, controlsMainHeight], () => {
@@ -101,12 +158,20 @@ export const useControls = (ctx: PlayerContext) => {
 	useEventListener(ctx.refs.rootRef, "mouseleave", handleRootMouseLeave);
 
 	onUnmounted(() => {
-		clearHideControlsTimer();
+		stopAutoHideTimer();
 	});
 
 	return {
 		visible,
 		mainRef,
-		setIsMouseInControls,
+		disabledHideOnMouseLeave,
+		disabledAutoHide,
+		setDisabledAutoHide,
+		setDisabledHideOnMouseLeave,
+		lockControlsWithTimeoutUnlock,
+		addDisabledAutoHide,
+		removeDisabledAutoHide,
+		startAutoHideTimer,
+		stopAutoHideTimer,
 	};
 };

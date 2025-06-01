@@ -121,7 +121,7 @@ export function usePlayerProvide(
 	context.driver = useSwitchPlayerCore(context);
 
 	// Popup管理器
-	const popupManager = usePopupManager();
+	const popupManager = usePopupManager(context);
 	context.popupManager = popupManager;
 
 	// 播放速度
