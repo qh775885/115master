@@ -8,21 +8,34 @@
 		leave-to-class="opacity-0"
 	>
 		<div 
-			v-if="!progressBar?.isLongPressDragging.value"
-			:class="styles.root">
+			v-if="show"
+			:class="styles.root"
+			ref="controlRightRef"
+		>
 			<slot></slot>
 		</div>
 	</transition>
 </template>
 
 <script setup lang="ts">
+import { computed, shallowRef } from "vue";
+import { useControlsMouseDetection } from "../../hooks/useControlsMouseDetection";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
-
-const { progressBar } = usePlayerContext();
 
 const styles = {
 	root: [
 		"absolute inset-y-0 right-0 flex flex-col justify-end items-center gap-2 px-7 pb-2",
 	],
 };
+
+const { progressBar, controls } = usePlayerContext();
+
+const controlRightRef = shallowRef<HTMLDivElement | null>(null);
+
+useControlsMouseDetection(controlRightRef);
+
+// 显示/隐藏控制栏
+const show = computed(() => {
+	return controls.visible.value && !progressBar.isLongPressDragging.value;
+});
 </script>

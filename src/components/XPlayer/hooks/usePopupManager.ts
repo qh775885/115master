@@ -1,4 +1,5 @@
-import { computed, reactive } from "vue";
+import { computed, reactive, watch } from "vue";
+import type { PlayerContext } from "./usePlayerProvide";
 
 interface Popup {
 	// 是否可见
@@ -17,7 +18,7 @@ interface Popup {
  * Popup管理器
  * 用于跟踪全局popup状态，防止控制栏在有popup打开时自动隐藏
  */
-export const usePopupManager = () => {
+export const usePopupManager = (ctx: PlayerContext) => {
 	const popups = reactive(new Map<string, Popup>());
 
 	const disabledBubblingElements = new Set<HTMLElement>();
@@ -56,6 +57,16 @@ export const usePopupManager = () => {
 	const removeDisabledBubblingElement = (element: HTMLElement) => {
 		disabledBubblingElements.delete(element);
 	};
+
+	watch(hasOpenPopup, (value) => {
+		if (value) {
+			ctx.controls.addDisabledAutoHide();
+			ctx.controls.setDisabledHideOnMouseLeave(true);
+		} else {
+			ctx.controls.removeDisabledAutoHide();
+			ctx.controls.setDisabledHideOnMouseLeave(false);
+		}
+	});
 
 	return {
 		hasOpenPopup,
