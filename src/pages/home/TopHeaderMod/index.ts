@@ -1,4 +1,12 @@
-// 顶部导航栏修改器
+import { openOfflineTask } from "./openOfflineTask";
+
+/**
+ * 顶部导航栏修改器
+ * @description
+ * 1. 添加自定义的云下载一级按钮
+ * 2. 删除官方的云下载按钮
+ * 3. 云下载按钮免除刷新重定向
+ */
 export class TopHeaderMod {
 	constructor() {
 		this.init();
@@ -12,6 +20,17 @@ export class TopHeaderMod {
 	private init() {
 		const offlineTaskButton = this.createOfflineTaskButton();
 		this.topHeaderNode?.prepend(offlineTaskButton);
+		this.deleteOfficialDownloadButton();
+	}
+
+	// 删除官方的离线任务按钮
+	private deleteOfficialDownloadButton() {
+		const downloadButton = this.topHeaderNode?.querySelector(
+			".button[menu='offline_task']",
+		);
+		if (downloadButton) {
+			downloadButton.remove();
+		}
 	}
 
 	// 创建离线任务按钮
@@ -26,8 +45,7 @@ export class TopHeaderMod {
 		button.style.background = "#3a4783";
 		button.style.borderColor = "#3a4783";
 		button.onclick = () => {
-			// @ts-ignore
-			window.top.Core.FileMenu.DoEvent([], "offline_task", null);
+			openOfflineTask();
 		};
 		return button;
 	}
