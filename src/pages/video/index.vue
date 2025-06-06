@@ -14,7 +14,6 @@
 			<!-- Drawer content (主内容区域) -->
 			<div :class="styles.drawer.content">
 				<div :class="styles.container.pageMain"
-					
 				>
 					<div :class="[
 						styles.player.container,

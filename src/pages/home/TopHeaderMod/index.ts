@@ -1,3 +1,6 @@
+import { unsafeWindow } from "$";
+import { getUrlParams } from "../../../utils/url";
+import type { TopRootSearchParams } from "../global";
 import { openOfflineTask } from "./openOfflineTask";
 
 /**
@@ -13,11 +16,19 @@ export class TopHeaderMod {
 	}
 
 	get topHeaderNode() {
-		return document.querySelector("#js_top_panel_box")
+		return document.querySelector(unsafeWindow.Main.CONFIG.TopPanelBox)
 			?.firstElementChild as HTMLElement;
 	}
 
 	private init() {
+		if (!this.topHeaderNode) return;
+		const params = getUrlParams<TopRootSearchParams>(
+			top?.window.location.search ?? "",
+		);
+		if (params.mode === "search") {
+			return;
+		}
+		this.deleteOfficialDownloadButton();
 		const offlineTaskButton = this.createOfflineTaskButton();
 		this.topHeaderNode?.prepend(offlineTaskButton);
 		this.deleteOfficialDownloadButton();

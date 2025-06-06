@@ -3,19 +3,18 @@
 		<div :class="styles.container.content">
 			<!-- 错误状态 -->
 			<div :class="styles.states.error" v-if="videoData.error.value">
-				<LoadingError style="margin: 0 auto" :detail="videoData.error.value" />
+				<LoadingError size="mini" :detail="videoData.error.value" fold />
 			</div>
 			
 			<!-- 加载骨架 -->
 			<template v-else-if="videoData.isLoading.value">
-				<div class="skeleton w-full h-24"></div>
+				<div :class="styles.skeleton"></div>
 			</template>
 			
 			<!-- 预览内容 -->
 			<div
 				v-else
-				ref="videoRef"
-				class="pswp-gallery" 
+				class="pswp-gallery"
 				:class="styles.preview.container"
 				:id="`gallery-${props.pickCode}`"
 			>
@@ -37,7 +36,7 @@
 </template>
 
 <script setup lang="ts">
-import { useElementVisibility } from "@vueuse/core";
+import { refDebounced, useElementVisibility } from "@vueuse/core";
 import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
@@ -49,20 +48,21 @@ import { FILELIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 const styles = {
 	// 容器样式
 	container: {
-		main: "w-full max-w-214 px-20",
-		content: "relative flex items-center",
+		main: "w-full max-w-214 px-20 h-24 [content-visibility:auto]",
+		content:
+			"relative h-full flex items-center bg-base-300 rounded overflow-hidden",
 	},
 	// 状态样式
 	states: {
 		error: "flex items-center justify-center flex-1",
 	},
+	// 骨架样
+	skeleton: "skeleton w-full h-full rounded",
 	// 预览样式
 	preview: {
-		container: [
-			"h-24 flex overflow-hidden select-none rounded overflow-hidden",
-		],
+		container: ["h-full flex overflow-hidden select-none overflow-hidden"],
 		thumbItem:
-			"aspect-video h-24 cursor-zoom-in no-underline bg-neutral-100 overflow-hidden hover:opacity-90 transition-opacity",
+			"aspect-video h-full cursor-zoom-in no-underline overflow-hidden hover:opacity-90 transition-opacity",
 		thumbImage: ["h-full w-full object-contain object-center align-top"],
 	},
 };
@@ -70,14 +70,12 @@ const styles = {
 const props = defineProps<{
 	pickCode: string;
 	sha1: string;
-	duration: number;
+	duration: number | string;
 }>();
 
 const rootRef = ref<HTMLElement>();
-const rootVisibilityRef = useElementVisibility(rootRef, {
-	threshold: 0.3,
-});
-const videoRef = ref<HTMLElement>();
+const rootVisibilityRef = useElementVisibility(rootRef);
+const rootVisibilityDebouncedRef = refDebounced(rootVisibilityRef, 150);
 const lightbox = ref<PhotoSwipeLightbox | null>(null);
 
 // 初始化 PhotoSwipe
@@ -120,14 +118,19 @@ const videoData = usePreview();
 
 // 监听元素可见性
 watch(
-	() => rootVisibilityRef.value,
+	() => rootVisibilityDebouncedRef.value,
 	(visible) => {
-		if (visible) {
+		if (
+			visible &&
+			!videoData.state.value?.length &&
+			!videoData.isLoading.value &&
+			!videoData.error.value
+		) {
 			videoData.execute(0, {
 				sha1: props.sha1,
 				pickCode: props.pickCode,
 				coverNum: FILELIST_PREVIEW_NUM,
-				duration: props.duration,
+				duration: Number(props.duration),
 			});
 		}
 	},

@@ -70,7 +70,6 @@ export class HlsIO {
 			};
 		});
 		this.duration = start;
-		console.log("segments", this.segments);
 	}
 
 	/**
