@@ -1,217 +1,173 @@
-import { getAvNumber } from "../../../utils/getNumber";
 import "./index.css";
-import { defer } from "lodash";
-import { PLUS_VERSION } from "../../../constants";
-import { getDuration } from "../../../utils/time";
-import {
-	type FileItemAttributes,
-	FileListType,
-	FileType,
-	type ItemInfo,
-	IvType,
-} from "../types";
-import { FileItemActressInfo } from "./actressInfo";
-import { FileItemClickPlay } from "./clickPlay";
-import { FileListDownload } from "./download";
-import { FileItemExtInfo } from "./extInfo";
-import { FileItemExtMenu } from "./extMenu";
-import { FileItemPreview } from "./preview";
-
-class FileItemLoader {
-	// 预览信息
-	private preview: FileItemPreview | null = null;
-	// 扩展信息
-	private extInfo: FileItemExtInfo | null = null;
-	// 演员信息
-	private actressInfo: FileItemActressInfo | null = null;
-	// 扩展菜单
-	private extMenu: FileItemExtMenu | null = null;
-	// 点击播放
-	private clickPlay: FileItemClickPlay | null = null;
-	// 下载
-	private download: FileListDownload | null = null;
-
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly fileListType: FileListType,
-	) {}
-
-	// 获取属性
-	private get attributes(): FileItemAttributes {
-		return Object.fromEntries(
-			Array.from(this.itemNode.attributes).map((attr) => [
-				attr.name,
-				attr.value,
-			]),
-		) as unknown as FileItemAttributes;
-	}
-
-	// 获取番号
-	private get avNumber(): ItemInfo["avNumber"] {
-		return getAvNumber(this.attributes.title);
-	}
-
-	// 获取是否可播放
-	private get filePlayable(): boolean {
-		return (
-			this.attributes.file_type === FileType.file &&
-			this.attributes.iv === IvType.playable &&
-			this.attributes.vdi !== "0"
-		);
-	}
-
-	private get durationNode(): HTMLElement | null {
-		return this.itemNode.querySelector(".duration") ?? null;
-	}
-
-	// 获取视频时长
-	private get duration(): number {
-		return getDuration(this.durationNode?.getAttribute("duration")!);
-	}
-
-	// 获取 itemInfo
-	private get itemInfo(): ItemInfo {
-		return {
-			avNumber: this.avNumber,
-			attributes: this.attributes,
-			filePlayable: this.filePlayable,
-			fileListType: this.fileListType,
-			duration: this.duration,
-		};
-	}
-
-	// 加载
-	public async load() {
-		if (PLUS_VERSION) {
-			// 加载扩展信息
-			this.extInfo = new FileItemExtInfo(this.itemNode, this.itemInfo);
-			this.extInfo.load();
-			// 加载演员信息
-			this.actressInfo = new FileItemActressInfo(this.itemNode, this.itemInfo);
-			this.actressInfo.load();
-		}
-
-		// 加载预览信息
-		this.preview = new FileItemPreview(this.itemNode, this.itemInfo);
-		this.preview.load();
-
-		// 加载扩展菜单
-		this.extMenu = new FileItemExtMenu(this.itemNode, this.itemInfo);
-		this.extMenu.load();
-
-		// 加载点击播放
-		this.clickPlay = new FileItemClickPlay(this.itemNode, this.itemInfo);
-		this.clickPlay.load();
-
-		// 加载下载
-		this.download = new FileListDownload(this.itemNode, this.itemInfo);
-		this.download.load();
-	}
-
-	// 销毁
-	public destroy(): void {
-		this.extInfo?.destroy();
-		this.preview?.destroy();
-		this.actressInfo?.destroy();
-		this.clickPlay?.destroy();
-	}
-}
+import { unsafeWindow } from "$";
+import { isReload } from "../../../utils/route";
+import { FileListType } from "../types";
+import { FileItemModLoader } from "./FileItemLoader";
+import { FileListScrollHistory } from "./scrollHistory";
 
 /**
  * 文件列表修改器
  */
 class FileListMod {
-	// 文件列表 ItemMaps
-	private fileitemMaps: Map<HTMLLIElement, FileItemLoader> = new Map();
-	// 文件列表变化监听器
+	/** 文件列表 Item Mod Loader Map */
+	private itemModLoaderMaps: Map<HTMLLIElement, FileItemModLoader> = new Map();
+	/** 文件列表变化监听器 */
 	private observerContent: MutationObserver | null = null;
+	/** 文件列表滚动位置记录 */
+	private scrollHistory: FileListScrollHistory | null = null;
 
 	constructor() {
 		this.init();
 	}
 
-	// 初始化
-	private async init(): Promise<void> {
-		this.updateFileItem();
-		this.watchFileItemChange();
+	/**
+	 * 获取文件列表容器节点
+	 */
+	get dataListBoxNode() {
+		return document.querySelector(unsafeWindow.Main.CONFIG.DataListBox);
 	}
 
 	// 获取文件列表dom
-	get fileListCellNode() {
+	get listCellNode() {
 		return document.querySelector(".list-cell") ?? null;
 	}
 
-	// 获取文件列表类型
-	get fileListType(): FileListType {
-		const listThumb = this.fileListCellNode?.querySelector(".list-contents");
-		if (listThumb) {
+	/**
+	 * 获取文件列表内容节点
+	 */
+	get listContentsNode() {
+		return this.listCellNode?.querySelector(".list-contents");
+	}
+
+	/**
+	 * 获取文件列表内容节点
+	 */
+	get listThumbNode() {
+		return this.listCellNode?.querySelector(".list-thumb");
+	}
+
+	/**
+	 * 获取文件列表滚动容器节点
+	 */
+	get listScrollBoxNode() {
+		return this.listContentsNode ?? this.listThumbNode;
+	}
+
+	/**
+	 * 获取文件列表类型
+	 */
+	get listType(): FileListType {
+		if (this.listContentsNode) {
 			return FileListType.list;
 		}
 		return FileListType.grid;
 	}
 
-	// 获取文件列表dom的li节点
-	get fileItemNodes() {
-		const nodes = this.fileListCellNode?.querySelectorAll("li");
-		return nodes ? new Set(nodes) : null;
+	/**
+	 * 获取文件列表 Item Nodes
+	 */
+	get itemNodes() {
+		return this.listCellNode?.querySelectorAll("li");
 	}
 
-	// 监听文件列表变化
-	private watchFileItemChange() {
+	/**
+	 * 初始化
+	 */
+	private async init() {
+		this.updateItems();
+		this.scrollHistory = new FileListScrollHistory();
+		isReload() && this.scrollHistory.clearAll();
+		if (this.listScrollBoxNode) {
+			this.scrollHistory?.setScrollBox(this.listScrollBoxNode);
+		}
+		this.watchItemsChange();
+	}
+
+	/**
+	 * 监听文件列表 Item 变化
+	 */
+	private watchItemsChange() {
 		let observerContent: MutationObserver | null = null;
-		observerContent = new MutationObserver(() => {
-			this.updateFileItem();
+		observerContent = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				// 如果目标节点是文件列表dom，并且有新增节点，则更新文件列表
+				if (
+					mutation.target.isSameNode(this.dataListBoxNode) &&
+					mutation.addedNodes.length > 0
+				) {
+					console.time("updateItems");
+					this.updateItems();
+					console.timeEnd("updateItems");
+					this.listScrollBoxNode &&
+						this.scrollHistory?.setScrollBox(this.listScrollBoxNode);
+					break;
+				}
+			}
 		});
-		observerContent.observe(document, {
+
+		if (!this.dataListBoxNode) {
+			console.error("文件列表容器节点不存在, 无法监听文件列表变化");
+			return;
+		}
+
+		observerContent.observe(this.dataListBoxNode!, {
 			childList: true,
-			subtree: true,
 		});
 		this.observerContent = observerContent;
 	}
 
-	// 更新文件列表
-	private updateFileItem() {
-		// 遍历文件列表dom的li节点
-		for (const item of this.fileItemNodes ?? []) {
-			defer(() => {
-				// 如果已经存在，则跳过
-				if (this.fileitemMaps.has(item)) {
-					return;
-				}
+	/**
+	 * 更新文件列表
+	 */
+	private updateItems() {
+		const itemNodes = this.itemNodes;
+		const itemsSet = new Set(itemNodes);
 
-				// 创建文件列表item
-				const fileItem = new FileItemLoader(item, this.fileListType);
-				// 加载文件列表item
-				fileItem.load();
-				// 设置文件列表item
-				this.fileitemMaps.set(item, fileItem);
-			});
+		if (!itemsSet) {
+			return;
 		}
-		// 遍历文件列表item
-		for (const [key, value] of this.fileitemMaps.entries()) {
-			// 如果文件列表dom的li节点存在，则跳过
-			if (this.fileItemNodes?.has(key)) {
-				return;
+
+		// 创建新 Item 修改器
+		for (const item of itemsSet) {
+			// 如果已经存在，则跳过
+			if (this.itemModLoaderMaps.has(item)) {
+				continue;
+			}
+
+			const itemModLoader = new FileItemModLoader(item, this.listType);
+			itemModLoader.load();
+			this.itemModLoaderMaps.set(item, itemModLoader);
+		}
+		// 销毁旧 Item 修改器
+		for (const [key, value] of this.itemModLoaderMaps.entries()) {
+			// 如果 li Node 存在，则跳过
+			if (itemsSet.has(key)) {
+				continue;
 			}
 			// 销毁文件列表item
 			value.destroy();
 			// 删除文件列表item
-			this.fileitemMaps.delete(key);
+			this.itemModLoaderMaps.delete(key);
 		}
 	}
 
-	// 销毁文件列表
-	private destroyItems(): void {
-		this.fileitemMaps.forEach((item) => {
+	/**
+	 * 销毁所有 Item Mod Loader
+	 */
+	private destroyAllItemModLoader(): void {
+		this.itemModLoaderMaps.forEach((item) => {
 			item.destroy();
 		});
-		this.fileitemMaps.clear();
+		this.itemModLoaderMaps.clear();
 	}
 
-	// 销毁
+	/**
+	 * 销毁
+	 */
 	public destroy(): void {
 		this.observerContent?.disconnect();
-		this.destroyItems();
+		this.destroyAllItemModLoader();
+		this.scrollHistory?.destroy();
 	}
 }
 

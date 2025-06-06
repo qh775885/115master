@@ -1,7 +1,3 @@
-import { AppLogger } from "./logger";
-
-const logger = new AppLogger("getAvNumber");
-
 /**
  * 提取番号
  * @param filename 文件名
@@ -26,8 +22,6 @@ export function getAvNumber(filename: string): string | null {
 		.replace(/@\w+@/, "")
 		// 清除 share_db86f06fdfbf31573ca6828ac0716d22
 		.replace(/share_[\w]{32}/, "");
-
-	logger.log("清理干扰字符", `before:${name} -> after:${cleanName}`);
 
 	// 常见的番号格式正则表达式
 	const patterns = [
@@ -104,16 +98,12 @@ export function getAvNumber(filename: string): string | null {
 	];
 
 	// 按照优先级顺序尝试匹配
-	for (const { name, pattern, format } of patterns) {
+	for (const { pattern, format } of patterns) {
 		const match = cleanName.match(pattern);
 		if (match) {
-			logger.log("match name", name);
-			logger.log("match regexp", pattern.toString());
 			const result = format(match);
-			logger.log("找到番号^^^", result, name);
 			return result;
 		}
 	}
-	logger.log("找不到番号");
 	return null;
 }

@@ -37,6 +37,7 @@ export interface FileItemAttributes {
 	// 地区id
 	area_id: string;
 	p_id: string;
+	// 目录id
 	cate_id: string;
 	cate_name: string;
 	score: string;
@@ -62,6 +63,9 @@ export interface ItemInfo {
 	duration: number;
 }
 
+/**
+ * 文件列表视图模式
+ */
 export enum FileListType {
 	// 列表
 	list = "list",

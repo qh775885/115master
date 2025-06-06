@@ -8,7 +8,7 @@
             
             <!-- 加载骨架 -->
             <template v-else-if="extInfo.isLoading.value || (!extInfo.isLoading.value && !extInfo.isReady.value)">
-                <div class="skeleton w-full h-24"></div>
+                <div class="skeleton w-full h-full"></div>
             </template>
             
             <!-- 空状态 -->
@@ -158,8 +158,8 @@ const missAV = new MissAV();
 const styles = {
 	// 容器样式
 	container: {
-		main: "w-full px-20",
-		content: "relative flex items-center gap-1 group min-h-24",
+		main: "w-full px-20 h-24",
+		content: "relative flex items-center gap-1 group h-full",
 	},
 	// 状态样式
 	states: {
@@ -189,7 +189,7 @@ const styles = {
 	item: {
 		container: "flex items-start gap-2 text-xs",
 		label: "w-8 h-5 text-neutral-500 shrink-0",
-		value: "flex flex-1 gap-2 flex-wrap text-neutral-500",
+		value: "flex flex-1 gap-2 flex-wrap text-neutral-500 line-clamp-1",
 		link: "hover:text-primary transition-colors hover:underline",
 		badge: "bg-neutral-100 hover:bg-neutral-100 rounded px-1 py-[1px] text-xs",
 	},

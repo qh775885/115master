@@ -22,3 +22,13 @@ export const goToPlayer = (
 
 	history.pushState({}, "", url);
 };
+
+/**
+ * 是否是用户手动刷新页面
+ */
+export const isReload = (): boolean => {
+	return (
+		top?.window.performance.navigation.type ===
+		top?.window.performance.navigation.TYPE_RELOAD
+	);
+};

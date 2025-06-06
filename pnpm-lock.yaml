@@ -68,6 +68,9 @@ importers:
       hls.js:
         specifier: ^1.5.20
         version: 1.5.20
+      iconify-icon:
+        specifier: ^3.0.0
+        version: 3.0.0
       localforage:
         specifier: ^1.10.0
         version: 1.10.0
@@ -1541,6 +1544,9 @@ packages:
   human-signals@2.1.0:
     resolution: {integrity: sha512-B4FFZ6q/T2jhhksgkbEW3HBvWIfDW85snkQgawt07S7J5QXTk6BkNV+0yAeZrM5QpMAdYlocGoljn0sJ/WQkFw==}
     engines: {node: '>=10.17.0'}
+
+  iconify-icon@3.0.0:
+    resolution: {integrity: sha512-yPcnpkn8HUEUckrxxJBOer3jbGv3bqozHsLMLBRxhk3As1X76BgV2mS2a1HTNOIagR8nUs30H3qAd9GLe8Mnlg==}
 
   immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
@@ -3944,6 +3950,10 @@ snapshots:
       entities: 4.5.0
 
   human-signals@2.1.0: {}
+
+  iconify-icon@3.0.0:
+    dependencies:
+      '@iconify/types': 2.0.0
 
   immediate@3.0.6: {}
 

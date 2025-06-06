@@ -12,7 +12,6 @@
     --range-thumb-size: calc(var(--size-selector, 0.25rem) * 2);
     --range-p: 0rem;
 }
-
 [data-theme="dark"] {
     .skeleton {
         background-image: linear-gradient(
