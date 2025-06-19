@@ -5,20 +5,19 @@ export enum FileType {
 	file = "1",
 }
 
+/** 是否视频 */
 export enum IvType {
-	// 可播放
-	playable = "1",
-	// 不可播放
-	unplayable = "0",
+	// 是
+	Yes = "1",
 }
 
 export interface FileItemAttributes {
 	c: string;
 	// 目录id
 	cid: string;
-	// 是否可播放
+	// 是否视频
 	iv: IvType;
-	// unknown
+	// Video Icon
 	vdi: string;
 	// 标题
 	title: string;
@@ -58,7 +57,6 @@ export interface FileItemAttributes {
 export interface ItemInfo {
 	avNumber: string | null;
 	attributes: FileItemAttributes;
-	filePlayable: boolean;
 	fileListType: FileListType;
 	duration: number;
 	listScrollBoxNode: Element;

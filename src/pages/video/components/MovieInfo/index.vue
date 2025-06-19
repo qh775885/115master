@@ -26,8 +26,7 @@
 			<template v-if="movieInfo.error.value">
 				<LoadingError 
 					:class="styles.states.error"
-					message="获取影片信息失败，可能由于网络异常或者您没有科学上网"
-					:detail="movieInfo.error.value.toString()"
+					:message="movieInfo.error.value"
 				/>
 			</template>
 

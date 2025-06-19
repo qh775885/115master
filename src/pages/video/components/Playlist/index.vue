@@ -15,7 +15,7 @@
 		</div>
 
 		<div :class="styles.playlist.content" v-if="playlist.error">
-			<LoadingError :detail="playlist.error" :fold="true"></LoadingError>
+			<LoadingError :message="playlist.error"></LoadingError>
 		</div>
 		<div :class="styles.playlist.content" v-else-if="playlist.isLoading || (!playlist.isLoading && !playlist.isReady)">
 			<div class="skeleton h-24 w-full rounded-lg"></div>

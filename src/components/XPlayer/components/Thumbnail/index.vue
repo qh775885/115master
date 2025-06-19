@@ -35,6 +35,16 @@
 			>
 				<div v-if="loading" :class="styles.image.loading"></div>
 			</transition>
+
+			<div
+				v-if="thumb.error"
+				:class="styles.image.error"
+			>
+				<LoadingError
+					:message="thumb.error"
+					size="mini"
+				/>
+			</div>
 		</div>
 		<div :class="styles.timeBox.container">
 			<span 
@@ -53,6 +63,7 @@
 
 <script setup lang="ts">
 import { computed, onUnmounted, reactive, ref, shallowRef, watch } from "vue";
+import LoadingError from "../../../../components/LoadingError/index.vue";
 import { getImageResize } from "../../../../utils/image";
 import { boundary } from "../../../../utils/number";
 import { usePlayerContext } from "../../hooks/usePlayerProvide";
@@ -71,6 +82,7 @@ const styles = {
 		pressing: "ring-4 ring-base-content/90",
 		loading:
 			"absolute loading loading-spinner size-12 m-auto rounded-full text-base-content/80",
+		error: "absolute inset-0 flex items-center justify-center",
 	},
 	timeBox: {
 		container:
@@ -129,7 +141,13 @@ const thumbnailContainerSize = shallowRef({
 // 最后一次定时器
 const lastTimer = shallowRef<NodeJS.Timeout | null>(null);
 // 缩略图
-const thumb = reactive({
+const thumb = reactive<{
+	lastHoverTime: number;
+	lastRequestTime: number;
+	renderTime: number;
+	renderImage: ThumbnailFrame | undefined;
+	error: unknown;
+}>({
 	// 最后一次 hover 时间
 	lastHoverTime: -1,
 	// 最后一次请求时间
@@ -137,7 +155,9 @@ const thumb = reactive({
 	// 渲染时间
 	renderTime: -1,
 	// 渲染图片
-	renderImage: undefined as ThumbnailFrame,
+	renderImage: undefined,
+	// 错误
+	error: undefined,
 });
 // 是否显示
 const boxVisible = computed(() => props.visible && previewTransform.value > -1);
@@ -194,35 +214,41 @@ const updateThumbnail = async (hoverTime: number, isLast: boolean) => {
 		}, 50);
 	}
 
-	// 尝试从缓存中取, 其实是同步返回
-	const cacheImage = await onThumbnailRequest?.({
-		type: "Cache",
-		time: hoverTime,
-		isLast,
-	});
-	if (cacheImage) {
-		thumb.renderImage = cacheImage;
-		thumb.renderTime = hoverTime;
+	try {
+		// 尝试从缓存中取, 其实是同步返回
+		const cacheImage = await onThumbnailRequest?.({
+			type: "Cache",
+			time: hoverTime,
+			isLast,
+		});
+		if (cacheImage) {
+			thumb.renderImage = cacheImage;
+			thumb.renderTime = hoverTime;
 
-		if (isLast) {
-			thumb.lastRequestTime = -1;
+			if (isLast) {
+				thumb.lastRequestTime = -1;
+			}
+			thumb.error = undefined;
+			return;
 		}
-		return;
-	}
 
-	thumb.lastRequestTime = hoverTime;
-	const newImage = await onThumbnailRequest?.({
-		type: "Must",
-		time: hoverTime,
-		isLast,
-	});
-	if (!newImage) return;
+		thumb.lastRequestTime = hoverTime;
+		const newImage = await onThumbnailRequest?.({
+			type: "Must",
+			time: hoverTime,
+			isLast,
+		});
+		if (!newImage) return;
 
-	// 如果请求时间与最新Hover时间相同，则更新缩略图
-	if (hoverTime === thumb.lastHoverTime && isLast) {
-		thumb.lastRequestTime = -1;
-		thumb.renderImage = newImage;
-		thumb.renderTime = hoverTime;
+		// 如果请求时间与最新Hover时间相同，则更新缩略图
+		if (hoverTime === thumb.lastHoverTime && isLast) {
+			thumb.lastRequestTime = -1;
+			thumb.renderImage = newImage;
+			thumb.renderTime = hoverTime;
+			thumb.error = undefined;
+		}
+	} catch (error) {
+		thumb.error = error;
 	}
 };
 
@@ -246,8 +272,12 @@ watch(
 
 // 绘制缩略图
 watch(
-	() => thumb.renderImage,
-	(newVal) => {
+	() => [thumb.renderImage, thumb.error],
+	() => {
+		if (thumb.error) {
+			return;
+		}
+
 		if (thumbnailCanvas.value && ctx.value) {
 			requestAnimationFrame(() => {
 				if (!ctx.value) {
@@ -258,9 +288,9 @@ watch(
 				ctx.value.clearRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
 
 				// 如果缩略图存在且渲染时间与最新Hover时间相同，则绘制缩略图
-				if (newVal && thumb.renderTime === thumb.lastHoverTime) {
-					const imgWidth = newVal.img.width;
-					const imgHeight = newVal.img.height;
+				if (thumb.renderImage && thumb.renderTime === thumb.lastHoverTime) {
+					const imgWidth = thumb.renderImage.img.width;
+					const imgHeight = thumb.renderImage.img.height;
 					const { width: resizeWidth, height: resizeHeight } = getImageResize(
 						imgWidth,
 						imgHeight,
@@ -271,7 +301,13 @@ watch(
 					const dy = (DEFAULT_HEIGHT - resizeHeight) / 2;
 					ctx.value.fillStyle = "#000";
 					ctx.value.fillRect(0, 0, DEFAULT_WIDTH, DEFAULT_HEIGHT);
-					ctx.value.drawImage(newVal.img, dx, dy, resizeWidth, resizeHeight);
+					ctx.value.drawImage(
+						thumb.renderImage.img,
+						dx,
+						dy,
+						resizeWidth,
+						resizeHeight,
+					);
 				}
 			});
 		}

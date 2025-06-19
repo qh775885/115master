@@ -5,13 +5,14 @@
         @click="handlePlay(item)"
     >
 		<div :class="styles.preview.container">
-			<LoadingError 
-				v-if="preview.error"
-				:class="styles.preview.imageError"
-				:detail="preview.error"
-				:fold="true"
-				size="mini"
-			/>
+
+			<template v-if="preview.error">
+				<LoadingError 
+					:class="styles.preview.imageError"
+					:message="preview.error"
+					size="mini"
+				/>
+			</template>
 
 			<div v-else-if="preview.isLoading" :class="styles.preview.skeleton">
 			</div>
@@ -55,11 +56,12 @@ import { Icon } from "@iconify/vue";
 import { computed, shallowRef } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import { formatTime } from "../../../../components/XPlayer/utils/time";
+import { FRIENDLY_ERROR_MESSAGE } from "../../../../constants";
 import { useSmartPreview } from "../../../../hooks/usePreview";
 import { ICON_STAR_FILL } from "../../../../icons";
 import type { Entity } from "../../../../utils/drive115";
+import { Drive115Error } from "../../../../utils/drive115/core";
 import { formatFileSize } from "../../../../utils/format";
-
 // 播放列表预览封面数量
 const PLAYLIST_PREVIEW_NUM = 1;
 

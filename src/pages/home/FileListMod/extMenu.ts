@@ -5,7 +5,7 @@ import { drive115 } from "../../../utils/drive115";
 import { isMac } from "../../../utils/platform";
 import { goToPlayer } from "../../../utils/route";
 import { webLinkIINA } from "../../../utils/weblink";
-import { FileListType, type ItemInfo } from "../types";
+import { FileListType, type ItemInfo, IvType } from "../types";
 
 interface ButtonConfig {
 	class: string;
@@ -29,7 +29,7 @@ export class FileItemExtMenu {
 				class: "115-player",
 				title: "使用【115官方播放器】",
 				text: "5️⃣ 官方播放",
-				visible: this.itemInfo.filePlayable,
+				visible: this.itemInfo.attributes.iv === IvType.Yes,
 				click: () => {
 					GM_openInTab(
 						new URL(
@@ -47,7 +47,7 @@ export class FileItemExtMenu {
 							title: "使用【iina】",
 							text: "IINA",
 							icon: iinaIcon,
-							visible: this.itemInfo.filePlayable,
+							visible: this.itemInfo.attributes.iv === IvType.Yes,
 							click: async () => {
 								try {
 									const download = await drive115.getFileDownloadUrl(
@@ -65,7 +65,7 @@ export class FileItemExtMenu {
 				class: "master-player",
 				title: "使用【Master播放器】",
 				text: "▶️ Master 播放",
-				visible: this.itemInfo.filePlayable,
+				visible: this.itemInfo.attributes.iv === IvType.Yes,
 				click: () => {
 					goToPlayer(
 						{
