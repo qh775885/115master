@@ -9,9 +9,9 @@ import { intervalArray } from "../../../utils/array";
 import { M3U8ClipperNew } from "../../../utils/clipper/m3u8Clipper";
 import { getImageResize } from "../../../utils/image";
 import {
-	ERROR_QUEUE_CLEARED,
 	type LaneConfig,
 	Scheduler,
+	SchedulerError,
 } from "../../../utils/scheduler";
 import { blurTime } from "../../../utils/time";
 import type { usePreferences } from "./usePreferences";
@@ -216,7 +216,10 @@ export function useDataThumbnails(
 					},
 				)
 				.catch((error) => {
-					if (error instanceof Error && error.message !== ERROR_QUEUE_CLEARED) {
+					if (
+						error instanceof SchedulerError &&
+						error.message !== SchedulerError.QueueCleared
+					) {
 						throw error;
 					}
 				});

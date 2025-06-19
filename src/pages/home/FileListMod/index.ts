@@ -24,26 +24,28 @@ class FileListMod {
 	 * 获取文件列表容器节点
 	 */
 	get dataListBoxNode() {
-		return document.querySelector(unsafeWindow.Main.CONFIG.DataListBox);
+		return document.querySelector<HTMLElement>(
+			unsafeWindow.Main.CONFIG.DataListBox,
+		);
 	}
 
 	// 获取文件列表dom
 	get listCellNode() {
-		return document.querySelector(".list-cell") ?? null;
+		return document.querySelector<HTMLElement>(".list-cell") ?? null;
 	}
 
 	/**
 	 * 获取文件列表内容节点
 	 */
 	get listContentsNode() {
-		return this.listCellNode?.querySelector(".list-contents");
+		return this.listCellNode?.querySelector<HTMLElement>(".list-contents");
 	}
 
 	/**
 	 * 获取文件列表内容节点
 	 */
 	get listThumbNode() {
-		return this.listCellNode?.querySelector(".list-thumb");
+		return this.listCellNode?.querySelector<HTMLElement>(".list-thumb");
 	}
 
 	/**
@@ -134,7 +136,11 @@ class FileListMod {
 				continue;
 			}
 
-			const itemModLoader = new FileItemModLoader(item, this.listType);
+			const itemModLoader = new FileItemModLoader(
+				item,
+				this.listType,
+				this.listScrollBoxNode!,
+			);
 			itemModLoader.load();
 			this.itemModLoaderMaps.set(item, itemModLoader);
 		}

@@ -1,3 +1,4 @@
+import { defer } from "lodash";
 import { type App, createApp } from "vue";
 import mainStyles from "../../../styles/main.css?inline";
 import ExtInfo from "../components/ExtInfo/index.vue";
@@ -63,6 +64,9 @@ export class FileItemExtInfo {
 
 	// 销毁
 	public destroy() {
-		this.vueApp?.unmount();
+		/** 延迟卸载 Vue，避免阻塞新的文件列表加载 */
+		defer(() => {
+			this.vueApp?.unmount();
+		});
 	}
 }

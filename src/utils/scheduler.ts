@@ -79,20 +79,34 @@ type AsyncQueueOptions = {
 
 type AsyncQueueOptionsDefault = Required<AsyncQueueOptions>;
 
-export const ERROR_QUEUE_CLEARED = "Queue cleared";
+/**
+ * 调度器错误
+ */
+export class SchedulerError extends Error {
+	/** 任务已存在 */
+	static TaskExist = "Task Exist";
+	/** 任务已取消 */
+	static TaskCancelled = "Task Cancelled";
+	/** 队列已清空 */
+	static QueueCleared = "Queue Cleared";
+	/** 队列已满 */
+	static QueueFull = "Queue Full";
+	/** 任务超时 */
+	static TaskTimeout = "Task Timeout";
+}
 
 /**
  * 任务调度器
  */
 export class Scheduler<T> {
-	private queue: Task<T>[] = [];
+	public queue: Task<T>[] = [];
 	private running: Map<string, Task<T>> = new Map();
 	// 每个车道的运行中任务计数
 	private laneRunningCount: Map<string, number> = new Map();
 
 	protected options: AsyncQueueOptionsDefault = {
 		maxConcurrent: 3,
-		maxQueueLength: 100,
+		maxQueueLength: Infinity,
 		defaultRetryDelay: 1000,
 		laneConfig: {},
 	};
@@ -117,14 +131,12 @@ export class Scheduler<T> {
 		options: AddTaskOptions = {},
 	): Promise<T> {
 		if (this.queue.length >= this.options.maxQueueLength) {
-			throw new Error("队列已满");
+			throw new SchedulerError(SchedulerError.QueueFull);
 		}
 
 		// 是否有同名的任务
 		if (options.id && this.get(options.id)) {
-			throw new Error(
-				`任务已存在: ${options.id} ${this.get(options.id)?.status}`,
-			);
+			throw new SchedulerError(SchedulerError.TaskExist);
 		}
 
 		let resolve = undefined as unknown as (value: T) => void;
@@ -233,7 +245,7 @@ export class Scheduler<T> {
 		this.queue = this.queue.filter((task) => {
 			if (task.id === idOrLane || task.lane === idOrLane) {
 				task.status = TaskStatus.Cancelled;
-				task.reject(new Error("Task cancelled"));
+				task.reject(new SchedulerError(SchedulerError.TaskCancelled));
 				return false;
 			}
 			return true;
@@ -243,7 +255,7 @@ export class Scheduler<T> {
 		this.running.forEach((task, taskId) => {
 			if (task.id === idOrLane || task.lane === idOrLane) {
 				task.status = TaskStatus.Cancelled;
-				task.reject(new Error("Task cancelled"));
+				task.reject(new SchedulerError(SchedulerError.TaskCancelled));
 				this.running.delete(taskId);
 
 				// 更新车道运行计数
@@ -252,6 +264,17 @@ export class Scheduler<T> {
 				}
 			}
 		});
+	}
+
+	/**
+	 * 移除指定任务或任务车道
+	 * @param idOrLane 任务ID或车道名
+	 */
+	public remove(idOrLane: string): void {
+		this.cancel(idOrLane);
+		this.queue = this.queue.filter(
+			(task) => task.id !== idOrLane && task.lane !== idOrLane,
+		);
 	}
 
 	/**
@@ -280,10 +303,28 @@ export class Scheduler<T> {
 		this.processQueue();
 	}
 
-	private isPaused(idOrLane: string): boolean {
+	/**
+	 * 是否暂停
+	 * @param idOrLane 任务ID或车道名
+	 * @returns 是否暂停
+	 */
+	public isPaused(idOrLane: string): boolean {
 		return Boolean(
 			this.queue.some(
 				(task) => task.lane === idOrLane && task.status === TaskStatus.Paused,
+			),
+		);
+	}
+
+	/**
+	 * 是否正在等待执行
+	 * @param idOrLane 任务ID或车道名
+	 * @returns 是否正在等待执行
+	 */
+	public isPending(idOrLane: string): boolean {
+		return Boolean(
+			this.queue.some(
+				(task) => task.lane === idOrLane && task.status === TaskStatus.Pending,
 			),
 		);
 	}
@@ -350,7 +391,6 @@ export class Scheduler<T> {
 
 		if (!nextTask) return;
 
-		this.queue = this.queue.filter((task) => task !== nextTask);
 		this.running.set(nextTask.id, nextTask);
 		nextTask.status = TaskStatus.Running;
 
@@ -367,7 +407,7 @@ export class Scheduler<T> {
 					const timeoutPromise = new Promise<T>((_, reject) => {
 						timeoutId = window.setTimeout(() => {
 							console.warn("Task timeout", nextTask.id);
-							reject(new Error("Task timeout"));
+							reject(new SchedulerError(SchedulerError.TaskTimeout));
 						}, nextTask.timeout);
 					});
 
@@ -580,7 +620,7 @@ export class Scheduler<T> {
 	public clear(): void {
 		this.queue.forEach((task) => {
 			task.status = TaskStatus.Cancelled;
-			task.reject(new Error(ERROR_QUEUE_CLEARED));
+			task.reject(new SchedulerError(SchedulerError.QueueCleared));
 		});
 		this.queue = [];
 		this.running.clear();

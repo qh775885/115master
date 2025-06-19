@@ -55,6 +55,7 @@ export class FileItemPreview {
 			pickCode: this.itemInfo.attributes.pick_code,
 			sha1: this.itemInfo.attributes.sha1,
 			duration: String(this.itemInfo.duration),
+			listScrollBoxNode: this.itemInfo.listScrollBoxNode,
 		});
 		app.mount(previewDom);
 		this.vueApp = app;
