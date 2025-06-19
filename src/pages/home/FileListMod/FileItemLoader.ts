@@ -35,6 +35,7 @@ export class FileItemModLoader {
 	constructor(
 		private readonly itemNode: HTMLElement,
 		private readonly fileListType: FileListType,
+		private readonly listScrollBoxNode: HTMLElement,
 	) {}
 
 	// 获取属性
@@ -79,6 +80,7 @@ export class FileItemModLoader {
 			filePlayable: this.filePlayable,
 			fileListType: this.fileListType,
 			duration: this.duration,
+			listScrollBoxNode: this.listScrollBoxNode,
 		};
 	}
 

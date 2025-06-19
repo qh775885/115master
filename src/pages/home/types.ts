@@ -61,6 +61,7 @@ export interface ItemInfo {
 	filePlayable: boolean;
 	fileListType: FileListType;
 	duration: number;
+	listScrollBoxNode: Element;
 }
 
 /**

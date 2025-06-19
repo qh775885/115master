@@ -31,7 +31,6 @@
 				:key="item.pc"
 				:item="item"
 				:active="item.pc === pickCode"
-				:visible="visible"
 				@play="handlePlay"
 			/>
 			<div :class="styles.playlist.divider">没有更多了</div>
@@ -52,7 +51,6 @@ import type PlaylistItemVue from "./item.vue";
 const props = defineProps<{
 	playlist: ReturnType<typeof useDataPlaylist>;
 	pickCode?: string;
-	visible?: boolean;
 }>();
 
 const emit = defineEmits<{

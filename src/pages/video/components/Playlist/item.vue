@@ -6,18 +6,21 @@
     >
 		<div :class="styles.preview.container">
 			<LoadingError 
-				v-if="preview.error.value"
+				v-if="preview.error"
 				:class="styles.preview.imageError"
-				:detail="preview.error.value"
+				:detail="preview.error"
 				:fold="true"
 				size="mini"
 			/>
 
-			<div v-else-if="preview.isLoading.value" :class="styles.preview.skeleton">
+			<div v-else-if="preview.isLoading" :class="styles.preview.skeleton">
 			</div>
 			
 			<!-- 预览图 -->
-			<img v-else-if="preview.isReady.value" :src="previewImg" :class="styles.preview.image" />
+			<img v-else-if="preview.isReady" :src="preview.state[0]?.img" :class="styles.preview.image" />
+
+			<!-- 无预览图时显示骨架 -->
+			<div v-else :class="styles.preview.skeleton"></div>
 
 			<!-- 时长 -->
 			<div :class="styles.duration.container">
@@ -49,20 +52,20 @@
 
 <script setup lang="ts">
 import { Icon } from "@iconify/vue";
-import { useElementVisibility } from "@vueuse/core";
-import { computed, shallowRef, watch } from "vue";
+import { computed, shallowRef } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import { formatTime } from "../../../../components/XPlayer/utils/time";
-import { usePreview } from "../../../../hooks/usePreview";
+import { useSmartPreview } from "../../../../hooks/usePreview";
 import { ICON_STAR_FILL } from "../../../../icons";
-import { PLAYLIST_PREVIEW_NUM } from "../../../../utils/cache/core/const";
 import type { Entity } from "../../../../utils/drive115";
 import { formatFileSize } from "../../../../utils/format";
+
+// 播放列表预览封面数量
+const PLAYLIST_PREVIEW_NUM = 1;
 
 const props = defineProps<{
 	item: Entity.PlaylistItem;
 	active: boolean;
-	visible?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -120,38 +123,32 @@ const styles = {
 	},
 };
 
-// 根元素
+// 根元素引用
 const rootRef = shallowRef<HTMLElement>();
-// 元素可见性
-const visibilityRef = useElementVisibility(rootRef, {
-	threshold: 0.3,
-});
-// 预览
-const preview = usePreview();
-// 预览图片
-const previewImg = computed(() => {
-	return preview.state.value?.[0]?.img ?? "";
-});
-// 进度
+
+// 预览选项
+const previewOptions = computed(() => ({
+	pickCode: props.item.pc,
+	sha1: props.item.sha,
+	coverNum: PLAYLIST_PREVIEW_NUM,
+	duration: props.item.play_long,
+}));
+
+// 智能预览配置
+const smartPreviewConfig = {
+	elementRef: rootRef,
+};
+
+// 使用智能预览 hook
+const { preview } = useSmartPreview(previewOptions, smartPreviewConfig);
+
+// 进度百分比
 const progressPercent = computed(() => {
 	return props.item.current_time / props.item.play_long;
 });
-// 播放
+
+// 播放处理
 const handlePlay = (item: Entity.PlaylistItem) => {
 	emit("play", item);
 };
-// 监听元素可见性
-watch(
-	[visibilityRef, () => props.visible],
-	([elementVisible, playlistVisible]) => {
-		if (elementVisible && playlistVisible) {
-			preview.execute(0, {
-				pickCode: props.item.pc,
-				sha1: props.item.sha,
-				coverNum: PLAYLIST_PREVIEW_NUM,
-				duration: props.item.play_long,
-			});
-		}
-	},
-);
 </script>
