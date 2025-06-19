@@ -1,7 +1,7 @@
 import { GM_openInTab } from "$";
 import { VOD_URL_115 } from "../../../constants/115";
 import { goToPlayer } from "../../../utils/route";
-import type { ItemInfo } from "../types";
+import { type ItemInfo, IvType } from "../types";
 
 // 文件项点击播放
 export class FileItemClickPlay {
@@ -48,8 +48,8 @@ export class FileItemClickPlay {
 	}
 
 	public load() {
-		// 如果文件不可播放，则不进行操作
-		if (!this.itemInfo.filePlayable) {
+		// 如果文件不是视频，则不进行操作
+		if (this.itemInfo.attributes.iv !== IvType.Yes) {
 			return;
 		}
 

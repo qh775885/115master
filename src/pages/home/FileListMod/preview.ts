@@ -2,7 +2,7 @@ import { type App, createApp } from "vue";
 import { PLUS_VERSION } from "../../../constants";
 import mainStyles from "../../../styles/main.css?inline";
 import ExtPreview from "../components/ExtPreview/index.vue";
-import { FileListType, type ItemInfo } from "../types";
+import { FileListType, type ItemInfo, IvType } from "../types";
 
 // 文件列表预览信息
 export class FileItemPreview {
@@ -24,8 +24,8 @@ export class FileItemPreview {
 			return;
 		}
 
-		// 如果视频不可播放，则不加载预览视频
-		if (!this.itemInfo.filePlayable) {
+		// 如果视频不是视频，则不加载预览视频
+		if (this.itemInfo.attributes.iv !== IvType.Yes) {
 			return;
 		}
 

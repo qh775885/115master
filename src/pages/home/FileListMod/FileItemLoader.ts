@@ -1,13 +1,7 @@
 import { PLUS_VERSION } from "../../../constants";
 import { getAvNumber } from "../../../utils/getNumber";
 import { getDuration } from "../../../utils/time";
-import {
-	type FileItemAttributes,
-	type FileListType,
-	FileType,
-	type ItemInfo,
-	IvType,
-} from "../types";
+import type { FileItemAttributes, FileListType, ItemInfo } from "../types";
 import { FileItemActressInfo } from "./actressInfo";
 import { FileItemClickPlay } from "./clickPlay";
 import { FileListDownload } from "./download";
@@ -53,15 +47,6 @@ export class FileItemModLoader {
 		return getAvNumber(this.attributes.title);
 	}
 
-	// 获取是否可播放
-	private get filePlayable(): boolean {
-		return (
-			this.attributes.file_type === FileType.file &&
-			this.attributes.iv === IvType.playable &&
-			this.attributes.vdi !== "0"
-		);
-	}
-
 	// 获取视频时长节点
 	private get durationNode(): HTMLElement | null {
 		return this.itemNode.querySelector(".duration") ?? null;
@@ -77,7 +62,6 @@ export class FileItemModLoader {
 		return {
 			avNumber: this.avNumber,
 			attributes: this.attributes,
-			filePlayable: this.filePlayable,
 			fileListType: this.fileListType,
 			duration: this.duration,
 			listScrollBoxNode: this.listScrollBoxNode,

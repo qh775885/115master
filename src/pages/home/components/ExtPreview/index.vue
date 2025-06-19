@@ -3,7 +3,7 @@
 		<div :class="styles.container.content">
 			<!-- 错误状态 -->
 			<div :class="styles.states.error" v-if="preview.error">
-				<LoadingError size="mini" :detail="preview.error" fold />
+				<LoadingError size="mini" :message="preview.error" />
 			</div>
 			
 			<!-- 加载骨架 -->
@@ -40,8 +40,9 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import "photoswipe/style.css";
+import { FRIENDLY_ERROR_MESSAGE } from "../../../../constants";
 import { useSmartPreview } from "../../../../hooks/usePreview";
-
+import { Drive115Error } from "../../../../utils/drive115/core";
 // 文件列表预览封面数量
 const FILELIST_PREVIEW_NUM = 5;
 

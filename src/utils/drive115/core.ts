@@ -8,6 +8,7 @@ import {
 } from "../../constants/115";
 import { qualityCodeMap } from "../../constants/quality";
 import type { M3u8Item } from "../../types/player";
+import { AppError } from "../error";
 import { AppLogger } from "../logger";
 import { is115Browser } from "../platform";
 import { fetchRequest } from "../request/fetchRequest";
@@ -26,6 +27,14 @@ export interface DownloadResult {
 		};
 		url: string;
 	};
+}
+
+/**
+ * 115驱动错误
+ */
+export class Drive115Error extends AppError {
+	/** 未找到 m3u8 文件 */
+	static NotFoundM3u8File = Drive115Error.CreateError("Not found m3u8 file");
 }
 
 // TODO: 超时登录错误 errNo 990001
@@ -128,8 +137,14 @@ export class Drive115Core {
 
 		const htmlText = await response.text();
 		if (!/^#/.test(htmlText)) {
-			const res = JSON.parse(htmlText) as NormalApi.Res.VideoM3u8;
-			if (res.state === false) {
+			let res: NormalApi.Res.VideoM3u8 | undefined;
+			try {
+				res = JSON.parse(htmlText) as NormalApi.Res.VideoM3u8;
+			} catch (error) {
+				throw new Drive115Error.NotFoundM3u8File();
+			}
+
+			if (res && res.state === false) {
 				if (res.code === 911) {
 					this.jumpVerify(pickcode);
 				}

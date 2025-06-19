@@ -2,12 +2,9 @@
   <div :class="styles.container">
     <Icon :icon="iconName" :class="styles.icon" />
     <p :class="styles.text">
-      <slot>{{ message || defaultMessage }}</slot>
+      <slot>{{ message || FRIENDLY_ERROR_MESSAGE.UNKNOWN_ERROR }}</slot>
     </p>
-	<template v-if="props.detail">
-		<p v-if="!props.fold" :class="styles.detail" v-html="handleDetail(props.detail)"></p>
-		<button v-else :class="styles.detailButton" @click="handleShowDetail">查看错误</button>
-	</template>
+	<button v-if="(props.message instanceof Error)" :class="styles.detailButton" @click="handleShowDetail">查看错误</button>
     <button 
       v-if="props.retryable" 
       :class="styles.retryButton"
@@ -22,16 +19,17 @@
 import { Icon } from "@iconify/vue";
 import { useClipboard } from "@vueuse/core";
 import { computed } from "vue";
+import { FRIENDLY_ERROR_MESSAGE } from "../../constants";
 import { ICON_ERROR } from "../../icons";
 
 const props = withDefaults(
 	defineProps<{
+		/** 类型 */
+		type?: "error" | "warning" | "info" | "success";
 		// 是否可重试
 		retryable?: boolean;
 		// 错误信息
-		message?: string;
-		// 错误详情
-		detail?: string | Error | unknown;
+		message?: string | Error | unknown;
 		// 重试按钮文本
 		retryText?: string;
 		// 是否无内边距
@@ -44,9 +42,9 @@ const props = withDefaults(
 		fold?: boolean;
 	}>(),
 	{
+		type: "error",
 		retryable: false,
-		message: "加载失败",
-		detail: undefined,
+		message: undefined,
 		retryText: "重试",
 		noPadding: false,
 		size: "medium",
@@ -55,8 +53,6 @@ const props = withDefaults(
 );
 
 defineEmits<(e: "retry") => void>();
-
-const defaultMessage = "加载失败";
 
 const iconName = computed(() => props.icon);
 
@@ -73,7 +69,7 @@ const styles = computed(() => ({
 	],
 	// 图标样式
 	icon: [
-		"text-error",
+		`text-${props.type}`,
 		// 根据尺寸调整图标大小
 		{
 			mini: "text-2xl",
@@ -91,17 +87,6 @@ const styles = computed(() => ({
 			small: "text-sm",
 			medium: "text-base",
 			large: "text-lg",
-		}[props.size],
-	],
-	// 详情样式
-	detail: [
-		"text-center m-0 text-base-content/50 select-text whitespace-pre-line font-mono",
-		// 根据尺寸调整字体大小
-		{
-			mini: "text-xs",
-			small: "text-xs",
-			medium: "text-sm",
-			large: "text-base",
 		}[props.size],
 	],
 	// 详情按钮样式
@@ -123,7 +108,7 @@ const handleDetail = (detail: string | Error | unknown): string => {
 
 // 显示详情
 const handleShowDetail = () => {
-	const detail = handleDetail(props.detail);
+	const detail = handleDetail(props.message);
 	const { copy } = useClipboard();
 	copy(detail);
 	alert(detail);

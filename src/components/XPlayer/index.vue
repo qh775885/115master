@@ -30,7 +30,7 @@
 		<LoadingError 
 				v-if="playerCore?.loadError" 
 				:class="styles.error" 
-				:detail="playerCore?.loadError"
+				:message="playerCore?.loadError"
 			/>
 
 		<!-- 加载动画 -->

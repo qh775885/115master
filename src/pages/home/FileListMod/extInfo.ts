@@ -22,7 +22,7 @@ export class FileItemExtInfo {
 
 		// 如果视频不可播放且不是文件夹，则不加载扩展信息
 		if (
-			this.itemInfo.attributes.iv !== IvType.playable &&
+			this.itemInfo.attributes.iv !== IvType.Yes &&
 			this.itemInfo.attributes.file_type !== FileType.folder
 		) {
 			return;

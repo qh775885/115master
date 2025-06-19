@@ -5,6 +5,7 @@ import type {
 	ThumbnailFrame,
 	VideoSource,
 } from "../../../components/XPlayer/types";
+import { FRIENDLY_ERROR_MESSAGE } from "../../../constants";
 import { intervalArray } from "../../../utils/array";
 import { M3U8ClipperNew } from "../../../utils/clipper/m3u8Clipper";
 import { getImageResize } from "../../../utils/image";
@@ -66,17 +67,30 @@ export function useDataThumbnails(
 	// 缓存缩略图
 	const cahceThumbnails = new Map<number, ThumbnailFrame>();
 
+	// 错误
+	const state = shallowRef<{
+		error: Error | unknown | undefined;
+	}>({
+		error: undefined,
+	});
+
 	// 初始化缩略图生成器
 	const initialize = async (sources: VideoSource[], interval: number) => {
-		isInited.value = false;
-		const source = findLowestQualityHLS(sources);
-		if (!source) return;
-		clipper = new M3U8ClipperNew({
-			url: source.url,
-		});
-		await clipper.open();
-		samplingInterval.value = interval ?? DEFAULT_SAMPLING_INTERVAL;
-		isInited.value = true;
+		try {
+			isInited.value = false;
+			const source = findLowestQualityHLS(sources);
+			if (!source) {
+				throw FRIENDLY_ERROR_MESSAGE.CANNOT_PREVIEW_WITHOUT_TRANSCODING;
+			}
+			clipper = new M3U8ClipperNew({
+				url: source.url,
+			});
+			await clipper.open();
+			samplingInterval.value = interval ?? DEFAULT_SAMPLING_INTERVAL;
+			isInited.value = true;
+		} catch (error) {
+			state.value.error = error;
+		}
 	};
 
 	// 找到最低画质的 HLS 源
@@ -141,6 +155,10 @@ export function useDataThumbnails(
 		time: number;
 		isLast: boolean;
 	}): Promise<ThumbnailFrame> => {
+		if (state.value.error) {
+			throw state.value.error;
+		}
+
 		if (!isInited || Number.isNaN(time)) {
 			return;
 		}
@@ -168,6 +186,10 @@ export function useDataThumbnails(
 
 	// 自动加载缩略图
 	const autoBuffer = async () => {
+		if (state.value.error) {
+			throw state.value.error;
+		}
+
 		// 如果禁用了自动加载预览图
 		if (preferences.value.autoLoadThumbnails === false) {
 			return;
@@ -216,10 +238,7 @@ export function useDataThumbnails(
 					},
 				)
 				.catch((error) => {
-					if (
-						error instanceof SchedulerError &&
-						error.message !== SchedulerError.QueueCleared
-					) {
+					if (error instanceof SchedulerError.QueueCleared) {
 						throw error;
 					}
 				});

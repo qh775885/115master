@@ -3,7 +3,7 @@
         <div :class="styles.container.content">
             <!-- 错误状态 -->
             <div :class="styles.states.error" v-if="extInfo.error.value">
-                <LoadingError :message="`获取番号 [${props.avNumber}] 失败`" :detail="`可能由于网络原因，请检查是否科学网络${extInfo.error.value}`" fold size="mini"/>
+                <LoadingError :message="extInfo.error.value" size="mini"/>
             </div>
             
             <!-- 加载骨架 -->

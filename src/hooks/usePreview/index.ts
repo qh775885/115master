@@ -1,8 +1,10 @@
 import { useElementVisibility, useScroll } from "@vueuse/core";
 import { type Ref, onUnmounted, reactive, watch } from "vue";
+import { FRIENDLY_ERROR_MESSAGE } from "../../constants";
 import { previewCache } from "../../utils/cache";
 import { M3U8ClipperNew } from "../../utils/clipper/m3u8Clipper";
 import { drive115 } from "../../utils/drive115";
+import { Drive115Error } from "../../utils/drive115/core";
 import { getImageResize } from "../../utils/image";
 import { Scheduler, SchedulerError, TaskStatus } from "../../utils/scheduler";
 
@@ -260,7 +262,7 @@ export const useSmartPreview = (
 	const preview = reactive<{
 		isReady: boolean;
 		isLoading: boolean;
-		error: Error | unknown;
+		error: unknown;
 		state: Preview[];
 	}>({
 		isReady: false,
@@ -303,10 +305,12 @@ export const useSmartPreview = (
 			preview.state = data;
 			preview.isReady = true;
 		} catch (error) {
-			if (
-				error instanceof Error &&
-				error.message === SchedulerError.TaskCancelled
-			) {
+			if (error instanceof SchedulerError.TaskCancelled) {
+				return;
+			}
+			if (error instanceof Drive115Error.NotFoundM3u8File) {
+				preview.error =
+					FRIENDLY_ERROR_MESSAGE.CANNOT_PREVIEW_WITHOUT_TRANSCODING;
 				return;
 			}
 			preview.error = error;
