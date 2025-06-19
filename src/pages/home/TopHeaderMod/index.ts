@@ -31,7 +31,9 @@ export class TopHeaderMod {
 		this.deleteOfficialDownloadButton();
 		const offlineTaskButton = this.createOfflineTaskButton();
 		this.topHeaderNode?.prepend(offlineTaskButton);
-		this.deleteOfficialDownloadButton();
+
+		this.fixContextMenuPosition("upload_btn_add_dir");
+		this.fixContextMenuPosition("create_new_add_dir");
 	}
 
 	// 删除官方的离线任务按钮
@@ -59,6 +61,18 @@ export class TopHeaderMod {
 			openOfflineTask();
 		};
 		return button;
+	}
+
+	private fixContextMenuPosition(name: string) {
+		const tabNode = document.querySelector<HTMLElement>(
+			`[data-dropdown-tab="${name}"]`,
+		);
+		const contextMenuNode = document.querySelector<HTMLElement>(
+			`[data-dropdown-content="${name}"]`,
+		);
+		if (!tabNode || !contextMenuNode) return;
+		const tabRect = tabNode.getBoundingClientRect();
+		contextMenuNode.style.left = `${tabRect.left}px`;
 	}
 
 	public destroy() {}
