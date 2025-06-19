@@ -17,10 +17,28 @@ export class TopFilePathMod {
 	}
 
 	/**
+	 * 文件路径 Box
+	 */
+	private get filePathBoxNode() {
+		return document.querySelector<HTMLElement>("#js_top_header_file_path_box");
+	}
+
+	/**
 	 * 当前路径容器
 	 */
 	private get topFilePathContainerNode() {
-		return document.querySelector(".list-topheader .top-file-path");
+		return document.querySelector<HTMLElement>(
+			".list-topheader .top-file-path",
+		);
+	}
+
+	/**
+	 * 路径Tooltip
+	 */
+	private get commonLittlePopNode() {
+		return this.filePathBoxNode?.querySelector<HTMLElement>(
+			".common-little-pop",
+		);
 	}
 
 	/**
@@ -91,6 +109,10 @@ export class TopFilePathMod {
 		this.backButton.innerHTML =
 			'<iconify-icon icon="material-symbols:line-start-arrow-notch" noobserver></iconify-icon>返回目录';
 		this.topFilePathContainerNode?.before(this.backButton);
+		/** 修复路径Tooltip位置 */
+		if (this.commonLittlePopNode) {
+			this.commonLittlePopNode.style.marginLeft = `${this.filePathNode?.getBoundingClientRect().left}px`;
+		}
 		this.backButton.addEventListener("click", () => {
 			const prevPathLink =
 				this.readPathLinkNodes?.[this.readPathLinkNodes.length - 2];
@@ -101,13 +123,24 @@ export class TopFilePathMod {
 	}
 
 	/**
+	 * 删除返回按钮
+	 */
+	private removeBackButton() {
+		this.backButton?.remove();
+		this.backButton = null;
+		/** 恢复路径Tooltip位置 */
+		if (this.commonLittlePopNode) {
+			this.commonLittlePopNode.style.marginLeft = "0";
+		}
+	}
+
+	/**
 	 * 控制返回按钮显示/隐藏
 	 */
 	private controlBackButtonShow() {
 		const onlyOnePath = (this.readPathLinkNodes?.length ?? 0) <= 1;
 		if (onlyOnePath || this.hasSearchBackButton) {
-			this.backButton?.remove();
-			this.backButton = null;
+			this.removeBackButton();
 		} else if (!this.backButton) {
 			this.addBackButton();
 		}
