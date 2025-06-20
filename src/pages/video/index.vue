@@ -48,7 +48,8 @@
 						>
 							<template #header-left>
 								<HeaderInfo 
-									:fileInfo="DataFileInfo" 
+									:fileInfo="DataFileInfo"
+									:playlist="DataPlaylist"
 								/>
 							</template>
 							<template #controls-right>

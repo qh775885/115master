@@ -8,13 +8,13 @@ export class Drive115Wrap extends Drive115Core {
 		try {
 			const response = await this.webApiGetFiles(params);
 			if (response.state) {
-				return response.data;
+				return response;
 			}
 			throw new Error("webapiFiles 获取播放列表失败");
 		} catch (error) {
 			const response = await this.ApsGetNatsortFiles(params);
 			if (response.state) {
-				return response.data;
+				return response;
 			}
 			throw new Error(`获取播放列表失败: ${JSON.stringify(response)}`);
 		}
