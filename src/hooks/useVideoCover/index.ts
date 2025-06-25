@@ -1,7 +1,7 @@
 import { useElementVisibility, useScroll } from "@vueuse/core";
 import { type Ref, onUnmounted, reactive, watch } from "vue";
 import { FRIENDLY_ERROR_MESSAGE } from "../../constants";
-import { previewCache } from "../../utils/cache";
+import { videoCoverCache } from "../../utils/cache";
 import { M3U8ClipperNew } from "../../utils/clipper/m3u8Clipper";
 import { drive115 } from "../../utils/drive115";
 import { Drive115Error } from "../../utils/drive115/core";
@@ -14,13 +14,13 @@ const MAX_WIDTH = 720;
 /** 最大高度 */
 const MAX_HEIGHT = 720;
 
-/** 预览图调度器 */
-const previewScheduler = new Scheduler<Preview[]>({
+/** 视频封面调度器 */
+const videoCoverScheduler = new Scheduler<VideoCover[]>({
 	maxConcurrent: 3,
 });
 
-/** 预览图基础数据 */
-type PreviewBase = {
+/** 视频封面基础数据 */
+type VideoCoverBase = {
 	// 宽度
 	width: number;
 	// 高度
@@ -32,25 +32,25 @@ type PreviewBase = {
 };
 
 /**
- * 预览图原始数据
+ * 视频封面原始数据
  */
-export type PreviewRaw = PreviewBase & {
+export type VideoCoverRaw = VideoCoverBase & {
 	// 图片 blob
 	blob: Blob;
 };
 
 /**
- * 预览图数据
+ * 视频封面数据
  */
-export type Preview = PreviewBase & {
+export type VideoCover = VideoCoverBase & {
 	// 图片 blob URL
 	img: string;
 };
 
 /**
- * 预览选项
+ * 视频封面选项
  */
-export type PreviewOptions = {
+export type VideoCoverOptions = {
 	/** sha1 */
 	sha1: string;
 	/** 文件提取码 */
@@ -78,10 +78,10 @@ export type SmartLoadConfig = {
 };
 
 /**
- * 生成预览任务ID
+ * 生成任务ID
  */
-const generatePreviewTaskId = (options: PreviewOptions): string => {
-	return `preview_${options.sha1}_${options.pickCode}_${options.coverNum}_${options.duration}`;
+const generateTaskId = (options: VideoCoverOptions): string => {
+	return `cover_${options.sha1}_${options.pickCode}_${options.coverNum}_${options.duration}`;
 };
 
 /**
@@ -90,12 +90,12 @@ const generatePreviewTaskId = (options: PreviewOptions): string => {
 const getCacheKey = (sha1: string, time: number): string => `${sha1}_${time}`;
 
 /**
- * 计算预览时间点
+ * 计算视频封面时间点
  * @param duration 视频时长
  * @param coverNum 封面数量
- * @returns 预览时间点数组
+ * @returns 视频封面时间点数组
  */
-const calculatePreviewTimes = (
+const calculateVideoCoverTimes = (
 	duration: number,
 	coverNum: number,
 ): number[] => {
@@ -115,20 +115,20 @@ const calculatePreviewTimes = (
 };
 
 /**
- * 将数据转换为可预览数据
+ * 将数据转换为可显示数据
  */
-const convertPreviewableData = (rawData: PreviewRaw): Preview => ({
+const toDisplayableData = (rawData: VideoCoverRaw): VideoCover => ({
 	img: URL.createObjectURL(rawData.blob),
 	...rawData,
 });
 
 /**
- * 生成单个预览图原始数据
+ * 生成单个视频封面原始数据
  */
-const generatePreviewRaw = async (
+const generateVideoCoverRaw = async (
 	clipper: M3U8ClipperNew,
 	time: number,
-): Promise<PreviewRaw> => {
+): Promise<VideoCoverRaw> => {
 	// 获取截图
 	const result = await clipper.seek(time, true);
 	if (!result) {
@@ -173,44 +173,44 @@ const generatePreviewRaw = async (
 	result.videoFrame.close();
 
 	// 缓存 blob 数据
-	const previewRaw: PreviewRaw = {
+	const raw: VideoCoverRaw = {
 		blob,
 		width: resize.width,
 		height: resize.height,
 		frameTime: result.frameTime,
 		seekTime: time,
 	};
-	return previewRaw;
+	return raw;
 };
 
 /**
- * 从缓存获取预览图
+ * 从缓存获取视频封面
  */
-const getPreviewsFromCache = async (
+const getVideoCoversFromCache = async (
 	sha1: string,
 	times: number[],
-): Promise<Preview[]> => {
-	const previews: Preview[] = [];
+): Promise<VideoCover[]> => {
+	const covers: VideoCover[] = [];
 	for (const time of times) {
 		const cacheKey = getCacheKey(sha1, time);
-		const cache = await previewCache.get(cacheKey);
+		const cache = await videoCoverCache.get(cacheKey);
 		if (!cache) {
 			return [];
 		}
 		const cacheData = cache.value;
-		previews.push(convertPreviewableData(cacheData));
+		covers.push(toDisplayableData(cacheData));
 	}
-	return previews;
+	return covers;
 };
 
 /**
- * 获取预览图
+ * 获取视频封面
  */
-const getPreview = async (
+const getVideoCover = async (
 	sha1: string,
 	pickCode: string,
 	times: number[],
-): Promise<Preview[]> => {
+): Promise<VideoCover[]> => {
 	// 获取 m3u8 列表
 	const m3u8List = await drive115.getM3u8(pickCode);
 
@@ -228,12 +228,12 @@ const getPreview = async (
 	// 打开 clipper
 	await clipper.open();
 
-	// 获取预览图
+	// 获取每个时间点的视频封面
 	const promises = times.map(async (time) => {
 		const cacheKey = getCacheKey(sha1, time);
-		const previewRaw = await generatePreviewRaw(clipper, time);
-		previewCache.set(cacheKey, previewRaw);
-		return convertPreviewableData(previewRaw);
+		const raw = await generateVideoCoverRaw(clipper, time);
+		videoCoverCache.set(cacheKey, raw);
+		return toDisplayableData(raw);
 	});
 
 	// 返回用于显示的数据
@@ -243,27 +243,28 @@ const getPreview = async (
 /**
  * 清理 blob URL
  */
-const cleanupBlobUrl = (previews: string[]): void => {
-	previews.forEach((preview) => {
-		if (preview.startsWith("blob:")) {
-			URL.revokeObjectURL(preview);
+const cleanupBlobUrl = (covers: string[]): void => {
+	covers.forEach((cover) => {
+		if (cover.startsWith("blob:")) {
+			URL.revokeObjectURL(cover);
 		}
 	});
 };
 
 /**
- * 智能预览图 Hook - 带可见性检测和滚动防抖的智能加载策略
+ * 智能视频封面 Hook
+ * @description 带滚动加载
  */
-export const useSmartPreview = (
-	options: Ref<PreviewOptions>,
+export const useSmartVideoCover = (
+	options: Ref<VideoCoverOptions>,
 	config: SmartLoadConfig,
 ) => {
-	/** 预览数据 */
-	const preview = reactive<{
+	/** 数据 */
+	const videoCover = reactive<{
 		isReady: boolean;
 		isLoading: boolean;
 		error: unknown;
-		state: Preview[];
+		state: VideoCover[];
 	}>({
 		isReady: false,
 		isLoading: false,
@@ -271,11 +272,11 @@ export const useSmartPreview = (
 		state: [],
 	});
 
-	/** 预览任务ID */
-	const previewTaskId = generatePreviewTaskId(options.value);
+	/** 任务ID */
+	const taskId = generateTaskId(options.value);
 
-	/** 预览时间点 */
-	const times = calculatePreviewTimes(
+	/** 时间点 */
+	const times = calculateVideoCoverTimes(
 		options.value.duration,
 		options.value.coverNum,
 	);
@@ -288,55 +289,55 @@ export const useSmartPreview = (
 	});
 
 	/**
-	 * 获取预览图数据
+	 * 获取数据
 	 */
-	const getData = async (id: string, options: PreviewOptions) => {
-		if (preview.isReady || preview.error) {
+	const getData = async (id: string, options: VideoCoverOptions) => {
+		if (videoCover.isReady || videoCover.error) {
 			return;
 		}
 
-		const task = previewScheduler.get(id);
+		const task = videoCoverScheduler.get(id);
 		if (task) {
 			return;
 		}
-		preview.isLoading = true;
+		videoCover.isLoading = true;
 		try {
 			const data = await addTask(id, options.sha1, options.pickCode, times);
-			preview.state = data;
-			preview.isReady = true;
+			videoCover.state = data;
+			videoCover.isReady = true;
 		} catch (error) {
 			if (error instanceof SchedulerError.TaskCancelled) {
 				return;
 			}
 			if (error instanceof Drive115Error.NotFoundM3u8File) {
-				preview.error =
-					FRIENDLY_ERROR_MESSAGE.CANNOT_PREVIEW_WITHOUT_TRANSCODING;
+				videoCover.error =
+					FRIENDLY_ERROR_MESSAGE.CANNOT_VIDEO_COVER_WITHOUT_TRANSCODING;
 				return;
 			}
-			preview.error = error;
+			videoCover.error = error;
 		} finally {
-			preview.isLoading = false;
+			videoCover.isLoading = false;
 		}
 	};
 
-	/** 从缓存获取预览图数据 */
-	const getDataByCache = async (options: PreviewOptions) => {
-		if (preview.isReady || preview.error) {
+	/** 从缓存获取数据 */
+	const getDataByCache = async (options: VideoCoverOptions) => {
+		if (videoCover.isReady || videoCover.error) {
 			return;
 		}
 
-		preview.isLoading = true;
+		videoCover.isLoading = true;
 		try {
-			const data = await getPreviewsFromCache(options.sha1, times);
+			const data = await getVideoCoversFromCache(options.sha1, times);
 			if (data.length > 0) {
-				preview.state = data;
-				preview.isLoading = false;
-				preview.isReady = true;
+				videoCover.state = data;
+				videoCover.isLoading = false;
+				videoCover.isReady = true;
 			}
 		} catch (error) {
-			preview.error = error;
+			videoCover.error = error;
 		} finally {
-			preview.isLoading = false;
+			videoCover.isLoading = false;
 		}
 	};
 
@@ -347,9 +348,9 @@ export const useSmartPreview = (
 		pickCode: string,
 		times: number[],
 	) => {
-		return previewScheduler.add(
+		return videoCoverScheduler.add(
 			() => {
-				return getPreview(sha1, pickCode, times);
+				return getVideoCover(sha1, pickCode, times);
 			},
 			{
 				id,
@@ -360,9 +361,9 @@ export const useSmartPreview = (
 
 	/** 取消任务 */
 	const cancelTask = () => {
-		const task = previewScheduler.get(previewTaskId);
+		const task = videoCoverScheduler.get(taskId);
 		if (task && task.status === TaskStatus.Pending) {
-			previewScheduler.cancel(previewTaskId);
+			videoCoverScheduler.cancel(taskId);
 		}
 	};
 
@@ -373,7 +374,7 @@ export const useSmartPreview = (
 				getDataByCache(options.value);
 			} else {
 				await getDataByCache(options.value);
-				getData(previewTaskId, options.value);
+				getData(taskId, options.value);
 			}
 		} else {
 			cancelTask();
@@ -386,22 +387,22 @@ export const useSmartPreview = (
 		onStop: async () => {
 			if (visibility.value) {
 				await getDataByCache(options.value);
-				getData(previewTaskId, options.value);
+				getData(taskId, options.value);
 			}
 		},
 	});
 
 	/** 卸载 */
 	onUnmounted(() => {
-		previewScheduler.remove(previewTaskId);
+		videoCoverScheduler.remove(taskId);
 		cleanupBlobUrl(
-			preview.state
+			videoCover.state
 				.map((item) => item?.img)
 				.filter((item) => item !== undefined),
 		);
 	});
 
 	return {
-		preview,
+		videoCover,
 	};
 };

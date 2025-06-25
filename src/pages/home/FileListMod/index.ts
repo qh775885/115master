@@ -8,13 +8,13 @@ import { FileItemModClickPlay } from "./FileItemMod/clickPlay";
 import { FileItemModDownload } from "./FileItemMod/download";
 import { FileItemModExtInfo } from "./FileItemMod/extInfo";
 import { FileItemModExtMenu } from "./FileItemMod/extMenu";
-import { FileItemModPreview } from "./preview";
+import { FileItemModVideoCover } from "./FileItemMod/videoCover";
 import { FileListScrollHistory } from "./scrollHistory";
 
 const itemMods = [
 	FileItemModExtInfo,
 	FileItemModActressInfo,
-	FileItemModPreview,
+	FileItemModVideoCover,
 	FileItemModExtMenu,
 	FileItemModClickPlay,
 	FileItemModDownload,
