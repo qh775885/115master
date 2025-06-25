@@ -307,7 +307,12 @@ const handleChangeVideo = async (item: Entity.PlaylistItem) => {
 		DataVideoSources.clear();
 		DataThumbnails.clear();
 		DataHistory.clear();
-		DataSubtitles.execute(0, params.pickCode.value, null);
+		DataSubtitles.execute(
+			0,
+			params.pickCode.value,
+			DataFileInfo.state.file_name,
+			null,
+		);
 		if (PLUS_VERSION) {
 			DataMovieInfo.javDBState.execute(0);
 			DataMovieInfo.javBusState.execute(0);
@@ -385,7 +390,7 @@ const loadData = async (isFirst = true) => {
 			DataMovieInfo.javBusState.execute(0, avNumber);
 		}
 		// 加载字幕
-		DataSubtitles.execute(0, params.pickCode.value, avNumber);
+		DataSubtitles.execute(0, params.pickCode.value, res.file_name, avNumber);
 	});
 
 	// 加载播放列表
