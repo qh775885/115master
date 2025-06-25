@@ -1,11 +1,12 @@
 import { GM_openInTab } from "$";
-import iinaIcon from "../../../assets/icons/iina-icon.png";
-import { VOD_URL_115 } from "../../../constants/115";
-import { drive115 } from "../../../utils/drive115";
-import { isMac } from "../../../utils/platform";
-import { goToPlayer } from "../../../utils/route";
-import { webLinkIINA } from "../../../utils/weblink";
-import { FileListType, type ItemInfo, IvType } from "../types";
+import iinaIcon from "../../../../assets/icons/iina-icon.png";
+import { VOD_URL_115 } from "../../../../constants/115";
+import { drive115 } from "../../../../utils/drive115";
+import { isMac } from "../../../../utils/platform";
+import { goToPlayer } from "../../../../utils/route";
+import { webLinkIINA } from "../../../../utils/weblink";
+import { FileListType, IvType } from "../../types";
+import { FileItemModBase } from "./base";
 
 interface ButtonConfig {
 	class: string;
@@ -16,13 +17,10 @@ interface ButtonConfig {
 	click: () => void;
 }
 
-// 文件列表扩展菜单
-export class FileItemExtMenu {
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
-
+/**
+ * FileItemMod 扩展菜单
+ */
+export class FileItemModExtMenu extends FileItemModBase {
 	get buttonConfig(): ButtonConfig[] {
 		return [
 			{
@@ -132,8 +130,7 @@ export class FileItemExtMenu {
 		return link;
 	}
 
-	// 加载
-	public load() {
+	onLoad() {
 		// 如果文件列表类型为网格，则不加载扩展菜单
 		if (this.itemInfo.fileListType === FileListType.grid) {
 			return;
@@ -142,6 +139,5 @@ export class FileItemExtMenu {
 		this.createButtons();
 	}
 
-	// 销毁
-	public destroy() {}
+	onDestroy() {}
 }

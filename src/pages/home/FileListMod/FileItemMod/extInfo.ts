@@ -1,20 +1,20 @@
 import { defer } from "lodash";
 import { type App, createApp } from "vue";
-import mainStyles from "../../../styles/main.css?inline";
-import ExtInfo from "../components/ExtInfo/index.vue";
-import { FileListType, FileType, type ItemInfo, IvType } from "../types";
+import mainStyles from "../../../../styles/main.css?inline";
+import ExtInfo from "../../components/ExtInfo/index.vue";
+import { FileListType, FileType, IvType } from "../../types";
+import { FileItemModBase } from "./base";
 
-// 文件列表扩展信息
-export class FileItemExtInfo {
+/**
+ * FileItemMod 扩展信息
+ */
+export class FileItemModExtInfo extends FileItemModBase {
+	readonly IS_PLUS = true;
+	readonly ENABLE_KEY_IN_USER_SETTING = "enableFilelistPreview";
+
 	private vueApp: App | null = null;
 
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
-
-	// 加载
-	public load() {
+	onLoad() {
 		// 如果文件列表类型为网格，则不加载扩展信息
 		if (this.itemInfo.fileListType === FileListType.grid) {
 			return;
@@ -62,8 +62,7 @@ export class FileItemExtInfo {
 		this.vueApp = app;
 	}
 
-	// 销毁
-	public destroy() {
+	onDestroy() {
 		/** 延迟卸载 Vue，避免阻塞新的文件列表加载 */
 		defer(() => {
 			this.vueApp?.unmount();
