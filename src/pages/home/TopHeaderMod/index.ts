@@ -2,6 +2,9 @@ import { unsafeWindow } from "$";
 import { getUrlParams } from "../../../utils/url";
 import type { TopRootSearchParams } from "../global";
 import { openOfflineTask } from "./openOfflineTask";
+import "./index.css";
+import "iconify-icon";
+import { userSettings } from "../../../utils/userSettings";
 
 /**
  * 顶部导航栏修改器
@@ -9,6 +12,7 @@ import { openOfflineTask } from "./openOfflineTask";
  * 1. 添加自定义的云下载一级按钮
  * 2. 删除官方的云下载按钮
  * 3. 云下载按钮免除刷新重定向
+ * 4. 添加预览切换开关
  */
 export class TopHeaderMod {
 	constructor() {
@@ -20,6 +24,7 @@ export class TopHeaderMod {
 			?.firstElementChild as HTMLElement;
 	}
 
+	/** 初始化 */
 	private init() {
 		if (!this.topHeaderNode) return;
 		const params = getUrlParams<TopRootSearchParams>(
@@ -29,14 +34,13 @@ export class TopHeaderMod {
 			return;
 		}
 		this.deleteOfficialDownloadButton();
-		const offlineTaskButton = this.createOfflineTaskButton();
-		this.topHeaderNode?.prepend(offlineTaskButton);
-
+		this.addMasterOfflineTaskButton();
+		this.addPreviewSwitchButton();
 		this.fixContextMenuPosition("upload_btn_add_dir");
 		this.fixContextMenuPosition("create_new_add_dir");
 	}
 
-	// 删除官方的离线任务按钮
+	/** 删除官方的离线任务按钮 */
 	private deleteOfficialDownloadButton() {
 		const downloadButton = this.topHeaderNode?.querySelector(
 			".button[menu='offline_task']",
@@ -46,10 +50,16 @@ export class TopHeaderMod {
 		}
 	}
 
-	// 创建离线任务按钮
-	private createOfflineTaskButton() {
+	/** 添加 Master 离线任务按钮 */
+	private addMasterOfflineTaskButton() {
+		const button = this.createMasterOfflineTaskButton();
+		this.topHeaderNode?.prepend(button);
+	}
+
+	/** 创建 Master 离线任务按钮 */
+	private createMasterOfflineTaskButton() {
 		const button = document.createElement("a");
-		button.classList.add("button");
+		button.classList.add("button", "master-offline-task-btn");
 		button.href = "javascript:void(0)";
 		button.innerHTML = `
             <i class="icon-operate ifo-linktask"></i>
@@ -63,6 +73,35 @@ export class TopHeaderMod {
 		return button;
 	}
 
+	/** 添加预览切换开关 */
+	private addPreviewSwitchButton() {
+		const button = this.createPreviewSwitchButton();
+		this.topHeaderNode?.append(button);
+	}
+
+	/** 创建预览切换开关 */
+	private createPreviewSwitchButton() {
+		const value = userSettings.value.enableFilelistPreview;
+		const button = document.createElement("a");
+		button.classList.add("button", "btn-line", "master-preview-switch-btn");
+		if (value) {
+			button.classList.add("active");
+		}
+		button.setAttribute("title", "开启文件预览");
+		button.href = "javascript:void(0)";
+		button.innerHTML = `
+			<iconify-icon class="preview-off" icon="material-symbols:preview-off" noobserver></iconify-icon>
+			<iconify-icon class="preview-on" icon="material-symbols:preview" noobserver></iconify-icon>
+		`;
+		button.onclick = () => {
+			userSettings.value.enableFilelistPreview =
+				!userSettings.value.enableFilelistPreview;
+			button.classList.toggle("active");
+		};
+		return button;
+	}
+
+	/** 修正右键菜单位置 */
 	private fixContextMenuPosition(name: string) {
 		const tabNode = document.querySelector<HTMLElement>(
 			`[data-dropdown-tab="${name}"]`,
@@ -75,5 +114,6 @@ export class TopHeaderMod {
 		contextMenuNode.style.left = `${tabRect.left}px`;
 	}
 
+	/** 销毁 */
 	public destroy() {}
 }

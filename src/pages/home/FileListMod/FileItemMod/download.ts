@@ -1,13 +1,11 @@
-import { drive115 } from "../../../utils/drive115";
-import { is115Browser } from "../../../utils/platform";
-import type { ItemInfo } from "../types";
+import { drive115 } from "../../../../utils/drive115";
+import { is115Browser } from "../../../../utils/platform";
+import { FileItemModBase } from "./base";
 
-export class FileListDownload {
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
-
+/**
+ * FileItemMod 文件下载
+ */
+export class FileItemModDownload extends FileItemModBase {
 	get fileOprNode() {
 		return this.itemNode.querySelector<HTMLElement>(".file-opr");
 	}
@@ -24,8 +22,7 @@ export class FileListDownload {
 		);
 	}
 
-	// 加载
-	public load() {
+	onLoad() {
 		if (!this.fileOprNode) {
 			return;
 		}
@@ -69,6 +66,5 @@ export class FileListDownload {
 		}
 	}
 
-	// 销毁
-	public destory() {}
+	onDestroy() {}
 }

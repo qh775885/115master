@@ -1,15 +1,13 @@
 import { GM_openInTab } from "$";
-import { VOD_URL_115 } from "../../../constants/115";
-import { goToPlayer } from "../../../utils/route";
-import { type ItemInfo, IvType } from "../types";
+import { VOD_URL_115 } from "../../../../constants/115";
+import { goToPlayer } from "../../../../utils/route";
+import { IvType } from "../../types";
+import { FileItemModBase } from "./base";
 
-// 文件项点击播放
-export class FileItemClickPlay {
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
-
+/**
+ * FileItemMod 点击播放
+ */
+export class FileItemModClickPlay extends FileItemModBase {
 	get fileNameNode() {
 		return (
 			this.itemNode.querySelector(".file-thumb") ??
@@ -17,7 +15,7 @@ export class FileItemClickPlay {
 		);
 	}
 
-	// 中键文件115播放
+	/** 中键文件115播放 */
 	private handleAuxclick(e: MouseEvent) {
 		if (e.button === 1) {
 			e.preventDefault();
@@ -33,7 +31,7 @@ export class FileItemClickPlay {
 		}
 	}
 
-	// 点击文件名 master 播放
+	/** 点击文件名 master 播放 */
 	private handleClickPlayer(e: Event) {
 		e.preventDefault();
 		e.stopPropagation();
@@ -47,7 +45,7 @@ export class FileItemClickPlay {
 		);
 	}
 
-	public load() {
+	onLoad() {
 		// 如果文件不是视频，则不进行操作
 		if (this.itemInfo.attributes.iv !== IvType.Yes) {
 			return;
@@ -73,7 +71,7 @@ export class FileItemClickPlay {
 		);
 	}
 
-	public destroy() {
+	onDestroy() {
 		this.fileNameNode?.removeEventListener(
 			"click",
 			this.handleClickPlayer.bind(this) as EventListener,

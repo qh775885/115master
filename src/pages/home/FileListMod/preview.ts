@@ -2,18 +2,18 @@ import { type App, createApp } from "vue";
 import { PLUS_VERSION } from "../../../constants";
 import mainStyles from "../../../styles/main.css?inline";
 import ExtPreview from "../components/ExtPreview/index.vue";
-import { FileListType, type ItemInfo, IvType } from "../types";
+import { FileListType, IvType } from "../types";
+import { FileItemModBase } from "./FileItemMod/base";
 
-// 文件列表预览信息
-export class FileItemPreview {
+/**
+ * FileItemMod 预览信息
+ */
+export class FileItemModPreview extends FileItemModBase {
+	readonly ENABLE_KEY_IN_USER_SETTING = "enableFilelistPreview";
+
 	private vueApp: App | null = null;
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
 
-	// 加载
-	public load() {
+	onLoad() {
 		// 如果文件列表类型为网格，则不加载预览视频
 		if (this.itemInfo.fileListType === FileListType.grid) {
 			return;
@@ -61,8 +61,7 @@ export class FileItemPreview {
 		this.vueApp = app;
 	}
 
-	// 销毁
-	public destroy() {
+	onDestroy() {
 		this.vueApp?.unmount();
 	}
 }

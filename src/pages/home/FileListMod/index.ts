@@ -3,7 +3,22 @@ import { unsafeWindow } from "$";
 import { isReload } from "../../../utils/route";
 import { FileListType } from "../types";
 import { FileItemModLoader } from "./FileItemLoader";
+import { FileItemModActressInfo } from "./FileItemMod/actressInfo";
+import { FileItemModClickPlay } from "./FileItemMod/clickPlay";
+import { FileItemModDownload } from "./FileItemMod/download";
+import { FileItemModExtInfo } from "./FileItemMod/extInfo";
+import { FileItemModExtMenu } from "./FileItemMod/extMenu";
+import { FileItemModPreview } from "./preview";
 import { FileListScrollHistory } from "./scrollHistory";
+
+const itemMods = [
+	FileItemModExtInfo,
+	FileItemModActressInfo,
+	FileItemModPreview,
+	FileItemModExtMenu,
+	FileItemModClickPlay,
+	FileItemModDownload,
+];
 
 /**
  * 文件列表修改器
@@ -135,11 +150,11 @@ class FileListMod {
 			if (this.itemModLoaderMaps.has(item)) {
 				continue;
 			}
-
 			const itemModLoader = new FileItemModLoader(
 				item,
 				this.listType,
 				this.listScrollBoxNode!,
+				itemMods,
 			);
 			itemModLoader.load();
 			this.itemModLoaderMaps.set(item, itemModLoader);

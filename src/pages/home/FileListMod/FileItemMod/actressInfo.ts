@@ -1,17 +1,16 @@
-import { actressFaceDB } from "../../../utils/actressFaceDB";
-import { imageCache } from "../../../utils/cache";
-import { compressImage } from "../../../utils/image";
-import { FileListType, type ItemInfo } from "../types";
+import { actressFaceDB } from "../../../../utils/actressFaceDB";
+import { imageCache } from "../../../../utils/cache";
+import { compressImage } from "../../../../utils/image";
+import { FileListType } from "../../types";
+import { FileItemModBase } from "./base";
 
-// 文件列表演员信息
-export class FileItemActressInfo {
-	constructor(
-		private readonly itemNode: HTMLElement,
-		private readonly itemInfo: ItemInfo,
-	) {}
+/**
+ * FileItemMod 演员信息
+ */
+export class FileItemModActressInfo extends FileItemModBase {
+	readonly IS_PLUS = true;
 
-	// 加载
-	public async load() {
+	async onLoad() {
 		// 如果文件列表类型为网格，则不加载演员信息
 		if (this.itemInfo.fileListType === FileListType.grid) {
 			return;
@@ -68,6 +67,5 @@ export class FileItemActressInfo {
 		}
 	}
 
-	// 销毁
-	public destroy() {}
+	onDestroy() {}
 }

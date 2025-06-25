@@ -1,5 +1,4 @@
 .master-back-button {
-	--office-theme: #2777f8;
 	display: inline-flex;
 	align-items: center;
 	text-align: center;
@@ -14,7 +13,7 @@
 	&:hover {
 		background-color: color-mix(
 			in srgb,
-			var(--office-theme) 10%,
+			var(--official-theme) 10%,
 			transparent 0%
 		);
 		color: var(--office-theme);
@@ -22,7 +21,7 @@
 	&:active {
 		background-color: color-mix(
 			in srgb,
-			var(--office-theme) 15%,
+			var(--official-theme) 15%,
 			transparent 0%
 		);
 	}
