@@ -4,24 +4,24 @@
 		:class="[styles.item.base, { [styles.item.active]: props.active }]"
         @click="handlePlay(item)"
     >
-		<div :class="styles.preview.container">
+		<div :class="styles.cover.container">
 
-			<template v-if="preview.error">
+			<template v-if="videoCover.error">
 				<LoadingError 
-					:class="styles.preview.imageError"
-					:message="preview.error"
+					:class="styles.cover.imageError"
+					:message="videoCover.error"
 					size="mini"
 				/>
 			</template>
 
-			<div v-else-if="preview.isLoading" :class="styles.preview.skeleton">
+			<div v-else-if="videoCover.isLoading" :class="styles.cover.skeleton">
 			</div>
 			
-			<!-- 预览图 -->
-			<img v-else-if="preview.isReady" :src="preview.state[0]?.img" :class="styles.preview.image" />
+			<!-- 视频封面 -->
+			<img v-else-if="videoCover.isReady" :src="videoCover.state[0]?.img" :class="styles.cover.image" />
 
-			<!-- 无预览图时显示骨架 -->
-			<div v-else :class="styles.preview.skeleton"></div>
+			<!-- 骨架屏 -->
+			<div v-else :class="styles.cover.skeleton"></div>
 
 			<!-- 时长 -->
 			<div :class="styles.duration.container">
@@ -56,14 +56,12 @@ import { Icon } from "@iconify/vue";
 import { computed, shallowRef } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import { formatTime } from "../../../../components/XPlayer/utils/time";
-import { FRIENDLY_ERROR_MESSAGE } from "../../../../constants";
-import { useSmartPreview } from "../../../../hooks/usePreview";
+import { useSmartVideoCover } from "../../../../hooks/useVideoCover";
 import { ICON_STAR_FILL } from "../../../../icons";
 import type { Entity } from "../../../../utils/drive115";
-import { Drive115Error } from "../../../../utils/drive115/core";
 import { formatFileSize } from "../../../../utils/format";
-// 播放列表预览封面数量
-const PLAYLIST_PREVIEW_NUM = 1;
+// 播放列表视频封面数量
+const PLAYLIST_VIDEO_COVER_NUM = 1;
 
 const props = defineProps<{
 	item: Entity.PlaylistItem;
@@ -84,7 +82,7 @@ const styles = {
 		],
 		active: "bg-primary/10 hover:bg-primary/15",
 	},
-	preview: {
+	cover: {
 		container: [
 			"relative flex items-center justify-center flex-shrink-0",
 			"overflow-hidden rounded-lg",
@@ -128,21 +126,21 @@ const styles = {
 // 根元素引用
 const rootRef = shallowRef<HTMLElement>();
 
-// 预览选项
-const previewOptions = computed(() => ({
+// 选项
+const options = computed(() => ({
 	pickCode: props.item.pc,
 	sha1: props.item.sha,
-	coverNum: PLAYLIST_PREVIEW_NUM,
+	coverNum: PLAYLIST_VIDEO_COVER_NUM,
 	duration: props.item.play_long,
 }));
 
-// 智能预览配置
-const smartPreviewConfig = {
+// 配置
+const config = {
 	elementRef: rootRef,
 };
 
-// 使用智能预览 hook
-const { preview } = useSmartPreview(previewOptions, smartPreviewConfig);
+// smart 视频封面 hook
+const { videoCover } = useSmartVideoCover(options, config);
 
 // 进度百分比
 const progressPercent = computed(() => {

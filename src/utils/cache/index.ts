@@ -1,4 +1,4 @@
-export * from "./previewCache";
+export * from "./videoCoverCache";
 export * from "./core";
 export * from "./core/quotaManager";
 export * from "./core/metaStore";

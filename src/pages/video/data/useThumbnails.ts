@@ -80,7 +80,7 @@ export function useDataThumbnails(
 			isInited.value = false;
 			const source = findLowestQualityHLS(sources);
 			if (!source) {
-				throw FRIENDLY_ERROR_MESSAGE.CANNOT_PREVIEW_WITHOUT_TRANSCODING;
+				throw FRIENDLY_ERROR_MESSAGE.CANNOT_VIDEO_COVER_WITHOUT_TRANSCODING;
 			}
 			clipper = new M3U8ClipperNew({
 				url: source.url,

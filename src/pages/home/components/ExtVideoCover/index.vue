@@ -2,32 +2,32 @@
 	<div :class="styles.container.main" ref="rootRef">
 		<div :class="styles.container.content">
 			<!-- 错误状态 -->
-			<div :class="styles.states.error" v-if="preview.error">
-				<LoadingError size="mini" :message="preview.error" />
+			<div :class="styles.states.error" v-if="videoCover.error">
+				<LoadingError size="mini" :message="videoCover.error" />
 			</div>
 			
-			<!-- 加载骨架 -->
-			<template v-else-if="preview.isLoading">
+			<!-- 骨架屏 -->
+			<template v-else-if="videoCover.isLoading">
 				<div :class="styles.skeleton"></div>
 			</template>
 			
-			<!-- 预览内容 -->
+			<!-- 内容 -->
 			<div
-				v-else-if="preview.isReady"
+				v-else-if="videoCover.isReady"
 				class="pswp-gallery"
-				:class="styles.preview.container"
+				:class="styles.cover.container"
 				:id="`gallery-${props.pickCode}`"
 			>
 				<a 
-					v-for="(thumbnail, index) in preview.state"
+					v-for="(thumbnail, index) in videoCover.state"
 					:key="index"
-					:class="[styles.preview.thumbItem]"
+					:class="[styles.cover.thumbItem]"
 					@click.prevent.stop="openPhotoSwipe(index)"
 				>
 					<img 
 						:src="thumbnail.img" 
-						:alt="`预览图 ${index + 1}`"
-						:class="styles.preview.thumbImage"
+						:alt="`视频封面 ${index + 1}`"
+						:class="styles.cover.thumbImage"
 					/>
 				</a>
 			</div>
@@ -40,11 +40,9 @@ import PhotoSwipeLightbox from "photoswipe/lightbox";
 import { computed, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import LoadingError from "../../../../components/LoadingError/index.vue";
 import "photoswipe/style.css";
-import { FRIENDLY_ERROR_MESSAGE } from "../../../../constants";
-import { useSmartPreview } from "../../../../hooks/usePreview";
-import { Drive115Error } from "../../../../utils/drive115/core";
-// 文件列表预览封面数量
-const FILELIST_PREVIEW_NUM = 5;
+import { useSmartVideoCover } from "../../../../hooks/useVideoCover";
+// 文件列表视频封面数量
+const FILELIST_VIDEO_COVER_NUM = 5;
 
 // 样式常量定义
 const styles = {
@@ -60,8 +58,8 @@ const styles = {
 	},
 	// 骨架样式
 	skeleton: "skeleton w-full h-full rounded",
-	// 预览样式
-	preview: {
+	// 视频封面
+	cover: {
 		container: [
 			"w-full h-full flex overflow-hidden select-none overflow-hidden",
 		],
@@ -90,22 +88,22 @@ const lightbox = ref<PhotoSwipeLightbox | null>(null);
 // 滚动目标 ref（用于 useScroll）
 const scrollTargetRef = computed(() => props.listScrollBoxNode);
 
-// 预览选项
-const previewOptions = computed(() => ({
+// 选项
+const options = computed(() => ({
 	sha1: props.sha1,
 	pickCode: props.pickCode,
-	coverNum: FILELIST_PREVIEW_NUM,
+	coverNum: FILELIST_VIDEO_COVER_NUM,
 	duration: Number(props.duration),
 }));
 
-// 智能预览配置
-const smartPreviewConfig = {
+// 配置
+const config = {
 	elementRef: rootRef,
 	scrollTarget: scrollTargetRef,
 };
 
-// 使用智能预览 hook
-const { preview } = useSmartPreview(previewOptions, smartPreviewConfig);
+// smart 视频封面 hook
+const { videoCover } = useSmartVideoCover(options, config);
 
 // 初始化 PhotoSwipe
 const initPhotoSwipe = () => {
@@ -115,11 +113,11 @@ const initPhotoSwipe = () => {
 	}
 
 	lightbox.value = new PhotoSwipeLightbox({
-		dataSource: preview.state.map((item) => ({
+		dataSource: videoCover.state.map((item) => ({
 			src: item.img,
 			width: item.width,
 			height: item.height,
-			alt: "预览图",
+			alt: "视频封面",
 		})),
 		showHideAnimationType: "fade",
 		pswpModule: () => import("photoswipe"),
@@ -136,13 +134,13 @@ const initPhotoSwipe = () => {
 
 // 打开 PhotoSwipe
 const openPhotoSwipe = (index: number) => {
-	if (!lightbox.value || !preview.isReady) return;
+	if (!lightbox.value || !videoCover.isReady) return;
 	lightbox.value.loadAndOpen(index);
 };
 
 // 监听有效图片变化，初始化 PhotoSwipe
 watch(
-	() => preview.isReady,
+	() => videoCover.isReady,
 	async (isReady) => {
 		if (isReady) {
 			await nextTick();
