@@ -3,15 +3,16 @@ import type { Subtitle } from "../../../components/XPlayer/types";
 import { subtitlePreference } from "../../../utils/cache/subtitlePreference";
 import { drive115 } from "../../../utils/drive115";
 import { fetchRequest } from "../../../utils/request/fetchRequest";
+import { filenameJaccardSimilarity } from "../../../utils/string";
 import {
 	convertSrtToVtt,
 	vttToBlobUrl,
 } from "../../../utils/subtitle/subtitleTool";
 import { subtitlecat } from "../../../utils/subtitle/subtitlecat";
 
-// 获取字幕
+/** 字幕数据 */
 export const useDataSubtitles = () => {
-	// 通过 subtitleCat 获取字幕
+	/** 通过 subtitleCat 获取字幕 */
 	const getFromSubtitlecat = async (keyword: string) => {
 		if (!keyword) {
 			return [];
@@ -27,7 +28,7 @@ export const useDataSubtitles = () => {
 		}));
 	};
 
-	// 通过 115 获取字幕
+	/** 通过 115 获取字幕 */
 	const getFrom115 = async (pickcode: string) => {
 		const res = await drive115.webApiGetMoviesSubtitle({
 			pickcode,
@@ -49,14 +50,26 @@ export const useDataSubtitles = () => {
 		);
 	};
 
-	// 获取字幕
+	/** 排序字幕 */
+	const sortSubtitles = (subtitles: Subtitle[], filename: string) => {
+		return subtitles.sort((a, b) => {
+			const similarityA = filenameJaccardSimilarity(a.label, filename);
+			const similarityB = filenameJaccardSimilarity(b.label, filename);
+			return similarityB - similarityA;
+		});
+	};
+
+	/** 字幕数据 */
 	const subtitles = useAsyncState<Subtitle[]>(
-		async (pickcode: string, keyword: string) => {
+		async (pickcode: string, filename: string, keyword: string) => {
 			const preference = await subtitlePreference.getPreference(pickcode);
 			const subtitleCats = await getFromSubtitlecat(keyword);
 			const subtitles115 = await getFrom115(pickcode);
 
-			return [...subtitleCats, ...subtitles115].map((s) => {
+			return [
+				...sortSubtitles(subtitleCats, filename),
+				...sortSubtitles(subtitles115, filename),
+			].map((s) => {
 				return {
 					...s,
 					default: preference ? preference.id === s.id : false,
