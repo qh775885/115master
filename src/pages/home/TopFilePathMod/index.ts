@@ -1,6 +1,7 @@
 import { defer } from "lodash";
 import "./index.css";
 import "iconify-icon";
+import { BaseMod } from "../BaseMod";
 
 /**
  * 115 页面顶部路径修改
@@ -8,11 +9,12 @@ import "iconify-icon";
  * 1. 修改页面顶部路径为当前目录路径
  * 2. 添加一个返回上级目录按钮
  */
-export class TopFilePathMod {
+export class TopFilePathMod extends BaseMod {
 	private mutationObserver: MutationObserver | null = null;
 	private backButton: HTMLAnchorElement | null = null;
 
 	constructor() {
+		super();
 		this.init();
 	}
 
@@ -176,7 +178,7 @@ export class TopFilePathMod {
 	/**
 	 * 销毁
 	 */
-	public destroy() {
+	destroy() {
 		this.mutationObserver?.disconnect();
 		this.backButton?.remove();
 	}

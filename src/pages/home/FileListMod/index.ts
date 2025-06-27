@@ -1,6 +1,7 @@
 import "./index.css";
 import { unsafeWindow } from "$";
 import { isReload } from "../../../utils/route";
+import { BaseMod } from "../BaseMod";
 import { FileListType } from "../types";
 import { FileItemModLoader } from "./FileItemLoader";
 import { FileItemModActressInfo } from "./FileItemMod/actressInfo";
@@ -23,7 +24,7 @@ const itemMods = [
 /**
  * 文件列表修改器
  */
-class FileListMod {
+class FileListMod extends BaseMod {
 	/** 文件列表 Item Mod Loader Map */
 	private itemModLoaderMaps: Map<HTMLLIElement, FileItemModLoader> = new Map();
 	/** 文件列表变化监听器 */
@@ -32,6 +33,7 @@ class FileListMod {
 	private scrollHistory: FileListScrollHistory | null = null;
 
 	constructor() {
+		super();
 		this.init();
 	}
 
@@ -185,7 +187,7 @@ class FileListMod {
 	/**
 	 * 销毁
 	 */
-	public destroy(): void {
+	destroy(): void {
 		this.observerContent?.disconnect();
 		this.destroyAllItemModLoader();
 		this.scrollHistory?.destroy();
