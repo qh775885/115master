@@ -5,6 +5,7 @@ import { openOfflineTask } from "./openOfflineTask";
 import "./index.css";
 import "iconify-icon";
 import { userSettings } from "../../../utils/userSettings";
+import { BaseMod } from "../BaseMod";
 
 /**
  * 顶部导航栏修改器
@@ -14,8 +15,9 @@ import { userSettings } from "../../../utils/userSettings";
  * 3. 云下载按钮免除刷新重定向
  * 4. 添加预览切换开关
  */
-export class TopHeaderMod {
+export class TopHeaderMod extends BaseMod {
 	constructor() {
+		super();
 		this.init();
 	}
 
