@@ -73,6 +73,7 @@ pnpm build
 ```
 
 ## 常见问题
+
 [Q&A](https://github.com/cbingb666/115master/discussions/categories/q-a)
 
 ## 免责声明
@@ -93,4 +94,4 @@ pnpm build
 
 ## 鸣谢
 
-- [@zhaohappy](https://github.com/zhaohappy) 提供了 [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player) 
+- [@zhaohappy](https://github.com/zhaohappy) 提供了 [AvPlayer](https://zhaohappy.github.io/libmedia/docs/guide/player)
