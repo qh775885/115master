@@ -64,7 +64,7 @@ export function useDataVideoSources() {
       )
     }
     else {
-      console.log('m3u8', m3u8List.reason)
+      console.error('m3u8', m3u8List.reason)
     }
   }
 

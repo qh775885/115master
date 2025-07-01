@@ -167,6 +167,8 @@ export interface XPlayerEmit {
   'update:playbackRate': [number]
   /** 自动缓冲缩略图 */
   'update:autoLoadThumbnails': [boolean]
+  /** 自动播放 */
+  'update:autoPlay': [boolean]
   /** 禁用HDR */
   'update:disabledHDR': [boolean]
   /** 缩略图采样间隔 */
