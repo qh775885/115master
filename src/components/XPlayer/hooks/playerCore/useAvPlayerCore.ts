@@ -62,10 +62,6 @@ export const DEFAULT_OPTIONS: Partial<AVPlayerOptions> = {
   enableWorker: true,
   /** 缓冲时间 */
   preLoadTime: 60,
-  /** check mse */
-  checkUseMES: () => {
-    return false
-  },
 }
 
 /** 收集统计信息 */
@@ -347,7 +343,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
     init: async (container) => {
       try {
         const AVPlayer = await loadESM<AVPlayerConstructor>({
-          pkgName: '@libmedia-beta/avplayer',
+          pkgName: '@libmedia/avplayer',
           path: 'dist/esm/avplayer.js',
           varName: 'AVPlayer',
         })
