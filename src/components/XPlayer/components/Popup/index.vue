@@ -36,6 +36,10 @@ import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { usePortal } from '../../hooks/usePortal'
 import { isInContainsTrigger, triggerSet } from './utils'
 
+defineOptions({
+  inheritAttrs: false,
+})
+
 const props = withDefaults(defineProps<Props>(), {
   x: 0,
   y: 0,

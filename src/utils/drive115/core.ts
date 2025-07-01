@@ -9,7 +9,6 @@ import {
   WEB_API_URL_115,
 } from '../../constants/115'
 import { qualityCodeMap } from '../../constants/quality'
-import { AppLogger } from '../logger'
 import { is115Browser } from '../platform'
 import { fetchRequest } from '../request/fetchRequest'
 import { GMRequest } from '../request/gmRequst'
@@ -59,8 +58,6 @@ export class Drive115Error {
 export class Drive115Core {
   /** 加密 */
   protected crypto115 = new Crypto115()
-  /** 日志 */
-  private logger = new AppLogger('Drive115Core')
   /** 基础 URL */
   private BASE_URL = NORMAL_URL_115
   /** 网页 API URL */
@@ -104,9 +101,7 @@ export class Drive115Core {
     const tm = Math.floor(Date.now() / 1000).toString()
     const src = JSON.stringify({ pickcode })
     const encoded = this.crypto115.m115_encode(src, tm)
-
     const data = `data=${encodeURIComponent(encoded.data)}`
-    this.logger.log('发送加密数据:', data)
 
     /** 115Browser 需要使用 GMRequest，因为 115 会检查 ua 是否是 115Browser，请求这个接口返回重定向到 dl.115cdn.net，导致跨域无法获取到返回结果 */
     const request = is115Browser ? new GMRequest() : fetchRequest
@@ -118,7 +113,6 @@ export class Drive115Core {
     )
 
     const res = (await response.json()) as ProApi.Res.FilesAppChromeDownurl
-    this.logger.log('Pro方式响应:', res)
 
     if (!res.state) {
       throw new Error(`获取下载地址失败: ${JSON.stringify(res)}`)
@@ -183,7 +177,6 @@ export class Drive115Core {
 
     // 按照 UD HD BD 排序
     m3u8List.sort((a, b) => b.quality - a.quality)
-    this.logger.log('m3u8List result', m3u8List)
     return m3u8List
   }
 

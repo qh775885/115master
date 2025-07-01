@@ -123,9 +123,7 @@ class FileListMod extends BaseMod {
           mutation.target.isSameNode(this.dataListBoxNode)
           && mutation.addedNodes.length > 0
         ) {
-          console.time('updateItems')
           this.updateItems()
-          console.timeEnd('updateItems')
           this.listScrollBoxNode
           && this.scrollHistory?.setScrollBox(this.listScrollBoxNode)
           break
