@@ -395,7 +395,12 @@ export function useAvPlayerCore(ctx: PlayerContext) {
       lastTime.value = _lastTime ?? null
       const player = checkPlayer()
       await player
-        .load(url)
+        .load(url, {
+          http: {
+            // 必须包含凭证, 否则 115 浏览器无法播放
+            credentials: 'include',
+          },
+        })
         .then(async () => {
           streams.value = await player.getStreams()
 
