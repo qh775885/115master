@@ -82,6 +82,10 @@ pnpm build
 
 [Q&A](https://github.com/cbingb666/115master/discussions/categories/q-a)
 
+## 赞助
+
+[为爱发电~ 为 Master 添把柴火🔥](https://afdian.com/a/115Master) 
+
 ## 免责声明
 
 本软件仅供技术研究、学习和交流目的使用。使用者应遵守以下条款：
