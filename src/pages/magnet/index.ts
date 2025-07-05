@@ -45,6 +45,18 @@ export function registerMagnetProtocolHandler() {
 }
 
 /**
+ * 处理打开离线任务页面后
+ */
+export function handleOpenAfter() {
+  if (window.history.length > 1) {
+    window.history.back()
+  }
+  else {
+    window.close()
+  }
+}
+
+/**
  * 磁力链接页中转
  */
 export function magnetPage() {
@@ -54,11 +66,11 @@ export function magnetPage() {
     return
   }
   setMagnetTask(magnet)
-  window.open('https://115.com/?cid=0&offset=0&mode=wangpan', '_blank', 'width=1280,height=860,resizable=yes,scrollbars=yes')
-  if (window.history.length > 1) {
-    window.history.back()
+  const handle = window.open('https://115.com/?cid=0&offset=0&mode=wangpan', '_blank', 'width=1280,height=860')
+  if (handle) {
+    handleOpenAfter()
   }
   else {
-    window.close()
+    alert('请设置允许弹出窗口并刷新页面，否则无法打开离线任务页面')
   }
 }

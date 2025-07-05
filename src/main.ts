@@ -1,7 +1,7 @@
 import globToRegex from 'glob-to-regexp'
 import ROUTE_MATCH from './constants/route.match'
 import HomePage from './pages/home/index'
-import { magnetPage } from './pages/magnet'
+import { magnetPage, registerMagnetProtocolHandler } from './pages/magnet'
 import { videoPage, videoTokenPage } from './pages/video'
 import { checkUserAgent } from './utils/checkUserAgent'
 import { debugInfo } from './utils/debugInfo'
@@ -11,6 +11,9 @@ debugInfo.bootstrapInfo()
 
 /** 检查用户代理 */
 checkUserAgent()
+
+/** 注册磁力链接协议处理程序 */
+registerMagnetProtocolHandler()
 
 /** 路由匹配 */
 const routeMatch = [
