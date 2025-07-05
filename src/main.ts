@@ -1,6 +1,7 @@
 import globToRegex from 'glob-to-regexp'
 import ROUTE_MATCH from './constants/route.match'
 import HomePage from './pages/home/index'
+import { magnetPage } from './pages/magnet'
 import { videoPage, videoTokenPage } from './pages/video'
 import { checkUserAgent } from './utils/checkUserAgent'
 import { debugInfo } from './utils/debugInfo'
@@ -27,6 +28,11 @@ const routeMatch = [
   {
     match: ROUTE_MATCH.VIDEO_TOKEN,
     exec: () => videoTokenPage(),
+  },
+  /** 磁力链接页 */
+  {
+    match: ROUTE_MATCH.MAGNET,
+    exec: () => magnetPage(),
   },
 ]
 
