@@ -67,6 +67,7 @@ export default defineConfig({
         'include': [
           'https://115.com/?ct*',
           'https://115.com/web/lixian/master/video/*',
+          'https://115.com/web/lixian/master/magnet/*',
           'https://115.com/?aid*',
           'https://dl.115cdn.net/video/token',
         ],
