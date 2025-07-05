@@ -31,15 +31,9 @@
 
 ### Magnet
 
-支持任何网站的 Magnet 链接一键唤起离线任务
+支持任何网站的 Magnet 链接一键唤起离线任务。
 
-> **Tips**
->
-> 脚本将自动注册 `magnet` 协议处理程序，但需要浏览器支持并允许。
->
-> 浏览器中打开 `chrome://settings/handlers` 查看是否允许 115.com 来处理 Magnet 协议。
->
-> 您也可以禁用它，来关闭此功能。
+[如何使用 Magnet 链接一键打开离线任务？](https://github.com/cbingb666/115master/discussions/238)
 
 ## 使用安装
 
