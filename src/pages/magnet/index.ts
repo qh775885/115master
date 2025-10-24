@@ -41,7 +41,12 @@ export function registerMagnetTaskHandler() {
  * 注册磁力链接协议处理程序
  */
 export function registerMagnetProtocolHandler() {
-  navigator.registerProtocolHandler('magnet', '/web/lixian/master/magnet/?url=%s')
+  if (navigator.registerProtocolHandler) {
+    navigator.registerProtocolHandler('magnet', '/web/lixian/master/magnet/?url=%s')
+  }
+  else {
+    console.warn('此浏览器不支持注册协议处理程序')
+  }
 }
 
 /**
