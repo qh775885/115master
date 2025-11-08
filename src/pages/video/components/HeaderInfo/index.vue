@@ -76,6 +76,6 @@ const path = computed(() => {
 })
 
 function handleOpenFolder(id: string) {
-  window.open(`https://115.com/?cid=${id}&offset=0&mode=wangpan`, '_blank')
+  window.open(`https://115.com/?cid=${id}&offset=0&tab=&mode=wangpan`, '_blank', 'noreferrer')
 }
 </script>
