@@ -87,15 +87,8 @@ export function useControls(ctx: PlayerContext) {
   /** 减少禁止自动隐藏的引用计数 */
   const removeDisabledAutoHide = () => {
     disabledAutoHideCount.value = Math.max(0, disabledAutoHideCount.value - 1)
-  }
-
-  /** 设置是否禁止自动隐藏控制栏（保持向后兼容） */
-  const setDisabledAutoHide = (value: boolean) => {
-    if (value) {
-      addDisabledAutoHide()
-    }
-    else {
-      removeDisabledAutoHide()
+    if (disabledAutoHideCount.value === 0) {
+      startAutoHideTimer()
     }
   }
 
@@ -168,7 +161,6 @@ export function useControls(ctx: PlayerContext) {
     mainRef,
     disabledHideOnMouseLeave,
     disabledAutoHide,
-    setDisabledAutoHide,
     setDisabledHideOnMouseLeave,
     lockControlsWithTimeoutUnlock,
     addDisabledAutoHide,
