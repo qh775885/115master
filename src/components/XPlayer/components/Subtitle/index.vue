@@ -93,16 +93,16 @@ function timeToSeconds(time: string) {
  * @param text 字幕文本
  */
 function parseSubtitle(text: string) {
-  const lines = text.split(/\n\n/).filter(line => line.trim() !== '')
+  const blocks = text.split(/\n\n/).filter(block => block.trim() !== '')
   const subtitles = []
-  for (const line of lines) {
-    if (/WEBVTT/.test(line))
+  for (const block of blocks) {
+    if (/WEBVTT/.test(block))
       continue
 
-    const linesSplit = line.split(/\n/)
+    const lines = block.split(/\n/)
     /** 首行视为时间，其余为文本 */
-    const time = linesSplit.shift() ?? ''
-    const text = linesSplit.join('\n') ?? ''
+    const time = lines.shift() ?? ''
+    const text = lines.join('\n') ?? ''
 
     const [start, end] = time.split('-->')
     const st = timeToSeconds(start)
