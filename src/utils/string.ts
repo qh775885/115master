@@ -9,3 +9,17 @@ import { jaccardSimilarity } from './array'
 export function filenameJaccardSimilarity(filename: string, subtitle: string) {
   return jaccardSimilarity(filename.split(''), subtitle.split(''))
 }
+
+/**
+ * 删除文件扩展名
+ * @param filename 文件名
+ * @returns 删除扩展名后的文件名
+ * @expample
+ * ```ts
+ *  removeFileExtension('example.txt') // 'example'
+ *  removeFileExtension('archive.tar.gz') // 'archive.tar'
+ * ```
+ */
+export function removeFileExtension(filename: string) {
+  return filename.replace(/\.[^/.]+$/, '')
+}

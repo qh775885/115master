@@ -1,5 +1,6 @@
 import type { AVPlayerOptions } from '@libmedia/avplayer'
 import type { HlsConfig } from 'hls.js'
+import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
 
 /**
@@ -88,23 +89,32 @@ export interface VideoSource {
   }
 }
 
-// 字幕
-export interface Subtitle {
+/** 字幕 Base */
+export interface SubtitleBase {
   /** 字幕 id */
   id: string
-  /** 字幕 url */
-  url: string
+  /** 字幕网络地址或 BlobUrl */
+  url?: string
+  /** 字幕原始文本 */
+  raw?: Blob
+  /** 字幕格式 */
+  format: 'srt' | 'vtt' | string
   /** 字幕名称 */
   label: string
   /** 字幕语言 */
   srclang: string
   /** 字幕类型 */
   kind: 'subtitles' | 'captions'
-  /** 字幕默认 */
+  /** 是否字幕默认 */
   default?: boolean
   /** 字幕来源 */
   source?: string
+  /** 字幕来源 ICON */
+  sourceIcon?: string
 }
+
+/** 字幕 */
+export type Subtitle = RequireAtLeastOne<SubtitleBase, 'url' | 'raw'>
 
 /**
  * 播放器属性

@@ -3,33 +3,31 @@ import { useAsyncState } from '@vueuse/core'
 import { subtitlePreference } from '../../../utils/cache/subtitlePreference'
 import { drive115 } from '../../../utils/drive115'
 import { fetchRequest } from '../../../utils/request/fetchRequest'
-import { filenameJaccardSimilarity } from '../../../utils/string'
+import { filenameJaccardSimilarity, removeFileExtension } from '../../../utils/string'
 import { subtitlecat } from '../../../utils/subtitle/subtitlecat'
-import {
-  convertSrtToVtt,
-  vttToBlobUrl,
-} from '../../../utils/subtitle/subtitleTool'
 
 /** 字幕数据 */
 export function useDataSubtitles() {
   /** 通过 subtitleCat 获取字幕 */
-  const getFromSubtitlecat = async (keyword: string) => {
+  const getFromSubtitlecat = async (keyword: string): Promise<Subtitle[]> => {
     if (!keyword) {
       return []
     }
     const res = await subtitlecat.fetchSubtitle(keyword, 'zh-CN')
-    return res.map(subtitle => ({
+    const subtitles = res.map(subtitle => ({
       id: subtitle.id,
-      url: subtitle.url,
       label: subtitle.title,
       srclang: subtitle.targetLanguage,
       source: 'Subtitle Cat',
+      raw: subtitle.raw,
+      format: subtitle.format,
       kind: 'subtitles' as const,
-    }))
+    } satisfies Subtitle))
+    return subtitles
   }
 
   /** 通过 115 获取字幕 */
-  const getFrom115 = async (pickcode: string) => {
+  const getFrom115 = async (pickcode: string): Promise<Subtitle[]> => {
     const res = await drive115.webApiGetMoviesSubtitle({
       pickcode,
     })
@@ -37,15 +35,18 @@ export function useDataSubtitles() {
       res.data.list.map(async (subtitle) => {
         const url = new URL(subtitle.url)
         url.protocol = 'https://'
-        const vttText = await fetchRequest.get(url.href)
+        const res = await fetchRequest.get(url.href)
+        const blob = await res.blob()
         return {
           id: subtitle.sid,
-          url: vttToBlobUrl(convertSrtToVtt(await vttText.text())),
-          label: `${subtitle.title}`,
+          url: url.href,
+          raw: blob,
+          label: `${removeFileExtension(subtitle.title)}`,
           source: subtitle.file_id ? 'Upload' : 'Built-in',
           srclang: subtitle.language || 'zh-CN',
+          format: subtitle.type,
           kind: 'subtitles' as const,
-        }
+        } satisfies Subtitle
       }),
     )
   }
@@ -59,22 +60,32 @@ export function useDataSubtitles() {
     })
   }
 
+  /**
+   * 设置默认字幕
+   */
+  const setDefaultSubtitle = async (pickcode: string, subtitles: Subtitle[]): Promise<Subtitle[]> => {
+    const preference = await subtitlePreference.getPreference(pickcode)
+    return subtitles.map((s) => {
+      return {
+        ...s,
+        default: preference ? preference.id === s.id : false,
+      }
+    })
+  }
+
   /** 字幕数据 */
   const subtitles = useAsyncState<Subtitle[]>(
-    async (pickcode: string, filename: string, keyword: string) => {
-      const preference = await subtitlePreference.getPreference(pickcode)
+    async (pickcode: string, filename: string, keyword: string): Promise<Subtitle[]> => {
       const subtitleCats = await getFromSubtitlecat(keyword)
       const subtitles115 = await getFrom115(pickcode)
-
-      return [
-        ...sortSubtitles(subtitleCats, filename),
-        ...sortSubtitles(subtitles115, filename),
-      ].map((s) => {
-        return {
-          ...s,
-          default: preference ? preference.id === s.id : false,
-        }
-      })
+      const subtitles = await setDefaultSubtitle(
+        pickcode,
+        [
+          ...sortSubtitles(subtitleCats, filename),
+          ...sortSubtitles(subtitles115, filename),
+        ],
+      )
+      return subtitles
     },
     [],
     {

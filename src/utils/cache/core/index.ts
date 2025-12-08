@@ -12,12 +12,20 @@ interface CacheValue<T> {
   createdAt: number
   /** 更新时间戳 */
   updatedAt: number
+  /**
+   * 版本
+   * (1.6.2 以前没有向 Value 写入此字段, 此版本是 Cache 版本与项目版本无关)
+   * 目前它用于在 Get 时删除旧版本的缓存项 (默认行为)
+   */
+  version?: number
 }
 
 /** 缓存核心类 */
 export class CacheCore<T> {
   /** 存储实例 */
   storage: LocalForage
+  /** 储存配置 */
+  storageOptions: LocalForageOptions
   /** 空间限额管理器 */
   private quotaManager: QuotaManager
   /** 是否启用空间限额管理 */
@@ -32,9 +40,12 @@ export class CacheCore<T> {
    * @param options 存储配置
    */
   constructor(
-    options: LocalForageOptions & { enableQuotaManagement?: boolean } = {},
+    options: LocalForageOptions & {
+      enableQuotaManagement?: boolean
+    } = {},
   ) {
     const { enableQuotaManagement = true, ...storageOptions } = options
+    this.storageOptions = storageOptions
 
     // 获取存储配置
     this.name = storageOptions.name || STORE_NAME
@@ -58,12 +69,18 @@ export class CacheCore<T> {
    * @param key 缓存键
    * @returns 缓存值
    */
-  async get(key: string) {
+  async get(key: string): Promise<CacheValue<T> | null> {
     const cache = await this.storage.getItem<CacheValue<T>>(key)
 
     // 如果启用了空间限额管理，记录访问时间
     if (cache && this.enableQuotaManagement) {
       await this.quotaManager.recordAccess(key, cache.size)
+    }
+
+    // 检查版本，如果版本不匹配则删除缓存项
+    if ((cache?.version || 0) < (this.storageOptions.version || 0)) {
+      this.remove(key)
+      return null
     }
 
     return cache
@@ -94,6 +111,7 @@ export class CacheCore<T> {
         ...(size !== undefined ? { size } : {}),
         createdAt: existingCache?.createdAt || now, // 如果是新项目则设置创建时间，否则保留原创建时间
         updatedAt: now, // 更新时间总是当前时间
+        version: this.storageOptions.version,
       }
 
       await this.storage.setItem(key, cacheValue)
