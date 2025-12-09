@@ -1,3 +1,5 @@
+import type { VNode } from 'vue'
+
 // HUD消息数据
 export interface HudMessageProgress {
   /** 最大值（用于进度条） */
@@ -10,7 +12,7 @@ export interface HudMessageProgress {
 // HUD消息
 export interface HudMessage {
   title?: string /** 标题 */
-  value?: number | string | boolean /** 值 */
+  value?: number | string | boolean | VNode /** 值 - 支持 JSX/VNode */
   icon?: string /** 图标 */
   iconClass?: string /** 图标类名 */
   progress?: HudMessageProgress /** 数据 */

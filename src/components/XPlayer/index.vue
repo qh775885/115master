@@ -42,6 +42,7 @@
           <slot name="headerLeft" />
         </template>
       </ControlsHeader>
+      <SubtitleInfo />
       <ControlsMask>
         <ControlsRight>
           <slot name="controlsRight" />
@@ -85,6 +86,7 @@ import ControlsHeader from './components/Controls/ControlHeader.vue'
 import ControlsMask from './components/Controls/ControlMask.vue'
 import ControlsRight from './components/Controls/ControlsRight.vue'
 import Controls from './components/Controls/index.vue'
+import SubtitleInfo from './components/Controls/SubtitleInfo.vue'
 import HUD from './components/HUD/index.vue'
 import Loading from './components/Loading/index.vue'
 import PlayAnimation from './components/PlayAnimation/index.vue'

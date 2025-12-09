@@ -1,6 +1,7 @@
 import type { HudMessage } from '../components/HUD/index'
 import type { PlayerContext } from './usePlayerProvide'
-import { computed, onUnmounted, shallowRef, watch } from 'vue'
+import { computed, h, onUnmounted, shallowRef, watch } from 'vue'
+import SubtitleDisplay from '../components/SubtitleDisplay.vue'
 import {
   getVolumeIcon,
   ICON_FAST_FORWARD,
@@ -167,10 +168,28 @@ export function useHud(ctx: PlayerContext) {
 
   // 监听字幕变化
   if (ctx.subtitles) {
-    const { current } = ctx.subtitles
+    const { current, currentIndex, total } = ctx.subtitles
     watch(current, (newSubtitle) => {
-      const value = newSubtitle ? newSubtitle.label : '关闭'
       const icon = newSubtitle ? ICON_SUBTITLES : ICON_SUBTITLES_OFF
+
+      if (!newSubtitle) {
+        show({
+          title: '字幕',
+          icon,
+          value: '关闭',
+        })
+        return
+      }
+
+      /** 使用组件渲染字幕信息 */
+      const value = h(SubtitleDisplay, {
+        label: newSubtitle.label,
+        format: newSubtitle.format,
+        source: newSubtitle.source,
+        subtitleIndex: currentIndex.value,
+        total: total.value,
+      })
+
       show({
         title: '字幕',
         icon,

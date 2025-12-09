@@ -42,10 +42,15 @@
           @click="handleSubtitleSelect(item.value)"
         >
           <Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon" />
-          <span :class="[styles.menu.label]">{{ item.label }}</span>
           <template v-if="item.id !== -1">
-            <span :class="[styles.menu.format]">{{ item.raw?.format?.toLocaleUpperCase() }}</span>
-            <span :class="[styles.menu.desc]">{{ item.value?.source }}</span>
+            <SubtitleDisplay
+              class="flex-1 min-w-0"
+              :label="item.label"
+              :format="item.raw?.format"
+              :source="item.value?.source"
+              :subtitle-index="item.index"
+              :total="subtitles.total.value"
+            />
             <button
               v-if="item.value"
               type="button"
@@ -64,6 +69,9 @@
             >
               <Icon :class="[styles.menu.actionIcon]" :icon="ICON_DOWNLOAD" />
             </button>
+          </template>
+          <template v-else>
+            <span :class="[styles.menu.label]">{{ item.label }}</span>
           </template>
         </a>
       </li>
@@ -85,6 +93,7 @@ import {
   ICON_VIEW,
 } from '../../utils/icon'
 import Popup from '../Popup/index.vue'
+import SubtitleDisplay from '../SubtitleDisplay.vue'
 
 const styles = {
   menu: {
@@ -93,11 +102,9 @@ const styles = {
       controlStyles.menu.root,
       'max-h-72 max-w-xl overflow-y-auto overflow-x-hidden !flex-nowrap',
     ],
-    a: [controlStyles.menu.a, 'flex py-2 flex-wrap w-full'],
+    a: [controlStyles.menu.a, 'flex items-center py-2 w-full gap-2'],
     label: [controlStyles.menu.label, 'w-xs line-clamp-2'],
-    desc: ['badge badge-sm text-xs text-muted-foreground flex-1'],
-    format: ['badge badge-xs badge-outline text-2xs text-muted-foreground'],
-    action: ['btn btn-circle btn-xs btn-soft'],
+    action: ['btn btn-circle btn-xs btn-soft flex-shrink-0'],
     actionIcon: ['size-5'],
   },
   btn: controlStyles.btn,
@@ -115,13 +122,15 @@ const menuItems = computed(() => {
       value: null,
       icon: ICON_SUBTITLES_OFF,
       raw: undefined,
+      index: null,
     },
-    ...(subtitles.list.value ?? []).map(item => ({
+    ...(subtitles.list.value ?? []).map((item, idx) => ({
       id: item.url,
       label: item.label,
       value: item,
       icon: undefined,
       raw: item,
+      index: idx + 1,
     })),
   ]
 })
