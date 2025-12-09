@@ -42,7 +42,9 @@ const currentSubtitle = computed(() => {
   if (!subtitles.current.value) {
     return null
   }
-  if (!controls.visible.value || progressBar.isLongPressDragging.value) {
+  if (!controls.visible.value
+    || progressBar.isHovering.value
+  ) {
     return null
   }
   return subtitles.current.value
