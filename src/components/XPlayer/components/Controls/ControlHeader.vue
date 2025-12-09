@@ -19,9 +19,6 @@
         ]"
       >
         <slot name="left" />
-        <div :class="[styles.content.left]">
-          {{ props.title }}
-        </div>
       </div>
     </div>
   </transition>
@@ -31,10 +28,6 @@
 import { computed, shallowRef } from 'vue'
 import { useControlsMouseDetection } from '../../hooks/useControlsMouseDetection'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-
-const props = defineProps<{
-  title?: string
-}>()
 
 /** 插槽 */
 defineSlots<{
@@ -48,11 +41,6 @@ const styles = {
   root: 'relative',
   content: {
     root: 'relative flex justify-between items-center p-7',
-    left: 'flex-1 font-bold',
-    right: {
-      root: 'flex-1',
-      item: 'flex justify-end gap-2',
-    },
   },
   bg: 'absolute inset-0 bottom-[-50px] bg-linear-to-b from-black/30 to-transparent pointer-events-none',
 }

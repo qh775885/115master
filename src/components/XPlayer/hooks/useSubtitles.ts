@@ -76,11 +76,29 @@ export function useSubtitles(ctx: PlayerContext) {
     },
   )
 
+  /** 当前字幕序号 */
+  const currentIndex = computed(() => {
+    if (!current.value || !ctx.rootProps.subtitles.value) {
+      return null
+    }
+    const index = ctx.rootProps.subtitles.value.findIndex(
+      sub => sub.id === current.value?.id,
+    )
+    return index !== -1 ? index + 1 : null
+  })
+
+  /** 字幕总数 */
+  const total = computed(() => {
+    return ctx.rootProps.subtitles.value?.length ?? 0
+  })
+
   return {
     list: ctx.rootProps.subtitles,
     loading: ctx.rootProps.subtitlesLoading,
     ready: ctx.rootProps.subtitlesReady,
     current,
+    currentIndex,
+    total,
     change,
     toggleEnabled,
     restoreCurrentSubtitle,

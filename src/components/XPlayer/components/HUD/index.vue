@@ -42,7 +42,10 @@
           v-if="displayMessage.value"
           :class="styles.value"
         >
-          {{ displayMessage.value }}
+          <component :is="displayMessage.value" v-if="isVNode(displayMessage.value)" />
+          <template v-else>
+            {{ displayMessage.value }}
+          </template>
         </div>
       </div>
     </div>
@@ -52,7 +55,7 @@
 <script setup lang="ts">
 import type { HudMessage } from './types'
 import { Icon } from '@iconify/vue'
-import { computed, ref, watch } from 'vue'
+import { computed, isVNode, ref, watch } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
 
