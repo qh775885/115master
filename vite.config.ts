@@ -92,6 +92,8 @@ export default defineConfig({
           'javdb.com',
           'jdbstatic.com',
           'missav.ws',
+          'api-shoulei-ssl.xunlei.com',
+          'subtitle.v.geilijiasu.com',
         ],
         'resource': {
           icon: 'https://115.com/favicon.ico',

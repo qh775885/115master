@@ -5,6 +5,7 @@ import { drive115 } from '../../../utils/drive115'
 import { fetchRequest } from '../../../utils/request/fetchRequest'
 import { filenameJaccardSimilarity, removeFileExtension } from '../../../utils/string'
 import { subtitlecat } from '../../../utils/subtitle/subtitlecat'
+import { thunderSubtitle } from '../../../utils/subtitle/thunder'
 
 /** 字幕数据 */
 export function useDataSubtitles() {
@@ -19,6 +20,24 @@ export function useDataSubtitles() {
       label: subtitle.title,
       srclang: subtitle.targetLanguage,
       source: 'Subtitle Cat',
+      raw: subtitle.raw,
+      format: subtitle.format,
+      kind: 'subtitles' as const,
+    } satisfies Subtitle))
+    return subtitles
+  }
+
+  /** 通过迅雷获取字幕 */
+  const getFromThunder = async (filename: string): Promise<Subtitle[]> => {
+    if (!filename) {
+      return []
+    }
+    const res = await thunderSubtitle.fetchSubtitle(filename)
+    const subtitles = res.map(subtitle => ({
+      id: subtitle.id,
+      label: `${removeFileExtension(subtitle.title)}${subtitle.extraName ? ` ${subtitle.extraName}` : ''}`,
+      srclang: 'zh-CN',
+      source: 'Thunder',
       raw: subtitle.raw,
       format: subtitle.format,
       kind: 'subtitles' as const,
@@ -76,12 +95,18 @@ export function useDataSubtitles() {
   /** 字幕数据 */
   const subtitles = useAsyncState<Subtitle[]>(
     async (pickcode: string, filename: string, keyword: string): Promise<Subtitle[]> => {
-      const subtitleCats = await getFromSubtitlecat(keyword)
-      const subtitles115 = await getFrom115(pickcode)
+      /** 并行获取所有来源的字幕 */
+      const [subtitleCats, thunderSubs, subtitles115] = await Promise.all([
+        getFromSubtitlecat(keyword),
+        getFromThunder(filename),
+        getFrom115(pickcode),
+      ])
+
       const subtitles = await setDefaultSubtitle(
         pickcode,
         [
           ...sortSubtitles(subtitleCats, filename),
+          ...sortSubtitles(thunderSubs, filename),
           ...sortSubtitles(subtitles115, filename),
         ],
       )

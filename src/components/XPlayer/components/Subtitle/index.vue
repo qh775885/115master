@@ -107,8 +107,8 @@ function parseSubtitleVTT(text: string) {
     const text = lines.join('\n') ?? ''
 
     const [start, end] = time.split('-->')
-    const st = timeToSeconds(start)
-    const et = timeToSeconds(end)
+    const st = timeToSeconds(start.trim())
+    const et = timeToSeconds(end.trim())
     subtitles.push({ start, end, text, st, et })
   }
   subtitleParsed.value = subtitles
@@ -137,7 +137,6 @@ function parseSubtitle(text: string, format: Subtitle['format']) {
 function fetchSubtitle(url: string) {
   return fetch(url)
     .then(response => response.blob())
-    .then(blob => blob.text())
 }
 
 /**
@@ -155,7 +154,7 @@ async function loadSubtitle(subtitle: Subtitle | null) {
   else if (subtitle.url) {
     try {
       const subtitleText = await fetchSubtitle(subtitle.url)
-      parseSubtitle(subtitleText, subtitle.format)
+      parseSubtitle(await subtitleText.text(), subtitle.format)
     }
     catch (e) {
       console.warn('请求字幕文件失败', e)
