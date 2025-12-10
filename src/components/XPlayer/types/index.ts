@@ -172,6 +172,8 @@ export interface XPlayerProps {
   onPrevious?: () => void
   /** 下一个视频回调 */
   onNext?: () => void
+  /** 播放结束 */
+  onEnded?: () => void
 }
 
 export interface XPlayerEmit {

@@ -50,6 +50,7 @@
               :on-seeking="DataHistory.handleSeek"
               :on-seeked="DataHistory.handleSeek"
               :on-canplay="handleStartAutoBuffer"
+              :on-ended="handleVideoEnded"
             >
               <template #headerLeft>
                 <HeaderInfo
@@ -360,6 +361,15 @@ function handleNextVideo() {
 /** 开始自动缓冲缩略图 */
 function handleStartAutoBuffer() {
   DataThumbnails.autoBuffer()
+}
+
+/** 处理视频播放结束 */
+async function handleVideoEnded() {
+  /** 如果启用了自动播放且不是最后一个视频，自动播放下一个 */
+  const isLastVideo = playlistIndex.value >= playlistCount.value - 1
+  if (preferences.value.autoPlay && !isLastVideo) {
+    await handleNextVideo()
+  }
 }
 
 /** 处理时间更新 */
