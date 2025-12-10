@@ -369,6 +369,39 @@ const HOT_KEYS_CONFIG: Record<string, HotKeyConfig> = {
       ctx.transform?.toggleFlipY()
     },
   },
+
+  /**
+   * 按下 Ctrl+← 上一个视频
+   */
+  playlistPrevious: {
+    keys: [`${MODIFIERS.Control}+${KEYS.arrowLeft}`],
+    name: '上一个视频',
+    keydown: (ctx) => {
+      if (ctx.rootProps.onPrevious) {
+        const index = ctx.rootProps.playlistIndex ?? 0
+        if (index > 0) {
+          ctx.rootProps.onPrevious()
+        }
+      }
+    },
+  },
+
+  /**
+   * 按下 Ctrl+→ 下一个视频
+   */
+  playlistNext: {
+    keys: [`${MODIFIERS.Control}+${KEYS.arrowRight}`],
+    name: '下一个视频',
+    keydown: (ctx) => {
+      if (ctx.rootProps.onNext) {
+        const count = ctx.rootProps.playlistCount ?? 0
+        const index = ctx.rootProps.playlistIndex ?? 0
+        if (index < count - 1) {
+          ctx.rootProps.onNext()
+        }
+      }
+    },
+  },
 }
 
 /**

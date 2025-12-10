@@ -34,6 +34,8 @@
           <div :class="styles.controlBar.left">
             <!-- 播放按钮 -->
             <PlayButton />
+            <!-- 播放列表导航 -->
+            <PlaylistNavigationButtons />
             <!-- 音量控制 -->
             <VolumeControl />
             <!-- 时间显示 -->
@@ -75,6 +77,7 @@ import PipButton from './PipButton.vue'
 import PlaybackRateButton from './PlaybackRateButton.vue'
 import PlayButton from './PlayButton.vue'
 import PlayerCoreButton from './PlayerCoreButton.vue'
+import PlaylistNavigationButtons from './PlaylistNavigationButtons.vue'
 import ProgressBar from './ProgressBar.vue'
 import QualityButton from './QualityButton.vue'
 import SettingsButton from './SettingsButton.vue'

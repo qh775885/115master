@@ -66,6 +66,10 @@ export const ICON_ERROR = 'material-symbols:error'
 export const ICON_DOWNLOAD = 'material-symbols:download-rounded'
 // 查看
 export const ICON_VIEW = 'material-symbols:visibility-rounded'
+// 跳到上一个
+export const ICON_SKIP_PREVIOUS = 'material-symbols:skip-previous-rounded'
+// 跳到下一个
+export const ICON_SKIP_NEXT = 'material-symbols:skip-next-rounded'
 
 /**
  * 获取音量图标 Symbol

@@ -164,6 +164,14 @@ export interface XPlayerProps {
   onSeeked?: (time: number) => void
   /** 空闲 */
   onIdled?: () => void
+  /** 播放列表数量 */
+  playlistCount?: number
+  /** 播放列表当前索引 (0-based) */
+  playlistIndex?: number
+  /** 上一个视频回调 */
+  onPrevious?: () => void
+  /** 下一个视频回调 */
+  onNext?: () => void
 }
 
 export interface XPlayerEmit {

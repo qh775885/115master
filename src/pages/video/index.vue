@@ -40,6 +40,10 @@
               :last-time="DataHistory.lastTime.value"
               :subtitles-loading="DataSubtitles.isLoading"
               :subtitles-ready="DataSubtitles.isReady"
+              :playlist-count="playlistCount"
+              :playlist-index="playlistIndex"
+              :on-previous="handlePreviousVideo"
+              :on-next="handleNextVideo"
               :on-thumbnail-request="DataThumbnails.onThumbnailRequest"
               :on-subtitle-change="handleSubtitleChange"
               :on-timeupdate="handleTimeupdate"
@@ -262,6 +266,17 @@ const aspectRatio = computed(() => {
 
   return `${videoSize.value.width} / ${videoSize.value.height}`
 })
+/** 播放列表数量 */
+const playlistCount = computed(() => {
+  return DataPlaylist.state?.data?.length ?? 0
+})
+/** 播放列表当前索引 */
+const playlistIndex = computed(() => {
+  if (!DataPlaylist.state?.data || !params.pickCode.value) {
+    return -1
+  }
+  return DataPlaylist.state.data.findIndex(i => i.pc === params.pickCode.value)
+})
 
 /** 处理字幕变化 */
 async function handleSubtitleChange(subtitle: Subtitle | null) {
@@ -322,6 +337,24 @@ async function handleChangeVideo(item: Entity.PlaylistItem) {
   finally {
     changeing.value = false
   }
+}
+
+/** 播放上一个视频 */
+function handlePreviousVideo() {
+  if (!DataPlaylist.state?.data || playlistIndex.value <= 0) {
+    return
+  }
+  const prevItem = DataPlaylist.state.data[playlistIndex.value - 1]
+  handleChangeVideo(prevItem)
+}
+
+/** 播放下一个视频 */
+function handleNextVideo() {
+  if (!DataPlaylist.state?.data || playlistIndex.value >= playlistCount.value - 1) {
+    return
+  }
+  const nextItem = DataPlaylist.state.data[playlistIndex.value + 1]
+  handleChangeVideo(nextItem)
 }
 
 /** 开始自动缓冲缩略图 */
