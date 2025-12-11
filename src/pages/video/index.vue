@@ -27,6 +27,7 @@
               v-model:volume="preferences.volume"
               v-model:muted="preferences.muted"
               v-model:playback-rate="preferences.playbackRate"
+              v-model:quality="preferences.quality"
               v-model:auto-load-thumbnails="preferences.autoLoadThumbnails"
               v-model:disabled-h-d-r="preferences.disabledHDR"
               v-model:thumbnails-sampling-interval="preferences.thumbnailsSamplingInterval"

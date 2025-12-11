@@ -95,10 +95,12 @@ export function useSources(ctx: PlayerContext) {
     const currentTime = playerCore.value.currentTime || 0
 
     // 初始化新视频驱动
-    await initializeVideo(source)
+    await initializeVideo(source, undefined, currentTime)
 
-    // 恢复播放时间和状态
-    playerCore.value.seek(currentTime)
+    // 更新偏好设置
+    if (ctx.rootPropsVm.quality) {
+      ctx.rootPropsVm.quality.value = source.quality
+    }
   }
 
   /** 中断源 */
@@ -166,8 +168,19 @@ export function useSources(ctx: PlayerContext) {
         await ctx.playerCore.value?.destroy()
         return
       }
+
+      const preferredQuality = toValue(ctx.rootProps.quality)
+      let targetSource = list.value[0]
+
+      if (preferredQuality) {
+        const found = list.value.find(s => s.quality === preferredQuality)
+        if (found) {
+          targetSource = found
+        }
+      }
+
       await initializeVideo(
-        list.value[0],
+        targetSource,
         undefined,
         toValue(ctx.rootProps.lastTime),
       )

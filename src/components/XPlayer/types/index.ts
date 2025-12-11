@@ -142,6 +142,8 @@ export interface XPlayerProps {
   autoLoadThumbnails: boolean
   /** 自动播放 */
   autoPlay: boolean
+  /** 默认画质 */
+  quality?: number
   /** 禁用HDR */
   disabledHDR: boolean
   /** 缩略图采样间隔 */
@@ -189,6 +191,8 @@ export interface XPlayerEmit {
   'update:autoLoadThumbnails': [boolean]
   /** 自动播放 */
   'update:autoPlay': [boolean]
+  /** 默认画质 */
+  'update:quality': [number]
   /** 禁用HDR */
   'update:disabledHDR': [boolean]
   /** 缩略图采样间隔 */

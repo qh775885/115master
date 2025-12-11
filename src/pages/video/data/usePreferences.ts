@@ -23,6 +23,8 @@ export function usePreferences() {
       thumbnailsSamplingInterval: 60,
       // 自动播放
       autoPlay: true,
+      // 默认画质
+      quality: 0,
     },
     undefined,
     {

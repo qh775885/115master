@@ -71,8 +71,6 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
       methods.setMute(state.muted.value)
       // 初始化自动播放
       methods.setAutoPlay(state.autoPlay.value)
-      // 初始化播放时间
-      videoElement.currentTime = lastTime ?? state.currentTime.value
       // 初始化视频源
       videoElement.src = url
       // 初始化倍速（必须在src赋值后设置）
@@ -83,6 +81,12 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
           state.duration.value = videoElement.duration
           state.videoWidth.value = videoElement.videoWidth
           state.videoHeight.value = videoElement.videoHeight
+
+          // 初始化播放时间
+          if (lastTime !== undefined || state.currentTime.value > 0) {
+            videoElement.currentTime = lastTime ?? state.currentTime.value
+          }
+
           resolve()
 
           if (state.autoPlay.value) {
