@@ -144,6 +144,8 @@ export interface XPlayerProps {
   autoLoadThumbnails: boolean
   /** 自动播放 */
   autoPlay: boolean
+  /** 默认画质 */
+  quality?: number
   /** 禁用HDR */
   disabledHDR: boolean
   /** 缩略图采样间隔 */
@@ -174,6 +176,12 @@ export interface XPlayerProps {
   onSeeked?: (time: number) => void
   /** 空闲 */
   onIdled?: () => void
+  /** 播放列表数量 */
+  playlistCount?: number
+  /** 播放列表当前索引 (0-based) */
+  playlistIndex?: number
+  /** 播放结束 */
+  onEnded?: (ctx: PlayerContext) => void
 }
 
 export interface XPlayerEmit {
@@ -189,6 +197,8 @@ export interface XPlayerEmit {
   'update:autoLoadThumbnails': [boolean]
   /** 自动播放 */
   'update:autoPlay': [boolean]
+  /** 默认画质 */
+  'update:quality': [number]
   /** 禁用HDR */
   'update:disabledHDR': [boolean]
   /** 缩略图采样间隔 */

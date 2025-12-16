@@ -20,6 +20,8 @@ export interface PlayerPreferences {
   thumbnailsSamplingInterval: number
   /** 自动播放 */
   autoPlay: boolean
+  /** 默认画质 */
+  quality: number
   /** 快捷键偏好 */
   shortcutsPreference: ShortcutsPreference
 }
@@ -34,6 +36,7 @@ const DEFAULT_PREFERENCES: PlayerPreferences = {
   disabledHDR: false,
   thumbnailsSamplingInterval: 60,
   autoPlay: true,
+  quality: 0,
   shortcutsPreference: {
     actionKeyBindings: {},
   },

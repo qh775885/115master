@@ -27,6 +27,7 @@
               v-model:volume="preferences.volume"
               v-model:muted="preferences.muted"
               v-model:playback-rate="preferences.playbackRate"
+              v-model:quality="preferences.quality"
               v-model:auto-load-thumbnails="preferences.autoLoadThumbnails"
               v-model:disabled-h-d-r="preferences.disabledHDR"
               v-model:thumbnails-sampling-interval="
@@ -52,6 +53,7 @@
               :on-seeking="DataHistory.handleSeek"
               :on-seeked="DataHistory.handleSeek"
               :on-canplay="handleStartAutoBuffer"
+              :on-ended="handleVideoEnded"
               @play-previous="playPrevious"
               @play-next="playNext"
             >
@@ -555,6 +557,14 @@ async function playPrevious(ctx: PlayerContext) {
 /** 播放下一集 */
 async function playNext(ctx: PlayerContext) {
   playPreviousOrNext(ctx, 1)
+}
+
+/** 处理视频播放结束 */
+async function handleVideoEnded(ctx: PlayerContext) {
+  /** 自动播放下一集 */
+  if (hasPrevious.value) {
+    await playNext(ctx)
+  }
 }
 
 /** 获取播放列表按钮提示 */
