@@ -103,6 +103,40 @@ export function useSources(ctx: PlayerContext) {
     }
   }
 
+  /**
+   * 循环切换画质
+   * @param direction 方向 1: 下一个画质 -1: 上一个画质
+   */
+  const cycleQuality = async (direction: 1 | -1) => {
+    if (!current.value || list.value.length <= 1) {
+      return
+    }
+
+    const currentIndex = list.value.findIndex(
+      item => item.quality === current.value!.quality,
+    )
+
+    if (currentIndex === -1) {
+      return
+    }
+
+    const newIndex = direction === 1
+      ? (currentIndex + 1) % list.value.length /** 下一个画质 */
+      : currentIndex === 0 ? list.value.length - 1 : currentIndex - 1 /** 上一个画质 */
+
+    await changeQuality(list.value[newIndex])
+  }
+
+  /** 画质提升（循环切换到下一个更高画质） */
+  const cycleQualityUp = async () => {
+    await cycleQuality(1)
+  }
+
+  /** 画质降低（循环切换到上一个更低画质） */
+  const cycleQualityDown = async () => {
+    await cycleQuality(-1)
+  }
+
   /** 中断源 */
   const interruptSource = () => {
     isInterrupt.value = true
@@ -192,6 +226,8 @@ export function useSources(ctx: PlayerContext) {
     list,
     current,
     changeQuality,
+    cycleQualityUp,
+    cycleQualityDown,
     interruptSource,
     resumeSource,
     isInterrupt,

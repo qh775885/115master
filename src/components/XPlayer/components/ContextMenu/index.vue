@@ -21,6 +21,9 @@
             :class="styles.icon"
           />
           <span>{{ item.label }}</span>
+          <span v-if="item.actionKey" :class="styles.shortcuts">
+            {{ shortcuts.getShortcutsTip(item.actionKey) }}
+          </span>
         </a>
       </li>
     </ul>
@@ -46,9 +49,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import ShortcutsPopup from '../../shortcuts/ShortcutsPopup.vue'
 import Popup from '../Popup/index.vue'
 import AboutPopup from './AboutPopup.vue'
-import ShortcutsPopup from './ShortcutsPopup.vue'
 
 defineSlots<{
   aboutContent: () => void
@@ -59,7 +62,8 @@ const styles = {
   container: 'menu w-48',
   menuItem: 'menu-item rounded-lg',
   icon: 'size-6',
+  shortcuts: 'ml-auto text-xs opacity-30',
 }
 
-const { contextMenu } = usePlayerContext()
+const { contextMenu, shortcuts } = usePlayerContext()
 </script>
