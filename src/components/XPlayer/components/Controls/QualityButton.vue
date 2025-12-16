@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="styles.btnText.root"
-    data-tip="画质"
+    :data-tip="qualityTip"
     @click="toggleMenu"
   >
     <span>{{ currentQuality }}</span>
@@ -45,9 +45,11 @@ const styles = {
   ...controlStyles,
 }
 
-const { source } = usePlayerContext()
+const { source, shortcuts } = usePlayerContext()
 const menuVisible = shallowRef(false)
 const buttonRef = shallowRef<HTMLElement>()
+
+const NAME = '画质'
 
 const currentQuality = computed(() => {
   if (!source.current.value)
@@ -55,6 +57,11 @@ const currentQuality = computed(() => {
   const quality
     = source.current.value.displayQuality || source.current.value.quality
   return typeof quality === 'number' ? `${quality}P` : quality
+})
+
+const qualityTip = computed(() => {
+  const tip = shortcuts.getShortcutsTip('qualityDown')
+  return `${NAME}${tip}`
 })
 
 function toggleMenu() {

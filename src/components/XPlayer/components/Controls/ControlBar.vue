@@ -32,8 +32,20 @@
           }]"
         >
           <div :class="styles.controlBar.left">
+            <!-- 上一集按钮 -->
+            <EpisodeButton
+              type="playPrevious"
+              :disabled="!rootProps.hasPrevious"
+              :on-click="handlePlayPrevious"
+            />
             <!-- 播放按钮 -->
             <PlayButton />
+            <!-- 下一集按钮 -->
+            <EpisodeButton
+              type="playNext"
+              :disabled="!rootProps.hasNext"
+              :on-click="handlePlayNext"
+            />
             <!-- 音量控制 -->
             <VolumeControl />
             <!-- 时间显示 -->
@@ -70,6 +82,7 @@ import { computed, shallowRef } from 'vue'
 import { useControlsMouseDetection } from '../../hooks/useControlsMouseDetection'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import AudioTrackButton from './AudioTrackButton.vue'
+import EpisodeButton from './EpisodeButton.vue'
 import FullscreenButton from './FullscreenButton.vue'
 import PipButton from './PipButton.vue'
 import PlaybackRateButton from './PlaybackRateButton.vue'
@@ -100,7 +113,9 @@ const styles = {
 }
 
 /** 视频播放器上下文 */
-const { controls, playerCore, progressBar } = usePlayerContext()
+const ctx = usePlayerContext()
+
+const { controls, playerCore, progressBar, rootProps, rootEmit } = ctx
 
 /** 控制栏引用 */
 const controlBarRef = shallowRef<HTMLDivElement | null>(null)
@@ -116,4 +131,14 @@ const show = computed(() => {
 const canplay = computed(() => {
   return playerCore.value?.canplay
 })
+
+/** 播放上一集 */
+function handlePlayPrevious() {
+  rootEmit('playPrevious', ctx)
+}
+
+/** 播放下一集 */
+function handlePlayNext() {
+  rootEmit('playNext', ctx)
+}
 </script>

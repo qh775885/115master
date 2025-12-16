@@ -12,7 +12,7 @@
           hud?.showResumeSuspended();
         }"
       >
-        点击恢复音频
+        点击恢复音频 {{ muteKey }}
       </button>
     </div>
     <div :class="[styles.root]">
@@ -20,7 +20,7 @@
         class="swap swap-rotate" :class="[styles.btn.root, {
           'swap-active': playerCore?.muted,
         }]"
-        data-tip="静音 (M)"
+        :data-tip="muteTip"
         :disabled="!playerCore?.canplay || playerCore?.isSuspended"
         @click="playerCore?.toggleMute"
       >
@@ -53,7 +53,7 @@ import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import { getVolumeIcon } from '../../utils/icon'
 
-const { playerCore, hud } = usePlayerContext()
+const { playerCore, hud, shortcuts } = usePlayerContext()
 
 const styles = computed(() => ({
   root: 'flex items-center gap-2 mr-2',
@@ -74,6 +74,17 @@ const VolumeIcon = computed(() => {
     playerCore.value?.volume ?? 0,
     playerCore.value?.muted ?? false,
   )
+})
+
+const MUTE_NAME = '静音'
+
+const muteKey = computed(() => {
+  const tip = shortcuts.getShortcutsTip('toggleMute')
+  return tip
+})
+
+const muteTip = computed(() => {
+  return `${MUTE_NAME}${muteKey.value}`
 })
 
 function handleVolumeChange(event: Event) {

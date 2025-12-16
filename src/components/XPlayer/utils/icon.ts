@@ -22,6 +22,8 @@ export const ICON_LOADING = 'line-md:loading-loop'
 export const ICON_FAST_FORWARD = 'material-symbols:fast-forward-rounded'
 // 快速后退
 export const ICON_FAST_REWIND = 'material-symbols:fast-rewind-rounded'
+// 画面变换
+export const ICON_TRANSFORM = 'material-symbols:transform'
 // 旋转左
 export const ICON_ROTATE_LEFT = 'material-symbols:rotate-left-rounded'
 // 旋转右
@@ -66,6 +68,32 @@ export const ICON_ERROR = 'material-symbols:error'
 export const ICON_DOWNLOAD = 'material-symbols:download-rounded'
 // 查看
 export const ICON_VIEW = 'material-symbols:visibility-rounded'
+// 其他
+export const ICON_OTHER = 'material-symbols:more-vert'
+// 扩展功能
+export const ICON_EXTENSION_FEATURE = 'material-symbols:extension-rounded'
+// 播放列表
+export const ICON_PLAYLIST = 'material-symbols:order-play-rounded'
+// 窗口
+export const ICON_WINDOW = 'material-symbols:window-rounded'
+// 上一集
+export const ICON_PREV = 'material-symbols:skip-previous-rounded'
+// 下一集
+export const ICON_NEXT = 'material-symbols:skip-next-rounded'
+// 全屏
+export const ICON_FULLSCREEN = 'material-symbols:fullscreen-rounded'
+// 全屏退出
+export const ICON_FULLSCREEN_EXIT = 'material-symbols:fullscreen-exit-rounded'
+// 重置
+export const ICON_RESET = 'material-symbols:restart-alt'
+// 关闭
+export const ICON_CLOSE = 'material-symbols:close-rounded'
+// 导出
+export const ICON_EXPORT = 'material-symbols:upload-rounded'
+// 导入
+export const ICON_IMPORT = 'material-symbols:download-rounded'
+// 重置全部
+export const ICON_RESET_ALL = 'material-symbols:restart-alt-rounded'
 
 /**
  * 获取音量图标 Symbol

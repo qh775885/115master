@@ -30,6 +30,9 @@
     "noUncheckedSideEffectImports": true
   },
   "paths": {
+    "@/*": [
+      "src/*"
+    ],
     "@libmedia/common/*": [
       "node_modules/@libmedia/common/dist/esm/*"
     ],

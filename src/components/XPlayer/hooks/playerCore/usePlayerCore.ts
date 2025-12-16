@@ -44,7 +44,7 @@ export function usePlayerCoreDecorator(usePlayerCore:
       const newVolume = Math.min(Math.max(0, player.volume.value + delta), 100)
       player.setVolume(newVolume)
     },
-    /** 快进快退 (秒数或百分比浮点数) */
+    /** 快进后退 (秒数或百分比浮点数) */
     skip: (value: number, isPercent = false) => {
       const newTime = isPercent
         ? value * player.duration.value

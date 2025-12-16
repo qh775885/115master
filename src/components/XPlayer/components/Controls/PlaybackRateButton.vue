@@ -3,7 +3,7 @@
     ref="buttonRef"
     :class="[styles.btnText.root]"
     :disabled="!playerCore?.canplay"
-    data-tip="倍速 (ArrowUp/ArrowDown)"
+    :data-tip="playbackRateTip"
     @click="toggleSpeedMenu"
   >
     {{ buttonText }}
@@ -39,7 +39,9 @@ const styles = {
   ...controlStyles,
 }
 
-const { playbackRate, playerCore } = usePlayerContext()
+const NAME = '倍速'
+
+const { playbackRate, playerCore, shortcuts } = usePlayerContext()
 const rateOptions = computed(() =>
   [...playbackRate.rateOptions.value].reverse(),
 )
@@ -47,8 +49,13 @@ const menuVisible = shallowRef(false)
 const buttonRef = ref<HTMLElement>()
 const buttonText = computed(() => {
   return playbackRate.current.value === 1
-    ? '倍速'
+    ? NAME
     : `${playbackRate.current.value}X`
+})
+
+const playbackRateTip = computed(() => {
+  const tip = shortcuts.getShortcutsTip('playbackRateUp', 'playbackRateDown')
+  return `${NAME}${tip}`
 })
 
 /** 切换菜单显示 */

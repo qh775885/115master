@@ -92,6 +92,47 @@ export function useSubtitles(ctx: PlayerContext) {
     return ctx.rootProps.subtitles.value?.length ?? 0
   })
 
+  /** 导航字幕 */
+  const navigate = (direction: 1 | -1) => {
+    const subtitles = ctx.rootProps.subtitles.value
+    if (!subtitles || subtitles.length === 0) {
+      return
+    }
+
+    /** 如果当前没有字幕，选择边界字幕（下一个选第一个，上一个选最后一个） */
+    if (!current.value) {
+      const fallbackIndex = direction === 1 ? 0 : subtitles.length - 1
+      change(subtitles[fallbackIndex])
+      return
+    }
+
+    /** 查找当前字幕的索引 */
+    const currentIdx = subtitles.findIndex(sub => sub.id === current.value?.id)
+    if (currentIdx === -1) {
+      /** 当前字幕不在列表中，选择边界字幕 */
+      const fallbackIndex = direction === 1 ? 0 : subtitles.length - 1
+      change(subtitles[fallbackIndex])
+      return
+    }
+
+    /** 计算下一个索引 */
+    const nextIdx = currentIdx + direction
+
+    /** 检查边界，如果超出边界则关闭字幕 */
+    if (nextIdx >= 0 && nextIdx < subtitles.length) {
+      change(subtitles[nextIdx])
+    }
+    else {
+      change(null)
+    }
+  }
+
+  /** 切换到下一个字幕 */
+  const next = () => navigate(1)
+
+  /** 切换到上一个字幕 */
+  const prev = () => navigate(-1)
+
   return {
     list: ctx.rootProps.subtitles,
     loading: ctx.rootProps.subtitlesLoading,
@@ -101,6 +142,8 @@ export function useSubtitles(ctx: PlayerContext) {
     total,
     change,
     toggleEnabled,
+    next,
+    prev,
     restoreCurrentSubtitle,
   }
 }
