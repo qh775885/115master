@@ -1,3 +1,4 @@
+import type { ActionKey } from '../shortcuts/shortcuts.types'
 import type { PlayerContext } from './usePlayerProvide'
 import { ref, shallowRef } from 'vue'
 import {
@@ -7,10 +8,28 @@ import {
 } from '../utils/icon'
 
 export interface ContextMenuItem {
+  /**
+   * ID
+   */
   id: string
+  /**
+   * 菜单名
+   */
   label: string
+  /**
+   * 图标
+   */
   icon?: string
+  /**
+   * 动作
+   * @description 快捷键动作
+   */
   action: () => void
+  /**
+   * 快捷键 ActionKey
+   * @description 用于显示快捷键提示
+   */
+  actionKey?: ActionKey
 }
 
 /**
@@ -29,18 +48,10 @@ export function useContextMenu(ctx: PlayerContext) {
   /** 菜单项 */
   const menuItems: ContextMenuItem[] = [
     {
-      id: 'about',
-      label: '关于',
-      icon: ICON_ABOUT,
-      action: () => {
-        showAbout.value = true
-        visible.value = false
-      },
-    },
-    {
       id: 'shortcuts',
       label: '快捷键',
       icon: ICON_SHORTCUTS,
+      actionKey: 'shortcuts',
       action: () => {
         showShortcuts.value = true
         visible.value = false
@@ -50,8 +61,18 @@ export function useContextMenu(ctx: PlayerContext) {
       id: 'statistics',
       label: 'Statistics',
       icon: ICON_STATISTICS_INFO,
+      actionKey: 'statistics',
       action: () => {
         ctx.statistics.toggleVisible()
+        visible.value = false
+      },
+    },
+    {
+      id: 'about',
+      label: '关于',
+      icon: ICON_ABOUT,
+      action: () => {
+        showAbout.value = true
         visible.value = false
       },
     },

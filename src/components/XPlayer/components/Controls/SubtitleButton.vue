@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    :data-tip="`${subtitles.list.value?.length ? '字幕(C)' : '未找到字幕'}`"
+    :data-tip="subtitleTip"
     :disabled="subtitles.loading.value || !subtitles.ready.value || subtitles.list.value?.length === 0"
     @click="toggleMenu"
   >
@@ -110,9 +110,19 @@ const styles = {
   btn: controlStyles.btn,
 }
 
-const { subtitles } = usePlayerContext()
+const { subtitles, shortcuts } = usePlayerContext()
 const menuVisible = shallowRef(false)
 const buttonRef = shallowRef<HTMLElement>()
+
+const NAME = '字幕'
+
+const subtitleTip = computed(() => {
+  if (!subtitles.list.value?.length)
+    return '未找到字幕'
+
+  const tip = shortcuts.getShortcutsTip('toggleSubtitle')
+  return `${NAME}${tip}`
+})
 
 const menuItems = computed(() => {
   return [

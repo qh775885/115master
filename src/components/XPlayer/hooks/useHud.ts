@@ -154,13 +154,13 @@ export function useHud(ctx: PlayerContext) {
     })
   }
 
-  /** 显示播放速度 */
+  /** 显示倍速 */
   const showPlaybackRate = () => {
     const playbackRate = ctx.playerCore.value?.playbackRate
     if (!playbackRate)
       return
     show({
-      title: '播放速度',
+      title: '倍速',
       icon: ICON_TIMER,
       value: playbackRate,
     })
@@ -234,17 +234,20 @@ export function useHud(ctx: PlayerContext) {
     })
   }
 
-  /** 显示快进/快退HUD */
-  const showFastJumpHud = (dir: number) => {
+  /** 显示快进/后退HUD */
+  const showFastJumpHud = (value: number) => {
     /** 计算当前进度百分比 */
     const currentProgress = getCurrentProgressPercentage()
-    const title = dir === 1 ? '快进' : '快退'
+    const isForward = value > 0
+    const dirText = isForward ? '快进' : '后退'
+    const title = `${dirText} ${(value)}s`
+    const icon = isForward ? ICON_FAST_FORWARD : ICON_FAST_REWIND
 
     // 创建消息并添加进度信息
     show({
       title,
       value: formatTime(ctx.playerCore.value?.currentTime || 0),
-      icon: dir === 1 ? ICON_FAST_FORWARD : ICON_FAST_REWIND,
+      icon,
       progress: {
         max: 100,
         min: 0,

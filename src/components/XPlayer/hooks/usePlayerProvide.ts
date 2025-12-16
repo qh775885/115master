@@ -8,6 +8,7 @@ import {
   provide,
   ref,
 } from 'vue'
+import { useShortcuts } from '../shortcuts/shortcuts.hooks'
 import {
 
   useSwitchPlayerCore,
@@ -16,7 +17,6 @@ import { useContextMenu } from './useContextMenu'
 import { useControls } from './useControls'
 import { useCssVar } from './useCssVar'
 import { useFullscreen } from './useFullscreen'
-import { useHotKey } from './useHotKey'
 import { useHud } from './useHud'
 import { usePictureInPicture } from './usePictureInPicture'
 import { usePlaybackRate } from './usePlaybackRate'
@@ -58,7 +58,7 @@ export interface PlayerContext {
   fullscreen: ReturnType<typeof useFullscreen>
   /** 画中画 */
   pictureInPicture: ReturnType<typeof usePictureInPicture>
-  /** 播放速度 */
+  /** 倍速 */
   playbackRate: ReturnType<typeof usePlaybackRate>
   /** 进度条 */
   progressBar: ReturnType<typeof useProgressBar>
@@ -69,7 +69,7 @@ export interface PlayerContext {
   /** 视频源 */
   source: ReturnType<typeof useSources>
   /** 热键 */
-  hotKey: ReturnType<typeof useHotKey>
+  shortcuts: ReturnType<typeof useShortcuts>
   /** 画面转换 */
   transform: ReturnType<typeof useTransform>
   /** 预览图设置 */
@@ -125,7 +125,7 @@ export function usePlayerProvide(
   const popupManager = usePopupManager(context)
   context.popupManager = popupManager
 
-  /** 播放速度 */
+  /** 倍速 */
   const playbackRate = usePlaybackRate(context)
   context.playbackRate = playbackRate
 
@@ -149,9 +149,9 @@ export function usePlayerProvide(
   const source = useSources(context)
   context.source = source
 
-  /** 热键 */
-  const hotKey = useHotKey(context)
-  context.hotKey = hotKey
+  /** 热键设置 */
+  const shortcuts = useShortcuts(context)
+  context.shortcuts = shortcuts
 
   /** 画中画 */
   const pictureInPicture = usePictureInPicture(context)

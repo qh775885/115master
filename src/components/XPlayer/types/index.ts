@@ -2,6 +2,8 @@ import type { AVPlayerOptions } from '@libmedia/avplayer'
 import type { HlsConfig } from 'hls.js'
 import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
+import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { ShortcutsExt, ShortcutsPreference } from '../shortcuts/shortcuts.types'
 
 /**
  * 缩略图帧
@@ -146,6 +148,14 @@ export interface XPlayerProps {
   disabledHDR: boolean
   /** 缩略图采样间隔 */
   thumbnailsSamplingInterval: number
+  /** 快捷键偏好 */
+  shortcutsPreference: ShortcutsPreference
+  /** 是否有上一集 */
+  hasPrevious?: boolean
+  /** 是否有下一集 */
+  hasNext?: boolean
+  /** 外部快捷键配置 */
+  shortcutsExt?: ShortcutsExt
   /** hls 配置 */
   hlsConfig?: Partial<HlsConfig>
   /** avPlayer 配置 */
@@ -183,4 +193,10 @@ export interface XPlayerEmit {
   'update:disabledHDR': [boolean]
   /** 缩略图采样间隔 */
   'update:thumbnailsSamplingInterval': [number]
+  /** 快捷键偏好 */
+  'update:shortcutsPreference': [ShortcutsPreference]
+  /** 播放上一集 */
+  'playPrevious': [PlayerContext]
+  /** 播放下一集 */
+  'playNext': [PlayerContext]
 }
