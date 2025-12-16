@@ -60,7 +60,7 @@ export const ICON_STATISTICS_INFO = 'material-symbols:analytics-outline'
 export const ICON_SHORTCUTS = 'material-symbols:keyboard-outline'
 // 关于
 export const ICON_ABOUT = 'material-symbols:info-outline'
-// 颜色调整
+// 视频色彩
 export const ICON_COLOR_ADJUST = 'mdi:color'
 // 错误
 export const ICON_ERROR = 'material-symbols:error'

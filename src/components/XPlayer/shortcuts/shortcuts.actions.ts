@@ -1,6 +1,9 @@
+import type { PlayerContext } from '../hooks/usePlayerProvide'
 import type {
+  Action,
   ActionMap,
 } from './shortcuts.types'
+import { ENHANCE_CONFIGS } from '../hooks/useVideoEnhance'
 import {
   ACTION_GROUPS,
   ENHANCE_OFFSET,
@@ -341,314 +344,57 @@ const TRANSFORM_ACTION_MAP = withGroup({
   },
 } satisfies ActionMap, ACTION_GROUPS.TRANSFORM)
 
+/** 基础颜色增强动作 */
+type _BaseEnhanceActionMap = Record<
+  (
+    | `${keyof typeof ENHANCE_CONFIGS}Up`
+    | `${keyof typeof ENHANCE_CONFIGS}Down`
+  ),
+  Action
+>
+const _BASE_ENHANCE_COLOR_ACTION_MAP = Object.entries(ENHANCE_CONFIGS)
+  .reduce<_BaseEnhanceActionMap>
+  ((acc, [key, config]) => {
+    const { name } = config
+    const paramKey = key as keyof typeof ENHANCE_CONFIGS
+    const showHud = (ctx: PlayerContext) => {
+      ctx.hud?.show({
+        title: name,
+        value: ctx.videoEnhance.enhanceParams.values[paramKey].value,
+      })
+    }
+    return {
+      ...acc,
+      [`${paramKey}Up`]: {
+        name: `${name} +`,
+        allowRepeat: true,
+        keydown: (ctx) => {
+          ctx.videoEnhance.enhanceParams.values[paramKey].value += ENHANCE_OFFSET
+          showHud(ctx)
+        },
+      } satisfies Action,
+      [`${paramKey}Down`]: {
+        name: `${name} -`,
+        allowRepeat: true,
+        keydown: (ctx) => {
+          ctx.videoEnhance.enhanceParams.values[paramKey].value -= ENHANCE_OFFSET
+          showHud(ctx)
+        },
+      } satisfies Action,
+    }
+  }, {} as _BaseEnhanceActionMap)
+
 /** 颜色增强动作 */
 const ENHANCE_COLOR_ACTION_MAP = withGroup({
-  /**
-   * 亮度提升
-   */
-  brightnessUp: {
-    name: '亮度 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.brightness += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '亮度',
-        value: ctx.videoEnhance.colorParams.brightness,
-      })
-    },
-  },
+  ..._BASE_ENHANCE_COLOR_ACTION_MAP,
 
-  /**
-   * 亮度降低
-   */
-  brightnessDown: {
-    name: '亮度 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.brightness -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '亮度',
-        value: ctx.videoEnhance.colorParams.brightness,
-      })
-    },
-  },
-
-  /**
-   * 对比度提升
-   */
-  contrastUp: {
-    name: '对比度 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.contrast += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '对比度',
-        value: ctx.videoEnhance.colorParams.contrast,
-      })
-    },
-  },
-
-  /**
-   * 对比度降低
-   */
-  contrastDown: {
-    name: '对比度 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.contrast -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '对比度',
-        value: ctx.videoEnhance.colorParams.contrast,
-      })
-    },
-  },
-
-  /**
-   * 高光提升
-   */
-  highlightsUp: {
-    name: '高光 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.highlights += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '高光',
-        value: ctx.videoEnhance.colorParams.highlights,
-      })
-    },
-  },
-
-  /**
-   * 高光降低
-   */
-  highlightsDown: {
-    name: '高光 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.highlights -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '高光',
-        value: ctx.videoEnhance.colorParams.highlights,
-      })
-    },
-  },
-
-  /**
-   * 阴影提升
-   */
-  shadowsUp: {
-    name: '阴影 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.shadows += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '阴影',
-        value: ctx.videoEnhance.colorParams.shadows,
-      })
-    },
-  },
-
-  /**
-   * 阴影降低
-   */
-  shadowsDown: {
-    name: '阴影 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.shadows -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '阴影',
-        value: ctx.videoEnhance.colorParams.shadows,
-      })
-    },
-  },
-
-  /**
-   * 饱和度提升
-   */
-  saturationUp: {
-    name: '饱和度 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.saturation += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '饱和度',
-        value: ctx.videoEnhance.colorParams.saturation,
-      })
-    },
-  },
-
-  /**
-   * 饱和度降低
-   */
-  saturationDown: {
-    name: '饱和度 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.saturation -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '饱和度',
-        value: ctx.videoEnhance.colorParams.saturation,
-      })
-    },
-  },
-
-  /**
-   * 色温提升
-   */
-  colorTempUp: {
-    name: '色温 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.colorTemp += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '色温',
-        value: ctx.videoEnhance.colorParams.colorTemp,
-      })
-    },
-  },
-
-  /**
-   * 色温降低
-   */
-  colorTempDown: {
-    name: '色温 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.colorTemp -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '色温',
-        value: ctx.videoEnhance.colorParams.colorTemp,
-      })
-    },
-  },
-
-  /**
-   * 色调提升
-   */
-  hueUp: {
-    name: '色调 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.hue += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '色调',
-        value: ctx.videoEnhance.colorParams.hue,
-      })
-    },
-  },
-
-  /**
-   * 色调降低
-   */
-  hueDown: {
-    name: '色调 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.hue -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '色调',
-        value: ctx.videoEnhance.colorParams.hue,
-      })
-    },
-  },
-
-  /**
-   * 肤色美白提升
-   */
-  skinWhiteningUp: {
-    name: '美白 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.skinWhitening += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '美白',
-        value: ctx.videoEnhance.colorParams.skinWhitening,
-      })
-    },
-  },
-
-  /**
-   * 肤色美白降低
-   */
-  skinWhiteningDown: {
-    name: '美白 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.skinWhitening -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '美白',
-        value: ctx.videoEnhance.colorParams.skinWhitening,
-      })
-    },
-  },
-  /**
-   * 肤色范围提升
-   */
-  skinRangeUp: {
-    name: '肤色范围 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.skinRange += 1
-      ctx.hud?.show({
-        title: '肤色范围',
-        value: ctx.videoEnhance.colorParams.skinRange,
-      })
-    },
-  },
-
-  /**
-   * 肤色范围降低
-   */
-  skinRangeDown: {
-    name: '肤色范围 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.skinRange -= 1
-      ctx.hud?.show({
-        title: '肤色范围',
-        value: ctx.videoEnhance.colorParams.skinRange,
-      })
-    },
-  },
-
-  /**
-   * 锐化提升
-   */
-  sharpnessUp: {
-    name: '锐化 +',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.sharpness += ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '锐化',
-        value: ctx.videoEnhance.colorParams.sharpness,
-      })
-    },
-  },
-
-  /**
-   * 锐化降低
-   */
-  sharpnessDown: {
-    name: '锐化 -',
-    allowRepeat: true,
-    keydown: (ctx) => {
-      ctx.videoEnhance.colorParams.sharpness -= ENHANCE_OFFSET
-      ctx.hud?.show({
-        title: '锐化',
-        value: ctx.videoEnhance.colorParams.sharpness,
-      })
-    },
-  },
-
-  /** 重置颜色调整 */
+  /** 重置视频色彩 */
   resetVideoEnhance: {
-    name: '重置颜色调整',
+    name: '重置视频色彩',
     keydown: (ctx) => {
-      ctx.videoEnhance.reset()
+      ctx.videoEnhance.enhanceParams.resetAll()
       ctx.hud?.show({
-        title: '重置颜色调整',
+        title: '重置视频色彩',
       })
     },
   },
