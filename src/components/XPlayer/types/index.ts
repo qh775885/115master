@@ -1,6 +1,9 @@
 import type { AVPlayerOptions } from '@libmedia/avplayer'
 import type { HlsConfig } from 'hls.js'
+import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
+import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { ShortcutsExt, ShortcutsPreference } from '../shortcuts/shortcuts.types'
 
 /**
  * 缩略图帧
@@ -88,23 +91,32 @@ export interface VideoSource {
   }
 }
 
-// 字幕
-export interface Subtitle {
+/** 字幕 Base */
+export interface SubtitleBase {
   /** 字幕 id */
   id: string
-  /** 字幕 url */
-  url: string
+  /** 字幕网络地址或 BlobUrl */
+  url?: string
+  /** 字幕原始文本 */
+  raw?: Blob
+  /** 字幕格式 */
+  format: 'srt' | 'vtt' | string
   /** 字幕名称 */
   label: string
   /** 字幕语言 */
   srclang: string
   /** 字幕类型 */
   kind: 'subtitles' | 'captions'
-  /** 字幕默认 */
+  /** 是否字幕默认 */
   default?: boolean
   /** 字幕来源 */
   source?: string
+  /** 字幕来源 ICON */
+  sourceIcon?: string
 }
+
+/** 字幕 */
+export type Subtitle = RequireAtLeastOne<SubtitleBase, 'url' | 'raw'>
 
 /**
  * 播放器属性
@@ -132,10 +144,20 @@ export interface XPlayerProps {
   autoLoadThumbnails: boolean
   /** 自动播放 */
   autoPlay: boolean
+  /** 默认画质 */
+  quality?: number
   /** 禁用HDR */
   disabledHDR: boolean
   /** 缩略图采样间隔 */
   thumbnailsSamplingInterval: number
+  /** 快捷键偏好 */
+  shortcutsPreference: ShortcutsPreference
+  /** 是否有上一集 */
+  hasPrevious?: boolean
+  /** 是否有下一集 */
+  hasNext?: boolean
+  /** 外部快捷键配置 */
+  shortcutsExt?: ShortcutsExt
   /** hls 配置 */
   hlsConfig?: Partial<HlsConfig>
   /** avPlayer 配置 */
@@ -154,6 +176,12 @@ export interface XPlayerProps {
   onSeeked?: (time: number) => void
   /** 空闲 */
   onIdled?: () => void
+  /** 播放列表数量 */
+  playlistCount?: number
+  /** 播放列表当前索引 (0-based) */
+  playlistIndex?: number
+  /** 播放结束 */
+  onEnded?: (ctx: PlayerContext) => void
 }
 
 export interface XPlayerEmit {
@@ -169,8 +197,16 @@ export interface XPlayerEmit {
   'update:autoLoadThumbnails': [boolean]
   /** 自动播放 */
   'update:autoPlay': [boolean]
+  /** 默认画质 */
+  'update:quality': [number]
   /** 禁用HDR */
   'update:disabledHDR': [boolean]
   /** 缩略图采样间隔 */
   'update:thumbnailsSamplingInterval': [number]
+  /** 快捷键偏好 */
+  'update:shortcutsPreference': [ShortcutsPreference]
+  /** 播放上一集 */
+  'playPrevious': [PlayerContext]
+  /** 播放下一集 */
+  'playNext': [PlayerContext]
 }

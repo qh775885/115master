@@ -7,7 +7,7 @@
       },
     ]"
     :disabled="!playerCore?.canplay"
-    data-tip="播放/暂停 (Space)"
+    :data-tip="playTip"
     @click="playerCore?.togglePlay"
   >
     <Icon
@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { computed } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import { ICON_PASUE, ICON_PLAY } from '../../utils/icon'
@@ -36,5 +37,12 @@ const styles = {
   },
 }
 
-const { playerCore } = usePlayerContext()
+const NAME = '播放/暂停'
+
+const { playerCore, shortcuts } = usePlayerContext()
+
+const playTip = computed(() => {
+  const tip = shortcuts.getShortcutsTip('togglePlay')
+  return `${NAME}${tip}`
+})
 </script>

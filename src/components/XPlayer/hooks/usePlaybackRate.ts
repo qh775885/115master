@@ -1,7 +1,7 @@
 import type { PlayerContext } from './usePlayerProvide'
 import { computed, shallowRef } from 'vue'
 
-/** 播放速度 */
+/** 倍速 */
 export function usePlaybackRate(ctx: PlayerContext) {
   /** 正常倍速 */
   const NORMAL_RATE = 1
@@ -24,7 +24,7 @@ export function usePlaybackRate(ctx: PlayerContext) {
     10,
     MAX_RATE,
   ])
-  /** 播放速度 */
+  /** 倍速 */
   const current = ctx.rootPropsVm.playbackRate
   /** 当前倍速的索引 */
   const currentRateIndex = computed(
@@ -33,12 +33,12 @@ export function usePlaybackRate(ctx: PlayerContext) {
   /** 是否启用长按快速前进 */
   const fastForward = shallowRef(false)
 
-  /** 设置播放速度 */
+  /** 设置倍速 */
   const set = (rate: number) => {
     ctx.playerCore.value?.setPlaybackRate(rate)
   }
 
-  /** 调整播放速度 */
+  /** 调整倍速 */
   const setByIndex = (index: number) => {
     if (index < 0 || index >= rateOptions.value.length)
       return
@@ -46,17 +46,17 @@ export function usePlaybackRate(ctx: PlayerContext) {
     set(newRate)
   }
 
-  /** 增加播放速度 */
+  /** 增加倍速 */
   const up = () => {
     setByIndex(currentRateIndex.value + 1)
   }
 
-  /** 减少播放速度 */
+  /** 减少倍速 */
   const down = () => {
     setByIndex(currentRateIndex.value - 1)
   }
 
-  /** 减少播放速度并限制下限 */
+  /** 减少倍速并限制下限 */
   const downWithLowerLimit = () => {
     if (current.value <= NORMAL_RATE)
       return

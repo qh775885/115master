@@ -1,8 +1,8 @@
+import type { Subtitle } from '../../components/XPlayer/types'
 import md5 from 'blueimp-md5'
 import { subtitleCache } from '../cache/subtitleCache'
 import { AppLogger } from '../logger'
 import { GMRequestInstance } from '../request/gmRequst'
-import { convertSrtToVtt, vttToBlobUrl } from './subtitleTool'
 
 /**
  * subtitlecat 搜索结果
@@ -25,13 +25,9 @@ interface SubtitleSearchResult {
 /**
  * 处理后的字幕
  */
-export interface ProcessedSubtitle {
-  /** 字幕 id */
-  id: string
+export type ProcessedSubtitle = Required<Pick<Subtitle, 'id' | 'format' | 'raw'>> & {
   /** 标题 */
   title: string
-  /** 下载地址 */
-  url: string
   /** 下载次数 */
   downloads: number
   /** 评论 */
@@ -40,8 +36,6 @@ export interface ProcessedSubtitle {
   originLanguage: string
   /** 目标语言 */
   targetLanguage: string
-  /** vtt文本 */
-  vvtText: string
   /** 是否是缓存 */
   isCache: boolean
 }
@@ -57,13 +51,13 @@ export class SubtitleCat {
   /** 请求实例 */
   private iRequest = GMRequestInstance
 
-  /** 获取字幕文本 */
-  getSubtitleText(url: string): Promise<string> {
+  /** 获取字幕Blob */
+  getSubtitleText(url: string): Promise<Blob> {
     return new Promise((resolve, reject) => {
       this.iRequest
         .get(url)
-        .then((response) => {
-          resolve(response.text())
+        .then(async (response) => {
+          resolve(await response.blob())
         })
         .catch((error) => {
           reject(error)
@@ -106,7 +100,6 @@ export class SubtitleCat {
       // 重新生成所有字幕的 blob URL，因为之前的可能已经失效
       return cachedSubtitles.map(subtitle => ({
         ...subtitle,
-        url: vttToBlobUrl(subtitle.vvtText)!,
       }))
     }
 
@@ -240,17 +233,15 @@ export class SubtitleCat {
     if (!url)
       return undefined
 
-    const subtitleText = await this.getSubtitleText(this.domain + url)
-    const vttText = convertSrtToVtt(subtitleText)
-    const blobUrl = vttToBlobUrl(vttText)
+    const blob = await this.getSubtitleText(this.domain + url)
 
     return {
       ...item,
       id: md5(JSON.stringify(item)),
-      url: blobUrl!,
-      vvtText: vttText,
+      raw: blob,
+      format: 'srt',
       isCache: false,
-    }
+    } satisfies ProcessedSubtitle
   }
 
   /** 排序结果 */

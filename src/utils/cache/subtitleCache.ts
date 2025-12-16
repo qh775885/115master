@@ -24,6 +24,7 @@ export class SubtitleCache extends CacheCore<SubtitleCacheItem> {
   constructor() {
     super({
       storeName: 'subtitle_cache',
+      version: 2,
     })
   }
 

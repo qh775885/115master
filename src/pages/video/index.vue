@@ -27,10 +27,14 @@
               v-model:volume="preferences.volume"
               v-model:muted="preferences.muted"
               v-model:playback-rate="preferences.playbackRate"
+              v-model:quality="preferences.quality"
               v-model:auto-load-thumbnails="preferences.autoLoadThumbnails"
               v-model:disabled-h-d-r="preferences.disabledHDR"
-              v-model:thumbnails-sampling-interval="preferences.thumbnailsSamplingInterval"
+              v-model:thumbnails-sampling-interval="
+                preferences.thumbnailsSamplingInterval
+              "
               v-model:auto-play="preferences.autoPlay"
+              v-model:shortcuts-preference="preferences.shortcutsPreference"
               :class="[styles.player.video]"
               :style="{
                 aspectRatio,
@@ -40,12 +44,18 @@
               :last-time="DataHistory.lastTime.value"
               :subtitles-loading="DataSubtitles.isLoading"
               :subtitles-ready="DataSubtitles.isReady"
+              :shortcuts-ext="extShortcuts"
+              :has-previous="hasPrevious"
+              :has-next="hasNext"
               :on-thumbnail-request="DataThumbnails.onThumbnailRequest"
               :on-subtitle-change="handleSubtitleChange"
               :on-timeupdate="handleTimeupdate"
               :on-seeking="DataHistory.handleSeek"
               :on-seeked="DataHistory.handleSeek"
               :on-canplay="handleStartAutoBuffer"
+              :on-ended="handleVideoEnded"
+              @play-previous="playPrevious"
+              @play-next="playNext"
             >
               <template #headerLeft>
                 <HeaderInfo
@@ -53,7 +63,7 @@
                   :playlist="DataPlaylist"
                 />
               </template>
-              <template #controlsRight>
+              <template #controlsRight="{ ctx }">
                 <!-- 播放列表切换按钮 -->
                 <label
                   for="playlist-drawer"
@@ -61,30 +71,37 @@
                     styles.controls.btn.root,
                     preferences.showPlaylist && 'btn-active btn-primary',
                   ]"
-                  data-tip="播放列表(B)"
+                  :data-tip="
+                    getActionNameTip(ctx, '播放列表', 'toggleShowSider')
+                  "
                 >
-                  <Icon :icon="ICON_PLAYLIST" :class="[styles.controls.btn.icon]" />
+                  <Icon
+                    :icon="ICON_PLAYLIST"
+                    :class="[styles.controls.btn.icon]"
+                  />
                 </label>
 
                 <!-- 收藏按钮 -->
                 <button
                   v-if="DataFileInfo.isReady"
-                  class="swap swap-rotate" :class="[styles.controls.btn.root, {
-                    'swap-active': !DataMark.isMark.value,
-                  }]"
-                  data-tip="收藏"
+                  class="swap swap-rotate"
+                  :class="[
+                    styles.controls.btn.root,
+                    {
+                      'swap-active': !DataMark.isMark.value,
+                    },
+                  ]"
+                  :data-tip="getActionNameTip(ctx, '收藏', 'toggleFavorite')"
                   @click="handleMark"
                 >
                   <Icon
-                    class="swap-off" :class="[
-                      styles.controls.btn.icon,
-                    ]"
+                    class="swap-off"
+                    :class="[styles.controls.btn.icon]"
                     :icon="ICON_STAR_FILL"
                   />
                   <Icon
-                    class="swap-on" :class="[
-                      styles.controls.btn.icon,
-                    ]"
+                    class="swap-on"
+                    :class="[styles.controls.btn.icon]"
                     :icon="ICON_STAR"
                   />
                 </button>
@@ -93,7 +110,7 @@
                 <button
                   v-if="isMac && DataFileInfo.isReady"
                   :class="styles.controls.btn.root"
-                  data-tip="IINA"
+                  :data-tip="getActionNameTip(ctx, 'IINA 播放', 'playWithIINA')"
                   @click="handleLocalPlay('iina')"
                 >
                   <img
@@ -113,9 +130,7 @@
         <!-- 页面下方内容 -->
         <div v-if="PLUS_VERSION" :class="styles.container.pageFlow">
           <!-- 电影信息 -->
-          <MovieInfo
-            :movie-infos="DataMovieInfo"
-          />
+          <MovieInfo :movie-infos="DataMovieInfo" />
         </div>
       </div>
 
@@ -143,20 +158,30 @@
 </template>
 
 <script setup lang="ts">
+import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
 import type XPlayerInstance from '../../components/XPlayer/index.vue'
+import type {
+  ActionKey,
+  ActionKeyBindings,
+  ActionMap,
+  ShortcutsExt,
+} from '../../components/XPlayer/shortcuts/shortcuts.types'
 import type { Subtitle } from '../../components/XPlayer/types'
 import type { Entity } from '../../utils/drive115'
 import { Icon } from '@iconify/vue'
 import { useTitle } from '@vueuse/core'
-import { computed, nextTick, onMounted, ref, shallowRef } from 'vue'
+import { computed, h, nextTick, onMounted, ref, shallowRef } from 'vue'
 import iinaIcon from '../../assets/icons/iina-icon.png'
 import XPlayer from '../../components/XPlayer/index.vue'
+import { ACTION_GROUPS } from '../../components/XPlayer/shortcuts/shortcuts.const'
 import { controlRightStyles } from '../../components/XPlayer/styles/common'
+import { formatTime } from '../../components/XPlayer/utils/time'
 import { PLUS_VERSION } from '../../constants'
 import { useParamsVideoPage } from '../../hooks/useParams'
 import { ICON_PLAYLIST, ICON_STAR, ICON_STAR_FILL } from '../../icons'
 import { subtitlePreference } from '../../utils/cache/subtitlePreference'
 import { drive115 } from '../../utils/drive115'
+import { formatFileSize } from '../../utils/format'
 import { getAvNumber } from '../../utils/getNumber'
 import { isMac } from '../../utils/platform'
 import { goToPlayer } from '../../utils/route'
@@ -262,6 +287,66 @@ const aspectRatio = computed(() => {
 
   return `${videoSize.value.width} / ${videoSize.value.height}`
 })
+/** 当前播放列表索引 */
+const currentPlaylistIndex = computed(() => {
+  if (!DataPlaylist.state || !params.pickCode.value) {
+    return -1
+  }
+  return DataPlaylist.state.data.findIndex(
+    item => item.pc === params.pickCode.value,
+  )
+})
+/** 是否有上一集 */
+const hasPrevious = computed(() => {
+  if (currentPlaylistIndex.value < 0) {
+    return undefined
+  }
+  return currentPlaylistIndex.value > 0
+})
+/** 是否有下一集 */
+const hasNext = computed(() => {
+  if (!DataPlaylist.state || currentPlaylistIndex.value < 0) {
+    return undefined
+  }
+  return currentPlaylistIndex.value < DataPlaylist.state.data.length - 1
+})
+/** 动作映射 */
+const ACTION_MAP: ActionMap = {
+  toggleFavorite: {
+    name: '收藏',
+    group: ACTION_GROUPS.EXTERNAL,
+    keydown: async (ctx) => {
+      await handleMark()
+      const title = DataMark.isMark.value ? '已收藏' : '取消收藏'
+      const icon = DataMark.isMark.value ? ICON_STAR_FILL : ICON_STAR
+      ctx.hud?.show({
+        title,
+        icon,
+      })
+    },
+  },
+
+  playWithIINA: {
+    name: 'IINA 播放',
+    group: ACTION_GROUPS.EXTERNAL,
+    keydown: (ctx) => {
+      handleLocalPlay('iina')
+      ctx.hud?.show({
+        title: 'IINA 播放',
+      })
+    },
+  },
+} satisfies ActionMap
+/** 动作键绑定 */
+const ACTION_KEY_BINDINGS = {
+  toggleFavorite: [],
+  playWithIINA: [],
+} satisfies ActionKeyBindings
+/** 外部动作配置 */
+const extShortcuts = {
+  actionMap: ACTION_MAP,
+  actionKeyBindings: ACTION_KEY_BINDINGS,
+} satisfies ShortcutsExt
 
 /** 处理字幕变化 */
 async function handleSubtitleChange(subtitle: Subtitle | null) {
@@ -398,11 +483,6 @@ async function loadData(isFirst = true) {
   isFirst && DataPlaylist.execute(0, params.cid.value)
 }
 
-// 挂载
-onMounted(async () => {
-  await loadData()
-})
-
 /** 处理收藏 */
 async function handleMark() {
   // 切换星标
@@ -413,4 +493,92 @@ async function handleMark() {
     !!DataMark.isMark.value,
   )
 }
+
+/**
+ * 播放上一集或下一集
+ * @param ctx
+ * @param dir 方向 -1: 上一集 1: 下一集
+ */
+async function playPreviousOrNext(ctx: PlayerContext, dir: number) {
+  if (!DataPlaylist.state || !params.pickCode.value) {
+    return
+  }
+
+  const currentIndex = DataPlaylist.state.data.findIndex(
+    item => item.pc === params.pickCode.value,
+  )
+
+  const nextIndex = currentIndex + dir
+  if (nextIndex >= 0 && nextIndex < DataPlaylist.state.data.length) {
+    const nextItem = DataPlaylist.state.data[nextIndex]
+    handleChangeVideo(nextItem)
+    const no = nextIndex + 1
+    const len = DataPlaylist.state?.data.length
+    const title = `播放列表 (${no}/${len})`
+    const value = h('div', [
+      h(
+        'div',
+        {
+          class: 'text-sm font-semibold',
+        },
+        nextItem.n,
+      ),
+      h(
+        'div',
+        {
+          class: 'text-xs text-base-content/60',
+        },
+        formatTime(nextItem.play_long),
+      ),
+      h(
+        'div',
+        {
+          class: 'text-xs text-base-content/60',
+        },
+        formatFileSize(nextItem.s),
+      ),
+    ])
+    const icon = ICON_PLAYLIST
+    ctx.hud?.show({ title, icon, value })
+  }
+  else {
+    ctx.hud?.show({
+      title: '没有更多了',
+      icon: ICON_PLAYLIST,
+    })
+  }
+}
+
+/** 播放上一集 */
+async function playPrevious(ctx: PlayerContext) {
+  playPreviousOrNext(ctx, -1)
+}
+
+/** 播放下一集 */
+async function playNext(ctx: PlayerContext) {
+  playPreviousOrNext(ctx, 1)
+}
+
+/** 处理视频播放结束 */
+async function handleVideoEnded(ctx: PlayerContext) {
+  /** 自动播放下一集 */
+  if (hasPrevious.value) {
+    await playNext(ctx)
+  }
+}
+
+/** 获取播放列表按钮提示 */
+function getActionNameTip(
+  ctx: PlayerContext,
+  name: string,
+  actionKey: ActionKey,
+) {
+  const tip = ctx.shortcuts.getShortcutsTip(actionKey)
+  return `${name}${tip}`
+}
+
+// 挂载
+onMounted(async () => {
+  await loadData()
+})
 </script>

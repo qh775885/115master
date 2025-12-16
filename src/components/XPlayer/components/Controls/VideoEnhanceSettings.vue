@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    data-tip="颜色调整"
+    data-tip="视频色彩"
     @click="toggleMenu"
   >
     <Icon
@@ -25,167 +25,36 @@
       <div class="card-body">
         <div class="flex justify-between items-center mb-2">
           <h3 class="card-title">
-            色彩调整
+            视频色彩
           </h3>
           <button
             class="btn btn-xs btn-circle btn-ghost"
             title="重置"
-            @click="videoEnhance.reset"
+            @click="resetAll"
           >
             <Icon :icon="ICON_RESTART" class="size-6" />
           </button>
         </div>
         <div class="grid grid-rows-5 grid-flow-col gap-x-5 gap-y-2">
-          <!-- 亮度 -->
-          <fieldset class="fieldset">
+          <fieldset
+            v-for="(value, key) in enhanceParams.values"
+            :key="key"
+            class="fieldset"
+          >
             <legend class="fieldset-legend w-full">
-              亮度 <span class="badge badge-sm">{{ videoEnhance.colorParams.brightness }}</span>
+              {{ ENHANCE_PARAMS_CONFIG[key].name }} <span class="badge badge-sm">{{ value }}</span>
             </legend>
             <input
-              v-model.number="videoEnhance.colorParams.brightness"
               type="range"
               class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
+              :value="value.value"
+              :min="ENHANCE_PARAMS_CONFIG[key].min"
+              :max="ENHANCE_PARAMS_CONFIG[key].max"
+              :step="ENHANCE_PARAMS_CONFIG[key].step"
+              @input="($event: Event) =>
+                values[key].value = ($event.target as HTMLInputElement).valueAsNumber"
             >
           </fieldset>
-
-          <!-- 对比度 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              对比度 <span class="badge badge-sm">{{ videoEnhance.colorParams.contrast }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.contrast"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 高光 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              高光 <span class="badge badge-sm">{{ videoEnhance.colorParams.highlights }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.highlights"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 阴影 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              阴影 <span class="badge badge-sm">{{ videoEnhance.colorParams.shadows }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.shadows"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 饱和度 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              饱和度 <span class="badge badge-sm">{{ videoEnhance.colorParams.saturation }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.saturation"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 色温 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              色温 <span class="badge badge-sm">{{ videoEnhance.colorParams.colorTemp }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.colorTemp"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 色调 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              色调 <span class="badge badge-sm">{{ videoEnhance.colorParams.hue }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.hue"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="-100"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 锐化 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              锐化 <span class="badge badge-sm">{{ videoEnhance.colorParams.sharpness }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.sharpness"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="0"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 美白强度 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              美白强度 <span class="badge badge-sm">{{ videoEnhance.colorParams.skinWhitening }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.skinWhitening"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="0"
-              max="100"
-              step="1"
-            >
-          </fieldset>
-
-          <!-- 肤色范围 -->
-          <fieldset class="fieldset">
-            <legend class="fieldset-legend w-full">
-              肤色范围 <span class="badge badge-sm">{{ videoEnhance.colorParams.skinRange }}</span>
-            </legend>
-            <input
-              v-model.number="videoEnhance.colorParams.skinRange"
-              type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
-              min="1"
-              max="10"
-              step="1"
-            >
-          </fieldset>
-
           <!-- 禁用HDR -->
           <fieldset class="fieldset">
             <legend class="fieldset-legend w-full">
@@ -223,4 +92,6 @@ function toggleMenu() {
 }
 
 const { videoEnhance } = usePlayerContext()
+const { enhanceParams, ENHANCE_PARAMS_CONFIG } = videoEnhance
+const { values, resetAll } = enhanceParams
 </script>

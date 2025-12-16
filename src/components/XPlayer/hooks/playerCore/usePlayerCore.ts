@@ -21,6 +21,7 @@ export function usePlayerCoreDecorator(usePlayerCore:
   player.on('timeupdate', ctx.rootProps.onTimeupdate ?? noop)
   player.on('seeking', ctx.rootProps.onSeeking ?? noop)
   player.on('seeked', ctx.rootProps.onSeeked ?? noop)
+  player.on('ended', () => ctx.rootProps.onEnded?.(ctx))
 
   /** 同步响应式数据 */
   const syncRefList = [
@@ -44,7 +45,7 @@ export function usePlayerCoreDecorator(usePlayerCore:
       const newVolume = Math.min(Math.max(0, player.volume.value + delta), 100)
       player.setVolume(newVolume)
     },
-    /** 快进快退 (秒数或百分比浮点数) */
+    /** 快进后退 (秒数或百分比浮点数) */
     skip: (value: number, isPercent = false) => {
       const newTime = isPercent
         ? value * player.duration.value

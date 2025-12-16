@@ -42,9 +42,10 @@
           <slot name="headerLeft" />
         </template>
       </ControlsHeader>
+      <SubtitleInfo />
       <ControlsMask>
         <ControlsRight>
-          <slot name="controlsRight" />
+          <slot name="controlsRight" v-bind="{ ctx }" />
         </ControlsRight>
       </ControlsMask>
       <ControlsBar />
@@ -76,6 +77,7 @@
 </template>
 
 <script setup lang="ts">
+import type { PlayerContext } from './hooks/usePlayerProvide'
 import type { XPlayerEmit, XPlayerProps } from './types'
 import { shallowRef, watch, watchEffect } from 'vue'
 import LoadingError from '../../components/LoadingError/index.vue'
@@ -85,6 +87,7 @@ import ControlsHeader from './components/Controls/ControlHeader.vue'
 import ControlsMask from './components/Controls/ControlMask.vue'
 import ControlsRight from './components/Controls/ControlsRight.vue'
 import Controls from './components/Controls/index.vue'
+import SubtitleInfo from './components/Controls/SubtitleInfo.vue'
 import HUD from './components/HUD/index.vue'
 import Loading from './components/Loading/index.vue'
 import PlayAnimation from './components/PlayAnimation/index.vue'
@@ -109,7 +112,7 @@ defineSlots<{
   /** 头部左侧插槽 */
   headerLeft: () => void
   /** 控制栏右侧插槽 */
-  controlsRight: () => void
+  controlsRight: (props: { ctx: PlayerContext }) => void
   /** 关于内容插槽 */
   aboutContent: () => void
 }>()
@@ -139,7 +142,7 @@ watchEffect(() => {
 })
 
 /** 视频播放器上下文 */
-const context = usePlayerProvide(
+const ctx = usePlayerProvide(
   {
     rootRef,
     playerElementRef,
@@ -148,8 +151,14 @@ const context = usePlayerProvide(
   emit,
 )
 
-const { fullscreen, source, transform, videoEnhance, playerCore, controls }
-  = context
+const {
+  fullscreen,
+  source,
+  transform,
+  videoEnhance,
+  playerCore,
+  controls,
+} = ctx
 
 // 监听控制栏可见性，直接设置光标样式
 watch(

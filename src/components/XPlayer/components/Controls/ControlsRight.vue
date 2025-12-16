@@ -42,6 +42,6 @@ useControlsMouseDetection(controlRightRef)
 
 /** 显示/隐藏控制栏 */
 const show = computed(() => {
-  return controls.visible.value && !progressBar.isLongPressDragging.value
+  return controls.visible.value && !progressBar.isHovering.value
 })
 </script>

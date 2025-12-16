@@ -17,6 +17,7 @@
 import type { Subtitle } from '../../types'
 import { useElementBounding } from '@vueuse/core'
 import { computed, shallowRef, watch } from 'vue'
+import { convertSrtToVtt } from '../../../../utils/subtitle/subtitleTool'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
 const styles = {
@@ -78,8 +79,9 @@ const cleanedText = computed(() => {
  * @returns 秒
  */
 function timeToSeconds(time: string) {
-  const [hours, minutes, seconds] = time.split(':').map(Number)
-  const [secondsPart, msPart] = seconds.toString().split('.')
+  const [hours = 0, minutes = 0, seconds = 0] = time.split(':').map(Number)
+  const [secondsPart = '0', msPart = '0'] = seconds.toString().split('.')
+
   return (
     hours * 3600
     + minutes * 60
@@ -89,23 +91,52 @@ function timeToSeconds(time: string) {
 }
 
 /**
- * 解析字幕
+ * 解析字幕VTT格式
  * @param text 字幕文本
  */
-function parseSubtitle(text: string) {
-  const lines = text.split(/\n\n/).filter(line => line.trim() !== '')
+function parseSubtitleVTT(text: string) {
+  const blocks = text.split(/\n\n/).filter(block => block.trim() !== '')
   const subtitles = []
-  for (const line of lines) {
-    if (/WEBVTT/.test(line))
+  for (const block of blocks) {
+    if (/WEBVTT/.test(block))
       continue
 
-    const [time, text] = line.split(/\n/)
+    const lines = block.split(/\n/)
+    /** 首行视为时间，其余为文本 */
+    const time = lines.shift() ?? ''
+    const text = lines.join('\n') ?? ''
+
     const [start, end] = time.split('-->')
-    const st = timeToSeconds(start)
-    const et = timeToSeconds(end)
+    const st = timeToSeconds(start.trim())
+    const et = timeToSeconds(end.trim())
     subtitles.push({ start, end, text, st, et })
   }
   subtitleParsed.value = subtitles
+}
+
+/**
+ * 解析字幕
+ * @param text 字幕文本
+ */
+function parseSubtitle(text: string, format: Subtitle['format']) {
+  let formatedText: string | undefined
+  switch (format) {
+    case 'srt':
+      formatedText = convertSrtToVtt(text)
+      break
+    case 'vtt':
+      formatedText = text
+      break
+    default:
+      console.warn('不支持的字幕格式:', format)
+      return
+  }
+  parseSubtitleVTT(formatedText)
+}
+
+function fetchSubtitle(url: string) {
+  return fetch(url)
+    .then(response => response.blob())
 }
 
 /**
@@ -117,10 +148,21 @@ async function loadSubtitle(subtitle: Subtitle | null) {
     text.value = null
     return
   }
-  const response = await fetch(subtitle.url)
-  const blob = await response.blob()
-  text.value = await blob.text()
-  parseSubtitle(text.value)
+  if (subtitle.raw) {
+    parseSubtitle(await subtitle.raw.text(), subtitle.format)
+  }
+  else if (subtitle.url) {
+    try {
+      const subtitleText = await fetchSubtitle(subtitle.url)
+      parseSubtitle(await subtitleText.text(), subtitle.format)
+    }
+    catch (e) {
+      console.warn('请求字幕文件失败', e)
+    }
+  }
+  else {
+    console.warn('加载字幕失败: 无效的字幕')
+  }
 }
 
 watch(current, () => {

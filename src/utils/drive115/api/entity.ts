@@ -41,7 +41,7 @@ export interface MoviesSubtitleItemBuiltIn {
   /** 字幕标题 */
   title: string
   /** 字幕类型 */
-  type: 'srt'
+  type: 'srt' | 'ass' | 'vtt'
   /** url */
   url: string
 }

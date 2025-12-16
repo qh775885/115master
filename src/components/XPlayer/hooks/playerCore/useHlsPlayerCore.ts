@@ -54,7 +54,7 @@ export function useHlsPlayerCore(ctx: PlayerContext) {
         ...config,
       })
     },
-    load: (url: string) => {
+    load: (url: string, lastTime?: number) => {
       const videoElement = videoNative.getRenderElement() as HTMLVideoElement
       const hls = getHlsRef()
       hls.loadSource(url)
@@ -67,6 +67,12 @@ export function useHlsPlayerCore(ctx: PlayerContext) {
           videoNative.duration.value = videoElement.duration
           videoNative.videoWidth.value = videoElement.videoWidth
           videoNative.videoHeight.value = videoElement.videoHeight
+
+          // 初始化播放时间
+          if (lastTime !== undefined || videoNative.currentTime.value > 0) {
+            videoElement.currentTime = lastTime ?? videoNative.currentTime.value
+          }
+
           resolve()
 
           if (videoNative.autoPlay.value) {

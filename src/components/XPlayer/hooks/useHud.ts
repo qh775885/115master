@@ -1,6 +1,7 @@
 import type { HudMessage } from '../components/HUD/index'
 import type { PlayerContext } from './usePlayerProvide'
-import { computed, onUnmounted, shallowRef, watch } from 'vue'
+import { computed, h, onUnmounted, shallowRef, watch } from 'vue'
+import SubtitleDisplay from '../components/SubtitleDisplay.vue'
 import {
   getVolumeIcon,
   ICON_FAST_FORWARD,
@@ -153,13 +154,13 @@ export function useHud(ctx: PlayerContext) {
     })
   }
 
-  /** 显示播放速度 */
+  /** 显示倍速 */
   const showPlaybackRate = () => {
     const playbackRate = ctx.playerCore.value?.playbackRate
     if (!playbackRate)
       return
     show({
-      title: '播放速度',
+      title: '倍速',
       icon: ICON_TIMER,
       value: playbackRate,
     })
@@ -167,10 +168,28 @@ export function useHud(ctx: PlayerContext) {
 
   // 监听字幕变化
   if (ctx.subtitles) {
-    const { current } = ctx.subtitles
+    const { current, currentIndex, total } = ctx.subtitles
     watch(current, (newSubtitle) => {
-      const value = newSubtitle ? newSubtitle.label : '关闭'
       const icon = newSubtitle ? ICON_SUBTITLES : ICON_SUBTITLES_OFF
+
+      if (!newSubtitle) {
+        show({
+          title: '字幕',
+          icon,
+          value: '关闭',
+        })
+        return
+      }
+
+      /** 使用组件渲染字幕信息 */
+      const value = h(SubtitleDisplay, {
+        label: newSubtitle.label,
+        format: newSubtitle.format,
+        source: newSubtitle.source,
+        subtitleIndex: currentIndex.value,
+        total: total.value,
+      })
+
       show({
         title: '字幕',
         icon,
@@ -215,17 +234,20 @@ export function useHud(ctx: PlayerContext) {
     })
   }
 
-  /** 显示快进/快退HUD */
-  const showFastJumpHud = (dir: number) => {
+  /** 显示快进/后退HUD */
+  const showFastJumpHud = (value: number) => {
     /** 计算当前进度百分比 */
     const currentProgress = getCurrentProgressPercentage()
-    const title = dir === 1 ? '快进' : '快退'
+    const isForward = value > 0
+    const dirText = isForward ? '快进' : '后退'
+    const title = `${dirText} ${(value)}s`
+    const icon = isForward ? ICON_FAST_FORWARD : ICON_FAST_REWIND
 
     // 创建消息并添加进度信息
     show({
       title,
       value: formatTime(ctx.playerCore.value?.currentTime || 0),
-      icon: dir === 1 ? ICON_FAST_FORWARD : ICON_FAST_REWIND,
+      icon,
       progress: {
         max: 100,
         min: 0,
