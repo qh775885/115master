@@ -31,7 +31,7 @@ export const EXPORT_FILE_PREFIX = `xplayer-shortcuts-config`
 /** 绑定键分隔符 */
 export const KEY_BINDING_SEPARATOR = '+'
 
-/** 颜色调整偏移 */
+/** 视频色彩偏移 */
 export const ENHANCE_OFFSET = 10
 
 /** 快进/后退偏移 */
@@ -67,7 +67,7 @@ export const ACTION_GROUPS = {
   SUBTITLE: { key: 'subtitle', name: '字幕', icon: ICON_SUBTITLES },
   WINDOW: { key: 'window', name: '窗口', icon: ICON_WINDOW },
   TRANSFORM: { key: 'transform', name: '画面变换', icon: ICON_TRANSFORM },
-  ENHANCE: { key: 'enhance', name: '颜色调整', icon: ICON_COLOR_ADJUST },
+  ENHANCE: { key: 'enhance', name: '视频色彩', icon: ICON_COLOR_ADJUST },
   EXTERNAL: { key: 'external', name: '扩展功能', icon: ICON_EXTENSION_FEATURE },
   OTHER: { key: 'other', name: '其他', icon: ICON_OTHER },
 } as const satisfies Record<string, ActionGroup>

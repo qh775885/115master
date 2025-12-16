@@ -1,8 +1,78 @@
 import type { PlayerContext } from './usePlayerProvide'
-import { computed, reactive } from 'vue'
+import { useClamp } from '@vueuse/math'
+import { computed, toValue } from 'vue'
+
+/** 增强参数配置 */
+interface EnhanceParamConfig {
+  name: string
+  defaultValue: number
+  min: number
+  max: number
+  step: number
+}
+
+/** 增强参数配置表 */
+type EnhanceConfigs = Record<string, EnhanceParamConfig>
+
+/** 增强参数配置表 */
+export const ENHANCE_CONFIGS = {
+  brightness: { name: '亮度', defaultValue: 0, min: -100, max: 100, step: 1 },
+  contrast: { name: '对比度', defaultValue: 0, min: -100, max: 100, step: 1 },
+  saturation: { name: '饱和度', defaultValue: 0, min: -100, max: 100, step: 1 },
+  colorTemp: { name: '色温', defaultValue: 0, min: -100, max: 100, step: 1 },
+  hue: { name: '色调', defaultValue: 0, min: -100, max: 100, step: 1 },
+  highlights: { name: '高光', defaultValue: 0, min: -100, max: 100, step: 1 },
+  shadows: { name: '阴影', defaultValue: 0, min: -100, max: 100, step: 1 },
+  sharpness: { name: '锐化', defaultValue: 0, min: 0, max: 100, step: 1 },
+  skinWhitening: { name: '美白强度', defaultValue: 0, min: 0, max: 100, step: 1 },
+  skinRange: { name: '肤色范围', defaultValue: 50, min: 1, max: 100, step: 1 },
+} satisfies EnhanceConfigs
 
 /**
- * 视频色彩调整设置 Hook
+ * 视频色彩调整参数
+ * @returns 增强参数
+ */
+function useEnhanceParams<
+  K extends keyof typeof ENHANCE_CONFIGS,
+>(
+  enhanceConfigs: EnhanceConfigs,
+) {
+  const values = Object
+    .entries(enhanceConfigs)
+    .reduce((acc, [key, config]) => {
+      acc[key as K] = useClamp(config.defaultValue, config.min, config.max)
+      return acc
+    }, {} as
+     Record<K, ReturnType<typeof useClamp>>)
+
+  const reset = (key: K) => {
+    const config = enhanceConfigs[key]
+    values[key].value = config.defaultValue
+  }
+
+  const resetAll = () => {
+    Object.keys(enhanceConfigs).forEach((key) => {
+      reset(key as K)
+    })
+  }
+
+  const isEnabled = computed(() => {
+    return Object.keys(enhanceConfigs).some((key) => {
+      const config = enhanceConfigs[key]
+      return values[key as K].value !== config.defaultValue
+    })
+  })
+
+  return {
+    values,
+    isEnabled,
+    reset,
+    resetAll,
+  }
+}
+
+/**
+ * 视频视频色彩设置 Hook
  *
  * 提供视频画面的色彩增强功能，包括亮度、对比度、饱和度、色调、
  * 高光、阴影、色温、锐化和肤色美白等调色功能
@@ -17,48 +87,8 @@ export function useVideoEnhance(ctx: PlayerContext) {
   /** 禁用HDR选项 */
   const disabledHDR = ctx.rootPropsVm.disabledHDR
 
-  // ======================== 调色参数 ========================
-
-  /** 默认调色参数 */
-  const defaultParams = {
-    /** 锐化强度 (0-100) */
-    sharpness: 0,
-    /** 亮度调整 (-100 到 100) */
-    brightness: 0,
-    /** 对比度调整 (-100 到 100) */
-    contrast: 0,
-    /** 高光调整 (-100 到 100) */
-    highlights: 0,
-    /** 阴影调整 (-100 到 100) */
-    shadows: 0,
-    /** 色温调整 (-100 冷色 到 100 暖色) */
-    colorTemp: 0,
-    /** 饱和度调整 (-100 到 100) */
-    saturation: 0,
-    /** 色调调整 (-100 到 100，洋红-绿色轴调整) */
-    hue: 0,
-    /** 肤色美白强度 (0-100) */
-    skinWhitening: 0,
-    /** 肤色范围控制 (1-10，控制美白的选择性) */
-    skinRange: 5,
-  } as const
-
-  /** 当前调色参数 */
-  const colorParams = reactive({ ...defaultParams })
-
-  // ======================== 计算属性 ========================
-
-  /**
-   * 判断是否启用滤镜
-   * 通过比较当前参数与默认参数来判断
-   */
-  const isEnabled = computed(() => {
-    return Object.keys(defaultParams).some(
-      key =>
-        colorParams[key as keyof typeof defaultParams]
-        !== defaultParams[key as keyof typeof defaultParams],
-    )
-  })
+  /** 增强参数 */
+  const enhanceParams = useEnhanceParams(ENHANCE_CONFIGS)
 
   /**
    * 获取亮度调整参数
@@ -70,8 +100,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 提供平滑的非线性调整曲线
    */
   const getBrightnessParams = computed(() => {
+    const brightness = toValue(enhanceParams.values.brightness)
     // 当亮度为0时，返回默认参数（不改变颜色）
-    if (colorParams.brightness === 0) {
+    if (brightness === 0) {
       return {
         type: 'gamma' as const,
         amplitude: 1,
@@ -81,7 +112,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.brightness / 100
+    const value = brightness / 100
     const absValue = Math.abs(value)
 
     // 根据调整方向选择不同的调整策略
@@ -134,8 +165,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 确保调整后的值始终在有效范围内
    */
   const getContrastParams = computed(() => {
+    const contrast = toValue(enhanceParams.values.contrast)
     // 当对比度为0时，返回默认参数（不改变颜色）
-    if (colorParams.contrast === 0) {
+    if (contrast === 0) {
       return {
         type: 'linear' as const,
         slope: 1,
@@ -144,7 +176,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.contrast / 100
+    const value = contrast / 100
 
     /*
      * 对比度调整：使用斜率调整，中心点在0.5
@@ -189,8 +221,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 保持整体色彩平衡
    */
   const getHighlightsParams = computed(() => {
+    const highlights = toValue(enhanceParams.values.highlights)
     // 当高光为0时，返回默认参数（不改变颜色）
-    if (colorParams.highlights === 0) {
+    if (highlights === 0) {
       return {
         type: 'linear' as const,
         slope: 1,
@@ -200,7 +233,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.highlights / 100
+    const value = highlights / 100
     /** 最大50%调整强度 */
     const intensity = Math.abs(value) * 0.5
 
@@ -256,8 +289,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 保持细节不丢失
    */
   const getShadowsParams = computed(() => {
+    const shadows = toValue(enhanceParams.values.shadows)
     // 当阴影为0时，返回默认参数（不改变颜色）
-    if (colorParams.shadows === 0) {
+    if (shadows === 0) {
       return {
         type: 'linear' as const,
         slope: 1,
@@ -267,7 +301,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.shadows / 100
+    const value = shadows / 100
     /** 最大50%调整强度 */
     const intensity = Math.abs(value) * 0.5
 
@@ -324,8 +358,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 色彩平衡补偿，防止色彩偏移
    */
   const getSaturationMatrix = computed(() => {
+    const saturation = toValue(enhanceParams.values.saturation)
     // 当值为0时，返回单位矩阵（不对颜色做任何改变）
-    if (colorParams.saturation === 0) {
+    if (saturation === 0) {
       return `1 0 0 0 0
           0 1 0 0 0
           0 0 1 0 0
@@ -333,7 +368,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.saturation / 100
+    const value = saturation / 100
 
     /**
      * 非线性饱和度调整曲线
@@ -436,8 +471,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 4. 适度的调整范围，避免过度失真
    */
   const getHueMatrix = computed(() => {
+    const hue = toValue(enhanceParams.values.hue)
     // 当值为0时，返回单位矩阵（不对颜色做任何改变）
-    if (colorParams.hue === 0) {
+    if (hue === 0) {
       return `1 0 0 0 0
           0 1 0 0 0
           0 0 1 0 0
@@ -445,7 +481,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** -1 到 1 */
-    const value = colorParams.hue / 100
+    const value = hue / 100
     /** 最大40%的调整强度，更温和 */
     const intensity = Math.abs(value) * 0.4
 
@@ -506,10 +542,10 @@ export function useVideoEnhance(ctx: PlayerContext) {
    */
   const getColorTempMatrix = computed(() => {
     /** 调整范围：-100~100 */
-    const value = colorParams.colorTemp
+    const colorTemp = toValue(enhanceParams.values.colorTemp)
 
     // 当值为0时，返回单位矩阵（不对颜色做任何改变）
-    if (value === 0) {
+    if (colorTemp === 0) {
       return `1 0 0 0 0
           0 1 0 0 0
           0 0 1 0 0
@@ -522,7 +558,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
      * 负值 = 冷色（减少红色，增加蓝色）
      */
     /** -1 到 1 */
-    const normalizedValue = value / 100
+    const normalizedValue = colorTemp / 100
 
     // 色温调整强度，避免过度调整
     /** 最大30%的调整强度 */
@@ -577,8 +613,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 3. 专注于效果而非复杂度
    */
   const getSharpnessParams = computed(() => {
-    // 当锐化为0时，返回默认参数（不改变图像）
-    if (colorParams.sharpness === 0) {
+    /** 当锐化为0时，返回默认参数（不改变图像） */
+    const sharpness = toValue(enhanceParams.values.sharpness)
+    if (sharpness === 0) {
       return {
         enabled: false,
         amount: 0,
@@ -586,7 +623,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** 0 到 1 */
-    const value = colorParams.sharpness / 100
+    const value = sharpness / 100
 
     // 简化的锐化强度计算
     /** 0-2.0，强锐化效果 */
@@ -605,8 +642,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
    * 只使用单一Gamma调整，避免复杂操作导致卡死
    */
   const getSkinWhiteningParams = computed(() => {
-    // 当美白强度为0时，返回默认参数
-    if (colorParams.skinWhitening === 0) {
+    /** 当美白强度为0时，返回默认参数 */
+    const skinWhitening = toValue(enhanceParams.values.skinWhitening)
+    if (skinWhitening === 0) {
       return {
         enabled: false,
         midtoneGamma: 1.0,
@@ -619,9 +657,9 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
 
     /** 0-1 */
-    const intensity = colorParams.skinWhitening / 100
+    const intensity = skinWhitening / 100
     /** 0.1-1 */
-    const rangeControl = colorParams.skinRange / 10
+    const rangeControl = toValue(enhanceParams.values.skinRange) / 100
 
     /*
      * 中间调Gamma美白
@@ -817,7 +855,7 @@ export function useVideoEnhance(ctx: PlayerContext) {
    */
   const getFilterStyle = computed(() => {
     // 如果所有参数都为默认值(0)，不应用任何滤镜样式
-    if (!isEnabled.value) {
+    if (!enhanceParams.isEnabled.value) {
       if (disabledHDR.value) {
         return {
           'filter': 'brightness(1)',
@@ -834,25 +872,12 @@ export function useVideoEnhance(ctx: PlayerContext) {
     }
   })
 
-  /**
-   * 重置所有调色参数到默认值
-   */
-  const reset = () => {
-    Object.assign(colorParams, defaultParams)
-  }
-
   return {
-    // 基础状态
+    ENHANCE_PARAMS_CONFIG: ENHANCE_CONFIGS,
     disabledHDR,
     filterName,
-
-    // 调色参数
-    colorParams,
-    defaultParams,
-
-    // 计算属性和方法
+    enhanceParams,
     renderFilter,
     getFilterStyle,
-    reset,
   }
 }
