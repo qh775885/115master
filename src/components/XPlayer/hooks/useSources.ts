@@ -1,6 +1,7 @@
 import type { VideoSource } from '../types'
 import type { PlayerContext } from './usePlayerProvide'
 import { useDebounceFn } from '@vueuse/core'
+import { minBy } from 'lodash'
 import { ref, shallowRef, toValue, watch } from 'vue'
 import { VideoSourceExtension } from '../types'
 import { PlayerCoreType } from './playerCore/types'
@@ -194,31 +195,51 @@ export function useSources(ctx: PlayerContext) {
   /** 使用防抖的切换播放器核心方法 */
   const switchPlayerCore = useDebounceFn(switchPlayerCoreImpl, 300)
 
+  /** 获取指定质量的最近视频源 */
+  const getRecentSource = (sources: VideoSource[], quality: number) => {
+    const recentSourcesOfQuality = minBy(sources, item =>
+      Math.abs(item.quality - quality))
+
+    return recentSourcesOfQuality
+  }
+
+  /** 获取首选视频源 */
+  function getPreferredSource(sources: VideoSource[]) {
+    const preferredQuality = toValue(ctx.rootProps.quality)
+    let targetSource = list.value[0]
+
+    if (preferredQuality) {
+      const recentSourcesOfQuality = getRecentSource(
+        sources,
+        preferredQuality,
+      )
+      if (recentSourcesOfQuality) {
+        targetSource = recentSourcesOfQuality
+      }
+    }
+    return targetSource
+  }
+
+  /** 监听视频源列表变化 */
+  async function watchListCallback() {
+    isInterrupt.value = false
+    if (list.value.length === 0) {
+      await ctx.playerCore.value?.destroy()
+      return
+    }
+
+    const targetSource = getPreferredSource(list.value)
+
+    await initializeVideo(
+      targetSource,
+      undefined,
+      toValue(ctx.rootProps.lastTime),
+    )
+  }
+
   watch(
     list,
-    async () => {
-      isInterrupt.value = false
-      if (list.value.length === 0) {
-        await ctx.playerCore.value?.destroy()
-        return
-      }
-
-      const preferredQuality = toValue(ctx.rootProps.quality)
-      let targetSource = list.value[0]
-
-      if (preferredQuality) {
-        const found = list.value.find(s => s.quality === preferredQuality)
-        if (found) {
-          targetSource = found
-        }
-      }
-
-      await initializeVideo(
-        targetSource,
-        undefined,
-        toValue(ctx.rootProps.lastTime),
-      )
-    },
+    watchListCallback,
     { immediate: true, deep: true },
   )
 
