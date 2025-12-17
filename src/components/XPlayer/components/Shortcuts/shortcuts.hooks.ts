@@ -1,5 +1,5 @@
 import type { ComputedRef } from 'vue'
-import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { PlayerContext } from '../../hooks/usePlayerProvide'
 import type {
   ActionKey,
   ActionKeyBindings,

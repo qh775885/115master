@@ -49,8 +49,8 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import ShortcutsPopup from '../../shortcuts/ShortcutsPopup.vue'
 import Popup from '../Popup/index.vue'
+import ShortcutsPopup from '../Shortcuts/ShortcutsPopup.vue'
 import AboutPopup from './AboutPopup.vue'
 
 defineSlots<{

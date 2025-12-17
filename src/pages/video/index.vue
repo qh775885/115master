@@ -158,22 +158,22 @@
 </template>
 
 <script setup lang="ts">
-import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
-import type XPlayerInstance from '../../components/XPlayer/index.vue'
 import type {
   ActionKey,
   ActionKeyBindings,
   ActionMap,
   ShortcutsExt,
-} from '../../components/XPlayer/shortcuts/shortcuts.types'
+} from '../../components/XPlayer/components/Shortcuts/shortcuts.types'
+import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
+import type XPlayerInstance from '../../components/XPlayer/index.vue'
 import type { Subtitle } from '../../components/XPlayer/types'
 import type { Entity } from '../../utils/drive115'
 import { Icon } from '@iconify/vue'
 import { useTitle } from '@vueuse/core'
 import { computed, h, nextTick, onMounted, ref, shallowRef } from 'vue'
 import iinaIcon from '../../assets/icons/iina-icon.png'
+import { ACTION_GROUPS } from '../../components/XPlayer/components/Shortcuts/shortcuts.const'
 import XPlayer from '../../components/XPlayer/index.vue'
-import { ACTION_GROUPS } from '../../components/XPlayer/shortcuts/shortcuts.const'
 import { controlRightStyles } from '../../components/XPlayer/styles/common'
 import { formatTime } from '../../components/XPlayer/utils/time'
 import { PLUS_VERSION } from '../../constants'

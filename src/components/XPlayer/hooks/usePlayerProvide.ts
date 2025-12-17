@@ -8,7 +8,7 @@ import {
   provide,
   ref,
 } from 'vue'
-import { useShortcuts } from '../shortcuts/shortcuts.hooks'
+import { useShortcuts } from '../components/Shortcuts/shortcuts.hooks'
 import {
 
   useSwitchPlayerCore,

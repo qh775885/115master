@@ -66,9 +66,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
-import Popup from '../components/Popup/index.vue'
-import { usePlayerContext } from '../hooks/usePlayerProvide'
-import { ICONS } from '../index.const'
+import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
+import Popup from '../Popup/index.vue'
 import ShortcutsItem from './components/ShortcutsItem.vue'
 import { ACTION_GROUPS, EXPORT_FILE_PREFIX } from './shortcuts.const'
 
