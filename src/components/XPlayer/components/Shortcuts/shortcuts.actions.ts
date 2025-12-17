@@ -1,9 +1,9 @@
-import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { PlayerContext } from '../../hooks/usePlayerProvide'
 import type {
   Action,
   ActionMap,
 } from './shortcuts.types'
-import { ENHANCE_CONFIGS } from '../hooks/useVideoEnhance'
+import { ENHANCE_CONFIGS } from '../../hooks/useVideoEnhance'
 import {
   ACTION_GROUPS,
   ENHANCE_OFFSET,

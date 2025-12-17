@@ -15,7 +15,7 @@ import type {
 } from './shortcuts.types'
 import {
   ICONS,
-} from '../index.const'
+} from '../../index.const'
 
 /** 导出配置文件名前缀 */
 export const EXPORT_FILE_PREFIX = `xplayer-shortcuts-config`

@@ -35,8 +35,8 @@
 import type { KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
-import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICONS } from '../../index.const'
+import { usePlayerContext } from '../../../hooks/usePlayerProvide'
+import { ICONS } from '../../../index.const'
 import {
   formatKeyDisplay,
   getKeyBindingStringFromEvent,

@@ -2,9 +2,9 @@ import type { AVPlayerOptions } from '@libmedia/avplayer'
 import type { HlsConfig } from 'hls.js'
 import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
+import type { ShortcutsExt, ShortcutsPreference } from '../components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from '../hooks/usePlayerProvide'
 import type { VIDEO_SOURCE_EXTENSION } from '../index.const'
-import type { ShortcutsExt, ShortcutsPreference } from '../shortcuts/shortcuts.types'
 
 /**
  * 缩略图帧

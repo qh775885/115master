@@ -1,5 +1,5 @@
 import type { RequireAtLeastOne } from 'type-fest'
-import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { PlayerContext } from '../../hooks/usePlayerProvide'
 import type { DEFAULT_ACTION_MAP } from './shortcuts.actions'
 
 // ======================= 绑定键 =======================

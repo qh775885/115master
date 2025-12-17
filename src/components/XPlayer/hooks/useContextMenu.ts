@@ -1,4 +1,4 @@
-import type { ActionKey } from '../shortcuts/shortcuts.types'
+import type { ActionKey } from '../components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from './usePlayerProvide'
 import { ref, shallowRef } from 'vue'
 import {
