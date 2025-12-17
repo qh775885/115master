@@ -6,7 +6,7 @@
     data-tip="音频轨道"
     @click="toggleVisible"
   >
-    <Icon :class="[styles.btn.icon]" :icon="ICON_AUDIO_TRACK" />
+    <Icon :class="[styles.btn.icon]" :icon="ICONS.ICON_AUDIO_TRACK" />
   </button>
 
   <Popup
@@ -44,8 +44,8 @@ import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_AUDIO_TRACK } from '../../utils/icon'
 import Popup from '../Popup/index.vue'
 
 const styles = {

@@ -3,6 +3,7 @@ import type { HlsConfig } from 'hls.js'
 import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
 import type { PlayerContext } from '../hooks/usePlayerProvide'
+import type { VIDEO_SOURCE_EXTENSION } from '../index.const'
 import type { ShortcutsExt, ShortcutsPreference } from '../shortcuts/shortcuts.types'
 
 /**
@@ -40,24 +41,6 @@ export type ThumbnailRequest = ({
 }) => Promise<ThumbnailFrame>
 
 /**
- * 视频源扩展名
- */
-export const VideoSourceExtension = {
-  mp4: 'mp4',
-  m3u8: 'm3u8',
-  m2ts: 'm2ts',
-  ts: 'ts',
-  flv: 'flv',
-  avi: 'avi',
-  mkv: 'mkv',
-  rmvb: 'rmvb',
-  mov: 'mov',
-  webm: 'webm',
-  iso: 'iso',
-  unknown: 'unknown',
-}
-
-/**
  * 视频源
  */
 export interface VideoSource {
@@ -73,7 +56,7 @@ export interface VideoSource {
   /** 扩展名 */
   extension:
     | string
-    | (typeof VideoSourceExtension)[keyof typeof VideoSourceExtension]
+    | (typeof VIDEO_SOURCE_EXTENSION)[keyof typeof VIDEO_SOURCE_EXTENSION]
   /** 质量 */
   quality: number
   /** 显示的画质值（可选） */

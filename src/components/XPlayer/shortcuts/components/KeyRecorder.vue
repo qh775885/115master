@@ -21,7 +21,7 @@
       :class="styles.remove" type="button"
       @click.stop="handleRemove"
     >
-      <Icon :icon="ICON_CLOSE" class="size-5" />
+      <Icon :icon="ICONS.ICON_CLOSE" class="size-5" />
     </button>
   </div>
 </template>
@@ -36,7 +36,7 @@ import type { KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_CLOSE } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 import {
   formatKeyDisplay,
   getKeyBindingStringFromEvent,

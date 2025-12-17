@@ -7,13 +7,13 @@
       <!-- 头部 -->
       <div :class="styles.container.header">
         <div :class="styles.titleContainer">
-          <Icon :icon="ICON_STATISTICS_INFO" :class="styles.titleIcon" />
+          <Icon :icon="ICONS.ICON_STATISTICS_INFO" :class="styles.titleIcon" />
           <h3 :class="styles.container.headerTitle">
             Statistics
           </h3>
         </div>
         <button :class="styles.closeButton" @click="statistics.toggleVisible">
-          <Icon icon="material-symbols:close-rounded" class="size-4" />
+          <Icon :icon="ICONS.ICON_CLOSE" class="size-4" />
         </button>
       </div>
 
@@ -151,7 +151,7 @@ import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_STATISTICS_INFO } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 import Popup from '../Popup/index.vue'
 
 const styles = {

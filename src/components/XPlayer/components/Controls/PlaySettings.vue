@@ -20,7 +20,7 @@
             href="https://github.com/cbingb666/115master/discussions/206"
             target="_blank"
           >
-            <Icon :icon="ICON_ERROR" />如何开启声音？
+            <Icon :icon="ICONS.ICON_ERROR" />如何开启声音？
           </a>
         </fieldset>
       </div>
@@ -31,7 +31,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_ERROR } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 
 const { playSettings } = usePlayerContext()
 </script>
