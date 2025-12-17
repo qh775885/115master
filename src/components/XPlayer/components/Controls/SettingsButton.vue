@@ -12,7 +12,7 @@
           'rotate-90': menuVisible,
         },
       ]"
-      :icon="ICON_SETTINGS"
+      :icon="ICONS.ICON_SETTINGS"
     />
   </button>
   <Popup
@@ -32,8 +32,8 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_SETTINGS } from '../../utils/icon'
 import Popup from '../Popup/index.vue'
 import PlaySettings from './PlaySettings.vue'
 import ThumbnailSettings from './ThumbnailSettings.vue'

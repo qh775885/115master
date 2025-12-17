@@ -8,13 +8,13 @@
       <!-- 头部 -->
       <div :class="styles.container.header">
         <div :class="styles.titleContainer">
-          <Icon :icon="ICON_ABOUT" :class="styles.titleIcon" />
+          <Icon :icon="ICONS.ICON_ABOUT" :class="styles.titleIcon" />
           <h3 :class="styles.container.headerTitle">
             关于
           </h3>
         </div>
         <button :class="styles.closeButton" @click="$emit('update:visible', false)">
-          <Icon icon="material-symbols:close-rounded" class="size-4" />
+          <Icon :icon="ICONS.ICON_CLOSE" class="size-4" />
         </button>
       </div>
 
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
-import { ICON_ABOUT } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 import Popup from '../Popup/index.vue'
 
 interface Props {

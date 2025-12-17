@@ -3,8 +3,8 @@
     class="swap swap-rotate" :class="[styles.btn.root, { 'swap-active': !pictureInPicture.isPip.value }]"
     :data-tip="pipTip" :disabled="playerCore?.type === PlayerCoreType.AvPlayer" @click="pictureInPicture.toggle"
   >
-    <Icon :icon="ICON_PIP_EXIT" class="swap-off" :class="[styles.btn.icon]" />
-    <Icon :icon="ICON_PIP" class="swap-on" :class="[styles.btn.icon]" />
+    <Icon :icon="ICONS.ICON_PIP_EXIT" class="swap-off" :class="[styles.btn.icon]" />
+    <Icon :icon="ICONS.ICON_PIP" class="swap-on" :class="[styles.btn.icon]" />
   </button>
 </template>
 
@@ -13,8 +13,8 @@ import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_PIP, ICON_PIP_EXIT } from '../../utils/icon'
 
 const styles = {
   ...controlStyles,

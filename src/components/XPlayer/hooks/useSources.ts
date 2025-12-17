@@ -3,7 +3,7 @@ import type { PlayerContext } from './usePlayerProvide'
 import { useDebounceFn } from '@vueuse/core'
 import { minBy } from 'lodash'
 import { ref, shallowRef, toValue, watch } from 'vue'
-import { VideoSourceExtension } from '../types'
+import { VIDEO_SOURCE_EXTENSION } from '../index.const'
 import { PlayerCoreType } from './playerCore/types'
 
 /**
@@ -31,7 +31,7 @@ export function useSources(ctx: PlayerContext) {
     if (source.type === 'hls') {
       return PlayerCoreType.Hls
     }
-    if ([VideoSourceExtension.mkv].includes(source.extension)) {
+    if ([VIDEO_SOURCE_EXTENSION.mkv].includes(source.extension)) {
       return PlayerCoreType.AvPlayer
     }
     return PlayerCoreType.Native

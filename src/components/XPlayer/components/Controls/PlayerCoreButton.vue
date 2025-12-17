@@ -10,7 +10,7 @@
       class="transition-transform" :class="[styles.btn.icon, {
         'rotate-90': menuVisible,
         'motion-safe:animate-spin': source?.isSwitching?.value,
-      }]" :icon="ICON_PLAYER_CORE"
+      }]" :icon="ICONS.ICON_PLAYER_CORE"
     />
   </button>
   <Popup
@@ -44,8 +44,8 @@ import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_PLAYER_CORE } from '../../utils/icon'
 import Popup from '../Popup/index.vue'
 
 const styles = {
