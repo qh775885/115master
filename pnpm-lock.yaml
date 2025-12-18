@@ -15,23 +15,23 @@ importers:
         specifier: ^5.0.0
         version: 5.0.0(vue@3.5.13(typescript@5.7.3))
       '@libmedia/avcodec':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@libmedia/avformat':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@libmedia/avnetwork':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@libmedia/avplayer':
-        specifier: ^0.8.2
-        version: 0.8.2
+        specifier: ^1.2.2
+        version: 1.2.2
       '@libmedia/avutil':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@libmedia/common':
-        specifier: ^1.4.0
-        version: 1.4.0
+        specifier: ^2.2.0
+        version: 2.2.0
       '@material-symbols/svg-400':
         specifier: ^0.28.2
         version: 0.28.2
@@ -100,11 +100,11 @@ importers:
         specifier: ^4.16.1
         version: 4.16.1(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.30.0(jiti@2.4.2)))(eslint@9.30.0(jiti@2.4.2))(typescript@5.7.3)
       '@libmedia/avpipeline':
-        specifier: ^0.8.1
-        version: 0.8.1
+        specifier: ^1.2.0
+        version: 1.2.0
       '@libmedia/cheap':
-        specifier: ^0.8.0
-        version: 0.8.0
+        specifier: ^1.2.0
+        version: 1.2.0
       '@rollup/plugin-typescript':
         specifier: ^12.1.2
         version: 12.1.2(rollup@4.32.0)(tslib@2.8.1)(typescript@5.7.3)
@@ -136,7 +136,7 @@ importers:
         specifier: ^5.0.35
         version: 5.0.35
       eslint:
-        specifier: ^9.29.0
+        specifier: ^9.30.0
         version: 9.30.0(jiti@2.4.2)
       eslint-plugin-format:
         specifier: ^1.0.1
@@ -163,10 +163,10 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
       vite:
-        specifier: ^6.0.5
+        specifier: ^6.0.11
         version: 6.0.11(@types/node@22.10.10)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.0)(yaml@2.8.0)
       vite-plugin-monkey:
-        specifier: ^5.0.3
+        specifier: ^5.0.5
         version: 5.0.5(vite@6.0.11(@types/node@22.10.10)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.39.0)(yaml@2.8.0))
       vite-plugin-static-copy:
         specifier: ^2.3.0
@@ -761,8 +761,8 @@ packages:
     resolution: {integrity: sha512-u3UPsIilWKOM3F9CXtrG8LEJmNxwoCQC/XVj4IKYXvvpx7QIi/Kg1LI5uDmDpKlac62NUtX7eLjRh+jVZcLOzw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  '@jridgewell/gen-mapping@0.3.11':
-    resolution: {integrity: sha512-C512c1ytBTio4MrpWKlJpyFHT6+qfFL8SZ58zBzJ1OOzUEjHeF1BtjY2fH7n4x/g2OV/KiiMLAivOp1DXmiMMw==}
+  '@jridgewell/gen-mapping@0.3.13':
+    resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
 
   '@jridgewell/gen-mapping@0.3.8':
     resolution: {integrity: sha512-imAbBGkb+ebQyxKgzv5Hu2nmROxoDOXHh80evxdoXNOrvAnVx7zimzc1Oo5h9RlfV4vPXaE2iM5pOFbvOCClWA==}
@@ -776,56 +776,56 @@ packages:
     resolution: {integrity: sha512-R8gLRTZeyp03ymzP/6Lil/28tGeGEzhx1q2k703KGWRAI1VdvPIXdG70VJc2pAMw3NA6JKL5hhFu1sJX0Mnn/A==}
     engines: {node: '>=6.0.0'}
 
-  '@jridgewell/source-map@0.3.9':
-    resolution: {integrity: sha512-amBU75CKOOkcQLfyM6J+DnWwz41yTsWI7o8MQ003LwUIWb4NYX/evAblTx1oBBYJySqL/zHPxHXDw5ewpQaUFw==}
+  '@jridgewell/source-map@0.3.11':
+    resolution: {integrity: sha512-ZMp1V8ZFcPG5dIWnQLr3NSI1MiCU7UETdS/A0G8V/XWHvJv3ZsFqutJn1Y5RPmAPX6F3BiE397OqveU/9NCuIA==}
 
   '@jridgewell/sourcemap-codec@1.5.0':
     resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
 
-  '@jridgewell/sourcemap-codec@1.5.3':
-    resolution: {integrity: sha512-AiR5uKpFxP3PjO4R19kQGIMwxyRyPuXmKEEy301V1C0+1rVjS94EZQXf1QKZYN8Q0YM+estSPhmx5JwNftv6nw==}
+  '@jridgewell/sourcemap-codec@1.5.5':
+    resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@jridgewell/trace-mapping@0.3.28':
-    resolution: {integrity: sha512-KNNHHwW3EIp4EDYOvYFGyIFfx36R2dNJYH4knnZlF8T5jdbD5Wx8xmSaQ2gP9URkJ04LGEtlcCtwArKcmFcwKw==}
+  '@jridgewell/trace-mapping@0.3.31':
+    resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@libmedia/audioresample@0.8.1':
-    resolution: {integrity: sha512-teSyg7QopHaWjsPDaiVPrPPX8eGOofAUjmRUbi8IMYucR1VxYEyY7ylGRlbAlO2YJxwXObuZeTcK1553SUueKA==}
+  '@libmedia/audioresample@1.2.0':
+    resolution: {integrity: sha512-AA9YqOynHrzESqj84MX6txaeFmAUptWy6cYCqZHaiuh8g6nfvpd0Y0ZcRrgQKrj9IchKG7FLN65vXygsydmYNg==}
 
-  '@libmedia/audiostretchpitch@0.8.1':
-    resolution: {integrity: sha512-Cyy9izPYmY3lHOX2yHSPnU/Y7TZC9WHueNIkQd+I5yAytnKpBzw4O5i0SJo/JGkqm2hdt3fYwTtZn0aDUtWpqw==}
+  '@libmedia/audiostretchpitch@1.2.0':
+    resolution: {integrity: sha512-XUXsqt/vS5/m7Vo57uVvDhgsAo/XNuxbPCd0u9XnfwAvPLeqnbT/rUVmU2D0/GcuSsdK6BdtvTidRCDsGQS0jQ==}
 
-  '@libmedia/avcodec@0.8.1':
-    resolution: {integrity: sha512-MQIRjh30X3LD6/TsRNftQsDAt1as60MHUUX6OntLrvC9P4BDReaPPqgRuvViK/3ZtfEixwNn+WudrusTj1fAIQ==}
+  '@libmedia/avcodec@1.2.0':
+    resolution: {integrity: sha512-fLNZmNWXYxu0BhMVch/ypno3dfFSP57xrRi/9nVJrYxUxvrh9nBxB01DFLgqV9mIcgY/8fVIbvujLZSKGndhmA==}
 
-  '@libmedia/avformat@0.8.1':
-    resolution: {integrity: sha512-4o25O9HRB3r7+D2q2S3oF2NQW2lEWBrdW5Qnc/ZbhSq3Y0D/3iVfF7a6/HpaGZ4wliVLjJDyZCrG+HpaW/s7qQ==}
+  '@libmedia/avformat@1.2.0':
+    resolution: {integrity: sha512-3Bs0TbS013qwWSGhAV3LvHdFNgco7k2di726RbejOAZMHOgIfVQRZDxcMPHa68Eomum2OTBKjSxYa1ZyNoLPrg==}
 
-  '@libmedia/avnetwork@0.8.1':
-    resolution: {integrity: sha512-yPlwPbEdGpEYWT1SSCnlhBtaEkelb8fcI3wCarJfKsx7diufwZGb6Lt4J6zk9+PotLtBoowILiz2JNeJSK7n6w==}
+  '@libmedia/avnetwork@1.2.0':
+    resolution: {integrity: sha512-HjdzMn8lv1PB1zFUuaWuazvO3QOKfXX+eGe+BibKSfh5Xi2QZBqmD4IXicQv6hekO+N+wdJSmmIisXSHnSVXiQ==}
 
-  '@libmedia/avpipeline@0.8.1':
-    resolution: {integrity: sha512-4y5cOxjLUDzMErvNA53eEaRy+KCoBvtp2cZ6q5F+lblUWhfHpK0AiH5ENDPMEWCYNl/yT0l4NUpFfFN4xBz43g==}
+  '@libmedia/avpipeline@1.2.0':
+    resolution: {integrity: sha512-R5IQu9z5gHYXWY+wS+3Sl1rweBiJc7W10JlnQM5zloKTWclsz5fQMGevFcgqVmFjiAPi0GLQAmIHgTap43rdBg==}
 
-  '@libmedia/avplayer@0.8.2':
-    resolution: {integrity: sha512-44DYTmUm+ULnGI5RGD1c+5WlestI/tQ5zZLGlNsQrTd11vx9nvQDCR5U3U4zN3udjcx66ja4R5IYu82XK532Bw==}
+  '@libmedia/avplayer@1.2.2':
+    resolution: {integrity: sha512-2YRlftT9VknnGUQ9j5gj4RyJogpzQlqGrBg4Bm5mAw+oLeLazbYBKCwFgUhK83SuytVXTwyUcp/fYQzZsnvc3Q==}
 
-  '@libmedia/avprotocol@0.8.1':
-    resolution: {integrity: sha512-ENaDNmf/kr8CivpZpwNS8MHDAvX2GZ7syFglepKIsnSqyRC4OzRy4AWZy8/qA3Yp/dTVjm61qDcG/G8SkMAUlg==}
+  '@libmedia/avprotocol@1.2.0':
+    resolution: {integrity: sha512-gBteAW+IUmMyPIvn5fNYFvxVrz8PGP5dSyqi0s1tvNLR9ckRomOPS0yBnnE4w6WOoP6Kf3DSdifUNcp91YWehQ==}
 
-  '@libmedia/avrender@0.8.1':
-    resolution: {integrity: sha512-cL93qYsdJC9LiOIIFMYTgJRlq1m0skqiU13cnqv038MOIGFxPwZCtdTDJ47nmH051XVOJ4VseBB0oOtX5fMpyQ==}
+  '@libmedia/avrender@1.2.0':
+    resolution: {integrity: sha512-vb6wW8dPtmXAsvd6Lxk1nJ2wUlQJ/CK4UekhtC7IgN8J+9ybl7lp1kkByVyiaffxa8z9lhBvZZRdr6aaOtTeMg==}
 
-  '@libmedia/avutil@0.8.1':
-    resolution: {integrity: sha512-NRyaTuV4PaMPeWxjNAh8MQEUJ7vtLfLJ1GFshtUwH4hU+NmhVU/wYd/nMr/0yCXcoile7PyyTXzT+ZyJ2WDYsA==}
+  '@libmedia/avutil@1.2.0':
+    resolution: {integrity: sha512-/O9jiuFi33XS3O7Qp/qM2HxkglXlmZEUXiX4WMUO2lDg9zOOWXCcz9Sy+ADljy2NMNmL8f8D3G+Wkxa+IqLrMA==}
 
-  '@libmedia/cheap@0.8.0':
-    resolution: {integrity: sha512-SORGkI7UpuuuQuN6r2oyvY/XFw3TDAukfZ30X4wrPQwFTPRfCwmQUJNl2QJjjhaOsgufqmv9f2Oa+L3nhR+FDA==}
+  '@libmedia/cheap@1.2.0':
+    resolution: {integrity: sha512-MznflChbjaYnH25wlPoORlZQXdw2IqlrxsKVJirHFRAvkhhqmFj89jfn/I8psXdYCR56k8LQfGl3zVyqlRXugA==}
 
-  '@libmedia/common@1.4.0':
-    resolution: {integrity: sha512-6DKklv7aP6xBqM0Uy2i/gAnZHfecCFyRBR4fMHSjS7MlfcQv5KcjEvIzkWiTVlScsyDtb0XZ2YAjdl7JI5KigA==}
+  '@libmedia/common@2.2.0':
+    resolution: {integrity: sha512-ScNUKvmpfNn4zOZItFY78K0Nnkb404hE5suPLe2x8rVb8/BN1avXfyOudZo23aO518a4ERUK7NrFuadsK5ZxzA==}
 
   '@material-symbols/svg-400@0.28.2':
     resolution: {integrity: sha512-ztFhK9tHx0Dte9SEtijgZ0xB/lg9E75nfYRoGGkAx6OCllJYHG6TyYVjxzQXBvOTXVE2bz5/KfSBB+jSV5YDow==}
@@ -1388,8 +1388,8 @@ packages:
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
-  ass-compiler@0.1.15:
-    resolution: {integrity: sha512-NPbNjCawqK/MKt1+0v5xezVxV2qk4AKIdl6tM3BsUohWQFb46WJaC0wJzMXlyGZbBJxx/AqKj3nalMSl+JZ+Jw==}
+  ass-compiler@0.1.16:
+    resolution: {integrity: sha512-t6RvH8ebL47t5a62XcrxMwxh1JQoOykydpT5bSVqqf9HA9/rbFl+9JgckBVTA5QdvfwuhYD5yrSc2n3u1tsjhA==}
 
   assjs@0.1.4:
     resolution: {integrity: sha512-qjHXBH8mcCBYfnB/vL/girh1MunM+IDyVhSJ3TPUdkK1n1OYQvGnB2A8LEFX195bBUAl47kXmgC2HGOAwKz/kA==}
@@ -1568,6 +1568,10 @@ packages:
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
+
+  commander@13.1.0:
+    resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
+    engines: {node: '>=18'}
 
   commander@14.0.0:
     resolution: {integrity: sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA==}
@@ -4287,10 +4291,10 @@ snapshots:
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
-  '@jridgewell/gen-mapping@0.3.11':
+  '@jridgewell/gen-mapping@0.3.13':
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.3
-      '@jridgewell/trace-mapping': 0.3.28
+      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/trace-mapping': 0.3.31
     optional: true
 
   '@jridgewell/gen-mapping@0.3.8':
@@ -4303,15 +4307,15 @@ snapshots:
 
   '@jridgewell/set-array@1.2.1': {}
 
-  '@jridgewell/source-map@0.3.9':
+  '@jridgewell/source-map@0.3.11':
     dependencies:
-      '@jridgewell/gen-mapping': 0.3.11
-      '@jridgewell/trace-mapping': 0.3.28
+      '@jridgewell/gen-mapping': 0.3.13
+      '@jridgewell/trace-mapping': 0.3.31
     optional: true
 
   '@jridgewell/sourcemap-codec@1.5.0': {}
 
-  '@jridgewell/sourcemap-codec@1.5.3':
+  '@jridgewell/sourcemap-codec@1.5.5':
     optional: true
 
   '@jridgewell/trace-mapping@0.3.25':
@@ -4319,96 +4323,97 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@jridgewell/trace-mapping@0.3.28':
+  '@jridgewell/trace-mapping@0.3.31':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.3
+      '@jridgewell/sourcemap-codec': 1.5.5
     optional: true
 
-  '@libmedia/audioresample@0.8.1':
+  '@libmedia/audioresample@1.2.0':
     dependencies:
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/audiostretchpitch@0.8.1':
+  '@libmedia/audiostretchpitch@1.2.0':
     dependencies:
-      '@libmedia/cheap': 0.8.0
+      '@libmedia/cheap': 1.2.0
 
-  '@libmedia/avcodec@0.8.1':
+  '@libmedia/avcodec@1.2.0':
     dependencies:
-      '@libmedia/avformat': 0.8.1
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avformat': 1.2.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avformat@0.8.1':
+  '@libmedia/avformat@1.2.0':
     dependencies:
-      '@libmedia/avcodec': 0.8.1
-      '@libmedia/avprotocol': 0.8.1
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avcodec': 1.2.0
+      '@libmedia/avprotocol': 1.2.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avnetwork@0.8.1':
+  '@libmedia/avnetwork@1.2.0':
     dependencies:
-      '@libmedia/avformat': 0.8.1
-      '@libmedia/avprotocol': 0.8.1
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avformat': 1.2.0
+      '@libmedia/avprotocol': 1.2.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avpipeline@0.8.1':
+  '@libmedia/avpipeline@1.2.0':
     dependencies:
-      '@libmedia/audioresample': 0.8.1
-      '@libmedia/audiostretchpitch': 0.8.1
-      '@libmedia/avcodec': 0.8.1
-      '@libmedia/avformat': 0.8.1
-      '@libmedia/avnetwork': 0.8.1
-      '@libmedia/avprotocol': 0.8.1
-      '@libmedia/avrender': 0.8.1
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/audioresample': 1.2.0
+      '@libmedia/audiostretchpitch': 1.2.0
+      '@libmedia/avcodec': 1.2.0
+      '@libmedia/avformat': 1.2.0
+      '@libmedia/avnetwork': 1.2.0
+      '@libmedia/avprotocol': 1.2.0
+      '@libmedia/avrender': 1.2.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avplayer@0.8.2':
+  '@libmedia/avplayer@1.2.2':
     dependencies:
-      '@libmedia/audioresample': 0.8.1
-      '@libmedia/audiostretchpitch': 0.8.1
-      '@libmedia/avcodec': 0.8.1
-      '@libmedia/avformat': 0.8.1
-      '@libmedia/avnetwork': 0.8.1
-      '@libmedia/avpipeline': 0.8.1
-      '@libmedia/avprotocol': 0.8.1
-      '@libmedia/avrender': 0.8.1
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
-      ass-compiler: 0.1.15
+      '@libmedia/audioresample': 1.2.0
+      '@libmedia/audiostretchpitch': 1.2.0
+      '@libmedia/avcodec': 1.2.0
+      '@libmedia/avformat': 1.2.0
+      '@libmedia/avnetwork': 1.2.0
+      '@libmedia/avpipeline': 1.2.0
+      '@libmedia/avprotocol': 1.2.0
+      '@libmedia/avrender': 1.2.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
+      ass-compiler: 0.1.16
       assjs: 0.1.4
 
-  '@libmedia/avprotocol@0.8.1':
+  '@libmedia/avprotocol@1.2.0':
     dependencies:
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avrender@0.8.1':
+  '@libmedia/avrender@1.2.0':
     dependencies:
-      '@libmedia/avutil': 0.8.1
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/avutil': 1.2.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/avutil@0.8.1':
+  '@libmedia/avutil@1.2.0':
     dependencies:
-      '@libmedia/cheap': 0.8.0
-      '@libmedia/common': 1.4.0
+      '@libmedia/cheap': 1.2.0
+      '@libmedia/common': 2.2.0
 
-  '@libmedia/cheap@0.8.0':
+  '@libmedia/cheap@1.2.0':
     dependencies:
-      '@libmedia/common': 1.4.0
+      '@libmedia/common': 2.2.0
+      commander: 13.1.0
 
-  '@libmedia/common@1.4.0': {}
+  '@libmedia/common@2.2.0': {}
 
   '@material-symbols/svg-400@0.28.2': {}
 
@@ -4968,7 +4973,7 @@ snapshots:
 
   argparse@2.0.1: {}
 
-  ass-compiler@0.1.15: {}
+  ass-compiler@0.1.16: {}
 
   assjs@0.1.4: {}
 
@@ -5157,6 +5162,8 @@ snapshots:
   color-name@1.1.4: {}
 
   colorette@2.0.20: {}
+
+  commander@13.1.0: {}
 
   commander@14.0.0: {}
 
@@ -7306,7 +7313,7 @@ snapshots:
 
   terser@5.39.0:
     dependencies:
-      '@jridgewell/source-map': 0.3.9
+      '@jridgewell/source-map': 0.3.11
       acorn: 8.15.0
       commander: 2.20.3
       source-map-support: 0.5.21

@@ -1,3 +1,5 @@
+import type { ValueOf } from 'type-fest'
+
 export { ICONS } from './icons/icons.index'
 
 /**
@@ -18,3 +20,11 @@ export const VIDEO_SOURCE_EXTENSION = {
   iso: 'iso',
   unknown: 'unknown',
 }
+
+/**
+ * AvPlayer 启用的视频源扩展名
+ */
+export const AVPLAYER_ENABLED_EXTENSIONS = [
+  VIDEO_SOURCE_EXTENSION.mkv,
+  VIDEO_SOURCE_EXTENSION.avi,
+] satisfies ValueOf<typeof VIDEO_SOURCE_EXTENSION>[]
