@@ -1,12 +1,11 @@
-import type Stats from '@libmedia/avpipeline/struct/stats'
+import type { Stats } from '@libmedia/avpipeline'
 import type AVPlayer from '@libmedia/avplayer'
 import type { AVPlayerOptions } from '@libmedia/avplayer'
-import type AVCodecParameters from '@libmedia/avutil/struct/avcodecparameters'
-import type { Rational } from '@libmedia/avutil/struct/rational'
-import type { Data } from '@libmedia/common/types/type'
+import type { AVCodecParameters, AVRational } from '@libmedia/avutil'
+import type { Data } from '@libmedia/common'
 import type { PlayerContext } from '../usePlayerProvide'
 import type { PlayerCoreMethods } from './types'
-import { AVCodecID } from '@libmedia/avutil/codec'
+import { AVCodecID } from '@libmedia/avutil/'
 import { useDebounceFn, useElementSize, useIntervalFn } from '@vueuse/core'
 import ee from 'event-emitter'
 import { get } from 'lodash'
@@ -42,7 +41,7 @@ export interface Stream {
   /** 显示方式 */
   disposition: int32
   /** 时间基 */
-  timeBase: Rational
+  timeBase: AVRational
 }
 
 /** 资源 CDN 地址 */
