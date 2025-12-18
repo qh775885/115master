@@ -15,7 +15,6 @@ import { computed, shallowRef } from 'vue'
 function calculateScale(videoWidth: number, videoHeight: number, containerWidth: number, containerHeight: number, angle: number) {
   /** 如果视频尺寸或容器尺寸无效，返回默认缩放 */
   if (!videoWidth || !videoHeight || !containerWidth || !containerHeight) {
-    console.error('计算旋转视频缩放比例时，视频尺寸或容器尺寸无效，返回默认缩放1')
     return 1
   }
 
@@ -77,9 +76,14 @@ export function useTransform(_ctx: PlayerContext) {
   const playerSize = useElementSize(_ctx.refs.playerElementRef)
   /** 缩放比例 */
   const scale = computed(() => {
+    if (!_ctx.playerCore.value) {
+      return 1
+    }
+
+    const { videoWidth, videoHeight } = _ctx.playerCore.value
     return calculateScale(
-      _ctx.playerCore.value?.videoWidth ?? 16,
-      _ctx.playerCore.value?.videoHeight ?? 9,
+      videoWidth,
+      videoHeight,
       playerSize.width.value,
       playerSize.height.value,
       rotate.value,
