@@ -26,7 +26,7 @@
     :trigger="buttonRef"
     placement="top"
   >
-    <ul :class="[styles.menu.root]">
+    <ul v-if="subtitles.hasSubtitles.value" :class="[styles.menu.root]">
       <li
         v-for="item in menuItems"
         :key="item.id"

@@ -47,7 +47,7 @@
               :shortcuts-ext="extShortcuts"
               :has-previous="hasPrevious"
               :has-next="hasNext"
-              :on-thumbnail-request="DataThumbnails.onThumbnailRequest"
+              :on-thumbnail-request="onThumbnailRequest"
               :on-subtitle-change="handleSubtitleChange"
               :on-timeupdate="handleTimeupdate"
               :on-seeking="DataHistory.handleSeek"
@@ -166,17 +166,19 @@ import type {
 } from '../../components/XPlayer/components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
 import type XPlayerInstance from '../../components/XPlayer/index.vue'
-import type { Subtitle } from '../../components/XPlayer/types'
+import type { Subtitle, ThumbnailRequest } from '../../components/XPlayer/types'
 import type { Entity } from '../../utils/drive115'
 import { Icon } from '@iconify/vue'
 import { useTitle } from '@vueuse/core'
-import { computed, h, nextTick, onMounted, ref, shallowRef } from 'vue'
+import { cloneDeep } from 'lodash'
+import { computed, h, nextTick, onMounted, ref, shallowRef, toValue } from 'vue'
 import iinaIcon from '../../assets/icons/iina-icon.png'
 import { ACTION_GROUPS } from '../../components/XPlayer/components/Shortcuts/shortcuts.const'
 import XPlayer from '../../components/XPlayer/index.vue'
 import { controlRightStyles } from '../../components/XPlayer/styles/common'
 import { formatTime } from '../../components/XPlayer/utils/time'
 import { PLUS_VERSION } from '../../constants'
+import { useLockFn } from '../../hooks/useLockFn'
 import { useParamsVideoPage } from '../../hooks/useParams'
 import { ICON_PLAYLIST, ICON_STAR, ICON_STAR_FILL } from '../../icons'
 import { subtitlePreference } from '../../utils/cache/subtitlePreference'
@@ -350,6 +352,7 @@ const extShortcuts = {
 
 /** 处理字幕变化 */
 async function handleSubtitleChange(subtitle: Subtitle | null) {
+  console.log('handleSubtitleChange', subtitle)
   // 保存字幕选择
   await subtitlePreference.savePreference(
     params.pickCode.value ?? '',
@@ -376,8 +379,7 @@ async function handleLocalPlay(player: LocalPlayer) {
   }
 }
 
-/** 播放器列表切换 */
-async function handleChangeVideo(item: Entity.PlaylistItem) {
+async function changeVideo(item: Entity.PlaylistItem) {
   try {
     changeing.value = true
     if (!params.cid.value) {
@@ -388,15 +390,10 @@ async function handleChangeVideo(item: Entity.PlaylistItem) {
       pickCode: item.pc,
     })
     params.getParams()
+    DataThumbnails.destory()
+    DataSubtitles.execute(0, '')
     DataVideoSources.clear()
-    DataThumbnails.clear()
     DataHistory.clear()
-    DataSubtitles.execute(
-      0,
-      params.pickCode.value,
-      DataFileInfo.state.file_name,
-      null,
-    )
     if (PLUS_VERSION) {
       DataMovieInfo.javDBState.execute(0)
       DataMovieInfo.javBusState.execute(0)
@@ -409,9 +406,12 @@ async function handleChangeVideo(item: Entity.PlaylistItem) {
   }
 }
 
+/** 播放器列表切换 */
+const handleChangeVideo = useLockFn(changeVideo)
+
 /** 开始自动缓冲缩略图 */
 function handleStartAutoBuffer() {
-  DataThumbnails.autoBuffer()
+  DataThumbnails.autoBuffer(params.pickCode.value ?? '')
 }
 
 /** 处理时间更新 */
@@ -442,45 +442,70 @@ function togglePlaylist() {
   preferences.value.showPlaylist = !preferences.value.showPlaylist
 }
 
+/** 缩略图请求 */
+function onThumbnailRequest(
+  o: Parameters<ThumbnailRequest>[0],
+): ReturnType<ThumbnailRequest> {
+  return DataThumbnails.onThumbnailRequest({
+    id: params.pickCode.value ?? '',
+    ...o,
+  })
+}
+
 /** 加载数据 */
 async function loadData(isFirst = true) {
-  if (!params.pickCode.value) {
+  const pickCode = toValue(params.pickCode)
+  const cid = toValue(params.cid)
+  if (!pickCode) {
     throw new Error('pickCode is required')
   }
   if (!params.cid.value) {
     throw new Error('cid is required')
   }
   try {
-    await DataHistory.fetch(params.pickCode.value)
+    await DataHistory.fetch(pickCode)
   }
   catch (error) {
     console.error(error)
   }
-  // 加载视频源
-  DataVideoSources.fetch(params.pickCode.value).then(() => {
-    // 初始化缩略图
-    DataThumbnails.initialize(
-      DataVideoSources.list.value,
-      preferences.value.thumbnailsSamplingInterval,
-    )
-  })
 
-  // 加载文件信息
-  DataFileInfo.execute(0, params.pickCode.value).then((res) => {
-    const avNumber = getAvNumber(res.file_name)
-    // 设置标题
-    useTitle(DataFileInfo.state.file_name || '')
-    // 加载番号信息
-    if (avNumber) {
-      DataMovieInfo.javDBState.execute(0, avNumber)
-      DataMovieInfo.javBusState.execute(0, avNumber)
-    }
-    // 加载字幕
-    DataSubtitles.execute(0, params.pickCode.value, res.file_name, avNumber)
-  })
+  const task = []
+
+  task.push(
+    DataVideoSources.fetch(pickCode).then(async () => {
+      // 初始化缩略图
+      await DataThumbnails.initialize(
+        pickCode,
+        cloneDeep(DataVideoSources.list.value),
+        preferences.value.thumbnailsSamplingInterval,
+      )
+    }),
+  )
+
+  task.push(
+    // 加载文件信息
+    DataFileInfo.execute(0, pickCode).then((res) => {
+      const avNumber = getAvNumber(res.file_name)
+      // 设置标题
+      useTitle(DataFileInfo.state.file_name || '')
+      // 加载番号信息
+      if (avNumber) {
+        DataMovieInfo.javDBState.execute(0, avNumber)
+        DataMovieInfo.javBusState.execute(0, avNumber)
+      }
+      // 加载字幕
+      DataSubtitles.execute(0, pickCode, res.file_name, avNumber)
+    }),
+  )
 
   // 加载播放列表
-  isFirst && DataPlaylist.execute(0, params.cid.value)
+  if (
+    isFirst && cid
+  ) {
+    task.push(DataPlaylist.execute(0, cid))
+  }
+
+  return Promise.allSettled(task)
 }
 
 /** 处理收藏 */

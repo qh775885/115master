@@ -321,6 +321,7 @@ watch([source.list], () => {
   thumb.lastRequestTime = -1
   thumb.renderTime = -1
   thumb.renderImage = undefined
+  thumb.error = undefined
   if (lastTimer.value) {
     clearTimeout(lastTimer.value)
     lastTimer.value = null
