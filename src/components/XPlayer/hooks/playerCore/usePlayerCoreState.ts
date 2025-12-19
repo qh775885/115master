@@ -23,7 +23,7 @@ export function usePlayerCoreState() {
   /** 是否可以播放 */
   const canplay = shallowRef(false)
   /** 加载错误 */
-  const loadError = shallowRef<Error | undefined>(undefined)
+  const loadError = shallowRef<Error | unknown | undefined>(null)
   /** 是否加载完成 */
   const loaded = shallowRef(false)
   /** 视频宽度 */

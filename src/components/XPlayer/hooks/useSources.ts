@@ -26,7 +26,6 @@ export function useSources(ctx: PlayerContext) {
   const getHlsSource = () => {
     return list.value.find(item => item.type === 'hls')
   }
-
   const getDefaultPlayerCore = (source: VideoSource) => {
     if (source.type === 'hls') {
       return PlayerCoreType.Hls
@@ -43,10 +42,6 @@ export function useSources(ctx: PlayerContext) {
     playerCoreType?: PlayerCoreType,
     lastTime?: number,
   ) => {
-    if (!ctx.driver) {
-      throw new Error('videoDriver is not found')
-    }
-
     // 更新当前源
     current.value = source
 
@@ -70,10 +65,7 @@ export function useSources(ctx: PlayerContext) {
       await playerCore.value.load(source.url, lastTime ?? 0)
     }
     catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') {
-        return
-      }
-      if (error instanceof Error) {
+      if (error instanceof Error || error instanceof MediaError) {
         const hlsSource = getHlsSource()
 
         if (hlsSource && playerCore?.value?.type !== PlayerCoreType.Hls) {
@@ -82,7 +74,6 @@ export function useSources(ctx: PlayerContext) {
 
         return
       }
-
       throw error
     }
   }

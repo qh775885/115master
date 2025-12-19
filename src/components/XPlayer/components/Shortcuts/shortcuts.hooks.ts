@@ -280,7 +280,6 @@ export function useShortcuts(ctx: PlayerContext) {
 
   /**
    * 获取动作的快捷键提示文本
-   * @param actionKey 动作键
    * @returns 快捷键提示文本
    */
   function getShortcutsTip(...args: (DefaultActionKey | ActionKey)[]) {

@@ -50,8 +50,8 @@
               :on-thumbnail-request="onThumbnailRequest"
               :on-subtitle-change="handleSubtitleChange"
               :on-timeupdate="handleTimeupdate"
-              :on-seeking="DataHistory.handleSeek"
-              :on-seeked="DataHistory.handleSeek"
+              :on-seeking="handleSeek"
+              :on-seeked="handleSeek"
               :on-canplay="handleStartAutoBuffer"
               :on-ended="handleVideoEnded"
               @play-previous="playPrevious"
@@ -415,13 +415,15 @@ function handleStartAutoBuffer() {
 }
 
 /** 处理时间更新 */
-function handleTimeupdate(time: number) {
+function handleTimeupdate(ctx: PlayerContext) {
   if (changeing.value) {
     return
   }
   if (!DataHistory.isinit.value) {
     return
   }
+  const time = ctx.playerCore.value?.currentTime ?? 0
+
   if (time <= 0) {
     return
   }
@@ -430,6 +432,12 @@ function handleTimeupdate(time: number) {
     throw new Error('pickCode is required')
   }
   DataPlaylist.updateItemTime(params.pickCode.value, time)
+}
+
+/** 处理跳转 */
+function handleSeek(ctx: PlayerContext) {
+  const time = ctx.playerCore.value?.currentTime ?? 0
+  DataHistory.handleSeek(time)
 }
 
 /** 关闭播放列表 */
