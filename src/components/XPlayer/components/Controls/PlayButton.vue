@@ -11,12 +11,12 @@
     @click="playerCore?.togglePlay"
   >
     <Icon
-      :icon="ICON_PASUE" class="swap-off" :class="[
+      :icon="ICONS.ICON_PASUE" class="swap-off" :class="[
         styles.btn.icon,
       ]"
     />
     <Icon
-      :icon="ICON_PLAY" class="swap-on" :class="[
+      :icon="ICONS.ICON_PLAY" class="swap-on" :class="[
         styles.btn.icon,
       ]"
     />
@@ -27,8 +27,8 @@
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_PASUE, ICON_PLAY } from '../../utils/icon'
 
 const styles = {
   btn: {

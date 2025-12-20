@@ -3,7 +3,7 @@
     v-if="visible"
     :class="[styles.container, animationClass]"
   >
-    <Icon :icon="isShowPause ? ICON_PASUE : ICON_PLAY" :class="styles.icon" />
+    <Icon :icon="isShowPause ? ICONS.ICON_PASUE : ICONS.ICON_PLAY" :class="styles.icon" />
   </div>
 </template>
 
@@ -11,7 +11,7 @@
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef, watch } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_PASUE, ICON_PLAY } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 
 /** 样式抽象 */
 const styles = {

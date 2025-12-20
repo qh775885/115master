@@ -13,14 +13,14 @@
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_FULLSCREEN, ICON_FULLSCREEN_EXIT } from '../../utils/icon'
+import { ICONS } from '../../index.const'
 
 const { fullscreen, shortcuts } = usePlayerContext()
 
 const icon = computed(() => {
   return fullscreen.isFullscreen.value
-    ? ICON_FULLSCREEN_EXIT
-    : ICON_FULLSCREEN
+    ? ICONS.ICON_FULLSCREEN_EXIT
+    : ICONS.ICON_FULLSCREEN
 })
 
 const NAME = '全屏'

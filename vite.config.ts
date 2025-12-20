@@ -1,4 +1,4 @@
-import transformer from '@libmedia/cheap/build/transformer'
+import * as transformer from '@libmedia/cheap/build/transformer'
 import typescript from '@rollup/plugin-typescript'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'

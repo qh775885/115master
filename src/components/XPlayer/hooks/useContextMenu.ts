@@ -1,11 +1,9 @@
-import type { ActionKey } from '../shortcuts/shortcuts.types'
+import type { ActionKey } from '../components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from './usePlayerProvide'
 import { ref, shallowRef } from 'vue'
 import {
-  ICON_ABOUT,
-  ICON_SHORTCUTS,
-  ICON_STATISTICS_INFO,
-} from '../utils/icon'
+  ICONS,
+} from '../index.const'
 
 export interface ContextMenuItem {
   /**
@@ -50,7 +48,7 @@ export function useContextMenu(ctx: PlayerContext) {
     {
       id: 'shortcuts',
       label: '快捷键',
-      icon: ICON_SHORTCUTS,
+      icon: ICONS.ICON_SHORTCUTS,
       actionKey: 'shortcuts',
       action: () => {
         showShortcuts.value = true
@@ -60,7 +58,7 @@ export function useContextMenu(ctx: PlayerContext) {
     {
       id: 'statistics',
       label: 'Statistics',
-      icon: ICON_STATISTICS_INFO,
+      icon: ICONS.ICON_STATISTICS_INFO,
       actionKey: 'statistics',
       action: () => {
         ctx.statistics.toggleVisible()
@@ -70,7 +68,7 @@ export function useContextMenu(ctx: PlayerContext) {
     {
       id: 'about',
       label: '关于',
-      icon: ICON_ABOUT,
+      icon: ICONS.ICON_ABOUT,
       action: () => {
         showAbout.value = true
         visible.value = false

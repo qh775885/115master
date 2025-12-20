@@ -1,5 +1,6 @@
 import type { PlayerContext } from '../usePlayerProvide'
 import { syncRef, toReactive } from '@vueuse/core'
+import { EVENTS } from '../../events'
 import { PlayerCoreType } from './types'
 import { useAvPlayerCore } from './useAvPlayerCore'
 import { useHlsPlayerCore } from './useHlsPlayerCore'
@@ -15,13 +16,12 @@ export function usePlayerCoreDecorator(usePlayerCore:
   const player = usePlayerCore(ctx)
 
   const noop = () => {}
-
-  // 事件监听
-  player.on('canplay', ctx.rootProps.onCanplay ?? noop)
-  player.on('timeupdate', ctx.rootProps.onTimeupdate ?? noop)
-  player.on('seeking', ctx.rootProps.onSeeking ?? noop)
-  player.on('seeked', ctx.rootProps.onSeeked ?? noop)
-  player.on('ended', () => ctx.rootProps.onEnded?.(ctx))
+  ctx.eventMitt.on(EVENTS.CANPLAY, ctx.rootProps.onCanplay ?? noop)
+  ctx.eventMitt.on(EVENTS.TIMEUPDATE, ctx.rootProps.onTimeupdate ?? noop)
+  ctx.eventMitt.on(EVENTS.SEEKING, ctx.rootProps.onSeeking ?? noop)
+  ctx.eventMitt.on(EVENTS.SEEKED, ctx.rootProps.onSeeked ?? noop)
+  ctx.eventMitt.on(EVENTS.ENDED, ctx.rootProps.onEnded ?? noop)
+  ctx.eventMitt.on(EVENTS.ERROR, ctx.rootProps.onError ?? noop)
 
   /** 同步响应式数据 */
   const syncRefList = [
@@ -56,6 +56,7 @@ export function usePlayerCoreDecorator(usePlayerCore:
     /** 销毁 */
     destroy: async () => {
       unSyncRefList()
+      ctx.eventMitt.emitter.all.clear()
       await player.destroy()
     },
   })

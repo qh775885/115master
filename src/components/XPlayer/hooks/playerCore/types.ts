@@ -68,9 +68,4 @@ export interface PlayerCoreMethods {
   getRenderElement: () => HTMLVideoElement | HTMLCanvasElement | null
   /** 销毁 */
   destroy: () => Promise<void>
-  /** 事件监听 */
-  on: (
-    name: keyof PlayerCoreEvents,
-    callback: PlayerCoreEvents[keyof PlayerCoreEvents],
-  ) => void
 }

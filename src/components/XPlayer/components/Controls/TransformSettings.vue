@@ -16,17 +16,17 @@
               :disabled="transform.rotate.value === -270"
               @click="transform.left"
             >
-              <Icon :icon="ICON_ROTATE_LEFT" class="size-4" />
+              <Icon :icon="ICONS.ICON_ROTATE_LEFT" class="size-4" />
             </button>
             <button class="btn btn-sm join-item flex-1" @click="transform.normal">
-              <Icon :icon="ICON_ROTATE_NORMAL" class="size-4" />
+              <Icon :icon="ICONS.ICON_ROTATE_NORMAL" class="size-4" />
             </button>
             <button
               class="btn btn-sm join-item flex-1"
               :disabled="transform.rotate.value === 270"
               @click="transform.right"
             >
-              <Icon :icon="ICON_ROTATE_RIGHT" class="size-4" />
+              <Icon :icon="ICONS.ICON_ROTATE_RIGHT" class="size-4" />
             </button>
           </div>
         </fieldset>
@@ -43,7 +43,7 @@
               @click="transform.toggleFlipX"
             >
               <div class="transform rotate-90">
-                <Icon :icon="ICON_FLIP_X" class="size-4" />
+                <Icon :icon="ICONS.ICON_FLIP_X" class="size-4" />
               </div>
               水平
             </button>
@@ -52,7 +52,7 @@
               :class="{ 'btn-primary': transform.flipY.value }"
               @click="transform.toggleFlipY"
             >
-              <Icon :icon="ICON_FLIP_Y" class="size-4" />
+              <Icon :icon="ICONS.ICON_FLIP_Y" class="size-4" />
               垂直
             </button>
           </div>
@@ -65,13 +65,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import {
-  ICON_FLIP_X,
-  ICON_FLIP_Y,
-  ICON_ROTATE_LEFT,
-  ICON_ROTATE_NORMAL,
-  ICON_ROTATE_RIGHT,
-} from '../../utils/icon'
+import { ICONS } from '../../index.const'
 
 const { transform } = usePlayerContext()
 </script>

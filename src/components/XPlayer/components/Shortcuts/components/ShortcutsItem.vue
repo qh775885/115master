@@ -22,7 +22,7 @@
       <span>{{ action.tip }}</span>
     </div>
     <button v-if="isModified" :class="styles.reset" type="button" title="重置" @click="handleReset">
-      <Icon :icon="ICON_RESET" class="size-4" />
+      <Icon :icon="ICONS.ICON_RESET" class="size-4" />
     </button>
   </div>
 </template>
@@ -36,8 +36,8 @@
 import type { Action, ActionKey, KeyBindings, KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
-import { usePlayerContext } from '../../hooks/usePlayerProvide'
-import { ICON_RESET } from '../../utils/icon'
+import { usePlayerContext } from '../../../hooks/usePlayerProvide'
+import { ICONS } from '../../../index.const'
 import {
   hasEmptyKeybindings,
   isMaxKeybindings,

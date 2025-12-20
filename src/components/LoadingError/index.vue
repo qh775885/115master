@@ -2,7 +2,7 @@
   <div :class="styles.container">
     <Icon :icon="iconName" :class="styles.icon" />
     <p :class="styles.text">
-      <slot>{{ message || FRIENDLY_ERROR_MESSAGE.UNKNOWN_ERROR }}</slot>
+      <slot>{{ formatErrorMessage(message) }}</slot>
     </p>
     <button v-if="(props.message instanceof Error)" :class="styles.detailButton" @click="handleShowDetail">
       查看错误
@@ -14,6 +14,13 @@
     >
       {{ props.retryText }}
     </button>
+    <button
+      v-if="props.closable"
+      :class="styles.closeButton"
+      @click="$emit('close')"
+    >
+      {{ props.closeText }}
+    </button>
   </div>
 </template>
 
@@ -21,8 +28,8 @@
 import { Icon } from '@iconify/vue'
 import { useClipboard } from '@vueuse/core'
 import { computed } from 'vue'
-import { FRIENDLY_ERROR_MESSAGE } from '../../constants'
 import { ICON_ERROR } from '../../icons'
+import { MEDIA_ERROR_NAME } from '../XPlayer/index.const'
 
 const props = withDefaults(
   defineProps<{
@@ -30,10 +37,14 @@ const props = withDefaults(
     type?: 'error' | 'warning' | 'info' | 'success'
     /** 是否可重试 */
     retryable?: boolean
+    /** 是否可关闭 */
+    closable?: boolean
     /** 错误信息 */
-    message?: string | Error | unknown
+    message?: string | Error | MediaError | unknown
     /** 重试按钮文本 */
     retryText?: string
+    /** 关闭按钮文本 */
+    closeText?: string
     /** 是否无内边距 */
     noPadding?: boolean
     /** 大小 */
@@ -54,9 +65,22 @@ const props = withDefaults(
   },
 )
 
-defineEmits<(e: 'retry') => void>()
+defineEmits<(e: 'retry' | 'close') => void>()
 
 const iconName = computed(() => props.icon)
+
+/** 格式化错误信息 */
+function formatErrorMessage(message: string | Error | MediaError | unknown): string {
+  if (message instanceof Error) {
+    return `${message.name}: ${message.message}`
+  }
+  if (message instanceof MediaError) {
+    if (message.code in MEDIA_ERROR_NAME) {
+      return `${MEDIA_ERROR_NAME[message.code as keyof typeof MEDIA_ERROR_NAME]}`
+    }
+  }
+  return message as string
+}
 
 /** 样式常量定义 */
 const styles = computed(() => ({
@@ -97,6 +121,10 @@ const styles = computed(() => ({
   retryButton: [
     'btn btn-error btn-sm transition-all duration-200',
     'hover:btn-error hover:scale-105 active:scale-95',
+  ],
+  // 关闭按钮样式
+  closeButton: [
+    'btn btn-neutral btn-xs',
   ],
 }))
 

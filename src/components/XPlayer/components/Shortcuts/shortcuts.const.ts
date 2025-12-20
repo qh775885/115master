@@ -14,16 +14,8 @@ import type {
   Platform,
 } from './shortcuts.types'
 import {
-  ICON_COLOR_ADJUST,
-  ICON_EXTENSION_FEATURE,
-  ICON_OTHER,
-  ICON_PLAY,
-  ICON_PLAYLIST,
-  ICON_SUBTITLES,
-  ICON_TRANSFORM,
-  ICON_VOLUME_UP,
-  ICON_WINDOW,
-} from '../utils/icon'
+  ICONS,
+} from '../../index.const'
 
 /** 导出配置文件名前缀 */
 export const EXPORT_FILE_PREFIX = `xplayer-shortcuts-config`
@@ -61,15 +53,15 @@ export const MULTI_LAYER_KEYS: Record<string, string> = {
 
 /** 动作分组定义 */
 export const ACTION_GROUPS = {
-  PLAY: { key: 'play', name: '播放 / 进度', icon: ICON_PLAY },
-  SOUND: { key: 'sound', name: '声音', icon: ICON_VOLUME_UP },
-  EPISODE: { key: 'episode', name: '播放列表 / 画质', icon: ICON_PLAYLIST },
-  SUBTITLE: { key: 'subtitle', name: '字幕', icon: ICON_SUBTITLES },
-  WINDOW: { key: 'window', name: '窗口', icon: ICON_WINDOW },
-  TRANSFORM: { key: 'transform', name: '画面变换', icon: ICON_TRANSFORM },
-  ENHANCE: { key: 'enhance', name: '视频色彩', icon: ICON_COLOR_ADJUST },
-  EXTERNAL: { key: 'external', name: '扩展功能', icon: ICON_EXTENSION_FEATURE },
-  OTHER: { key: 'other', name: '其他', icon: ICON_OTHER },
+  PLAY: { key: 'play', name: '播放 / 进度', icon: ICONS.ICON_PLAY },
+  SOUND: { key: 'sound', name: '声音', icon: ICONS.ICON_VOLUME_UP },
+  EPISODE: { key: 'episode', name: '播放列表 / 画质', icon: ICONS.ICON_PLAYLIST },
+  SUBTITLE: { key: 'subtitle', name: '字幕', icon: ICONS.ICON_SUBTITLES },
+  WINDOW: { key: 'window', name: '窗口', icon: ICONS.ICON_WINDOW },
+  TRANSFORM: { key: 'transform', name: '画面变换', icon: ICONS.ICON_TRANSFORM },
+  ENHANCE: { key: 'enhance', name: '视频色彩', icon: ICONS.ICON_COLOR_ADJUST },
+  EXTERNAL: { key: 'external', name: '扩展功能', icon: ICONS.ICON_EXTENSION_FEATURE },
+  OTHER: { key: 'other', name: '其他', icon: ICONS.ICON_OTHER },
 } as const satisfies Record<string, ActionGroup>
 
 /** 修饰键 */

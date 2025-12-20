@@ -1,21 +1,20 @@
-import type Stats from '@libmedia/avpipeline/struct/stats'
+import type { Stats } from '@libmedia/avpipeline'
 import type AVPlayer from '@libmedia/avplayer'
 import type { AVPlayerOptions } from '@libmedia/avplayer'
-import type AVCodecParameters from '@libmedia/avutil/struct/avcodecparameters'
-import type { Rational } from '@libmedia/avutil/struct/rational'
-import type { Data } from '@libmedia/common/types/type'
+import type { AVCodecParameters, AVRational } from '@libmedia/avutil'
+import type { Data } from '@libmedia/common'
 import type { PlayerContext } from '../usePlayerProvide'
 import type { PlayerCoreMethods } from './types'
-import { AVCodecID } from '@libmedia/avutil/codec'
+import { Events as AVPlayerEvents } from '@libmedia/avplayer'
+import { AVCodecID } from '@libmedia/avutil/'
 import { useDebounceFn, useElementSize, useIntervalFn } from '@vueuse/core'
-import ee from 'event-emitter'
 import { get } from 'lodash'
 import { computed, nextTick, ref, shallowRef, watch } from 'vue'
 import { CDN_BASE_URL } from '../../../../constants'
 import { loadESM } from '../../../../utils/loadESM'
+import { EVENTS } from '../../events'
 import { PlayerCoreType } from './types'
 import { usePlayerCoreState } from './usePlayerCoreState'
-
 /** 获取 wasm 参数 */
 type GetWasmArgs = Parameters<NonNullable<AVPlayerOptions['getWasm']>>
 
@@ -42,11 +41,11 @@ export interface Stream {
   /** 显示方式 */
   disposition: int32
   /** 时间基 */
-  timeBase: Rational
+  timeBase: AVRational
 }
 
 /** 资源 CDN 地址 */
-const CDN_URL_WASM = `${CDN_BASE_URL}/gh/cbingb666/libmedia@latest/dist`
+const CDN_URL_WASM = `${CDN_BASE_URL}/gh/zhaohappy/libmedia@latest/dist`
 
 /** 默认配置 */
 export const DEFAULT_OPTIONS: Partial<AVPlayerOptions> = {
@@ -260,8 +259,6 @@ export function useAvPlayerCore(ctx: PlayerContext) {
       stream => stream.id === videoStreamId.value,
     )
   })
-  /** 事件发射器 */
-  const customEmitter = ee()
   /** 是否第一次播放 */
   const isFirstPlay = ref(true)
   /** 上次播放时间 */
@@ -321,7 +318,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
   }
 
   /** 销毁事件监听 */
-  const destoryListeners = () => {
+  const offEvents = () => {
     for (const [key, events] of Object.entries(
       playerRef.value?.listeners ?? {},
     )) {
@@ -357,38 +354,46 @@ export function useAvPlayerCore(ctx: PlayerContext) {
         containerRef.value = container
         playerRef.value = player
 
-        playerRef.value?.on('playing', () => {
+        player.on(AVPlayerEvents.PLAYING, () => {
+          ctx.eventMitt.emit(EVENTS.PLAYING, ctx)
           state.paused.value = false
         })
-        playerRef.value?.on('paused', () => {
+        player.on(AVPlayerEvents.PAUSED, () => {
+          ctx.eventMitt.emit(EVENTS.PAUSED, ctx)
           state.paused.value = true
         })
-        playerRef.value?.on('loaded', () => {
+        player.on(AVPlayerEvents.LOADED, () => {
+          ctx.eventMitt.emit(EVENTS.LOADED, ctx)
           state.isLoading.value = false
           state.loaded.value = true
         })
-        playerRef.value?.on('error', (error) => {
-          console.error(error)
-        })
-        playerRef.value?.on('seeking', () => {
+        player.on(AVPlayerEvents.SEEKING, () => {
+          ctx.eventMitt.emit(EVENTS.SEEKING, ctx)
           state.isLoading.value = true
         })
-        playerRef.value?.on('seeked', () => {
+        player.on(AVPlayerEvents.SEEKED, () => {
+          ctx.eventMitt.emit(EVENTS.SEEKED, ctx)
           state.isLoading.value = false
         })
-        playerRef.value?.on('timeout', () => {
+        player.on(AVPlayerEvents.TIMEOUT, () => {
+          ctx.eventMitt.emit(EVENTS.TIMEOUT, ctx)
           console.warn('avplayer timeout')
         })
-        playerRef.value?.on('time', (pts) => {
-          if (seeking) {
+        player.on(AVPlayerEvents.TIME, (pts) => {
+          if (seeking)
             return
-          }
           state.currentTime.value = Number(pts) / 1000
+          ctx.eventMitt.emit(EVENTS.TIMEUPDATE, ctx)
+        })
+        player.on(AVPlayerEvents.ERROR, (error) => {
+          state.loadError.value = error
+          ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
         })
       }
       catch (error) {
         console.error('初始化 AVPlayer 失败:', error)
         state.loadError.value = error as Error
+        ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
       }
     },
     load: async (url, _lastTime) => {
@@ -431,7 +436,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
               .play()
               .then(async () => {
                 state.canplay.value = true
-                customEmitter.emit('canplay')
+                ctx.eventMitt.emit(EVENTS.CANPLAY, ctx)
 
                 state.isSuspended.value
                   = !state.muted.value && player.isSuspended()
@@ -439,15 +444,17 @@ export function useAvPlayerCore(ctx: PlayerContext) {
               .catch((error) => {
                 console.error('播放失败', error)
                 state.loadError.value = error
+                ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
               })
           }
           else {
             state.canplay.value = true
-            customEmitter.emit('canplay')
+            ctx.eventMitt.emit(EVENTS.CANPLAY, ctx)
           }
         })
         .catch((error) => {
           state.loadError.value = error
+          ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
           pauseCollectStats()
           throw error
         })
@@ -480,7 +487,9 @@ export function useAvPlayerCore(ctx: PlayerContext) {
         .then(async () => {
           if (isFirstPlay.value) {
             // 回跳到上次播放时间, 必须在播放后，否则部分高画质视频会无法播放
-            await methods.seek(lastTime.value ?? state.currentTime.value)
+            setTimeout(() => {
+              methods.seek(lastTime.value ?? state.currentTime.value)
+            }, 1000)
             isFirstPlay.value = false
           }
 
@@ -536,45 +545,10 @@ export function useAvPlayerCore(ctx: PlayerContext) {
       await nextTick()
       seeking = false
     },
-    on: (event, callback) => {
-      watch(
-        playerRef,
-        (player) => {
-          if (player) {
-            switch (event) {
-              case 'canplay':
-                customEmitter.on('canplay', callback)
-                break
-              case 'timeupdate':
-                player.on('time', () => {
-                  callback(state.currentTime.value)
-                })
-                break
-              case 'seeking':
-                player.on('seeking', () => {
-                  callback(state.currentTime.value)
-                })
-                break
-              case 'seeked':
-                player.on('seeked', () => {
-                  callback(state.currentTime.value)
-                })
-                break
-              default:
-                player.on(event, callback)
-            }
-          }
-        },
-        {
-          once: true,
-        },
-      )
-    },
-
     /** 销毁 */
     destroy: async () => {
       // 销毁事件监听
-      destoryListeners()
+      offEvents()
       // 暂停收集统计信息
       pauseCollectStats()
       // 重置状态

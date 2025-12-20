@@ -12,7 +12,7 @@
           'rotate-45': menuVisible,
         },
       ]"
-      :icon="ICON_COLOR_ADJUST"
+      :icon="ICONS.ICON_COLOR_ADJUST"
     />
   </button>
   <Popup
@@ -32,7 +32,7 @@
             title="重置"
             @click="resetAll"
           >
-            <Icon :icon="ICON_RESTART" class="size-6" />
+            <Icon :icon="ICONS.ICON_RESTART" class="size-6" />
           </button>
         </div>
         <div class="grid grid-rows-5 grid-flow-col gap-x-5 gap-y-2">
@@ -76,8 +76,8 @@
 import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_COLOR_ADJUST, ICON_RESTART } from '../../utils/icon'
 import Popup from '../Popup/index.vue'
 
 const styles = {

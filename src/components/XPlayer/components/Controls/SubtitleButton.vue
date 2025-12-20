@@ -10,12 +10,12 @@
     <Icon
       v-if="subtitles.loading.value || !subtitles.ready.value"
       :class="[styles.btn.icon]"
-      :icon="ICON_LOADING"
+      :icon="ICONS.ICON_LOADING"
     />
     <!-- found 字幕 -->
     <Icon
       v-else
-      :icon="subtitles.current.value ? ICON_SUBTITLES : ICON_SUBTITLES_OFF"
+      :icon="subtitles.current.value ? ICONS.ICON_SUBTITLES : ICONS.ICON_SUBTITLES_OFF"
       :class="[styles.btn.icon]"
       :disabled="subtitles.list.value?.length === 0"
     />
@@ -26,7 +26,7 @@
     :trigger="buttonRef"
     placement="top"
   >
-    <ul :class="[styles.menu.root]">
+    <ul v-if="subtitles.hasSubtitles.value" :class="[styles.menu.root]">
       <li
         v-for="item in menuItems"
         :key="item.id"
@@ -58,7 +58,7 @@
               :title="`查看 ${item.label}`"
               @click.stop="viewSubtitle(item.value)"
             >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICON_VIEW" />
+              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_VIEW" />
             </button>
             <button
               v-if="item.value"
@@ -67,7 +67,7 @@
               :title="`下载 ${item.label}`"
               @click.stop="downloadSubtitle(item.value)"
             >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICON_DOWNLOAD" />
+              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_DOWNLOAD" />
             </button>
           </template>
           <template v-else>
@@ -84,14 +84,8 @@ import type { Subtitle } from '../../types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import {
-  ICON_DOWNLOAD,
-  ICON_LOADING,
-  ICON_SUBTITLES,
-  ICON_SUBTITLES_OFF,
-  ICON_VIEW,
-} from '../../utils/icon'
 import Popup from '../Popup/index.vue'
 import SubtitleDisplay from '../SubtitleDisplay.vue'
 
@@ -130,7 +124,7 @@ const menuItems = computed(() => {
       id: -1,
       label: '关闭字幕',
       value: null,
-      icon: ICON_SUBTITLES_OFF,
+      icon: ICONS.ICON_SUBTITLES_OFF,
       raw: undefined,
       index: null,
     },
