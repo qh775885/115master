@@ -3,8 +3,10 @@ import type { PlayerContext } from './usePlayerProvide'
 import { useDebounceFn } from '@vueuse/core'
 import { minBy } from 'lodash'
 import { ref, shallowRef, toValue, watch } from 'vue'
+import { EVENTS } from '../events'
 import { AVPLAYER_ENABLED_EXTENSIONS } from '../index.const'
 import { PlayerCoreType } from './playerCore/types'
+import { VIDEO_CATCH_ERROES } from './playerCore/useCatchVideo'
 
 /**
  * 视频源
@@ -44,6 +46,7 @@ export function useSources(ctx: PlayerContext) {
   ) => {
     // 更新当前源
     current.value = source
+    const hlsSource = getHlsSource()
 
     try {
       await ctx.driver?.switchDriver(
@@ -58,6 +61,37 @@ export function useSources(ctx: PlayerContext) {
         throw new Error('playerElementRef is not found')
       }
 
+      ctx.eventMitt.on(EVENTS.ERROR, ([_, err]) => {
+        if (err === VIDEO_CATCH_ERROES.VIDEO_TRACK_LOSS) {
+          console.error('视频轨道丢失')
+          if (
+            hlsSource
+            && playerCore?.value?.type !== PlayerCoreType.Hls
+          ) {
+            if (confirm('检测到视频轨道丢失，是否切换到 HLS 视频源？\nTips：实验性功能，目前算法可能不准确！')) {
+              initializeVideo(hlsSource, undefined, lastTime ?? 0)
+            }
+          }
+          else if (playerCore.value) {
+            playerCore.value.loadError = err
+          }
+        }
+        if (err === VIDEO_CATCH_ERROES.VIDEO_FRAMED_DROPPED) {
+          console.error('视频严重丢帧')
+          if (
+            hlsSource
+            && playerCore?.value?.type !== PlayerCoreType.Hls
+          ) {
+            if (confirm('检测到视频严重丢帧，是否切换到 HLS 视频源？\nTips：实验性功能，目前算法可能不准确！')) {
+              initializeVideo(hlsSource, undefined, lastTime ?? 0)
+            }
+          }
+          else if (playerCore.value) {
+            playerCore.value.loadError = err
+          }
+        }
+      })
+
       // 初始化播放器
       await playerCore.value.init(playerElementRef.value)
 
@@ -66,12 +100,10 @@ export function useSources(ctx: PlayerContext) {
     }
     catch (error) {
       if (error instanceof Error || error instanceof MediaError) {
-        const hlsSource = getHlsSource()
-
         if (hlsSource && playerCore?.value?.type !== PlayerCoreType.Hls) {
+          console.warn('当前视频源播放失败，尝试切换到 HLS 视频源', error)
           await initializeVideo(hlsSource, undefined, lastTime ?? 0)
         }
-
         return
       }
       throw error

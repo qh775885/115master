@@ -3,6 +3,7 @@ import type { PlayerCoreMethods } from './types'
 import { shallowRef } from 'vue'
 import { EVENTS } from '../../events'
 import { PlayerCoreType } from './types'
+import { useCatchVideoFramedDropped, useCatchVideoTrackLoss } from './useCatchVideo'
 import { usePlayerCoreState } from './usePlayerCoreState'
 
 /**
@@ -11,11 +12,22 @@ import { usePlayerCoreState } from './usePlayerCoreState'
 export function useNativePlayerCore(_ctx: PlayerContext) {
   /** 视频元素 */
   const renderElementRef = shallowRef<HTMLVideoElement>()
+
   /** 状态 */
   const state = usePlayerCoreState()
 
   /** 事件 mitt */
   const eventMitt = _ctx.eventMitt
+
+  /** 捕获视频轨道丢失异常 */
+  useCatchVideoTrackLoss(renderElementRef, (error) => {
+    eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+  })
+
+  /** 捕获视频丢帧异常 */
+  useCatchVideoFramedDropped(renderElementRef, (error) => {
+    eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+  })
 
   /** 获取视频元素 */
   const getVideoElementRef = () => {
