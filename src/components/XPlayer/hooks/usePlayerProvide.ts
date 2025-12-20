@@ -1,4 +1,5 @@
 import type { EmitFn, InjectionKey, Ref, ShallowRef, ToRefs } from 'vue'
+import type { Events } from '../events'
 import type { XPlayerEmit, XPlayerProps } from '../types'
 import type { usePlayerCoreDecorator } from './playerCore/usePlayerCore'
 import { useVModels } from '@vueuse/core'
@@ -9,6 +10,7 @@ import {
   ref,
 } from 'vue'
 import { useShortcuts } from '../components/Shortcuts/shortcuts.hooks'
+import { EventMitt } from '../events'
 import {
 
   useSwitchPlayerCore,
@@ -90,6 +92,8 @@ export interface PlayerContext {
   playerCore: Ref<ReturnType<typeof usePlayerCoreDecorator> | undefined>
   /** 播放设置 */
   playSettings: ReturnType<typeof usePlaySettings>
+  /** 事件 */
+  eventMitt: EventMitt<Events>
 }
 
 /**
@@ -117,6 +121,7 @@ export function usePlayerProvide(
     rootProps,
     rootPropsVm: useVModels(rootProps, rootEmit),
     playerCore: ref(),
+    eventMitt: new EventMitt<Events>(),
   } as PlayerContext
 
   context.driver = useSwitchPlayerCore(context)

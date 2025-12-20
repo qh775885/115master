@@ -50,6 +50,8 @@ const DEFAULT_SAMPLING_INTERVAL = 30
 export function useDataThumbnails(
   preferences: ReturnType<typeof usePreferences>,
 ) {
+  const currentId = shallowRef<string | undefined>(undefined)
+
   /** 缩略图生成器 */
   let clipper: M3U8ClipperNew
 
@@ -89,7 +91,8 @@ export function useDataThumbnails(
   }
 
   /** 初始化缩略图生成器 */
-  const initialize = async (sources: VideoSource[], interval: number) => {
+  const initialize = async (id: string, sources: VideoSource[], interval: number) => {
+    currentId.value = id
     try {
       isInited.value = false
       const source = findLowestQualityHLS(sources)
@@ -104,6 +107,9 @@ export function useDataThumbnails(
       isInited.value = true
     }
     catch (error) {
+      if (currentId.value !== id) {
+        return
+      }
       state.value.error = error
     }
   }
@@ -112,12 +118,18 @@ export function useDataThumbnails(
    * 获取指定时间点的缩略图
    */
   const seekThumbnail = async (
+    id: string,
     seekTime: number,
     seekBlurTime: number,
   ): Promise<ThumbnailFrame> => {
     const result = await clipper.seek(seekBlurTime, true)
     if (!result) {
-      return undefined
+      return
+    }
+
+    if (currentId.value !== id) {
+      result.videoFrame.close()
+      return
     }
 
     /** 获取缩略图尺寸 */
@@ -141,19 +153,20 @@ export function useDataThumbnails(
       frameTime: result.frameTime,
       consumedTime: result.consumedTime,
     }
-
+    result.videoFrame.close()
     // 缓存缩略图
     cahceThumbnails.set(seekBlurTime, thumbnail)
-
     // 返回缩略图
     return thumbnail
   }
 
   /** 获取指定时间点的缩略图 */
   const onThumbnailRequest = async ({
+    id = '',
     time,
     isLast,
   }: {
+    id: string
     time: number
     isLast: boolean
   }): Promise<ThumbnailFrame> => {
@@ -183,11 +196,11 @@ export function useDataThumbnails(
     }
 
     // 请求缩略图
-    return await seekThumbnail(time, seekBlurTime)
+    return await seekThumbnail(id, time, seekBlurTime)
   }
 
   /** 自动加载缩略图 */
-  const autoBuffer = async () => {
+  const autoBuffer = async (id: string) => {
     if (state.value.error) {
       throw state.value.error
     }
@@ -229,7 +242,7 @@ export function useDataThumbnails(
             if (cahceThumbnails.has(seekTime)) {
               return null
             }
-            return await seekThumbnail(time, seekTime)
+            return await seekThumbnail(id, time, seekTime)
           },
           {
             id: time.toString(),
@@ -240,7 +253,7 @@ export function useDataThumbnails(
           },
         )
         .catch((error) => {
-          if (error instanceof SchedulerError.QueueCleared) {
+          if (!(error instanceof SchedulerError.QueueCleared)) {
             throw error
           }
         })
@@ -256,7 +269,7 @@ export function useDataThumbnails(
   }
 
   /** clear */
-  const clear = () => {
+  const destory = () => {
     clipper.destroy()
     scheduler.clear()
     releaseCache()
@@ -265,7 +278,7 @@ export function useDataThumbnails(
   }
 
   tryOnUnmounted(() => {
-    clear()
+    destory()
   })
 
   return {
@@ -274,6 +287,6 @@ export function useDataThumbnails(
     initialize,
     autoBuffer,
     onThumbnailRequest,
-    clear,
+    destory,
   }
 }

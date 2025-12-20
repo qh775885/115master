@@ -1,5 +1,6 @@
 import type { Subtitle } from '../../../components/XPlayer/types'
 import { useAsyncState } from '@vueuse/core'
+import { shallowRef } from 'vue'
 import { jaccardSimilarity } from '../../../utils/array'
 import { subtitlePreference } from '../../../utils/cache/subtitlePreference'
 import { drive115 } from '../../../utils/drive115'
@@ -10,6 +11,8 @@ import { thunderSubtitle } from '../../../utils/subtitle/thunder'
 
 /** 字幕数据 */
 export function useDataSubtitles() {
+  const currentId = shallowRef<string>()
+
   /** 通过 subtitleCat 获取字幕 */
   const getFromSubtitlecat = async (keyword: string): Promise<Subtitle[]> => {
     if (!keyword) {
@@ -82,14 +85,21 @@ export function useDataSubtitles() {
   /** 字幕数据 */
   const subtitles = useAsyncState<Subtitle[]>(
     async (pickcode: string, filename: string, keyword: string): Promise<Subtitle[]> => {
+      currentId.value = pickcode
       const preference = await subtitlePreference.getPreference(pickcode)
-
+      if (currentId.value !== pickcode) {
+        return []
+      }
       /** 并行获取所有来源的字幕 */
       const results = await Promise.allSettled([
         getFromSubtitlecat(keyword),
         getFromThunder(filename),
         getFrom115(pickcode),
       ])
+
+      if (currentId.value !== pickcode) {
+        return []
+      }
 
       const subtitles = results
         .filter(result => result.status === 'fulfilled')

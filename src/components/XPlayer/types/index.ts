@@ -145,26 +145,26 @@ export interface XPlayerProps {
   hlsConfig?: Partial<HlsConfig>
   /** avPlayer 配置 */
   avPlayerConfig?: Partial<AVPlayerOptions>
+  /** 播放列表数量 */
+  playlistCount?: number
+  /** 播放列表当前索引 (0-based) */
+  playlistIndex?: number
   /** 缩略图请求 */
   onThumbnailRequest?: ThumbnailRequest
   /** 字幕改变 */
   onSubtitleChange?: (subtitle: Subtitle | null) => void
   /** 播放器可播放 */
-  onCanplay?: () => void
+  onCanplay?: (ctx: PlayerContext) => void
   /** 更新当前时间 */
-  onTimeupdate?: (time: number) => void
+  onTimeupdate?: (ctx: PlayerContext) => void
   /** 跳转中 */
-  onSeeking?: (time: number) => void
+  onSeeking?: (ctx: PlayerContext) => void
   /** 跳转结束 */
-  onSeeked?: (time: number) => void
-  /** 空闲 */
-  onIdled?: () => void
-  /** 播放列表数量 */
-  playlistCount?: number
-  /** 播放列表当前索引 (0-based) */
-  playlistIndex?: number
+  onSeeked?: (ctx: PlayerContext) => void
   /** 播放结束 */
   onEnded?: (ctx: PlayerContext) => void
+  /** 播放器错误 */
+  onError?: (e: [ctx: PlayerContext, error: unknown]) => void
 }
 
 export interface XPlayerEmit {
