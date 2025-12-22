@@ -45,7 +45,7 @@ import type { Entity } from '../../../../utils/drive115'
 import type { useDataPlaylist } from '../../data/useDataPlaylist'
 import type PlaylistItemVue from './item.vue'
 import { Icon } from '@iconify/vue'
-import { nextTick, ref, shallowRef, useTemplateRef, watch } from 'vue'
+import { nextTick, shallowRef, useTemplateRef, watch } from 'vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
 import { ICON_CLOSE, ICON_PLAYLIST } from '../../../../icons'
 import PlaylistItem from './item.vue'
@@ -95,10 +95,9 @@ const styles = {
   },
 }
 
-const playlistRef = ref<HTMLElement | null>(null)
+const playlistRef = shallowRef<HTMLElement | null>(null)
 const playlistItemRefs
   = useTemplateRef<InstanceType<typeof PlaylistItemVue>[]>('playlistItemRefs')
-const initedScroll = shallowRef(false)
 
 /** 点击播放 */
 function handlePlay(item: Entity.PlaylistItem) {
@@ -112,57 +111,30 @@ function handlePlay(item: Entity.PlaylistItem) {
  * 滚动到激活的项目
  */
 async function scrollToActiveItem(withAnimation = true) {
-  if (initedScroll.value)
-    return
   await nextTick()
 
   if (!playlistItemRefs.value)
     return
 
-  initedScroll.value = true
-
   /** 查找激活的项目 */
-  const activeItem = playlistItemRefs.value.find(ref => ref.$props.active)
-  if (!activeItem || !playlistRef.value)
+  const activeItemRef = playlistItemRefs.value.find(ref => ref.$props.active)
+  if (!activeItemRef)
     return
 
-  /** 获取激活项目元素与容器 */
-  const activeElement = activeItem.$el
-  const container = playlistRef.value
-
-  /** 基本位置计算 */
-  const elementTop = activeElement.offsetTop
-  const elementHeight = activeElement.offsetHeight
-  const containerHeight = container.clientHeight
-  const containerScrollTop = container.scrollTop
-
-  /** 检查元素是否已完全在可视区域内 */
-  const elementBottom = elementTop + elementHeight
-  const isFullyVisible
-    = elementTop >= containerScrollTop
-      && elementBottom <= containerScrollTop + containerHeight
-
-  // 如果元素已完全可见且不是手动触发，则不滚动
-  if (isFullyVisible && !withAnimation) {
-    return
-  }
-
-  /** 计算居中位置 */
-  const scrollTop = elementTop - (containerHeight - elementHeight) / 2
-
-  // 执行滚动
-  container.scrollTo({
-    top: Math.max(0, scrollTop),
+  activeItemRef.$el.scrollIntoView({
     behavior: withAnimation ? 'smooth' : 'instant',
+    block: 'center',
   })
 }
 
 /** 监听 pickCode 的变化，滚动到激活的项目 */
 watch(
-  [() => props.playlist.state, () => props.pickCode],
+  [() => props.playlist.state],
   () => scrollToActiveItem(false),
-  {
-    immediate: true,
-  },
+)
+
+watch(
+  () => props.pickCode,
+  () => scrollToActiveItem(true),
 )
 </script>

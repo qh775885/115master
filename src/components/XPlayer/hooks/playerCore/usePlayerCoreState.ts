@@ -23,7 +23,7 @@ export function usePlayerCoreState() {
   /** 是否可以播放 */
   const canplay = shallowRef(false)
   /** 加载错误 */
-  const loadError = shallowRef<Error | undefined>(undefined)
+  const loadError = shallowRef<Error | unknown | undefined>(null)
   /** 是否加载完成 */
   const loaded = shallowRef(false)
   /** 视频宽度 */
@@ -37,6 +37,8 @@ export function usePlayerCoreState() {
    * 2. 如果是 AvPlayer 播放器，则挂起音频
    */
   const isSuspended = shallowRef(false)
+  /** 是否为黑屏 */
+  const isBlackFrame = shallowRef(false)
 
   return {
     currentTime,
@@ -53,6 +55,7 @@ export function usePlayerCoreState() {
     videoWidth,
     videoHeight,
     isSuspended,
+    isBlackFrame,
     reset: () => {
       currentTime.value = 0
       duration.value = 0
@@ -68,6 +71,7 @@ export function usePlayerCoreState() {
       videoWidth.value = 0
       videoHeight.value = 0
       isSuspended.value = false
+      isBlackFrame.value = false
     },
   }
 }

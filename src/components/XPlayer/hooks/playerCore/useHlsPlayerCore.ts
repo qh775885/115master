@@ -1,7 +1,6 @@
 import type { HlsConfig } from 'hls.js'
 import type { PlayerContext } from '../usePlayerProvide'
 import type { PlayerCoreMethods } from './types'
-import { useEventListener } from '@vueuse/core'
 import Hls from 'hls.js'
 import { shallowRef } from 'vue'
 import { PlayerCoreType } from './types'
@@ -62,28 +61,7 @@ export function useHlsPlayerCore(ctx: PlayerContext) {
       videoElement.muted = videoNative.muted.value
       videoElement.playbackRate = videoNative.playbackRate.value
       videoElement.volume = videoNative.volume.value / 100
-      return new Promise<void>((resolve, reject) => {
-        useEventListener(videoElement, 'loadedmetadata', () => {
-          videoNative.duration.value = videoElement.duration
-          videoNative.videoWidth.value = videoElement.videoWidth
-          videoNative.videoHeight.value = videoElement.videoHeight
-
-          // 初始化播放时间
-          if (lastTime !== undefined || videoNative.currentTime.value > 0) {
-            videoElement.currentTime = lastTime ?? videoNative.currentTime.value
-          }
-
-          resolve()
-
-          if (videoNative.autoPlay.value) {
-            videoNative.play()
-          }
-        })
-        useEventListener(videoElement, 'error', (_event) => {
-          videoNative.loadError.value = new Error('NotSupportedError')
-          reject(videoNative.loadError.value)
-        })
-      })
+      return videoNative.loadWithPromise(videoElement, methods.play, lastTime)
     },
     destroy: () => {
       if (hlsRef.value) {

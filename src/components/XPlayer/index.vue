@@ -25,16 +25,6 @@
     <!-- 字幕 -->
     <Subtitle />
 
-    <!-- 错误提示 -->
-    <LoadingError
-      v-if="playerCore?.loadError"
-      :class="styles.error"
-      :message="playerCore?.loadError"
-    />
-
-    <!-- 加载动画 -->
-    <Loading v-else-if="playerCore?.isLoading" />
-
     <!-- 视频控制栏 -->
     <Controls>
       <ControlsHeader>
@@ -53,6 +43,19 @@
 
     <!-- 状态HUD显示 -->
     <HUD />
+
+    <!-- 错误提示 -->
+    <LoadingError
+      v-if="playerCore?.loadError"
+      :class="styles.error"
+      :message="playerCore.loadError"
+      :closable="true"
+      close-text="忽略错误"
+      @close="playerCore.loadError = undefined"
+    />
+
+    <!-- 加载动画 -->
+    <Loading v-else-if="playerCore?.isLoading" />
 
     <!-- 调试面板 -->
     <Statistics />

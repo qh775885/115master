@@ -13,8 +13,8 @@
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
-import { ICON_NEXT, ICON_PREV } from '../../utils/icon'
 
 const props = defineProps<{
   type: 'playPrevious' | 'playNext'
@@ -22,9 +22,9 @@ const props = defineProps<{
   onClick: () => void
 }>()
 
-const ICONS = {
-  playPrevious: ICON_PREV,
-  playNext: ICON_NEXT,
+const BTN_ICONS = {
+  playPrevious: ICONS.ICON_PREV,
+  playNext: ICONS.ICON_NEXT,
 } satisfies Record<typeof props.type, string>
 
 const LABELS = {
@@ -39,7 +39,7 @@ const styles = {
 const ctx = usePlayerContext()
 
 const icon = computed(() => {
-  return ICONS[props.type]
+  return BTN_ICONS[props.type]
 })
 
 const tip = computed(() => {

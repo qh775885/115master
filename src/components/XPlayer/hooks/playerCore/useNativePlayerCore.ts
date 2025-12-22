@@ -1,8 +1,9 @@
 import type { PlayerContext } from '../usePlayerProvide'
 import type { PlayerCoreMethods } from './types'
-import { useEventListener } from '@vueuse/core'
-import { shallowRef, watch } from 'vue'
+import { shallowRef } from 'vue'
+import { EVENTS } from '../../events'
 import { PlayerCoreType } from './types'
+import { useCatchVideoFramedDropped, useCatchVideoTrackLoss } from './useCatchVideo'
 import { usePlayerCoreState } from './usePlayerCoreState'
 
 /**
@@ -11,8 +12,22 @@ import { usePlayerCoreState } from './usePlayerCoreState'
 export function useNativePlayerCore(_ctx: PlayerContext) {
   /** 视频元素 */
   const renderElementRef = shallowRef<HTMLVideoElement>()
+
   /** 状态 */
   const state = usePlayerCoreState()
+
+  /** 事件 mitt */
+  const eventMitt = _ctx.eventMitt
+
+  /** 捕获视频轨道丢失异常 */
+  useCatchVideoTrackLoss(renderElementRef, (error) => {
+    eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+  })
+
+  /** 捕获视频丢帧异常 */
+  useCatchVideoFramedDropped(renderElementRef, (error) => {
+    eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+  })
 
   /** 获取视频元素 */
   const getVideoElementRef = () => {
@@ -20,6 +35,141 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
       throw new Error('videoElementRef is not found')
     }
     return renderElementRef.value
+  }
+
+  let listeners: {
+    event: keyof HTMLMediaElementEventMap
+    handler: (event: Event) => void
+    options?: AddEventListenerOptions
+  }[] = []
+
+  function on(
+    event: keyof HTMLMediaElementEventMap,
+    handler: (event: Event) => void,
+    options?: AddEventListenerOptions,
+  ) {
+    if (renderElementRef.value) {
+      renderElementRef.value.addEventListener(event, handler, options)
+      listeners.push({ event, handler, options })
+    }
+  }
+
+  function off(
+    event: keyof HTMLMediaElementEventMap,
+    handler: (event: Event) => void,
+    options?: AddEventListenerOptions,
+  ) {
+    if (renderElementRef.value) {
+      renderElementRef.value.removeEventListener(event, handler, options)
+      listeners = listeners.filter(listener =>
+        listener.event !== event
+        || listener.handler !== handler
+        || listener.options !== options,
+      )
+    }
+  }
+
+  function offListeners() {
+    for (const listener of listeners) {
+      off(listener.event as keyof HTMLMediaElementEventMap, listener.handler, listener.options)
+    }
+  }
+
+  const eventHanldes: Record<string, (event: Event) => void> = {
+    play: () => {
+      state.paused.value = false
+      eventMitt.emit(EVENTS.PLAY, _ctx)
+    },
+    pause: () => {
+      state.paused.value = true
+      eventMitt.emit(EVENTS.PAUSED, _ctx)
+    },
+    playing: () => {
+      state.paused.value = false
+      eventMitt.emit(EVENTS.PLAYING, _ctx)
+    },
+    ended: () => {
+      state.paused.value = true
+      eventMitt.emit(EVENTS.ENDED, _ctx)
+    },
+    waiting: () => {
+      state.isLoading.value = true
+      eventMitt.emit(EVENTS.WAITING, _ctx)
+    },
+    canplay: () => {
+      state.isLoading.value = false
+      state.canplay.value = true
+      eventMitt.emit(EVENTS.CANPLAY, _ctx)
+    },
+    seeking: () => {
+      state.isLoading.value = true
+      eventMitt.emit(EVENTS.SEEKING, _ctx)
+    },
+    seeked: () => {
+      state.isLoading.value = false
+      eventMitt.emit(EVENTS.SEEKED, _ctx)
+    },
+    timeupdate: () => {
+      state.currentTime.value = renderElementRef.value?.currentTime ?? 0
+      eventMitt.emit(EVENTS.TIMEUPDATE, _ctx)
+    },
+    error: (_event: Event) => {
+      const error = getError(_event)
+      if (error) {
+        state.loadError.value = error
+        eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+      }
+    },
+  }
+
+  function onInitEvents() {
+    for (const [event, handler] of Object.entries(eventHanldes)) {
+      on(event as keyof HTMLMediaElementEventMap, handler)
+    }
+  }
+
+  function loadWithPromise(videoElement: HTMLVideoElement, play: () => Promise<void>, lastTime?: number) {
+    return new Promise<void>((resolve, reject) => {
+      on('loadedmetadata', () => {
+        state.duration.value = videoElement.duration
+        state.videoWidth.value = videoElement.videoWidth
+        state.videoHeight.value = videoElement.videoHeight
+
+        // 初始化播放时间
+        if (lastTime !== undefined || state.currentTime.value > 0) {
+          videoElement.currentTime = lastTime ?? state.currentTime.value
+        }
+
+        resolve()
+        if (state.autoPlay.value) {
+          play()
+        }
+      }, {
+        once: true,
+      })
+      on('error', (_event) => {
+        const error = getError(_event)
+        if (error) {
+          state.loadError.value = error
+          eventMitt.emit(EVENTS.ERROR, [_ctx, error])
+          reject(error)
+        }
+      }, {
+        once: true,
+      })
+    })
+  }
+
+  function getError(_event: Event): Error | MediaError | unknown {
+    const error
+      = (_event.target as HTMLVideoElement)?.error
+        ?? new Error('Video element unknown error')
+    // if (error instanceof MediaError && error.code === MediaError.MEDIA_ERR_ABORTED)
+    //   return
+    // if (error instanceof DOMException && error.name === 'AbortError') {
+    //   return
+    // }
+    return error
   }
 
   const methods: PlayerCoreMethods = {
@@ -30,36 +180,7 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
       videoElement.style.height = '100%'
       videoElement.style.objectFit = 'contain'
       renderElementRef.value = videoElement
-
-      useEventListener(renderElementRef, 'play', () => {
-        state.paused.value = false
-      })
-      useEventListener(renderElementRef, 'pause', () => {
-        state.paused.value = true
-      })
-      useEventListener(renderElementRef, 'playing', () => {
-        state.paused.value = false
-      })
-      useEventListener(renderElementRef, 'ended', () => {
-        state.paused.value = true
-      })
-      useEventListener(renderElementRef, 'waiting', () => {
-        state.isLoading.value = true
-      })
-      useEventListener(renderElementRef, 'canplay', () => {
-        state.isLoading.value = false
-        state.canplay.value = true
-      })
-      useEventListener(renderElementRef, 'seeking', () => {
-        state.isLoading.value = true
-      })
-      useEventListener(renderElementRef, 'seeked', () => {
-        state.isLoading.value = false
-      })
-      useEventListener(renderElementRef, 'timeupdate', () => {
-        state.currentTime.value = renderElementRef.value?.currentTime ?? 0
-      })
-
+      onInitEvents()
       return Promise.resolve()
     },
     load: async (url, lastTime) => {
@@ -75,36 +196,7 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
       videoElement.src = url
       // 初始化倍速（必须在src赋值后设置）
       methods.setPlaybackRate(state.playbackRate.value)
-
-      return new Promise((resolve, reject) => {
-        useEventListener(renderElementRef, 'loadedmetadata', () => {
-          state.duration.value = videoElement.duration
-          state.videoWidth.value = videoElement.videoWidth
-          state.videoHeight.value = videoElement.videoHeight
-
-          // 初始化播放时间
-          if (lastTime !== undefined || state.currentTime.value > 0) {
-            videoElement.currentTime = lastTime ?? state.currentTime.value
-          }
-
-          resolve()
-
-          if (state.autoPlay.value) {
-            methods.play()
-          }
-        })
-        useEventListener(renderElementRef, 'error', (_event: Event) => {
-          if (_event.target instanceof HTMLVideoElement) {
-            const error = new Error(_event.target.error?.message)
-            error.name = 'Media Error'
-            state.loadError.value = error
-          }
-          else {
-            state.loadError.value = new Error('Video element unknown error')
-          }
-          reject(state.loadError.value)
-        })
-      })
+      return loadWithPromise(videoElement, methods.play, lastTime)
     },
     getRenderElement: () => {
       return getVideoElementRef()
@@ -116,25 +208,19 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
         .then(() => {
           state.paused.value = false
         })
-        .catch((error: DOMException) => {
+        .catch((error) => {
           /**
            * 浏览器在未设置静音且未交互时，会抛出 NotAllowedError，不允许直接播放
            * 那么我们设置 video 为静音，并且标记音频被挂起，然后重新播放
            * @more NotAllowedError: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD
            */
-          if (error.name === 'NotAllowedError' && videoElement.error === null) {
-            console.warn(error)
+          if (error instanceof DOMException && error.name === 'NotAllowedError') {
             state.isSuspended.value = true
             const videoElement = getVideoElementRef()
             videoElement.muted = true
             return methods.play()
           }
-          if (error.name === 'AbortError') {
-            console.warn(error)
-            throw error
-          }
-          console.error('native player play error', error)
-          state.loadError.value = error
+          console.error(error)
           throw error
         })
     },
@@ -187,8 +273,10 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
         videoElement.currentTime = time
         state.currentTime.value = time
         if (videoElement.src) {
-          useEventListener(videoElement, 'seeked', () => {
+          on('seeked', () => {
             resolve()
+          }, {
+            once: true,
           })
         }
         else {
@@ -196,47 +284,12 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
         }
       })
     },
-    on: (event, callback) => {
-      watch(
-        renderElementRef,
-        (videoElement) => {
-          if (videoElement) {
-            switch (event) {
-              case 'canplay':
-                videoElement.addEventListener(
-                  'canplay',
-                  callback as EventListener,
-                )
-                break
-              case 'timeupdate':
-                videoElement.addEventListener('timeupdate', () => {
-                  callback(videoElement.currentTime)
-                })
-                break
-              case 'seeking':
-                videoElement.addEventListener('seeking', () => {
-                  callback(videoElement.currentTime)
-                })
-                break
-              case 'seeked':
-                videoElement.addEventListener('seeked', () => {
-                  callback(videoElement.currentTime)
-                })
-                break
-              default:
-                videoElement.addEventListener(event, callback as EventListener)
-            }
-          }
-        },
-        {
-          once: true,
-        },
-      )
-    },
     destroy: () => {
       const videoElement = renderElementRef.value
       if (!videoElement)
         return Promise.resolve()
+
+      offListeners()
 
       // 停止播放并清理
       videoElement.pause()
@@ -256,6 +309,10 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
   return {
     ...state,
     ...methods,
+    on,
+    off,
+    offListeners,
+    loadWithPromise,
     renderElementRef,
     type: PlayerCoreType.Native as const,
   }

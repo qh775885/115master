@@ -4,11 +4,11 @@
       <!-- 头部 -->
       <div :class="styles.header">
         <h3 :class="styles.title">
-          <Icon :icon="ICON_SHORTCUTS" class="size-6" />
+          <Icon :icon="ICONS.ICON_SHORTCUTS" class="size-6" />
           快捷键设置
         </h3>
         <button :class="styles.close" @click="$emit('update:visible', false)">
-          <Icon :icon="ICON_CLOSE" class="size-4" />
+          <Icon :icon="ICONS.ICON_CLOSE" class="size-4" />
         </button>
       </div>
       <!-- 内容 -->
@@ -39,11 +39,11 @@
           <button
             :class="styles.actionBtn" type="button" @click="handleImport"
           >
-            <Icon :icon="ICON_IMPORT" class="size-3.5" />
+            <Icon :icon="ICONS.ICON_IMPORT" class="size-3.5" />
             <span>导入</span>
           </button>
           <button :class="styles.actionBtn" type="button" @click="handleExport">
-            <Icon :icon="ICON_EXPORT" class="size-3.5" />
+            <Icon :icon="ICONS.ICON_EXPORT" class="size-3.5" />
             <span>导出</span>
           </button>
           <button
@@ -52,7 +52,7 @@
             :class="[styles.actionBtn]"
             @click="handleResetAll"
           >
-            <Icon :icon="ICON_RESET_ALL" class="size-3.5" />
+            <Icon :icon="ICONS.ICON_RESET_ALL" class="size-3.5" />
             重置全部
           </button>
         </div>
@@ -66,9 +66,9 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
-import Popup from '../components/Popup/index.vue'
-import { usePlayerContext } from '../hooks/usePlayerProvide'
-import { ICON_CLOSE, ICON_EXPORT, ICON_IMPORT, ICON_RESET_ALL, ICON_SHORTCUTS } from '../utils/icon'
+import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
+import Popup from '../Popup/index.vue'
 import ShortcutsItem from './components/ShortcutsItem.vue'
 import { ACTION_GROUPS, EXPORT_FILE_PREFIX } from './shortcuts.const'
 

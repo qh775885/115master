@@ -1,7 +1,7 @@
 import type { VideoSource } from '../../../components/XPlayer'
 import { ref } from 'vue'
 import { setVideoCookie } from '..'
-import { VideoSourceExtension } from '../../../components/XPlayer/types'
+import { VIDEO_SOURCE_EXTENSION } from '../../../components/XPlayer/index.const'
 import { qualityNumMap } from '../../../constants/quality'
 import { drive115 } from '../../../utils/drive115'
 import { getFileExtensionByUrl } from '../../../utils/file'
@@ -38,7 +38,7 @@ export function useDataVideoSources() {
 
       const extension
         = getFileExtensionByUrl(download.value.url.url)
-          ?? VideoSourceExtension.unknown
+          ?? VIDEO_SOURCE_EXTENSION.unknown
 
       list.value.unshift({
         name: 'Ultra',
@@ -56,7 +56,7 @@ export function useDataVideoSources() {
           name: `${item.quality}P`,
           url: item.url,
           type: 'hls' as const,
-          extension: VideoSourceExtension.m3u8,
+          extension: VIDEO_SOURCE_EXTENSION.m3u8,
           quality: item.quality,
           displayQuality:
             qualityNumMap[item.quality as keyof typeof qualityNumMap],

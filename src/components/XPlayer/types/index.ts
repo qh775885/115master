@@ -2,8 +2,9 @@ import type { AVPlayerOptions } from '@libmedia/avplayer'
 import type { HlsConfig } from 'hls.js'
 import type { RequireAtLeastOne } from 'type-fest'
 import type { Ref } from 'vue'
+import type { ShortcutsExt, ShortcutsPreference } from '../components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from '../hooks/usePlayerProvide'
-import type { ShortcutsExt, ShortcutsPreference } from '../shortcuts/shortcuts.types'
+import type { VIDEO_SOURCE_EXTENSION } from '../index.const'
 
 /**
  * 缩略图帧
@@ -40,24 +41,6 @@ export type ThumbnailRequest = ({
 }) => Promise<ThumbnailFrame>
 
 /**
- * 视频源扩展名
- */
-export const VideoSourceExtension = {
-  mp4: 'mp4',
-  m3u8: 'm3u8',
-  m2ts: 'm2ts',
-  ts: 'ts',
-  flv: 'flv',
-  avi: 'avi',
-  mkv: 'mkv',
-  rmvb: 'rmvb',
-  mov: 'mov',
-  webm: 'webm',
-  iso: 'iso',
-  unknown: 'unknown',
-}
-
-/**
  * 视频源
  */
 export interface VideoSource {
@@ -73,7 +56,7 @@ export interface VideoSource {
   /** 扩展名 */
   extension:
     | string
-    | (typeof VideoSourceExtension)[keyof typeof VideoSourceExtension]
+    | (typeof VIDEO_SOURCE_EXTENSION)[keyof typeof VIDEO_SOURCE_EXTENSION]
   /** 质量 */
   quality: number
   /** 显示的画质值（可选） */
@@ -162,26 +145,26 @@ export interface XPlayerProps {
   hlsConfig?: Partial<HlsConfig>
   /** avPlayer 配置 */
   avPlayerConfig?: Partial<AVPlayerOptions>
+  /** 播放列表数量 */
+  playlistCount?: number
+  /** 播放列表当前索引 (0-based) */
+  playlistIndex?: number
   /** 缩略图请求 */
   onThumbnailRequest?: ThumbnailRequest
   /** 字幕改变 */
   onSubtitleChange?: (subtitle: Subtitle | null) => void
   /** 播放器可播放 */
-  onCanplay?: () => void
+  onCanplay?: (ctx: PlayerContext) => void
   /** 更新当前时间 */
-  onTimeupdate?: (time: number) => void
+  onTimeupdate?: (ctx: PlayerContext) => void
   /** 跳转中 */
-  onSeeking?: (time: number) => void
+  onSeeking?: (ctx: PlayerContext) => void
   /** 跳转结束 */
-  onSeeked?: (time: number) => void
-  /** 空闲 */
-  onIdled?: () => void
-  /** 播放列表数量 */
-  playlistCount?: number
-  /** 播放列表当前索引 (0-based) */
-  playlistIndex?: number
+  onSeeked?: (ctx: PlayerContext) => void
   /** 播放结束 */
   onEnded?: (ctx: PlayerContext) => void
+  /** 播放器错误 */
+  onError?: (e: [ctx: PlayerContext, error: unknown]) => void
 }
 
 export interface XPlayerEmit {
