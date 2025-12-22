@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import { getAvNumber } from '../getNumber'
 
 describe('getNumber', () => {
