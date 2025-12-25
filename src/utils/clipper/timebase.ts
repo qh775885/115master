@@ -10,7 +10,7 @@ export interface Rational {
  */
 export const microsecTimebase: Rational = {
   num: 1,
-  den: 1000000,
+  den: 1_000_000,
 }
 
 /**
@@ -18,7 +18,7 @@ export const microsecTimebase: Rational = {
  */
 export const millisecTimebase: Rational = {
   num: 1,
-  den: 1000,
+  den: 1_000,
 }
 
 /**
@@ -27,6 +27,14 @@ export const millisecTimebase: Rational = {
 export const secTimebase: Rational = {
   num: 1,
   den: 1,
+}
+
+/**
+ * 90kHz时间基
+ */
+export const ninetykHzTimebase: Rational = {
+  num: 1,
+  den: 90_000,
 }
 
 /**

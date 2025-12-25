@@ -131,7 +131,7 @@ export interface XPlayerProps {
   quality?: number
   /** 禁用HDR */
   disabledHDR: boolean
-  /** 缩略图采样间隔 */
+  /** 缩略图最大采样间隔 */
   thumbnailsSamplingInterval: number
   /** 快捷键偏好 */
   shortcutsPreference: ShortcutsPreference
@@ -184,7 +184,7 @@ export interface XPlayerEmit {
   'update:quality': [number]
   /** 禁用HDR */
   'update:disabledHDR': [boolean]
-  /** 缩略图采样间隔 */
+  /** 缩略图最大采样间隔 */
   'update:thumbnailsSamplingInterval': [number]
   /** 快捷键偏好 */
   'update:shortcutsPreference': [ShortcutsPreference]

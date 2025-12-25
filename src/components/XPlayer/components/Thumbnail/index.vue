@@ -48,9 +48,9 @@
     </div>
     <div :class="styles.timeBox.container">
       <span
-        v-if="isHoveringImage && thumb.renderImage?.frameTime"
+        v-if="thumb.renderImage?.frameTime"
       >
-        跳至 {{ formatTime(thumb.renderImage?.frameTime || 0) }} 预览时间
+        {{ formatTime(thumb.renderImage?.frameTime || 0) }}
       </span>
       <span
         v-else
@@ -137,7 +137,7 @@ const thumbnailContainerSize = shallowRef({
   height: DEFAULT_HEIGHT,
 })
 /** 最后一次定时器 */
-const lastTimer = shallowRef<NodeJS.Timeout | null>(null)
+const lastTimer = shallowRef<number | null>(null)
 /** 缩略图 */
 const thumb = reactive<{
   lastHoverTime: number
@@ -205,7 +205,7 @@ async function updateThumbnail(hoverTime: number, isLast: boolean) {
   thumb.renderImage = undefined
 
   if (!isLast) {
-    lastTimer.value = setTimeout(() => {
+    lastTimer.value = window.setTimeout(() => {
       if (hoverTime === thumb.lastHoverTime) {
         updateThumbnail(hoverTime, true)
       }
@@ -342,5 +342,18 @@ onUnmounted(() => {
     clearTimeout(lastTimer.value)
     lastTimer.value = null
   }
+})
+
+/** 获取当前缩略图的时间（如果存在且可见） */
+function getCurrentFrameTime(): number | null {
+  if (boxVisible.value && thumb.renderImage?.frameTime) {
+    return thumb.renderImage.frameTime
+  }
+  return null
+}
+
+/** 暴露方法供父组件调用 */
+defineExpose({
+  getCurrentFrameTime,
 })
 </script>

@@ -62,6 +62,7 @@
     </div>
     <!-- 缩略图预览 -->
     <Thumbnail
+      ref="thumbnailRef"
       :visible="isPreviewVisible || isDragging"
       :position="isDragging ? dragProgress : previewProgress"
       :time="previewTime"
@@ -72,6 +73,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch } from 'vue'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Thumbnail from '../Thumbnail/index.vue'
 
@@ -105,6 +107,9 @@ const styles = {
 
 const { progressBar } = usePlayerContext()
 
+/** 缩略图组件引用 */
+const thumbnailRef = ref<any>(null)
+
 /** 从 hook 中解构所有需要的状态和方法 */
 const {
   progressBarWrapperRef,
@@ -123,5 +128,11 @@ const {
   handleBarWrapperMouseMove,
   handleBarWrapperMouseLeave,
   handleThumbnailSeek,
+  setThumbnailRef,
 } = progressBar
+
+/** 将 thumbnailRef 传递给 hook */
+watch(thumbnailRef, (newRef) => {
+  setThumbnailRef(newRef)
+}, { immediate: true })
 </script>

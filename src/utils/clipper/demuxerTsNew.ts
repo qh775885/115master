@@ -6,10 +6,16 @@ import {
   TSDemux,
 } from '@cbingbing/demuxer'
 
+/** 解复用后的数据 */
+export interface AvcFrameData {
+  avcFrame: AVCFrame
+  rawData: Uint8Array
+}
+
 // DemuxerTs 类的构造函数选项
 interface DemuxerTsOptions {
   /** 解码回调 */
-  onDecodeChunk: (encodeChunk: {
+  onAvcFrameData: (encodeChunk: {
     avcFrame: AVCFrame
     rawData: Uint8Array
   }) => void
@@ -32,18 +38,17 @@ export class DemuxerTsNew {
    */
   demux: TSDemux | undefined
   /**
-   * 第一次收到数据的时间
-   */
-  private firstOnDataTime = 0
-  /**
    * 解码回调
    */
-  private _onDecodeChunk: DemuxerTsOptions['onDecodeChunk']
+  private _sendAvcFrameData: DemuxerTsOptions['onAvcFrameData']
   /**
    * 配置回调
    */
-  private _onConfig: DemuxerTsOptions['onConfig']
-
+  private _sendConfig: DemuxerTsOptions['onConfig']
+  /**
+   * 解复用完成回调
+   */
+  private _emitDone: DemuxerTsOptions['onDone']
   /**
    * 构造函数
    * @param options 解复用器选项
@@ -61,8 +66,9 @@ export class DemuxerTsNew {
       'frame',
       this._onDemuxFrame.bind(this),
     )
-    this._onDecodeChunk = options.onDecodeChunk
-    this._onConfig = options.onConfig
+    this._sendAvcFrameData = options.onAvcFrameData
+    this._sendConfig = options.onConfig
+    this._emitDone = options.onDone.bind(this)
   }
 
   /**
@@ -119,7 +125,7 @@ export class DemuxerTsNew {
 
         if (nalu.unit_type === NaluTypes.SPS) {
           const config = getAVCConfig(nalu.sps)
-          this._onConfig({
+          this._sendConfig({
             codec: config.codec,
             width: nalu.sps.width,
             height: nalu.sps.height,
@@ -168,7 +174,7 @@ export class DemuxerTsNew {
       }
 
       // 发送到解码器
-      this._onDecodeChunk({
+      this._sendAvcFrameData({
         avcFrame,
         rawData: frameData,
       })
@@ -182,8 +188,6 @@ export class DemuxerTsNew {
    * 解复用完成回调
    */
   private _onDeMuxDataDone() {
-    const endTime = performance.now()
-    const duration = endTime - this.firstOnDataTime
-    console.log(`解复用完成，耗时: ${duration} 毫秒`)
+    this._emitDone()
   }
 }

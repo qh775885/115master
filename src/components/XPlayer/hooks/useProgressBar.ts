@@ -26,6 +26,8 @@ export function useProgressBar(ctx: PlayerContext) {
   const isPreviewVisible = shallowRef(false)
   /** 进度条容器 */
   const progressBarWrapperRef = shallowRef<HTMLElement | null>(null)
+  /** 缩略图组件引用 */
+  const thumbnailRef = shallowRef<{ getCurrentFrameTime?: () => number | null } | null>(null)
   /** 长按计时器 */
   let longPressTimer: ReturnType<typeof setTimeout> | null = null
   /** 进度条宽度 - 使用 useElementSize */
@@ -107,7 +109,9 @@ export function useProgressBar(ctx: PlayerContext) {
   /** 停止拖拽 */
   function stopDragging(position: number) {
     if (isDragging.value) {
-      const finalTime = position * duration.value
+      /** 优先使用缩略图的时间（如果存在且可见） */
+      const thumbnailFrameTime = thumbnailRef.value?.getCurrentFrameTime?.()
+      const finalTime = thumbnailFrameTime ?? (position * duration.value)
       ctx.playerCore.value?.seek(finalTime)
       previewProgress.value = position * 100
       previewTime.value = finalTime
@@ -195,6 +199,11 @@ export function useProgressBar(ctx: PlayerContext) {
     document.removeEventListener('mouseup', handleGlobalMouseUp)
   }
 
+  /** 设置缩略图组件引用 */
+  function setThumbnailRef(ref: { getCurrentFrameTime?: () => number | null } | null) {
+    thumbnailRef.value = ref
+  }
+
   onUnmounted(() => {
     document.removeEventListener('mousemove', handleGlobalMouseMove)
     document.removeEventListener('mouseup', handleGlobalMouseUp)
@@ -223,5 +232,6 @@ export function useProgressBar(ctx: PlayerContext) {
     handleBarWrapperMouseMove,
     handleBarWrapperMouseLeave,
     handleThumbnailSeek,
+    setThumbnailRef,
   }
 }

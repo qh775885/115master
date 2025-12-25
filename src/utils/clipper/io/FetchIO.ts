@@ -1,69 +1,38 @@
+import { ChunkReader } from './ChunkIO'
+
 /**
  * FetchIO 类 - 负责从URL获取指定范围的视频数据
- * 处理数据块的读取和管理
+ * 处理数据块的读取和管理，支持缓存和请求去重
  */
 export class FetchIO {
+  /**
+   * 创建分块读取器
+   * @param url 目标URL
+   * @param start 起始位置
+   * @param limit 限制大小
+   * @returns 分块读取器
+   */
+  createChunkReader(url: string, start: number, limit: number = ChunkReader.DEFAULT_LIMIT): ChunkReader {
+    return new ChunkReader(url, this, start, limit)
+  }
+
   /**
    * 从URL获取指定范围的ArrayBuffer
    * @param url 目标URL
    * @param start 起始字节
    * @param end 结束字节
-   * @returns 获取到的ArrayBuffer
+   * @returns 获取到的Response
    */
   async fetchBufferRange(
     url: string,
     start: number,
-    end: number,
+    end?: number,
   ): Promise<Response> {
-    const response = fetch(url, {
-      method: 'GET',
+    const response = await fetch(url, {
       headers: {
-        Range: `bytes=${start}-${end}`,
+        Range: `bytes=${start}-${end ?? ''}`,
       },
-      priority: 'low',
     })
     return response
-  }
-
-  /**
-   * 流式读取视频块
-   */
-  async streamChunks(
-    url: string,
-    callback: (buffer: ArrayBuffer, position: number) => Promise<boolean>,
-    options: {
-      stepChunkSize?: number
-      maxSteps?: number
-    } = {},
-  ): Promise<void> {
-    /** 步进块大小 */
-    const stepChunkSize = options.stepChunkSize || 188 * 1024 * 2
-    let currentPosition = 0
-    let shouldContinue = true
-
-    // 读取初始块
-    try {
-      // 继续读取后续数据块，直到达到最大步数或回调返回false
-      while (shouldContinue) {
-        const response = await this.fetchBufferRange(
-          url,
-          currentPosition,
-          currentPosition + stepChunkSize - 1,
-        )
-        if (response.status !== 206) {
-          shouldContinue = false
-          break
-        }
-        shouldContinue = await callback(
-          await response.arrayBuffer(),
-          currentPosition,
-        )
-        currentPosition += stepChunkSize
-      }
-    }
-    catch (error) {
-      console.error('流式读取数据出错:', error)
-      throw error
-    }
   }
 }
