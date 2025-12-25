@@ -5,7 +5,7 @@ import type {
 import type { LaneConfig } from '../../../utils/scheduler'
 import type { usePreferences } from './usePreferences'
 import { tryOnUnmounted } from '@vueuse/core'
-import { shuffle } from 'lodash'
+import { chain } from 'lodash'
 import { shallowRef } from 'vue'
 import { FRIENDLY_ERROR_MESSAGE } from '../../../constants'
 import { intervalArray } from '../../../utils/array'
@@ -44,9 +44,22 @@ const SCHEDULER_OPTIONS = {
   laneConfig: LANE_CONFIG,
 }
 
-/** 默认采样间隔 */
+/** 默认最大采样间隔 */
 const DEFAULT_SAMPLING_INTERVAL = 30
 
+/** 最小采样间隔（秒） */
+const MIN_SAMPLING_INTERVAL = 2
+
+/** 最小采样数量 */
+const MIN_SAMPLING_COUNT = 100
+
+/** 最大采样数量 */
+const MAX_SAMPLING_COUNT = 300
+
+/**
+ * 缩略图生成
+ * @param preferences 偏好设置
+ */
 export function useDataThumbnails(
   preferences: ReturnType<typeof usePreferences>,
 ) {
@@ -90,7 +103,28 @@ export function useDataThumbnails(
     return lowestQuality
   }
 
-  /** 初始化缩略图生成器 */
+  /**
+   * 动态计算采样间隔
+   * @description 根据视频时长和传入的间隔，动态调整采样间隔，确保生成的缩略图数量不会太少
+   * @param duration 视频时长（秒）
+   * @param initialInterval 初始采样间隔（秒）
+   * @returns 调整后的采样间隔（秒）
+   */
+  const calculateSamplingInterval = (
+    duration: number,
+    initialInterval: number,
+  ): number => {
+    const count = Math.max(MIN_SAMPLING_COUNT, Math.min(duration / initialInterval, MAX_SAMPLING_COUNT))
+    return Math.max(MIN_SAMPLING_INTERVAL, Math.min(duration / count, initialInterval))
+  }
+
+  /**
+   * 缩略图最大采样间隔
+   * @description 初始化缩略图生成器，根据视频源的画质，选择最低画质的 HLS 源，并设置缩略图最大采样间隔
+   * @param id 唯一标识 (可以是 pickcode )
+   * @param sources 视频源
+   * @param interval 缩略图最大采样间隔
+   */
   const initialize = async (id: string, sources: VideoSource[], interval: number) => {
     currentId.value = id
     try {
@@ -103,7 +137,22 @@ export function useDataThumbnails(
         url: source.url,
       })
       await clipper.open()
-      samplingInterval.value = interval ?? DEFAULT_SAMPLING_INTERVAL
+
+      /** 动态计算采样间隔，根据视频时长调整 */
+      const initialInterval = interval ?? DEFAULT_SAMPLING_INTERVAL
+      samplingInterval.value = calculateSamplingInterval(
+        clipper.hlsIo.duration,
+        initialInterval,
+      )
+
+      console.table({
+        'M3U8 分片数量': clipper.hlsIo.segments.length,
+        'M3U8 总时长': clipper.hlsIo.duration,
+        '最大采样间隔': initialInterval,
+        '实际采样间隔': samplingInterval.value,
+        '需要采集的缩略图数量': Math.ceil(clipper.hlsIo.duration / samplingInterval.value),
+      })
+
       isInited.value = true
     }
     catch (error) {
@@ -116,13 +165,18 @@ export function useDataThumbnails(
 
   /**
    * 获取指定时间点的缩略图
+   * @description 获取指定时间点的缩略图，根据模糊处理后的时间，请求缩略图，并返回缩略图
+   * @param id 唯一标识 (可以是 pickcode )
+   * @param seekTime 实际时间
+   * @param seekBlurTime 模糊处理后的时间
+   * @returns 缩略图
    */
   const seekThumbnail = async (
     id: string,
     seekTime: number,
     seekBlurTime: number,
   ): Promise<ThumbnailFrame> => {
-    const result = await clipper.seek(seekBlurTime, true)
+    const result = await clipper.seek(seekBlurTime, false)
     if (!result) {
       return
     }
@@ -154,22 +208,38 @@ export function useDataThumbnails(
       consumedTime: result.consumedTime,
     }
     result.videoFrame.close()
+
+    // DEBUG INFO
+    // console.log(`
+    //   ## seekThumbnail
+    //   seekTime: ${seekTime}
+    //   seekBlurTime: ${seekBlurTime}
+    //   samplingInterval: ${samplingInterval.value}
+    //   consumedTime: ${result.consumedTime}
+    //   frameTime: ${result.frameTime}
+    // `)
+
     // 缓存缩略图
     cahceThumbnails.set(seekBlurTime, thumbnail)
     // 返回缩略图
     return thumbnail
   }
 
-  /** 获取指定时间点的缩略图 */
-  const onThumbnailRequest = async ({
-    id = '',
-    time,
-    isLast,
-  }: {
+  /**
+   * 处理来自播放器的缩略图请求
+   * @description 处理来自播放器的缩略图请求，如果不是最后一次请求，则返回缓存中的缩略图
+   */
+  const onThumbnailRequest = async (options: {
     id: string
     time: number
     isLast: boolean
+  } = {
+    id: '',
+    time: 0,
+    isLast: false,
   }): Promise<ThumbnailFrame> => {
+    const { id, time, isLast } = options
+
     if (state.value.error) {
       throw state.value.error
     }
@@ -219,14 +289,10 @@ export function useDataThumbnails(
     isAutoBufferExecuted.value = true
 
     /** 获取所有缩略图时间点 */
-    const times
-      // 打乱顺序
-      = shuffle(
-        // 生成缩略图时间点
-        intervalArray(0, clipper.hlsIo.duration, samplingInterval.value)
-        // 过滤已缓存的缩略图
-          .filter(time => !cahceThumbnails.has(time)),
-      )
+    const times = chain(intervalArray(0, clipper.hlsIo.duration, samplingInterval.value))
+      .filter(time => !cahceThumbnails.has(time))
+      .shuffle()
+      .value()
 
     // 添加任务
     for (const time of times) {

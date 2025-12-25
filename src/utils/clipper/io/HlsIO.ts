@@ -1,6 +1,6 @@
 import type { Segment as M3U8Segment } from 'm3u8-parser'
-import type { Range } from './IO'
 import { Parser } from 'm3u8-parser'
+import { FetchIO } from './FetchIO'
 
 /**
  * 请求信息
@@ -28,7 +28,7 @@ export type Segment = M3U8Segment & {
  * HlsIO 类 - 负责从URL获取指定范围的视频数据
  * 处理数据块的读取和管理
  */
-export class HlsIO {
+export class HlsIO extends FetchIO {
   /** 请求信息 */
   info: FetchInfo | undefined
 
@@ -44,6 +44,11 @@ export class HlsIO {
   /** 当前分片 */
   get segment() {
     return this.segments[this.segmentIndex]
+  }
+
+  /** 分片数量 */
+  get segmentCount() {
+    return this.segments.length
   }
 
   /** 当前分片URL */
@@ -64,26 +69,11 @@ export class HlsIO {
   }
 
   /**
-   * 读取
-   * @param range 范围
-   * @returns 获取到的ArrayBuffer
+   * 读取分片
+   * @param time 时间/秒
+   * @returns 读取到的分片
    */
-  async read(range: Range): Promise<ArrayBuffer> {
-    const response = await fetch(this.segments[this.segmentIndex].uri, {
-      headers: {
-        Range: `bytes=${range.start}-${range.end}`,
-      },
-      ...(this.info?.fetchOptions ?? {}),
-    })
-    return await response.arrayBuffer()
-  }
-
-  /**
-   * 跳转
-   * @param time 时间
-   * @returns 跳转到的分片
-   */
-  async seek(time: number): Promise<Segment> {
+  readSegment(time: number): Segment {
     this.segmentIndex = this.segments.findIndex(
       i => i.timestamp <= time && time <= i.timestamp + i.duration,
     )

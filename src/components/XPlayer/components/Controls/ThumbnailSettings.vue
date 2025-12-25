@@ -8,7 +8,7 @@
         <!-- 采样间隔 -->
         <fieldset class="fieldset">
           <legend class="fieldset-legend">
-            采样间隔 (S)
+            最大采样间隔 (S)
           </legend>
           <div class="flex gap-2">
             <button
@@ -43,6 +43,6 @@ import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
 const { thumbnailSettings } = usePlayerContext()
 
-/** 采样间隔选项 */
+/** 最大最大采样间隔选项 */
 const samplingIntervals = [30, 60, 120]
 </script>

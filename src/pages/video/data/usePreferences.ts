@@ -16,7 +16,7 @@ export interface PlayerPreferences {
   autoLoadThumbnails: boolean
   /** 禁用HDR */
   disabledHDR: boolean
-  /** 缩略图采样间隔 */
+  /** 缩略图最大采样间隔 */
   thumbnailsSamplingInterval: number
   /** 自动播放 */
   autoPlay: boolean
