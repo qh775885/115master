@@ -68,6 +68,9 @@ export function useDataThumbnails(
   /** 缩略图生成器 */
   let clipper: M3U8ClipperNew
 
+  /** 初始化缩略图生成器 Promise */
+  let initializePromise: ReturnType<typeof initializeImpl>
+
   /** 任务调度器 */
   const scheduler = new Scheduler<ThumbnailFrame | null>(SCHEDULER_OPTIONS)
 
@@ -119,13 +122,12 @@ export function useDataThumbnails(
   }
 
   /**
-   * 缩略图最大采样间隔
-   * @description 初始化缩略图生成器，根据视频源的画质，选择最低画质的 HLS 源，并设置缩略图最大采样间隔
+   * 初始化缩略图生成器( 内部实现 )
    * @param id 唯一标识 (可以是 pickcode )
    * @param sources 视频源
    * @param interval 缩略图最大采样间隔
    */
-  const initialize = async (id: string, sources: VideoSource[], interval: number) => {
+  const initializeImpl = async (id: string, sources: VideoSource[], interval: number) => {
     currentId.value = id
     try {
       isInited.value = false
@@ -164,6 +166,14 @@ export function useDataThumbnails(
   }
 
   /**
+   * 初始化缩略图生成器
+   */
+  const initialize = (...args: Parameters<typeof initializeImpl>) => {
+    initializePromise = initializeImpl(...args)
+    return initializePromise
+  }
+
+  /**
    * 获取指定时间点的缩略图
    * @description 获取指定时间点的缩略图，根据模糊处理后的时间，请求缩略图，并返回缩略图
    * @param id 唯一标识 (可以是 pickcode )
@@ -176,6 +186,9 @@ export function useDataThumbnails(
     seekTime: number,
     seekBlurTime: number,
   ): Promise<ThumbnailFrame> => {
+    if (!isInited.value && initializePromise) {
+      await initializePromise
+    }
     const result = await clipper.seek(seekBlurTime, false)
     if (!result) {
       return
@@ -240,12 +253,12 @@ export function useDataThumbnails(
   }): Promise<ThumbnailFrame> => {
     const { id, time, isLast } = options
 
-    if (state.value.error) {
-      throw state.value.error
+    if (Number.isNaN(time)) {
+      throw new TypeError('Invalid time')
     }
 
-    if (!isInited || Number.isNaN(time)) {
-      return
+    if (state.value.error) {
+      throw state.value.error
     }
 
     /** 计算请求时间 */
