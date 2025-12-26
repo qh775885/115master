@@ -51,8 +51,8 @@ const props = withDefaults(
     size?: 'mini' | 'small' | 'medium' | 'large'
     /** 图标名称 */
     icon?: string
-    /** 是否折叠显示详情 */
-    fold?: boolean
+    /** 是否显示详情 */
+    showDetailButton?: boolean
   }>(),
   {
     type: 'error',
@@ -62,6 +62,7 @@ const props = withDefaults(
     noPadding: false,
     size: 'medium',
     icon: ICON_ERROR,
+    showDetailButton: true,
   },
 )
 

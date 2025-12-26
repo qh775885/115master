@@ -43,6 +43,7 @@
         <LoadingError
           :message="thumb.error"
           size="mini"
+          :show-detail-button="false"
         />
       </div>
     </div>
