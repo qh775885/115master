@@ -1,4 +1,5 @@
 import type { FrameData } from './DecoderFlow'
+import { appLogger } from './../logger'
 import { DecoderFlow } from './DecoderFlow'
 import { HlsIO } from './io/HlsIO'
 
@@ -22,6 +23,7 @@ interface M3U8ClipperOptions {
  */
 export class M3U8ClipperNew {
   hlsIo: HlsIO
+  protected logger = appLogger.sub('M3U8ClipperNew')
 
   constructor(private options: M3U8ClipperOptions) {
     this.hlsIo = new HlsIO()
@@ -67,13 +69,13 @@ export class M3U8ClipperNew {
     try {
       const frameData = await decoderFlow.waitForFrame(TIMEOUT_MS)
       if (frameData) {
-        console.log('seek success frameData', frameData)
+        this.logger.debug('seek success frameData', frameData)
         return frameData
       }
       return undefined
     }
     catch (error) {
-      console.error('seek error', error)
+      this.logger.error('seek error', error)
       throw error
     }
     finally {

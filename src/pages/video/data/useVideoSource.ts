@@ -5,6 +5,10 @@ import { VIDEO_SOURCE_EXTENSION } from '../../../components/XPlayer/index.const'
 import { qualityNumMap } from '../../../constants/quality'
 import { drive115 } from '../../../utils/drive115'
 import { getFileExtensionByUrl } from '../../../utils/file'
+import { appLogger } from '../../../utils/logger'
+
+/** 日志 */
+const logger = appLogger.sub('useDataVideoSources')
 
 /** 视频源 */
 export function useDataVideoSources() {
@@ -18,7 +22,7 @@ export function useDataVideoSources() {
 
     if (download.status === 'fulfilled') {
       if (download.value.url.auth_cookie) {
-        console.warn('设置cookie', download.value.url.auth_cookie)
+        logger.info('设置cookie', download.value.url.auth_cookie)
         try {
           await setVideoCookie({
             name: download.value.url.auth_cookie.name,
@@ -64,7 +68,7 @@ export function useDataVideoSources() {
       )
     }
     else {
-      console.error('m3u8', m3u8List.reason)
+      logger.error('m3u8 获取失败:', m3u8List.reason)
     }
   }
 

@@ -1,8 +1,7 @@
 import type { Subtitle } from '../../components/XPlayer/types'
 import md5 from 'blueimp-md5'
-import { AppLogger } from '../logger'
+import { appLogger } from '../logger'
 import { GMRequestInstance } from '../request/gmRequst'
-
 /**
  * 迅雷字幕 API 返回的单个字幕项
  */
@@ -63,10 +62,10 @@ export type ProcessedThunderSubtitle = Required<Pick<Subtitle, 'id' | 'raw' | 'f
  * 迅雷字幕类
  */
 export class ThunderSubtitle {
+  /** 日志 */
+  protected logger = appLogger.sub('ThunderSubtitle')
   /** API 域名 */
   private domain = 'https://api-shoulei-ssl.xunlei.com'
-  /** 日志 */
-  private logger = new AppLogger('Utils ThunderSubtitle')
   /** 请求实例 */
   private iRequest = GMRequestInstance
 
@@ -76,6 +75,7 @@ export class ThunderSubtitle {
    */
   async fetchSubtitle(keyword: string): Promise<ProcessedThunderSubtitle[]> {
     if (!keyword) {
+      this.logger.warn('缺少搜索关键词', { keyword })
       return []
     }
     try {
@@ -84,11 +84,11 @@ export class ThunderSubtitle {
       const data: ThunderSubtitleResponse = await response.json()
 
       if (data.code !== 0 || data.result !== 'ok' || !data.data?.length) {
-        this.logger.log('未找到字幕', { keyword, response: data })
+        this.logger.info('未找到字幕', { keyword, response: data })
         return []
       }
 
-      this.logger.log(`找到 ${data.data.length} 个字幕`, { keyword })
+      this.logger.info(`找到 ${data.data.length} 个字幕，关键词: ${keyword}`)
 
       /** 处理每个字幕项 */
       const processedResults = await Promise.all(
@@ -105,7 +105,7 @@ export class ThunderSubtitle {
             }
           }
           catch (error) {
-            this.logger.error(`下载字幕失败: ${item.name}`, error)
+            this.logger.error(`Download subtitle failed: ${item.name}`, { item, error })
             return null
           }
         }),
@@ -116,12 +116,13 @@ export class ThunderSubtitle {
         .filter((item): item is ProcessedThunderSubtitle => item !== null)
         .sort((a, b) => b.score - a.score)
 
-      this.logger.log('最终结果', finalResults)
+      this.logger.info(`下载到 ${finalResults.length} 个字幕`)
+      console.table(finalResults)
 
       return finalResults
     }
     catch (error) {
-      this.logger.error('获取迅雷字幕失败', error)
+      this.logger.error('获取迅雷字幕失败', { error })
       return []
     }
   }

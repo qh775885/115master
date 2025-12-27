@@ -5,6 +5,7 @@ import {
   NaluTypes,
   TSDemux,
 } from '@cbingbing/demuxer'
+import { appLogger } from '../logger'
 
 /** 解复用后的数据 */
 export interface AvcFrameData {
@@ -37,6 +38,8 @@ export class DemuxerTsNew {
    * 解复用器实例
    */
   demux: TSDemux | undefined
+  /** 日志 */
+  protected logger = appLogger.sub('DemuxerTsNew')
   /**
    * 解码回调
    */
@@ -141,7 +144,6 @@ export class DemuxerTsNew {
 
       // 如果没有有效数据，返回null
       if (nalus.length === 0) {
-        // console.warn('关键帧中没有有效NALU数据');
         return null
       }
 
@@ -158,7 +160,7 @@ export class DemuxerTsNew {
       return frameData
     }
     catch (error) {
-      console.error('创建关键帧数据时出错:', error)
+      this.logger.error('创建关键帧数据时出错:', error)
       return null
     }
   }
@@ -169,7 +171,7 @@ export class DemuxerTsNew {
   private _sendVideoFrame(avcFrame: AVCFrame, frameData: Uint8Array) {
     try {
       if (!frameData || frameData.byteLength === 0) {
-        console.warn('尝试发送无效帧数据')
+        this.logger.warn('尝试发送无效帧数据')
         return
       }
 
@@ -180,7 +182,7 @@ export class DemuxerTsNew {
       })
     }
     catch (error) {
-      console.error('发送视频帧时出错:', error)
+      this.logger.error('发送视频帧时出错:', error)
     }
   }
 

@@ -1,5 +1,5 @@
 import type { ProcessedSubtitle } from '../subtitle/subtitlecat'
-import { AppLogger } from '../logger'
+import { appLogger } from '../logger'
 import { CacheCore } from './core'
 
 /** 字幕缓存项 */
@@ -15,7 +15,7 @@ interface SubtitleCacheItem {
 /** 字幕缓存 */
 export class SubtitleCache extends CacheCore<SubtitleCacheItem> {
   /** 日志 */
-  private logger = new AppLogger('Utils SubtitleCache')
+  protected logger = appLogger.sub('SubtitleCache')
   /** 缓存前缀 */
   private readonly CACHE_PREFIX = '115master_subtitle_'
   /** 默认缓存时间 (ms) */
@@ -38,18 +38,18 @@ export class SubtitleCache extends CacheCore<SubtitleCacheItem> {
       const cacheItem = await super.get(cacheKey)
 
       if (!cacheItem) {
-        this.logger.log('缓存未命中', { keyword, language })
+        this.logger.info('缓存未命中', { keyword, language })
         return null
       }
 
       // 检查是否过期
       if (Date.now() - cacheItem.value.timestamp > cacheItem.value.expiresIn) {
-        this.logger.log('缓存已过期', { keyword, language })
+        this.logger.info('缓存已过期', { keyword, language })
         await this.remove(cacheKey)
         return null
       }
 
-      this.logger.log('缓存命中', {
+      this.logger.info('缓存命中', {
         keyword,
         language,
         count: cacheItem.value.subtitles.length,
@@ -79,7 +79,7 @@ export class SubtitleCache extends CacheCore<SubtitleCacheItem> {
       }
 
       await super.set(cacheKey, cacheItem)
-      this.logger.log('设置缓存成功', {
+      this.logger.info('设置缓存成功', {
         keyword,
         language,
         count: subtitles.length,
@@ -94,7 +94,7 @@ export class SubtitleCache extends CacheCore<SubtitleCacheItem> {
   async clear(): Promise<void> {
     try {
       await super.clear()
-      this.logger.log('清除所有缓存成功')
+      this.logger.info('清除所有缓存成功')
     }
     catch (error) {
       this.logger.error('清除缓存失败', error)

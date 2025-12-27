@@ -225,6 +225,8 @@ function collectUnsupportWasm(collect: Array<GetWasmArgs>, getWasmFn: typeof get
  * 使用 AvPlayerCore
  */
 export function useAvPlayerCore(ctx: PlayerContext) {
+  /** 日志 */
+  const logger = ctx.logger.sub('useAvPlayerCore')
   /** 是否正在跳转 */
   let seeking = false
   /** 播放器引用 */
@@ -377,7 +379,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
         })
         player.on(AVPlayerEvents.TIMEOUT, () => {
           ctx.eventMitt.emit(EVENTS.TIMEOUT, ctx)
-          console.warn('avplayer timeout')
+          logger.warn('avplayer timeout')
         })
         player.on(AVPlayerEvents.TIME, (pts) => {
           if (seeking)
@@ -391,7 +393,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
         })
       }
       catch (error) {
-        console.error('初始化 AVPlayer 失败:', error)
+        logger.error('初始化 AVPlayer 失败:', error)
         state.loadError.value = error as Error
         ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
       }
@@ -409,7 +411,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
         .then(async () => {
           streams.value = await player.getStreams()
 
-          console.log(videoStreams.value)
+          logger.log(videoStreams.value)
 
           /** 设置首选音频流 */
           const preferredAudioStream = getPreferredAudioStream(streams.value)
@@ -442,7 +444,7 @@ export function useAvPlayerCore(ctx: PlayerContext) {
                   = !state.muted.value && player.isSuspended()
               })
               .catch((error) => {
-                console.error('播放失败', error)
+                logger.error('播放失败', error)
                 state.loadError.value = error
                 ctx.eventMitt.emit(EVENTS.ERROR, [ctx, error])
               })

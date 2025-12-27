@@ -185,6 +185,7 @@ import { subtitlePreference } from '../../utils/cache/subtitlePreference'
 import { drive115 } from '../../utils/drive115'
 import { formatFileSize } from '../../utils/format'
 import { getAvNumber } from '../../utils/getNumber'
+import { appLogger } from '../../utils/logger'
 import { isMac } from '../../utils/platform'
 import { goToPlayer } from '../../utils/route'
 import { webLinkIINA, webLinkShortcutsMpv } from '../../utils/weblink'
@@ -242,6 +243,8 @@ const styles = {
   },
 }
 
+/** 日志 */
+const logger = appLogger.sub('Video')
 /** 播放器 Ref */
 const xplayerRef = ref<InstanceType<typeof XPlayerInstance>>()
 /** 偏好设置 */
@@ -352,7 +355,6 @@ const extShortcuts = {
 
 /** 处理字幕变化 */
 async function handleSubtitleChange(subtitle: Subtitle | null) {
-  console.log('handleSubtitleChange', subtitle)
   // 保存字幕选择
   await subtitlePreference.savePreference(
     params.pickCode.value ?? '',
@@ -474,7 +476,7 @@ async function loadData(isFirst = true) {
     await DataHistory.fetch(pickCode)
   }
   catch (error) {
-    console.error(error)
+    logger.error(error)
   }
 
   const task = []

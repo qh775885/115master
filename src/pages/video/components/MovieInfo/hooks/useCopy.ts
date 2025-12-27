@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { appLogger } from '../../../../../utils/logger'
 
 /**
  * 提供复制文本到剪贴板的功能
@@ -7,6 +8,7 @@ import { ref } from 'vue'
  */
 export function useCopy(duration = 300) {
   const isCopied = ref(false)
+  const logger = appLogger.sub('useCopy')
 
   /**
    * 复制文本到剪贴板
@@ -25,7 +27,7 @@ export function useCopy(duration = 300) {
       }, duration)
     }
     catch (err) {
-      console.error('复制失败:', err)
+      logger.error('复制失败:', err)
       throw err
     }
   }

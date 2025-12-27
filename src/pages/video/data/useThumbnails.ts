@@ -11,6 +11,7 @@ import { FRIENDLY_ERROR_MESSAGE } from '../../../constants'
 import { intervalArray } from '../../../utils/array'
 import { M3U8ClipperNew } from '../../../utils/clipper/m3u8Clipper'
 import { getImageResize } from '../../../utils/image'
+import { appLogger } from '../../../utils/logger'
 import {
 
   Scheduler,
@@ -55,6 +56,9 @@ const MIN_SAMPLING_COUNT = 100
 
 /** 最大采样数量 */
 const MAX_SAMPLING_COUNT = 300
+
+/** 日志 */
+const logger = appLogger.sub('useDataThumbnails')
 
 /**
  * 缩略图生成
@@ -147,11 +151,12 @@ export function useDataThumbnails(
         initialInterval,
       )
 
+      logger.info('初始化缩略图生成器完成，信息如下:')
       console.table({
         'M3U8 分片数量': clipper.hlsIo.segments.length,
-        'M3U8 总时长': clipper.hlsIo.duration,
-        '最大采样间隔': initialInterval,
-        '实际采样间隔': samplingInterval.value,
+        'M3U8 总时长(s)': clipper.hlsIo.duration,
+        '最大采样间隔(s)': initialInterval,
+        '实际采样间隔(s)': samplingInterval.value,
         '需要采集的缩略图数量': Math.ceil(clipper.hlsIo.duration / samplingInterval.value),
       })
 
@@ -223,14 +228,14 @@ export function useDataThumbnails(
     result.videoFrame.close()
 
     // DEBUG INFO
-    // console.log(`
-    //   ## seekThumbnail
-    //   seekTime: ${seekTime}
-    //   seekBlurTime: ${seekBlurTime}
-    //   samplingInterval: ${samplingInterval.value}
-    //   consumedTime: ${result.consumedTime}
-    //   frameTime: ${result.frameTime}
-    // `)
+    logger.debug(`
+      ## seekThumbnail
+      seekTime: ${seekTime}
+      seekBlurTime: ${seekBlurTime}
+      samplingInterval: ${samplingInterval.value}
+      consumedTime: ${result.consumedTime}
+      frameTime: ${result.frameTime}
+    `)
 
     // 缓存缩略图
     cahceThumbnails.set(seekBlurTime, thumbnail)

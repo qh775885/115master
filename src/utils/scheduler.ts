@@ -1,3 +1,5 @@
+import { appLogger } from './logger'
+
 // 任务状态
 export enum TaskStatus {
   // 待执行
@@ -133,6 +135,8 @@ export class Scheduler<T> {
     laneConfig: {},
   }
 
+  /** 日志 */
+  protected logger = appLogger.sub('Scheduler')
   /** 正在运行的任务 */
   private running: Map<string, Task<T>> = new Map()
   /** 每个车道的运行中任务计数 */
@@ -603,7 +607,7 @@ export class Scheduler<T> {
         if (nextTask.timeout) {
           const timeoutPromise = new Promise<T>((_, reject) => {
             timeoutId = window.setTimeout(() => {
-              console.warn('Task timeout', nextTask.id)
+              this.logger.warn('Task timeout', nextTask.id)
               reject(new SchedulerError.TaskTimeout())
             }, nextTask.timeout)
           })
@@ -655,7 +659,7 @@ export class Scheduler<T> {
     }
     catch (error) {
       if (retriesLeft > 0 && task.status !== 'cancelled') {
-        console.warn('Task retry', task.id)
+        this.logger.warn('重试任务', task.id)
         await new Promise(resolve =>
           setTimeout(resolve, this.options.defaultRetryDelay),
         )

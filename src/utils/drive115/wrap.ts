@@ -1,9 +1,13 @@
 import type { WebApi } from './api'
 import type { DownloadResult } from './core'
+import { appLogger } from '../logger'
 import { Drive115Core } from './core'
 
 /** 115驱动的包装 */
 export class Drive115Wrap extends Drive115Core {
+  /** 日志 */
+  protected logger = appLogger.sub('Drive115Wrap')
+
   /** 获取文件列表 */
   async getFiles(params: WebApi.Req.GetFiles) {
     try {
@@ -61,7 +65,7 @@ export class Drive115Wrap extends Drive115Core {
       return await this.ProPostAppChromeDownurl(pickcode)
     }
     catch (error) {
-      console.warn('第一种获取下载链接失败', error)
+      this.logger.warn('第一种获取下载链接失败', error)
       const res = await this.webApiFilesDownload(pickcode)
       return res
     }

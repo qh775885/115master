@@ -1,4 +1,5 @@
 import type { CacheCore } from './index'
+import { appLogger } from '../../logger'
 import { CLEANUP_BATCH_SIZE, STORAGE_QUOTA_THRESHOLD } from './const'
 import { MetaStore } from './metaStore'
 
@@ -19,6 +20,8 @@ export interface StorageUsage {
  * 用于监控存储空间使用情况并在需要时清理旧数据
  */
 export class QuotaManager {
+  /** 日志 */
+  protected logger = appLogger.sub('QuotaManager')
   /** 元数据存储 */
   private metaStore: MetaStore
   /** 缓存实例 */
@@ -110,11 +113,11 @@ export class QuotaManager {
         cleanedKeys.push(item.key)
       }
       catch (error) {
-        console.error(`清理缓存项 ${item.key} 失败:`, error)
+        this.logger.error(`清理缓存项 ${item.key} 失败:`, error)
       }
     }
 
-    console.warn(`已清理 ${cleanedKeys.length} 个旧缓存项`)
+    this.logger.warn(`已清理 ${cleanedKeys.length} 个旧缓存项`)
     return cleanedKeys
   }
 

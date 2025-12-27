@@ -12,6 +12,8 @@ import { VIDEO_CATCH_ERROES } from './playerCore/useCatchVideo'
  * 视频源
  */
 export function useSources(ctx: PlayerContext) {
+  /** 日志 */
+  const logger = ctx.logger.sub('useSources')
   /** 视频元素 */
   const playerElementRef = ctx.refs.playerElementRef
   /** 播放器 */
@@ -63,7 +65,7 @@ export function useSources(ctx: PlayerContext) {
 
       ctx.eventMitt.on(EVENTS.ERROR, ([_, err]) => {
         if (err === VIDEO_CATCH_ERROES.VIDEO_TRACK_LOSS) {
-          console.error('视频轨道丢失')
+          logger.error('视频轨道丢失')
           if (
             hlsSource
             && playerCore?.value?.type !== PlayerCoreType.Hls
@@ -77,7 +79,7 @@ export function useSources(ctx: PlayerContext) {
           }
         }
         if (err === VIDEO_CATCH_ERROES.VIDEO_FRAMED_DROPPED) {
-          console.error('视频严重丢帧')
+          logger.error('视频严重丢帧')
           if (
             hlsSource
             && playerCore?.value?.type !== PlayerCoreType.Hls
@@ -101,7 +103,7 @@ export function useSources(ctx: PlayerContext) {
     catch (error) {
       if (error instanceof Error || error instanceof MediaError) {
         if (hlsSource && playerCore?.value?.type !== PlayerCoreType.Hls) {
-          console.warn('当前视频源播放失败，尝试切换到 HLS 视频源', error)
+          logger.warn('当前视频源播放失败，尝试切换到 HLS 视频源', error)
           await initializeVideo(hlsSource, undefined, lastTime ?? 0)
         }
         return
@@ -167,7 +169,7 @@ export function useSources(ctx: PlayerContext) {
     if (playerCore.value) {
       playerCore.value
         .destroy()
-        .catch((e: Error) => console.error('销毁播放器失败:', e))
+        .catch((e: Error) => logger.error('销毁播放器失败:', e))
     }
   }
 
@@ -180,7 +182,7 @@ export function useSources(ctx: PlayerContext) {
   /** 切换播放器核心的实际实现 */
   const switchPlayerCoreImpl = async (type: PlayerCoreType) => {
     if (isSwitching.value) {
-      console.warn('正在切换播放器核心，忽略此次操作')
+      logger.warn('正在切换播放器核心，忽略此次操作')
       return
     }
 

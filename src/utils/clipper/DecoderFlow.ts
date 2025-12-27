@@ -2,6 +2,7 @@ import type { AVCFrame } from '@cbingbing/demuxer'
 import type { AvcFrameData } from './demuxerTsNew'
 import type { ChunkReader } from './io/ChunkIO'
 import type { FetchIO } from './io/FetchIO'
+import { appLogger } from '../logger'
 import { promiseDelay } from '../promise'
 import { DemuxerTsNew } from './demuxerTsNew'
 import { microsecTimebase, secTimebase, timebaseConvert } from './timebase'
@@ -39,6 +40,7 @@ export interface DecoderFlowOptions {
  * @description 负责管理 VideoDecoder、Demuxer 和解码循环逻辑
  */
 export class DecoderFlow {
+  protected logger = appLogger.sub('DecoderFlow')
   private videoDecoder: VideoDecoder | undefined
   private demuxer: DemuxerTsNew | undefined
   private sampleQueue: SampleQueueItem[] = []
@@ -64,11 +66,11 @@ export class DecoderFlow {
    * 初始化解码器和解复用器
    */
   initialize(): void {
-    console.debug(`[DecoderFlow] initialize 开始, segmentUrl: ${this.segmentUrl}`)
+    this.logger.debug(`initialize 开始, segmentUrl: ${this.segmentUrl}`)
     this.videoDecoder = this._createDecoder()
     this.demuxer = this._createDemuxer()
     this.reader = this.io.createChunkReader(this.segmentUrl, 0)
-    console.debug(`[DecoderFlow] initialize 完成, videoDecoder状态: ${this.videoDecoder.state}`)
+    this.logger.debug(`initialize 完成, videoDecoder状态: ${this.videoDecoder.state}`)
   }
 
   /**
@@ -78,17 +80,17 @@ export class DecoderFlow {
    */
   pushData(buffer: ArrayBuffer, done?: boolean): void {
     if (!this.demuxer) {
-      console.warn('[DecoderFlow] pushData demuxer is undefined')
+      this.logger.warn('pushData demuxer is undefined')
       return
     }
 
     if (done) {
-      console.debug(`[DecoderFlow] pushData 推送最后一块数据, 大小: ${buffer.byteLength} bytes`)
+      this.logger.debug(`pushData 推送最后一块数据, 大小: ${buffer.byteLength} bytes`)
     }
     else {
       // 只在解码器未配置时记录，帮助调试
       if (this.videoDecoder?.state === 'unconfigured') {
-        console.debug(`[DecoderFlow] pushData 推送数据到解复用器, 大小: ${buffer.byteLength} bytes, 解码器状态: ${this.videoDecoder.state}`)
+        this.logger.debug(`pushData 推送数据到解复用器, 大小: ${buffer.byteLength} bytes, 解码器状态: ${this.videoDecoder.state}`)
       }
     }
     this.demuxer.push(buffer, done ? { done: true } : undefined)
@@ -109,11 +111,11 @@ export class DecoderFlow {
    */
   async waitForFrame(timeoutMs: number): Promise<FrameData | undefined> {
     if (!this.videoDecoder || !this.demuxer) {
-      console.warn('[DecoderFlow] waitForFrame: videoDecoder or demuxer is undefined')
+      this.logger.warn('waitForFrame: videoDecoder or demuxer is undefined')
       return undefined
     }
     const startTime = Date.now()
-    console.debug(`[DecoderFlow] waitForFrame 开始, targetTime: ${this.targetTime}, timeoutMs: ${timeoutMs}, segmentUrl: ${this.segmentUrl}`)
+    this.logger.debug(`waitForFrame 开始, targetTime: ${this.targetTime}, timeoutMs: ${timeoutMs}, segmentUrl: ${this.segmentUrl}`)
 
     await this.autoReadChunk()
 
@@ -130,15 +132,15 @@ export class DecoderFlow {
 
       // 如果解码器未配置，主动尝试读取数据（每100ms尝试一次）
       if (this.videoDecoder?.state === 'unconfigured' && Date.now() - lastAutoReadTime > 100) {
-        console.debug(`[DecoderFlow] 解码器未配置，主动尝试读取数据`)
+        this.logger.debug(`解码器未配置，主动尝试读取数据`)
         await this.autoReadChunk()
         lastAutoReadTime = Date.now()
       }
 
       if (this._shouldStop() || timeout) {
         if (timeout) {
-          console.error(`[DecoderFlow] 超时! 循环次数: ${loopCount}, 已耗时: ${elapsed}ms`)
-          console.error(`[DecoderFlow] 超时时的状态:`, {
+          this.logger.error(`超时! 循环次数: ${loopCount}, 已耗时: ${elapsed}ms`)
+          this.logger.error(`超时时的状态:`, {
             targetTime: this.targetTime,
             segmentUrl: this.segmentUrl,
             videoDecoderState: this.videoDecoder?.state,
@@ -150,7 +152,7 @@ export class DecoderFlow {
             isRunning: this.isRunning,
             firstPts: this.firstPts,
           })
-          console.debug(this)
+          this.logger.debug(this)
           this._stop()
           throw new Error(`DecoderFlow waitForFrame timeout, targetTime: ${this.targetTime}, segmentUrl: ${this.segmentUrl}`)
         }
@@ -168,7 +170,7 @@ export class DecoderFlow {
              */
             this.frame.timestamp - OFFSET,
           )
-          console.debug(`[DecoderFlow] 成功找到帧, frameTime: ${frameTime}, 耗时: ${Date.now() - startTime}ms`)
+          this.logger.debug(`成功找到帧, frameTime: ${frameTime}, 耗时: ${Date.now() - startTime}ms`)
           return {
             videoFrame: this.frame.clone(),
             frameTime,
@@ -225,7 +227,7 @@ export class DecoderFlow {
         this._processFrame(videoFrame)
       },
       error: (error) => {
-        console.error('[DecoderFlow] 解码器错误:', error.message, this.segmentUrl, {
+        this.logger.error('解码器错误:', error.message, this.segmentUrl, {
           decoderState: this.videoDecoder?.state,
           sampleQueueLength: this.sampleQueue.length,
           samplesProcessedLength: this.samplesProcessed.length,
@@ -241,17 +243,17 @@ export class DecoderFlow {
    * @returns 解复用器
    */
   private _createDemuxer(): DemuxerTsNew {
-    console.debug('[DecoderFlow] _createDemuxer 创建解复用器')
+    this.logger.debug('_createDemuxer 创建解复用器')
     return new DemuxerTsNew({
       onConfig: (config) => {
-        console.debug(`[DecoderFlow] _createDemuxer onConfig 回调, codec: ${config.codec}`)
+        this.logger.debug(`_createDemuxer onConfig 回调, codec: ${config.codec}`)
         this._configure(config.codec)
       },
       onAvcFrameData: (encodeChunk) => {
         this._onAvcFrameData(encodeChunk)
       },
       onDone: () => {
-        console.debug('[DecoderFlow] _createDemuxer onDone 回调, 刷新解码器')
+        this.logger.debug('_createDemuxer onDone 回调, 刷新解码器')
         if (this.videoDecoder) {
           this.videoDecoder.flush()
         }
@@ -265,19 +267,19 @@ export class DecoderFlow {
    */
   private _configure(codec: string): void {
     if (!this.videoDecoder) {
-      console.warn('[DecoderFlow] _configure videoDecoder is undefined')
+      this.logger.warn('_configure videoDecoder is undefined')
       return
     }
 
     try {
-      console.debug(`[DecoderFlow] _configure 配置解码器, codec: ${codec}`)
+      this.logger.debug(`_configure 配置解码器, codec: ${codec}`)
       this.videoDecoder.configure({
         codec,
       })
-      console.debug(`[DecoderFlow] _configure 解码器配置成功, 状态: ${this.videoDecoder.state}`)
+      this.logger.debug(`_configure 解码器配置成功, 状态: ${this.videoDecoder.state}`)
     }
     catch (error) {
-      console.error('[DecoderFlow] _configure 配置解码器失败:', error, { codec })
+      this.logger.error('_configure 配置解码器失败:', error, { codec })
     }
   }
 
@@ -295,24 +297,24 @@ export class DecoderFlow {
     }
 
     if (!avcFrame.pts) {
-      console.warn('[DecoderFlow] _onDecodeChunk avcFrame lost pts')
+      this.logger.warn('_onDecodeChunk avcFrame lost pts')
       return
     }
 
     if (!avcFrame.duration) {
-      console.warn('[DecoderFlow] _onDecodeChunk avcFrame lost duration')
+      this.logger.warn('_onDecodeChunk avcFrame lost duration')
       return
     }
 
     if (this.videoDecoder?.state === 'unconfigured') {
-      console.warn('[DecoderFlow] _onDecodeChunk videoDecoder is unconfigured')
+      this.logger.warn('_onDecodeChunk videoDecoder is unconfigured')
       return
     }
 
     if (!this.firstPts) {
       this.firstPts = avcFrame.pts
       if (!avcFrame.keyframe) {
-        console.warn('[DecoderFlow] _onDecodeChunk first avcFrame is not keyframe')
+        this.logger.warn('_onDecodeChunk first avcFrame is not keyframe')
       }
     }
 
@@ -341,7 +343,7 @@ export class DecoderFlow {
 
     if (!this.frame && matchedFrame) {
       this.frame = matchedFrame
-      console.debug(`[DecoderFlow] _processFrame 找到匹配帧! frameTime: ${frameTime.toFixed(3)}s, targetTime: ${this.targetTime}s, timestamp: ${videoFrame.timestamp}`)
+      this.logger.debug(`_processFrame 找到匹配帧! frameTime: ${frameTime.toFixed(3)}s, targetTime: ${this.targetTime}s, timestamp: ${videoFrame.timestamp}`)
       return
     }
 
@@ -402,25 +404,25 @@ export class DecoderFlow {
 
     if (shouldRead && this.reader) {
       try {
-        console.debug(`[DecoderFlow] autoReadChunk 开始读取, decodeQueueSize: ${decodeQueueSize}`)
+        this.logger.debug(`autoReadChunk 开始读取, decodeQueueSize: ${decodeQueueSize}`)
         const arrayBuffer = await this.reader.next()
         if (arrayBuffer) {
-          console.debug(`[DecoderFlow] autoReadChunk 读取成功, 数据大小: ${arrayBuffer.byteLength} bytes`)
+          this.logger.debug(`autoReadChunk 读取成功, 数据大小: ${arrayBuffer.byteLength} bytes`)
           this.pushData(arrayBuffer)
         }
         else {
-          console.warn(`[DecoderFlow] autoReadChunk 读取返回 undefined, reader.isDoned: ${this.reader.isDoned}`)
+          this.logger.warn(`autoReadChunk 读取返回 undefined, reader.isDoned: ${this.reader.isDoned}`)
         }
       }
       catch (error) {
-        console.error(`[DecoderFlow] autoReadChunk 读取失败:`, error)
+        this.logger.error(`autoReadChunk 读取失败:`, error)
         throw error
       }
     }
     else {
       // 只在调试时记录，避免日志过多 - 但如果是未配置状态，需要详细记录
       if (this.videoDecoder?.state === 'unconfigured') {
-        console.warn(`[DecoderFlow] autoReadChunk 跳过读取, 原因: decodeQueueSize=${decodeQueueSize}, hasFrame=${!!this.frame}, isRunning=${this.isRunning}, hasReader=${!!this.reader}, readerIsDoned=${this.reader?.isDoned}`)
+        this.logger.warn(`autoReadChunk 跳过读取, 原因: decodeQueueSize=${decodeQueueSize}, hasFrame=${!!this.frame}, isRunning=${this.isRunning}, hasReader=${!!this.reader}, readerIsDoned=${this.reader?.isDoned}`)
       }
       else if (decodeQueueSize > 0) {
         // 正常情况，不记录日志避免过多
@@ -432,10 +434,10 @@ export class DecoderFlow {
         // 正常情况，不记录日志避免过多
       }
       else if (!this.reader) {
-        console.warn(`[DecoderFlow] autoReadChunk 跳过读取, reader 未初始化`)
+        this.logger.warn(`autoReadChunk 跳过读取, reader 未初始化`)
       }
       else if (this.reader.isDoned) {
-        console.debug(`[DecoderFlow] autoReadChunk 跳过读取, reader 已完成`)
+        this.logger.debug(`autoReadChunk 跳过读取, reader 已完成`)
       }
     }
   }
@@ -485,14 +487,14 @@ export class DecoderFlow {
 
         // 每10个样本记录一次，避免日志过多
         if (this.samplesProcessed.length % 10 === 0) {
-          console.debug(`[DecoderFlow] _processSampleQueue 处理样本, 队列剩余: ${this.sampleQueue.length}, 已处理: ${this.samplesProcessed.length}, pts: ${pts}, isKeyframe: ${isKeyframe}, frameTime: ${frameTime.toFixed(3)}s, targetTime: ${this.targetTime}s`)
+          this.logger.debug(`_processSampleQueue 处理样本, 队列剩余: ${this.sampleQueue.length}, 已处理: ${this.samplesProcessed.length}, pts: ${pts}, isKeyframe: ${isKeyframe}, frameTime: ${frameTime.toFixed(3)}s, targetTime: ${this.targetTime}s`)
         }
 
         this.samplesProcessed.push(sample)
         this.videoDecoder.decode(sample.encodedChunk)
       }
       catch (error) {
-        console.error('[DecoderFlow] 解码失败:', error, {
+        this.logger.error('解码失败:', error, {
           sample: {
             pts: sample.avcFrame.pts,
             keyframe: sample.avcFrame.keyframe,

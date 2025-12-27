@@ -1,6 +1,7 @@
 import { actressFaceDB } from '../../../../utils/actressFaceDB'
 import { imageCache } from '../../../../utils/cache'
 import { compressImage } from '../../../../utils/image'
+import { appLogger } from '../../../../utils/logger'
 import { FileListType } from '../../types'
 import { FileItemModBase } from './base'
 
@@ -9,6 +10,8 @@ import { FileItemModBase } from './base'
  */
 export class FileItemModActressInfo extends FileItemModBase {
   readonly IS_PLUS = true
+  /** 日志 */
+  protected logger = appLogger.sub('FileItemModActressInfo')
 
   async onLoad() {
     // 如果文件列表类型为网格，则不加载演员信息
@@ -59,13 +62,13 @@ export class FileItemModActressInfo extends FileItemModBase {
           }
         }
         catch (error) {
-          console.error('缓存演员头像失败:', error)
+          this.logger.error('缓存演员头像失败:', error)
         }
       }
     }
     catch (error) {
       // 出错时直接使用原始URL
-      console.error('加载演员头像缓存失败:', error)
+      this.logger.error('加载演员头像缓存失败:', error)
       actressDom.src = actress.url
     }
   }

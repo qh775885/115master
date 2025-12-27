@@ -1,7 +1,11 @@
+import { appLogger } from '../../utils/logger'
 import { openOfflineTask } from '../home/TopHeaderMod/openOfflineTask'
 
 /** 磁力链接任务键名 */
 const MAGNET_TASK_KEY = 'magnetTask'
+
+/** 日志 */
+const logger = appLogger.sub('Magnet')
 
 /**
  * 设置磁力链接任务
@@ -45,7 +49,7 @@ export function registerMagnetProtocolHandler() {
     navigator.registerProtocolHandler('magnet', '/web/lixian/master/magnet/?url=%s')
   }
   else {
-    console.warn('此浏览器不支持注册协议处理程序')
+    logger.error('此浏览器不支持注册协议处理程序')
   }
 }
 
