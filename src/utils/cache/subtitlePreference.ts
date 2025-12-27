@@ -1,4 +1,5 @@
 import type { Subtitle } from '../../components/XPlayer/types'
+import { appLogger } from '../logger'
 import { CacheCore } from './core'
 
 /** 字幕偏好 Type */
@@ -9,6 +10,9 @@ const STORE_PREFIX = 'subtitle_preference'
 
 /** 字幕偏好管理器 Class */
 export class SubtitlePreferenceManager extends CacheCore<SubtitlePreference> {
+  /** 日志 */
+  protected logger = appLogger.sub('SubtitlePreferenceManager')
+
   /** 构造函数 */
   constructor() {
     super({
@@ -32,7 +36,7 @@ export class SubtitlePreferenceManager extends CacheCore<SubtitlePreference> {
       }
     }
     catch (error) {
-      console.error('保存字幕偏好失败', error)
+      this.logger.error('保存字幕偏好失败', error)
     }
   }
 

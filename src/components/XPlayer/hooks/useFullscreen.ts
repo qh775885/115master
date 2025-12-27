@@ -6,6 +6,8 @@ import { shallowRef } from 'vue'
  * 全屏和播放列表
  */
 export function useFullscreen(ctx: PlayerContext) {
+  /** 日志 */
+  const logger = ctx.logger.sub('useFullscreen')
   /** 显示播放列表 */
   const showPlaylist = ctx.rootPropsVm.showPlaylist
   /** 是否全屏 */
@@ -39,7 +41,7 @@ export function useFullscreen(ctx: PlayerContext) {
       }
     }
     catch (error) {
-      console.error('Failed to toggle fullscreen:', error)
+      logger.error('切换全屏失败:', error)
     }
   }
 

@@ -104,7 +104,7 @@ const styles = {
   btn: controlStyles.btn,
 }
 
-const { subtitles, shortcuts } = usePlayerContext()
+const { subtitles, shortcuts, logger } = usePlayerContext()
 const menuVisible = shallowRef(false)
 const buttonRef = shallowRef<HTMLElement>()
 
@@ -172,7 +172,7 @@ async function viewSubtitle(subtitle: Subtitle) {
   const blobUrl = await createSubtitleBlobUrl(subtitle)
 
   if (!blobUrl) {
-    console.warn('查看字幕失败: 无法创建字幕文件')
+    logger.warn('查看字幕失败: 无法创建字幕文件')
     return null
   }
 

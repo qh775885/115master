@@ -3,8 +3,8 @@ import { useEventListener } from '@vueuse/core'
 import { shallowRef } from 'vue'
 
 export function usePictureInPicture(ctx: PlayerContext) {
+  const logger = ctx.logger.sub('usePictureInPicture')
   const isPip = shallowRef(!!document.pictureInPictureElement)
-
   const isSupport = 'pictureInPictureEnabled' in document
 
   const getRenderElement = () => {
@@ -29,7 +29,7 @@ export function usePictureInPicture(ctx: PlayerContext) {
       }
     }
     catch (error) {
-      console.error('Failed to toggle picture in picture:', error)
+      logger.error('切换画中画失败:', error)
     }
   }
 

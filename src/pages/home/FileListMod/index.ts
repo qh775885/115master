@@ -1,4 +1,5 @@
 import { unsafeWindow } from '$'
+import { appLogger } from '../../../utils/logger'
 import { isReload } from '../../../utils/route'
 import { BaseMod } from '../BaseMod'
 import { FileListType } from '../types'
@@ -25,6 +26,8 @@ const itemMods = [
  * 文件列表修改器
  */
 class FileListMod extends BaseMod {
+  /** 日志 */
+  protected logger = appLogger.sub('FileListMod')
   /** 文件列表 Item Mod Loader Map */
   private itemModLoaderMaps: Map<HTMLLIElement, FileItemModLoader> = new Map()
   /** 文件列表变化监听器 */
@@ -132,7 +135,7 @@ class FileListMod extends BaseMod {
     })
 
     if (!this.dataListBoxNode) {
-      console.error('文件列表容器节点不存在, 无法监听文件列表变化')
+      this.logger.error('文件列表容器节点不存在, 无法监听文件列表变化')
       return
     }
 

@@ -1,7 +1,7 @@
 import type { Subtitle } from '../../components/XPlayer/types'
 import md5 from 'blueimp-md5'
 import { subtitleCache } from '../cache/subtitleCache'
-import { AppLogger } from '../logger'
+import { appLogger } from '../logger'
 import { GMRequestInstance } from '../request/gmRequst'
 
 /**
@@ -44,10 +44,10 @@ export type ProcessedSubtitle = Required<Pick<Subtitle, 'id' | 'format' | 'raw'>
  * subtitlecat 字幕类
  */
 export class SubtitleCat {
+  /** 日志 */
+  protected logger = appLogger.sub('SubtitleCat')
   /** 域名 */
   private domain = 'https://subtitlecat.com'
-  /** 日志 */
-  private logger = new AppLogger('Utils SubtitleCat')
   /** 请求实例 */
   private iRequest = GMRequestInstance
 
@@ -165,17 +165,18 @@ export class SubtitleCat {
               )
             }
 
-            this.logger.log('最终结果', finalResults)
+            this.logger.info(`下载到 ${finalResults.length} 个字幕`)
+            console.table(finalResults)
 
             resolve(finalResults)
           }
           catch (error) {
-            console.error('处理过程中出错:', error)
+            this.logger.error('处理过程中出错:', error)
             reject(error)
           }
         })
         .catch((error) => {
-          console.error('请求失败:', error)
+          this.logger.error('请求失败:', error)
           reject(error)
         })
     })

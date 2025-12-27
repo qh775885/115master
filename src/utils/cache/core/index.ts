@@ -1,4 +1,5 @@
 import localforage from 'localforage'
+import { appLogger } from '../../logger'
 import { STORE_NAME } from './const'
 import { QuotaManager } from './quotaManager'
 
@@ -26,6 +27,8 @@ export class CacheCore<T> {
   storage: LocalForage
   /** 储存配置 */
   storageOptions: LocalForageOptions
+  /** 日志 */
+  protected logger = appLogger.sub('CacheCore')
   /** 空间限额管理器 */
   private quotaManager: QuotaManager
   /** 是否启用空间限额管理 */
@@ -134,7 +137,7 @@ export class CacheCore<T> {
         error instanceof DOMException
         && error.name === 'QuotaExceededError'
       ) {
-        console.error('缓存失败: 超出配额')
+        this.logger.error('缓存失败: 超出配额')
 
         // 如果启用了空间限额管理，尝试清理空间后重试
         if (this.enableQuotaManagement) {
@@ -146,7 +149,7 @@ export class CacheCore<T> {
         }
       }
       else {
-        console.error('缓存失败:', error)
+        this.logger.error('缓存失败:', error)
       }
     }
   }
@@ -262,7 +265,7 @@ export class CacheCore<T> {
     }
     catch (e) {
       // 如果无法序列化或计算大小，则记录警告
-      console.warn(`无法估算缓存项 ${key} 的大小:`, e)
+      this.logger.warn(`无法估算缓存项 ${key} 的大小:`, e)
       return undefined
     }
   }

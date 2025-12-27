@@ -1,4 +1,5 @@
 import type { EmitFn, InjectionKey, Ref, ShallowRef, ToRefs } from 'vue'
+import type { Logger } from '../../../utils/logger'
 import type { Events } from '../events'
 import type { XPlayerEmit, XPlayerProps } from '../types'
 import type { usePlayerCoreDecorator } from './playerCore/usePlayerCore'
@@ -11,6 +12,7 @@ import {
 } from 'vue'
 import { useShortcuts } from '../components/Shortcuts/shortcuts.hooks'
 import { EventMitt } from '../events'
+import { xPlayerLogger } from '../utils/logger'
 import {
 
   useSwitchPlayerCore,
@@ -94,6 +96,8 @@ export interface PlayerContext {
   playSettings: ReturnType<typeof usePlaySettings>
   /** 事件 */
   eventMitt: EventMitt<Events>
+  /** 日志 */
+  logger: InstanceType<typeof Logger>
 }
 
 /**
@@ -124,6 +128,14 @@ export function usePlayerProvide(
     eventMitt: new EventMitt<Events>(),
   } as PlayerContext
 
+  /**
+   * 日志
+   */
+  context.logger = xPlayerLogger
+
+  /**
+   * 播放器驱动核心
+   */
   context.driver = useSwitchPlayerCore(context)
 
   /** Popup管理器 */

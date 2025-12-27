@@ -1,4 +1,5 @@
 import localforage from 'localforage'
+import { appLogger } from '../../logger'
 import { META_STORE_NAME, STORE_NAME } from './const'
 
 export interface CacheMetaItem {
@@ -23,6 +24,8 @@ export interface CacheMetaItem {
  * 用于跟踪缓存项的最后访问时间和大小
  */
 export class MetaStore {
+  /** 日志 */
+  protected logger = appLogger.sub('MetaStore')
   /** 存储实例 */
   private storage: LocalForage
   /** 缓存名称 */
@@ -89,7 +92,7 @@ export class MetaStore {
       await this.storage.setItem(fullKey, meta)
     }
     catch (error) {
-      console.error('更新缓存元数据失败:', error)
+      this.logger.error('更新缓存元数据失败:', error)
     }
   }
 

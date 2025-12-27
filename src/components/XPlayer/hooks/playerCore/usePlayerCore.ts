@@ -67,11 +67,11 @@ export function usePlayerCoreDecorator(usePlayerCore:
  */
 export function useSwitchPlayerCore(ctx: PlayerContext) {
   let isSwitching = false
-
+  const logger = ctx.logger.sub('useSwitchPlayerCore')
   const switchDriver = async (videoType: PlayerCoreType) => {
     // 防止重复切换
     if (isSwitching) {
-      console.warn('播放器核心正在切换中，忽略此次请求')
+      logger.warn('播放器核心正在切换中，忽略此次请求')
       return
     }
 
@@ -80,7 +80,7 @@ export function useSwitchPlayerCore(ctx: PlayerContext) {
     try {
       // 先销毁现有播放器
       if (ctx.playerCore.value) {
-        console.log('正在销毁现有播放器核心:', ctx.playerCore.value.type)
+        logger.info('正在销毁现有播放器核心:', ctx.playerCore.value.type)
         await ctx.playerCore.value.destroy()
         ctx.playerCore.value = undefined
       }
@@ -88,7 +88,7 @@ export function useSwitchPlayerCore(ctx: PlayerContext) {
       // 等待一个微任务，确保销毁完成
       await new Promise(resolve => setTimeout(resolve, 0))
 
-      console.log('正在创建新的播放器核心:', videoType)
+      logger.log('正在创建新的播放器核心:', videoType)
 
       // 创建新的驱动实例
       switch (videoType) {
@@ -109,7 +109,7 @@ export function useSwitchPlayerCore(ctx: PlayerContext) {
       }
     }
     catch (error) {
-      console.error('切换视频驱动失败:', error)
+      logger.error('切换视频驱动失败:', error)
       throw error
     }
     finally {

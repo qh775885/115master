@@ -1,4 +1,5 @@
 import type { RequestOptions } from '../request/types'
+import { appLogger } from '../logger'
 import { CacheCore } from './core'
 import { STORE_NAME } from './core/const'
 
@@ -26,6 +27,8 @@ export interface GMRequestCacheItem {
  * 用于缓存 GMRequest 的请求结果
  */
 export class GMRequestCache {
+  /** 日志 */
+  protected logger = appLogger.sub('GMRequestCache')
   /** 缓存实例 */
   private cache: CacheCore<GMRequestCacheItem>
   /** 默认缓存时间 */
@@ -107,7 +110,7 @@ export class GMRequestCache {
       })
     }
     catch (error) {
-      console.error('缓存响应失败:', error)
+      this.logger.error('缓存响应失败:', error)
     }
   }
 
@@ -221,7 +224,7 @@ export class GMRequestCache {
         }
       }
       catch (error) {
-        console.error('序列化响应体失败:', error)
+        this.logger.error('序列化响应体失败:', error)
         body = null
       }
     }

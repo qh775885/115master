@@ -220,7 +220,7 @@ export function useNativePlayerCore(_ctx: PlayerContext) {
             videoElement.muted = true
             return methods.play()
           }
-          console.error(error)
+          _ctx.logger.error('播放失败:', error)
           throw error
         })
     },

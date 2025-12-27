@@ -2,6 +2,7 @@ import type { Ref } from 'vue'
 import { useEventListener } from '@vueuse/core'
 import { defer } from 'lodash'
 import { toValue } from 'vue'
+import { xPlayerLogger } from '../../utils/logger'
 
 export const VIDEO_CATCH_ERROES = {
   VIDEO_TRACK_LOSS: new Error('Video track loss error'),
@@ -54,6 +55,8 @@ export function useCatchVideoFramedDroppedOld(
   videoElement: Ref<HTMLVideoElement | undefined>,
   onError: (error: Error) => void,
 ) {
+  /** 日志 */
+  const logger = xPlayerLogger.sub('useCatchVideoFramedDroppedOld')
   /** 周期丢帧率阈值 */
   // const CYCLE_ERR_DROPPED_RATE_THRESHOLD = 0.15
   /** 平均丢帧率阈值 */
@@ -106,7 +109,7 @@ export function useCatchVideoFramedDroppedOld(
     const avgErrDroppedRate = sumErrDroppedRate / cycleCount
     const errDroppedRatio = droppedCount / cycleCount
 
-    console.log(`
+    logger.debug(`
       cycleErrDroppedRate: ${cycleErrDroppedRate.toFixed(3)},
       avgErrDroppedRate: ${avgErrDroppedRate.toFixed(3)},
       droppedCount: ${droppedCount},
@@ -176,8 +179,13 @@ export function useCatchVideoFramedDropped(
   videoElement: Ref<HTMLVideoElement | undefined>,
   onError: (error: Error) => void,
 ) {
+  /** 日志 */
+  const logger = xPlayerLogger.sub('useCatchVideoFramedDropped')
+  /** 错误次数阈值 */
   const ERR_COUNT_THRESHOLD = 2
+  /** 错误次数 */
   let errCount = 0
+  /** 请求 ID */
   let requestId: number | null = null
 
   function frameCallback(_now: number, metadata: VideoFrameCallbackMetadata) {
@@ -187,7 +195,7 @@ export function useCatchVideoFramedDropped(
 
     if (metadata.processingDuration === undefined) {
       errCount++
-      console.warn(`当前帧解码错误，错误次数：${errCount}`, metadata)
+      logger.warn(`当前帧解码错误，错误次数：${errCount}`, metadata)
       if (errCount >= ERR_COUNT_THRESHOLD) {
         onError(VIDEO_CATCH_ERROES.VIDEO_FRAMED_DROPPED)
         errCount = 0
@@ -207,7 +215,7 @@ export function useCatchVideoFramedDropped(
       requestId = el.requestVideoFrameCallback(frameCallback)
     }
     else {
-      console.warn('不支持 requestVideoFrameCallback，请使用支持该功能的浏览器')
+      logger.warn('不支持 requestVideoFrameCallback，请使用支持该功能的浏览器')
     }
   }
 

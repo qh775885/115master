@@ -29,7 +29,7 @@ const styles = {
   ],
 }
 
-const { subtitles, cssVar, refs, playerCore } = usePlayerContext()
+const { subtitles, cssVar, refs, playerCore, logger } = usePlayerContext()
 /** 安全区域底部 */
 const safeAreaBottom = computed(() => cssVar?.safeAreaBottom.value)
 /** 当前字幕 */
@@ -128,7 +128,7 @@ function parseSubtitle(text: string, format: Subtitle['format']) {
       formatedText = text
       break
     default:
-      console.warn('不支持的字幕格式:', format)
+      logger.warn('不支持的字幕格式:', format)
       return
   }
   parseSubtitleVTT(formatedText)
@@ -157,11 +157,11 @@ async function loadSubtitle(subtitle: Subtitle | null) {
       parseSubtitle(await subtitleText.text(), subtitle.format)
     }
     catch (e) {
-      console.warn('请求字幕文件失败', e)
+      logger.error('请求字幕文件失败', e)
     }
   }
   else {
-    console.warn('加载字幕失败: 无效的字幕')
+    logger.error('字幕数据无有效内容')
   }
 }
 

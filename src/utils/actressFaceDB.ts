@@ -2,6 +2,7 @@ import type { ActressImageInfo, ActressImageMap } from '../types/actress'
 import { GM_notification } from '$'
 import { CDN_BASE_URL } from '../constants'
 import { actressFaceCache } from './cache/actressFaceCache'
+import { appLogger } from './logger'
 
 /** 头像数据库仓库地址 */
 const GFRIENDS_REP_URL = `${CDN_BASE_URL}/gh/gfriends/gfriends@latest`
@@ -17,7 +18,8 @@ export class ActressFaceDB {
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000
   /** 头像数据库API地址 */
   private static readonly API_URL = GFRIENDS_GITHUB_API_URL
-
+  /** 日志 */
+  protected logger = appLogger.sub('ActressFaceDB')
   /** 头像映射 */
   private imageMap: ActressImageMap
   /** 上次更新时间 */
@@ -74,7 +76,7 @@ export class ActressFaceDB {
     }
     catch (error) {
       GM_notification(`❌ 更新头像数据库失败 ${error instanceof Error ? error.message : '未知错误'}`)
-      console.error('更新头像数据库失败:', error)
+      this.logger.error('更新头像数据库失败:', error)
       throw error
     }
   }
@@ -143,7 +145,7 @@ export class ActressFaceDB {
       return false
     }
     catch (error) {
-      console.error('从缓存加载数据失败:', error)
+      this.logger.error('从缓存加载数据失败:', error)
       return false
     }
   }
