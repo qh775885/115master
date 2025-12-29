@@ -4,7 +4,7 @@
     <p :class="styles.text">
       <slot>{{ formatErrorMessage(message) }}</slot>
     </p>
-    <button v-if="(props.message instanceof Error)" :class="styles.detailButton" @click="handleShowDetail">
+    <button v-if="showDetailButton && (props.message instanceof Error)" :class="styles.detailButton" @click="handleShowDetail">
       查看错误
     </button>
     <button

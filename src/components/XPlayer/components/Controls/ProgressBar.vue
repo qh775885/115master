@@ -6,7 +6,7 @@
       :class="styles.progressBar.wrapper"
       @mousedown="handleBarWrapperMouseDown"
       @mouseenter="handleBarWrapperMouseEnter"
-      @mousemove="handleBarWrapperMouseMove"
+      @mousemove="handleBarWrapperMouseMoveWithThrottle"
       @mouseleave="handleBarWrapperMouseLeave"
     >
       <!-- 进度条内容器 -->
@@ -15,7 +15,7 @@
         <div
           :class="styles.thumb.current"
           :style="{
-            width: `${progressValue}%`,
+            transform: `scaleX(${progressValue / 100})`,
             opacity: isDragging ? 0 : 1,
           }"
         />
@@ -24,21 +24,24 @@
         <div
           v-if="isDragging && !isLongPressDragging"
           :class="[styles.thumb.current, styles.thumb.dragging]"
-          :style="{ width: `${dragProgress}%` }"
+          :style="{ transform: `scaleX(${dragProgress / 100})` }"
         />
 
         <!-- 预览进度 -->
         <div
           v-show="isPreviewVisible && !isDragging"
           :class="styles.thumb.hover"
-          :style="{ width: `${previewProgress}%` }"
+          :style="{ transform: `scaleX(${previewProgress / 100})` }"
         />
 
         <!-- 原始进度拖拽点 -->
         <div
           v-if="isDragging"
           :class="styles.handle.container"
-          :style="{ left: `${originalProgress}%` }"
+          :style="{
+            left: 0,
+            transform: `translateX(${(progressBarWidth * originalProgress) / 100}px) translateX(-50%)`,
+          }"
         >
           <div :class="[styles.handle.base, styles.handle.original]" />
         </div>
@@ -47,7 +50,8 @@
         <div
           :class="styles.handle.container"
           :style="{
-            left: `${isDragging ? dragProgress : progressValue}%`,
+            left: 0,
+            transform: `translateX(${(progressBarWidth * (isDragging ? dragProgress : progressValue)) / 100}px) translateX(-50%)`,
           }"
         >
           <div
@@ -67,7 +71,6 @@
       :position="isDragging ? dragProgress : previewProgress"
       :time="previewTime"
       :progress-bar-width="progressBarWidth"
-      @seek="handleThumbnailSeek"
     />
   </div>
 </template>
@@ -87,12 +90,12 @@ const styles = {
   },
   thumb: {
     current:
-      'absolute h-full bg-primary transition-[width] duration-100 linear',
+      'absolute h-full w-full bg-primary origin-left transition-transform duration-100 linear',
     dragging: 'transition-none',
-    hover: 'absolute h-full bg-primary pointer-events-none',
+    hover: 'absolute h-full w-full bg-primary origin-left pointer-events-none',
   },
   handle: {
-    container: 'absolute h-full -translate-x-1/2',
+    container: 'absolute h-full',
     base: [
       'absolute top-1/2 left-1/2 size-3.5',
       'bg-primary rounded-full drop-shadow-xs/60',
@@ -125,9 +128,8 @@ const {
   isPreviewVisible,
   handleBarWrapperMouseDown,
   handleBarWrapperMouseEnter,
-  handleBarWrapperMouseMove,
+  handleBarWrapperMouseMoveWithThrottle,
   handleBarWrapperMouseLeave,
-  handleThumbnailSeek,
   setThumbnailRef,
 } = progressBar
 

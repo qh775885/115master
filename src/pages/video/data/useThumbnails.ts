@@ -52,13 +52,56 @@ const DEFAULT_SAMPLING_INTERVAL = 30
 const MIN_SAMPLING_INTERVAL = 2
 
 /** 最小采样数量 */
-const MIN_SAMPLING_COUNT = 100
+const MIN_SAMPLING_COUNT = 160
 
 /** 最大采样数量 */
 const MAX_SAMPLING_COUNT = 300
 
+/** 日志名称 */
+const LOGGER_NAME = 'useDataThumbnails'
+
 /** 日志 */
-const logger = appLogger.sub('useDataThumbnails')
+const logger = appLogger.sub(LOGGER_NAME)
+
+/** 使用缓存 */
+function useCache() {
+  /** 缓存缩略图 */
+  const cache = new Map<number, ThumbnailFrame>()
+
+  /** 获取缓存 */
+  const getCache = (time: number) => {
+    return cache.get(time)
+  }
+
+  /** 是否存在缓存 */
+  const hasCache = (time: number) => {
+    return cache.has(time)
+  }
+
+  /** 设置缓存 */
+  const setCache = (time: number, thumbnail: ThumbnailFrame) => {
+    const cacheOld = cache.get(time)
+    if (cacheOld) {
+      cacheOld.img?.close()
+    }
+    cache.set(time, thumbnail)
+  }
+
+  /** 释放缓存 */
+  const releaseCache = () => {
+    cache.forEach((thumbnail) => {
+      thumbnail?.img?.close()
+    })
+    cache.clear()
+  }
+
+  return {
+    getCache,
+    hasCache,
+    setCache,
+    releaseCache,
+  }
+}
 
 /**
  * 缩略图生成
@@ -84,11 +127,19 @@ export function useDataThumbnails(
   /** 是否执行过自动缓冲 */
   const isAutoBufferExecuted = shallowRef(false)
 
+  /** 初始的采样间隔 */
+  const initialSamplingInterval = shallowRef(DEFAULT_SAMPLING_INTERVAL)
+
   /** 采样间隔 */
   const samplingInterval = shallowRef(DEFAULT_SAMPLING_INTERVAL)
 
-  /** 缓存缩略图 */
-  const cahceThumbnails = new Map<number, ThumbnailFrame>()
+  /** 缓存 */
+  const {
+    getCache,
+    hasCache,
+    setCache,
+    releaseCache,
+  } = useCache()
 
   /** 错误 */
   const state = shallowRef<{
@@ -114,15 +165,15 @@ export function useDataThumbnails(
    * 动态计算采样间隔
    * @description 根据视频时长和传入的间隔，动态调整采样间隔，确保生成的缩略图数量不会太少
    * @param duration 视频时长（秒）
-   * @param initialInterval 初始采样间隔（秒）
+   * @param maxSimplingInterval 最大采样间隔（秒）
    * @returns 调整后的采样间隔（秒）
    */
   const calculateSamplingInterval = (
     duration: number,
-    initialInterval: number,
+    maxSimplingInterval: number,
   ): number => {
-    const count = Math.max(MIN_SAMPLING_COUNT, Math.min(duration / initialInterval, MAX_SAMPLING_COUNT))
-    return Math.max(MIN_SAMPLING_INTERVAL, Math.min(duration / count, initialInterval))
+    const count = Math.max(MIN_SAMPLING_COUNT, Math.min(duration / maxSimplingInterval, MAX_SAMPLING_COUNT))
+    return Math.max(MIN_SAMPLING_INTERVAL, Math.min(duration / count, maxSimplingInterval))
   }
 
   /**
@@ -145,17 +196,17 @@ export function useDataThumbnails(
       await clipper.open()
 
       /** 动态计算采样间隔，根据视频时长调整 */
-      const initialInterval = interval ?? DEFAULT_SAMPLING_INTERVAL
+      initialSamplingInterval.value = interval ?? DEFAULT_SAMPLING_INTERVAL
       samplingInterval.value = calculateSamplingInterval(
         clipper.hlsIo.duration,
-        initialInterval,
+        initialSamplingInterval.value,
       )
 
       logger.info('初始化缩略图生成器完成，信息如下:')
       console.table({
         'M3U8 分片数量': clipper.hlsIo.segments.length,
         'M3U8 总时长(s)': clipper.hlsIo.duration,
-        '最大采样间隔(s)': initialInterval,
+        '最大采样间隔(s)': initialSamplingInterval.value,
         '实际采样间隔(s)': samplingInterval.value,
         '需要采集的缩略图数量': Math.ceil(clipper.hlsIo.duration / samplingInterval.value),
       })
@@ -191,56 +242,67 @@ export function useDataThumbnails(
     seekTime: number,
     seekBlurTime: number,
   ): Promise<ThumbnailFrame> => {
-    if (!isInited.value && initializePromise) {
-      await initializePromise
-    }
-    const result = await clipper.seek(seekBlurTime, false)
-    if (!result) {
-      return
-    }
+    const subLogger = logger.sub(`seekThumbnail ${seekBlurTime}s`)
+    subLogger.enableSilentMode()
+    try {
+      if (!isInited.value && initializePromise) {
+        await initializePromise
+      }
+      const result = await clipper.seek(seekBlurTime, false, samplingInterval.value, subLogger)
+      if (!result) {
+        throw new Error('no find frame')
+      }
 
-    if (currentId.value !== id) {
+      if (currentId.value !== id) {
+        result.videoFrame.close()
+        return
+      }
+
+      /** 获取缩略图尺寸 */
+      const resize = getImageResize(
+        result.videoFrame.displayWidth,
+        result.videoFrame.displayHeight,
+        CLIPPER_OPTIONS.maxWidth,
+        CLIPPER_OPTIONS.maxHeight,
+      )
+
+      /** 创建缩略图 */
+      const imageBitmap = await createImageBitmap(result.videoFrame, {
+        resizeQuality: 'pixelated',
+        resizeWidth: resize.width,
+        resizeHeight: resize.height,
+      })
+      const thumbnail: ThumbnailFrame = {
+        img: imageBitmap,
+        seekTime,
+        seekBlurTime,
+        frameTime: result.frameTime,
+        consumedTime: result.consumedTime,
+      }
       result.videoFrame.close()
-      return
+
+      // DEBUG INFO
+      subLogger.debug(`
+        ## seekThumbnail
+        seekTime: ${seekTime}
+        seekBlurTime: ${seekBlurTime}
+        samplingInterval: ${samplingInterval.value}
+        consumedTime: ${result.consumedTime}
+        frameTime: ${result.frameTime}
+      `)
+
+      setCache(seekBlurTime, thumbnail)
+      // 返回缩略图
+      return thumbnail
     }
-
-    /** 获取缩略图尺寸 */
-    const resize = getImageResize(
-      result.videoFrame.displayWidth,
-      result.videoFrame.displayHeight,
-      CLIPPER_OPTIONS.maxWidth,
-      CLIPPER_OPTIONS.maxHeight,
-    )
-
-    /** 创建缩略图 */
-    const imageBitmap = await createImageBitmap(result.videoFrame, {
-      resizeQuality: 'pixelated',
-      resizeWidth: resize.width,
-      resizeHeight: resize.height,
-    })
-    const thumbnail: ThumbnailFrame = {
-      img: imageBitmap,
-      seekTime,
-      seekBlurTime,
-      frameTime: result.frameTime,
-      consumedTime: result.consumedTime,
+    catch (error) {
+      subLogger.error('seekThumbnail error', error)
+      subLogger.printLogsUsingTable('seekThumbnail error, print logs 👇')
+      throw error
     }
-    result.videoFrame.close()
-
-    // DEBUG INFO
-    logger.debug(`
-      ## seekThumbnail
-      seekTime: ${seekTime}
-      seekBlurTime: ${seekBlurTime}
-      samplingInterval: ${samplingInterval.value}
-      consumedTime: ${result.consumedTime}
-      frameTime: ${result.frameTime}
-    `)
-
-    // 缓存缩略图
-    cahceThumbnails.set(seekBlurTime, thumbnail)
-    // 返回缩略图
-    return thumbnail
+    finally {
+      subLogger.clearLogs()
+    }
   }
 
   /**
@@ -274,7 +336,7 @@ export function useDataThumbnails(
     )
 
     /** 如果缓存中存在，则返回缓存 */
-    const cache = cahceThumbnails.get(seekBlurTime)
+    const cache = getCache(seekBlurTime)
     if (cache) {
       return cache
     }
@@ -306,9 +368,14 @@ export function useDataThumbnails(
     // 设置为已执行
     isAutoBufferExecuted.value = true
 
+    /** 如果未初始化，则等待初始化完成 */
+    if (!isInited.value && initializePromise) {
+      await initializePromise
+    }
+
     /** 获取所有缩略图时间点 */
     const times = chain(intervalArray(0, clipper.hlsIo.duration, samplingInterval.value))
-      .filter(time => !cahceThumbnails.has(time))
+      .filter(time => !hasCache(time))
       .shuffle()
       .value()
 
@@ -323,7 +390,7 @@ export function useDataThumbnails(
               clipper.hlsIo.duration,
             )
             // 如果缓存中存在，则不请求
-            if (cahceThumbnails.has(seekTime)) {
+            if (hasCache(seekTime)) {
               return null
             }
             return await seekThumbnail(id, time, seekTime)
@@ -342,14 +409,6 @@ export function useDataThumbnails(
           }
         })
     }
-  }
-
-  /** 释放缓存 */
-  const releaseCache = () => {
-    cahceThumbnails.forEach((thumbnail) => {
-      thumbnail?.img?.close()
-    })
-    cahceThumbnails.clear()
   }
 
   /** clear */
