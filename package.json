@@ -44,7 +44,7 @@
     "@libmedia/avutil": "^1.2.0",
     "@libmedia/common": "^2.2.0",
     "@tailwindcss/vite": "^4.1.7",
-    "@vueuse/core": "^12.7.0",
+    "@vueuse/core": "^14.1.0",
     "@vueuse/math": "^14.1.0",
     "big-integer": "^1.6.52",
     "blueimp-md5": "^2.19.0",

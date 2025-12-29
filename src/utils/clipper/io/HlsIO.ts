@@ -22,6 +22,8 @@ export type Segment = M3U8Segment & {
   url: string
   /** 分段时间戳 */
   timestamp: number
+  /** 分段结束时间 */
+  endTime: number
 }
 
 /**
@@ -41,22 +43,8 @@ export class HlsIO extends FetchIO {
   /** 总时长 */
   duration = 0
 
-  /** 当前分片 */
-  get segment() {
-    return this.segments[this.segmentIndex]
-  }
-
-  /** 分片数量 */
-  get segmentCount() {
-    return this.segments.length
-  }
-
-  /** 当前分片URL */
-  get segmentUrl() {
-    if (!this.info) {
-      throw new Error('info is undefined')
-    }
-    return new URL(this.segment.uri, this.info.url).href
+  constructor() {
+    super()
   }
 
   /**
@@ -74,13 +62,13 @@ export class HlsIO extends FetchIO {
    * @returns 读取到的分片
    */
   readSegment(time: number): Segment {
-    this.segmentIndex = this.segments.findIndex(
-      i => i.timestamp <= time && time <= i.timestamp + i.duration,
+    const index = this.segments.findIndex(
+      i => i.timestamp <= time && time <= i.endTime,
     )
-    if (this.segmentIndex === -1) {
+    if (index === -1) {
       throw new Error('时间超出范围')
     }
-    return this.segment
+    return this.segments[index]
   }
 
   /**
@@ -88,7 +76,6 @@ export class HlsIO extends FetchIO {
    */
   destroy() {
     this.segments = []
-    this.segmentIndex = 0
     this.duration = 0
     this.info = undefined
   }
@@ -117,6 +104,7 @@ export class HlsIO extends FetchIO {
         ...segment,
         duration: segment.duration,
         timestamp,
+        endTime: timestamp + segment.duration,
         url: new URL(segment.uri, this.info?.url).href,
       }
     })

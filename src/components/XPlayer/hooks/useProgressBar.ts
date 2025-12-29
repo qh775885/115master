@@ -1,11 +1,13 @@
 import type { PlayerContext } from './usePlayerProvide'
-import { useElementSize } from '@vueuse/core'
+import { useElementSize, useThrottleFn } from '@vueuse/core'
 import { computed, onUnmounted, shallowRef, watch } from 'vue'
 
 /**
  * 进度条
  */
 export function useProgressBar(ctx: PlayerContext) {
+  /** 节流时间 */
+  const THROTTLE_TIME = 1000 / 60
   /** 长按阈值 */
   const LONG_PRESS_THRESHOLD = 300
   /** 是否拖拽中 */
@@ -42,6 +44,8 @@ export function useProgressBar(ctx: PlayerContext) {
   })
   /** 视频时长 */
   const duration = computed(() => ctx.playerCore.value?.duration ?? 0)
+  /** 节流鼠标移动 */
+  const handleBarWrapperMouseMoveWithThrottle = useThrottleFn(handleBarWrapperMouseMove, THROTTLE_TIME)
 
   // 监听拖拽状态变化
   watch(isDragging, (newValue, oldValue) => {
@@ -187,18 +191,6 @@ export function useProgressBar(ctx: PlayerContext) {
     }
   }
 
-  /** 处理缩略图点击跳转事件 */
-  function handleThumbnailSeek(time: number) {
-    // 直接跳转到缩略图时间点
-    ctx.playerCore.value?.seek(time)
-    isDragging.value = false
-    // 隐藏预览
-    hidePreview()
-
-    document.removeEventListener('mousemove', handleGlobalMouseMove)
-    document.removeEventListener('mouseup', handleGlobalMouseUp)
-  }
-
   /** 设置缩略图组件引用 */
   function setThumbnailRef(ref: { getCurrentFrameTime?: () => number | null } | null) {
     thumbnailRef.value = ref
@@ -231,7 +223,7 @@ export function useProgressBar(ctx: PlayerContext) {
     handleBarWrapperMouseEnter,
     handleBarWrapperMouseMove,
     handleBarWrapperMouseLeave,
-    handleThumbnailSeek,
+    handleBarWrapperMouseMoveWithThrottle,
     setThumbnailRef,
   }
 }
