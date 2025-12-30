@@ -1,8 +1,9 @@
 ---
-description: 
+trigger: model_decision
+description: Vue 代码规范和最佳实践
 globs: src/**/*.vue
-alwaysApply: false
 ---
+
 # Vue 代码规范和最佳实践
 
 ## 文件结构
