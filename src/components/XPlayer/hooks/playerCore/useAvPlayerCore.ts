@@ -6,7 +6,8 @@ import type { Data } from '@libmedia/common'
 import type { PlayerContext } from '../usePlayerProvide'
 import type { PlayerCoreMethods } from './types'
 import { Events as AVPlayerEvents } from '@libmedia/avplayer'
-import { AVCodecID } from '@libmedia/avutil'
+// 从 /enum 导入运行时枚举值（主包的 AVCodecID 是 const enum，在运行时不存在）
+import { AVCodecID } from '@libmedia/avutil/enum'
 import { useDebounceFn, useElementSize, useIntervalFn } from '@vueuse/core'
 import { get } from 'lodash'
 import { computed, nextTick, ref, shallowRef, watch } from 'vue'
@@ -137,7 +138,12 @@ function getWasmUrl(...args: GetWasmArgs) {
       if (codecId && codecId >= 65536 && codecId <= 65572) {
         return `${DECODE_BASE_URL}/pcm-simd.wasm`
       }
-      switch (codecId) {
+      // 确保 codecId 存在
+      if (codecId === undefined) {
+        return new Error(`Unsupported decoder: ${type} ${codecId} ${mediaType}`)
+      }
+      // 使用 as number 避免 const enum 和 enum 类型不兼容问题
+      switch (codecId as number) {
         // -- 视频解码器 --
         // H264
         case AVCodecID.AV_CODEC_ID_H264:

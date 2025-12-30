@@ -62,8 +62,8 @@
             <AudioTrackButton />
             <!-- 播放器核心 -->
             <PlayerCoreButton />
-            <!-- 视频色彩 -->
-            <VideoEnhanceSettings />
+            <!-- [已禁用] 视频色彩 -->
+            <!-- <VideoEnhanceSettings /> -->
             <!-- 设置 -->
             <SettingsButton />
             <!-- 画中画 -->
