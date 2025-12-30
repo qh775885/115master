@@ -40,8 +40,9 @@ export class TopHeaderMod extends BaseMod {
     if (params.mode === 'search') {
       return
     }
-    this.deleteOfficialDownloadButton()
-    this.addMasterOfflineTaskButton()
+    // [已禁用] 云下载按钮使用官方原生功能
+    // this.deleteOfficialDownloadButton()
+    // this.addMasterOfflineTaskButton()
     this.addPreviewSwitchButton()
     this.fixContextMenuPosition('upload_btn_add_dir')
     this.fixContextMenuPosition('create_new_add_dir')
