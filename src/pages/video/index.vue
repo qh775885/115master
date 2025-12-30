@@ -64,6 +64,9 @@
                 />
               </template>
               <template #controlsRight="{ ctx }">
+                <!-- 播放模式按钮 -->
+                <PlayModeButton v-model="preferences.playMode" />
+
                 <!-- 播放列表切换按钮 -->
                 <label
                   for="playlist-drawer"
@@ -193,6 +196,8 @@ import About from './components/About/index.vue'
 import HeaderInfo from './components/HeaderInfo/index.vue'
 import MovieInfo from './components/MovieInfo/index.vue'
 import Playlist from './components/Playlist/index.vue'
+import PlayModeButton from './components/PlayModeButton.vue'
+import { PlayMode } from './data/usePreferences'
 import { useDataFileInfo } from './data/useDataFileInfo'
 import { useDataHistory } from './data/useDataHistory'
 import { useMark } from './data/useDataMark'
@@ -596,9 +601,23 @@ async function playNext(ctx: PlayerContext) {
 
 /** 处理视频播放结束 */
 async function handleVideoEnded(ctx: PlayerContext) {
-  /** 自动播放下一集 */
-  if (hasPrevious.value) {
-    await playNext(ctx)
+  const mode = preferences.value.playMode
+
+  switch (mode) {
+    case PlayMode.AUTO_NEXT:
+      // 自动播放下一集
+      if (hasNext.value) {
+        await playNext(ctx)
+      }
+      break
+    case PlayMode.LOOP:
+      // 循环播放当前视频
+      ctx.playerCore.value?.seek(0)
+      ctx.playerCore.value?.play()
+      break
+    case PlayMode.STOP:
+      // 播完停止，不做任何操作
+      break
   }
 }
 

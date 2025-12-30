@@ -2,6 +2,16 @@ import type { ShortcutsPreference } from '../../../components/XPlayer/components
 import { useStorage } from '@vueuse/core'
 import { merge } from 'lodash'
 
+/** 播放模式 */
+export enum PlayMode {
+  /** 自动下一集 */
+  AUTO_NEXT = 'auto_next',
+  /** 循环播放当前视频 */
+  LOOP = 'loop',
+  /** 播完停止 */
+  STOP = 'stop',
+}
+
 /** 用户偏好设置类型 */
 export interface PlayerPreferences {
   /** 音量 */
@@ -24,6 +34,8 @@ export interface PlayerPreferences {
   quality: number
   /** 快捷键偏好 */
   shortcutsPreference: ShortcutsPreference
+  /** 播放模式 */
+  playMode: PlayMode
 }
 
 /** 默认偏好设置 */
@@ -40,6 +52,7 @@ const DEFAULT_PREFERENCES: PlayerPreferences = {
   shortcutsPreference: {
     actionKeyBindings: {},
   },
+  playMode: PlayMode.AUTO_NEXT,
 }
 
 /**
