@@ -64,6 +64,8 @@
             <PlayerCoreButton />
             <!-- [已禁用] 视频色彩 -->
             <!-- <VideoEnhanceSettings /> -->
+            <!-- 扩展插槽（原调色按钮位置） -->
+            <slot name="beforeSettings" />
             <!-- 设置 -->
             <SettingsButton />
             <!-- 画中画 -->
@@ -95,6 +97,12 @@ import SubtitleButton from './SubtitleButton.vue'
 import TimeDisplay from './TimeDisplay.vue'
 import VideoEnhanceSettings from './VideoEnhanceSettings.vue'
 import VolumeControl from './VolumeControl.vue'
+
+/** 插槽定义 */
+defineSlots<{
+  /** 设置按钮之前的插槽（原调色按钮位置） */
+  beforeSettings: () => void
+}>()
 
 /** 样式抽象 */
 const styles = {

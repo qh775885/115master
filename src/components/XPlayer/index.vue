@@ -38,7 +38,11 @@
           <slot name="controlsRight" v-bind="{ ctx }" />
         </ControlsRight>
       </ControlsMask>
-      <ControlsBar />
+      <ControlsBar>
+        <template #beforeSettings>
+          <slot name="beforeSettings" v-bind="{ ctx }" />
+        </template>
+      </ControlsBar>
     </Controls>
 
     <!-- 状态HUD显示 -->
@@ -116,6 +120,8 @@ defineSlots<{
   headerLeft: () => void
   /** 控制栏右侧插槽 */
   controlsRight: (props: { ctx: PlayerContext }) => void
+  /** 控制栏底部设置按钮之前的插槽（原调色按钮位置） */
+  beforeSettings: (props: { ctx: PlayerContext }) => void
   /** 关于内容插槽 */
   aboutContent: () => void
 }>()

@@ -63,10 +63,11 @@
                   :playlist="DataPlaylist"
                 />
               </template>
-              <template #controlsRight="{ ctx }">
+              <template #beforeSettings>
                 <!-- 播放模式按钮 -->
                 <PlayModeButton v-model="preferences.playMode" />
-
+              </template>
+              <template #controlsRight="{ ctx }">
                 <!-- 播放列表切换按钮 -->
                 <label
                   for="playlist-drawer"
