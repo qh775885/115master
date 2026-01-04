@@ -3,9 +3,9 @@ export const ICON_RESTART = 'material-symbols:restart-alt-rounded'
 // 自动缓冲
 export const ICON_AUTO_LOAD = 'material-symbols:autorenew-rounded'
 // 画中画
-export const ICON_PIP = 'material-symbols:pip-rounded'
+export const ICON_PIP = 'solar:to-pip-bold'
 // 画中画退出
-export const ICON_PIP_EXIT = 'material-symbols:pip-exit-rounded'
+export const ICON_PIP_EXIT = 'solar:quit-pip-bold'
 // 设置
 export const ICON_SETTINGS = 'material-symbols:settings-rounded'
 // 暂停
@@ -94,3 +94,5 @@ export const ICON_EXPORT = 'material-symbols:upload-rounded'
 export const ICON_IMPORT = 'material-symbols:download-rounded'
 // 重置全部
 export const ICON_RESET_ALL = 'material-symbols:restart-alt-rounded'
+// 倍速
+export const ICON_PLAYBACK_RATE = 'material-symbols:speed-outline-rounded'

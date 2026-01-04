@@ -92,7 +92,7 @@ export function useProgressBar(ctx: PlayerContext) {
 
   /** 开始拖拽 */
   function startDragging(position: number) {
-    ctx.controls.addDisabledAutoHide()
+    ctx.controls.setDragging(true)
     ctx.controls.setDisabledHideOnMouseLeave(true)
     isDragging.value = true
     originalProgress.value = progressValue.value
@@ -121,7 +121,7 @@ export function useProgressBar(ctx: PlayerContext) {
       previewTime.value = finalTime
     }
     isDragging.value = false
-    ctx.controls.removeDisabledAutoHide()
+    ctx.controls.setDragging(false)
     ctx.controls.setDisabledHideOnMouseLeave(false)
   }
 

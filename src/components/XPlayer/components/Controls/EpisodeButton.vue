@@ -1,7 +1,7 @@
 <template>
   <button
     :class="[styles.btn.root]"
-    :data-tip="tip"
+    :title="tip"
     :disabled="disabled"
     @click="onClick"
   >

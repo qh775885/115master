@@ -48,6 +48,12 @@ export function usePopupManager(ctx: PlayerContext) {
     ),
   )
 
+  // 监听弹窗状态变化，同步到 controls
+  watch(hasOpenPopup, (value) => {
+    ctx.controls.setHasOpenPopup(value)
+    ctx.controls.setDisabledHideOnMouseLeave(value)
+  })
+
   /** 添加阻止冒泡元素 */
   const addDisabledBubblingElement = (element: HTMLElement) => {
     disabledBubblingElements.add(element)
@@ -57,17 +63,6 @@ export function usePopupManager(ctx: PlayerContext) {
   const removeDisabledBubblingElement = (element: HTMLElement) => {
     disabledBubblingElements.delete(element)
   }
-
-  watch(hasOpenPopup, (value) => {
-    if (value) {
-      ctx.controls.addDisabledAutoHide()
-      ctx.controls.setDisabledHideOnMouseLeave(true)
-    }
-    else {
-      ctx.controls.removeDisabledAutoHide()
-      ctx.controls.setDisabledHideOnMouseLeave(false)
-    }
-  })
 
   return {
     hasOpenPopup,

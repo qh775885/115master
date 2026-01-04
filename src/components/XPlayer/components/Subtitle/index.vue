@@ -23,9 +23,10 @@ import { usePlayerContext } from '../../hooks/usePlayerProvide'
 const styles = {
   container: 'absolute inset-0',
   content: [
-    'absolute left-1/2 bottom-[3%] max-w-[80%] mx-auto px-1',
-    'bg-black/75 whitespace-pre-wrap text-white text-center',
+    'absolute left-1/2 bottom-[3%] max-w-[80%] mx-auto px-6',
+    'bg-black/60 whitespace-pre-wrap text-white text-center',
     'transition-transform duration-200 ease-in-out',
+    'rounded-xl',
   ],
 }
 

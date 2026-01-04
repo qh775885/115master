@@ -3,7 +3,7 @@
     ref="buttonRef"
     :class="[styles.btn.root]"
     :disabled="!playerCore?.canplay || playerCore?.type !== PlayerCoreType.AvPlayer"
-    data-tip="音频轨道"
+    title="音频轨道"
     @click="toggleVisible"
   >
     <Icon :class="[styles.btn.icon]" :icon="ICONS.ICON_AUDIO_TRACK" />

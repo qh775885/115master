@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    data-tip="视频色彩"
+    title="视频色彩"
     @click="toggleMenu"
   >
     <Icon
@@ -21,7 +21,7 @@
     placement="top"
     :class="[styles.popup]"
   >
-    <div class="card card-sm bg-neutral-800">
+    <div class="card card-sm">
       <div class="card-body">
         <div class="flex justify-between items-center mb-2">
           <h3 class="card-title">
@@ -82,7 +82,10 @@ import Popup from '../Popup/index.vue'
 
 const styles = {
   ...controlStyles,
-  popup: 'select-none',
+  popup: [
+    'p-2',
+    'select-none',
+  ],
 }
 
 const buttonRef = shallowRef<HTMLElement>()

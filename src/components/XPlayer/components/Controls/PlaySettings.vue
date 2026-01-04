@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-sm bg-neutral-800">
+  <div class="card card-sm">
     <div class="card-body">
       <h3 class="card-title flex justify-between">
         播放
@@ -16,7 +16,7 @@
             @change="playSettings.toggleAutoPlay"
           >
           <a
-            class="btn btn-link btn-xs inline-flex text-base-300"
+            class="btn btn-link btn-xs inline-flex text-base-content/30 tracking-wide"
             href="https://github.com/cbingb666/115master/discussions/206"
             target="_blank"
           >

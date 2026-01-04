@@ -1,5 +1,5 @@
 <template>
-  <Popup :visible="visible" :class="styles.root" @update:visible="$emit('update:visible', $event)">
+  <Popup :visible="visible" :class="styles.root" :mild="true" @update:visible="$emit('update:visible', $event)">
     <div :class="styles.container">
       <!-- 头部 -->
       <div :class="styles.header">
@@ -78,25 +78,23 @@ defineEmits<{ 'update:visible': [value: boolean] }>()
 const styles = {
   root: [
     'top-1/2! left-1/2! -translate-x-1/2! -translate-y-1/2! w-2xl p-0!',
-    '[--header-height:calc(var(--spacing)*14)]',
     '[--group-title-height:calc(var(--spacing)*10)]',
   ],
-  container: 'relative flex flex-col bg-base-100/80 rounded-xl overflow-hidden shadow-2xl max-h-[95vh]',
+  container: 'relative flex flex-col overflow-hidden shadow-2xl max-h-[95vh]',
   header: [
-    'absolute top-0 inset-x-0 z-3 flex items-center justify-between h-(--header-height) px-5',
-    'bg-base-100/30 backdrop-blur-md',
+    'flex items-center justify-between px-5',
+    'py-4',
     'border-b border-base-content/5',
   ],
   title: 'flex items-center gap-2 text-base font-semibold text-base-content',
   close: [
     'btn btn-xs btn-ghost',
   ],
-  content: 'flex-1 overflow-y-auto pt-(--header-height) [&::-webkit-scrollbar-track]:mt-[calc(var(--header-height)+var(--group-title-height))]',
+  content: 'flex-1 overflow-y-auto [&::-webkit-scrollbar-track]:mt-[calc(var(--header-height)+var(--group-title-height))]',
   groupWrapper: 'mb-0.5 last:mb-0',
   groupTitle: [
     'sticky top-2 z-2 flex items-center gap-2.5 text-sm font-bold px-4 mt-2 mx-5 h-[var(--group-title-height)]',
-    'bg-base-300/30 backdrop-blur-sm rounded-xl',
-    'border border-base-content/5',
+    'bg-neutral rounded-xl',
   ],
   groupContent: 'px-5 py-2',
   footer: 'flex items-center justify-end gap-3 px-5 py-3 bg-base-200/30 border-t border-base-content/5',

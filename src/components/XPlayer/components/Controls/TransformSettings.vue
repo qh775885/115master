@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-sm bg-neutral-800">
+  <div class="card card-sm">
     <div class="card-body">
       <h3 class="card-title">
         旋转与翻转

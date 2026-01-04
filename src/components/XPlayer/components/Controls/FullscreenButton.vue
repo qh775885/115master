@@ -1,8 +1,8 @@
 <template>
   <button
-    class="btn btn-ghost btn-circle tooltip"
+    class="btn btn-ghost btn-circle"
     :class="{ 'swap-active': !fullscreen.isFullscreen.value }"
-    :data-tip="fullscreenTip"
+    :title="fullscreenTip"
     @click="fullscreen.toggleFullscreen"
   >
     <Icon class="size-7" :icon="icon" />

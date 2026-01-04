@@ -7,7 +7,7 @@
       },
     ]"
     :disabled="!playerCore?.canplay"
-    :data-tip="playTip"
+    :title="playTip"
     @click="playerCore?.togglePlay"
   >
     <Icon
@@ -33,7 +33,7 @@ import { controlStyles } from '../../styles/common'
 const styles = {
   btn: {
     ...controlStyles.btn,
-    root: [controlStyles.btn.root, 'before:ml-8'],
+    root: [controlStyles.btn.root],
   },
 }
 

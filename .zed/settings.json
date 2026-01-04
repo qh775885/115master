@@ -1,0 +1,56 @@
+{
+  "languages": {
+    "JavaScript": {
+      "formatter": {
+        "code_action": "source.fixAll.eslint"
+      }
+    },
+    "TypeScript": {
+      "formatter": {
+        "code_action": "source.fixAll.eslint"
+      }
+    },
+    "Vue.js": {
+      "formatter": {
+        "code_action": "source.fixAll.eslint"
+      }
+    },
+    "CSS": {
+      "formatter": {
+        "code_action": "source.fixAll.eslint"
+      }
+    }
+  },
+  "lsp": {
+    "vscode-css-language-server": {
+      "settings": {
+        "css": {
+          "lint": {
+            "unknownAtRules": "ignore"
+          }
+        }
+      }
+    },
+    "tailwindcss-language-server": {
+      "settings": {
+        "classFunctions": ["cva", "cx", "clsx", "cn"],
+        "experimental": {
+          "classRegex": [
+            [
+              "[a-zA-Z0-9_]+\\s*\\.\\s*[a-zA-Z0-9_]+\\s*=\\s*\\[([^\\]]*)\\]",
+              "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
+            ],
+            [
+              "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*\\b[a-zA-Z0-9_]+\\s*:\\s*\\[([^\\]]*)\\]",
+              "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
+            ],
+            [
+              "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*?\\b[a-zA-Z0-9_]+\\s*:\\s*['\"]([^'\"]*?)['\"]",
+              "([^'\"]*?)"
+            ]
+          ]
+        }
+      }
+    }
+  }
+}

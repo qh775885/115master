@@ -18,14 +18,22 @@ export function useControls(ctx: PlayerContext) {
   /** 控制栏是否显示 */
   const visible = shallowRef(true)
 
-  /** 禁止自动隐藏的引用计数 */
-  const disabledAutoHideCount = shallowRef(0)
+  /** 是否正在拖拽进度条 */
+  const isDragging = shallowRef(false)
 
-  /** 是否禁止自动隐藏控制栏（基于引用计数） */
-  const disabledAutoHide = computed(() => disabledAutoHideCount.value > 0)
+  /** 是否有弹窗打开 */
+  const hasOpenPopup = shallowRef(false)
 
   /** 是否禁止鼠标离开控制栏 */
   const disabledHideOnMouseLeave = shallowRef(false)
+
+  /** 控制栏区域 hover 状态 */
+  const isHovering = shallowRef(false)
+
+  /** 是否禁止自动隐藏控制栏（hover 优先，其次是拖拽和弹窗） */
+  const disabledAutoHide = computed(
+    () => isHovering.value || isDragging.value || hasOpenPopup.value,
+  )
 
   /** 隐藏控制栏计时器 */
   let hideControlsTimer: number | null = null
@@ -37,6 +45,14 @@ export function useControls(ctx: PlayerContext) {
   const controlsMainHeight = computed(() => {
     return mainRef.value?.offsetHeight
   })
+
+  /** 是否显示遮罩层 */
+  const isMaskVisible = computed(
+    () => [
+      isHovering.value,
+      hasOpenPopup.value,
+    ].some(Boolean),
+  )
 
   /** 显示控制栏 */
   const show = () => {
@@ -74,22 +90,6 @@ export function useControls(ctx: PlayerContext) {
       handleAutoHide,
       DELAY_HIDE_CONTROLS_TIME,
     )
-  }
-
-  /** 增加禁止自动隐藏的引用计数 */
-  const addDisabledAutoHide = () => {
-    disabledAutoHideCount.value++
-    if (disabledAutoHideCount.value === 1) {
-      stopAutoHideTimer()
-    }
-  }
-
-  /** 减少禁止自动隐藏的引用计数 */
-  const removeDisabledAutoHide = () => {
-    disabledAutoHideCount.value = Math.max(0, disabledAutoHideCount.value - 1)
-    if (disabledAutoHideCount.value === 0) {
-      startAutoHideTimer()
-    }
   }
 
   /** 设置是否禁止鼠标离开控制栏 */
@@ -156,15 +156,35 @@ export function useControls(ctx: PlayerContext) {
     stopAutoHideTimer()
   })
 
+  /** 设置 hover 状态 */
+  const setHovering = (hovering: boolean) => {
+    isHovering.value = hovering
+  }
+
+  /** 设置拖拽状态 */
+  const setDragging = (dragging: boolean) => {
+    isDragging.value = dragging
+  }
+
+  /** 设置弹窗状态 */
+  const setHasOpenPopup = (hasPopup: boolean) => {
+    hasOpenPopup.value = hasPopup
+  }
+
   return {
     visible,
     mainRef,
     disabledHideOnMouseLeave,
     disabledAutoHide,
+    isHovering,
+    isDragging,
+    isMaskVisible,
+    hasOpenPopup,
+    setHovering,
+    setDragging,
+    setHasOpenPopup,
     setDisabledHideOnMouseLeave,
     lockControlsWithTimeoutUnlock,
-    addDisabledAutoHide,
-    removeDisabledAutoHide,
     startAutoHideTimer,
     stopAutoHideTimer,
   }

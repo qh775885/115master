@@ -57,68 +57,49 @@
               @play-previous="playPrevious"
               @play-next="playNext"
             >
-              <template #headerLeft>
+              <template #headerLeft="{ ctx }">
                 <HeaderInfo
                   :file-info="DataFileInfo"
                   :playlist="DataPlaylist"
+                  :ctx="ctx"
+                  :is-mark="DataMark.isMark.value ?? false"
+                  :on-mark="handleMark"
                 />
               </template>
-              <template #controlsRight="{ ctx }">
-                <!-- 播放列表切换按钮 -->
-                <label
-                  for="playlist-drawer"
-                  :class="[
-                    styles.controls.btn.root,
-                    preferences.showPlaylist && 'btn-active btn-primary',
-                  ]"
-                  :data-tip="
-                    getActionNameTip(ctx, '播放列表', 'toggleShowSider')
-                  "
-                >
-                  <Icon
-                    :icon="ICON_PLAYLIST"
-                    :class="[styles.controls.btn.icon]"
-                  />
-                </label>
+              <template #headerRight="{ ctx }">
+                <div class="flex items-center gap-2">
+                  <ControlBox v-if="isMac && DataFileInfo.isReady" @click="handleLocalPlay('iina')">
+                    <!-- IINA 播放按钮 -->
+                    <button
+                      :class="styles.controls.btn.root"
+                      :title="getActionNameTip(ctx, 'IINA 播放', 'playWithIINA')"
+                    >
+                      <img
+                        :class="styles.controls.iinaIcon"
+                        :src="iinaIcon"
+                        alt="IINA"
+                      >
+                    </button>
+                  </ControlBox>
 
-                <!-- 收藏按钮 -->
-                <button
-                  v-if="DataFileInfo.isReady"
-                  class="swap swap-rotate"
-                  :class="[
-                    styles.controls.btn.root,
-                    {
-                      'swap-active': !DataMark.isMark.value,
-                    },
-                  ]"
-                  :data-tip="getActionNameTip(ctx, '收藏', 'toggleFavorite')"
-                  @click="handleMark"
-                >
-                  <Icon
-                    class="swap-off"
-                    :class="[styles.controls.btn.icon]"
-                    :icon="ICON_STAR_FILL"
-                  />
-                  <Icon
-                    class="swap-on"
-                    :class="[styles.controls.btn.icon]"
-                    :icon="ICON_STAR"
-                  />
-                </button>
-
-                <!-- IINA 播放按钮 -->
-                <button
-                  v-if="isMac && DataFileInfo.isReady"
-                  :class="styles.controls.btn.root"
-                  :data-tip="getActionNameTip(ctx, 'IINA 播放', 'playWithIINA')"
-                  @click="handleLocalPlay('iina')"
-                >
-                  <img
-                    :class="styles.controls.iinaIcon"
-                    :src="iinaIcon"
-                    alt="IINA"
-                  >
-                </button>
+                  <ControlBox>
+                    <!-- 播放列表切换按钮 -->
+                    <label
+                      for="playlist-drawer"
+                      :class="[
+                        styles.controls.btn.root,
+                      ]"
+                      :title="
+                        getActionNameTip(ctx, '播放列表', 'toggleShowSider')
+                      "
+                    >
+                      <Icon
+                        :icon="ICON_PLAYLIST"
+                        :class="[styles.controls.btn.icon]"
+                      />
+                    </label>
+                  </ControlBox>
+                </div>
               </template>
               <template #aboutContent>
                 <About />
@@ -173,6 +154,7 @@ import { useTitle } from '@vueuse/core'
 import { cloneDeep } from 'lodash'
 import { computed, h, nextTick, onMounted, ref, shallowRef, toValue } from 'vue'
 import iinaIcon from '../../assets/icons/iina-icon.png'
+import ControlBox from '../../components/XPlayer/components/Controls/ControlBox.vue'
 import { ACTION_GROUPS } from '../../components/XPlayer/components/Shortcuts/shortcuts.const'
 import XPlayer from '../../components/XPlayer/index.vue'
 import { controlRightStyles } from '../../components/XPlayer/styles/common'
@@ -216,7 +198,7 @@ const styles = {
       '[--app-playlist-width:calc(100%*var(--app-playlist-ratio))]',
     ],
     showPlaylist: 'show-playlist',
-    pageMain: ['relative w-full h-screen overflow-hidden'],
+    pageMain: ['relative w-full h-screen overflow-hidden bg-black'],
     pageFlow: 'flex flex-col gap-8 px-6 xl:px-36 py-8 w-full',
   },
   // 抽屉样式
@@ -239,7 +221,7 @@ const styles = {
   // 控制样式
   controls: {
     btn: controlRightStyles.btn,
-    iinaIcon: 'size-8 grayscale invert contrast-200',
+    iinaIcon: 'size-7 grayscale invert contrast-200',
   },
 }
 
@@ -324,9 +306,11 @@ const ACTION_MAP: ActionMap = {
       await handleMark()
       const title = DataMark.isMark.value ? '已收藏' : '取消收藏'
       const icon = DataMark.isMark.value ? ICON_STAR_FILL : ICON_STAR
+      const iconClass = DataMark.isMark.value ? 'text-pink-600' : ''
       ctx.hud?.show({
         title,
         icon,
+        iconClass,
       })
     },
   },
@@ -549,29 +533,45 @@ async function playPreviousOrNext(ctx: PlayerContext, dir: number) {
     handleChangeVideo(nextItem)
     const no = nextIndex + 1
     const len = DataPlaylist.state?.data.length
-    const title = `播放列表 (${no}/${len})`
+    const noText = `(${no + 1}/${len})`
+    const title = h('div', {
+      class: 'text-sm font-semibold',
+    }, [
+      h('span', {
+        class: 'text-lg font-semibold',
+      }, nextItem.n),
+    ])
     const value = h('div', [
       h(
         'div',
         {
-          class: 'text-sm font-semibold',
+          class: 'flex items-center gap-2',
         },
-        nextItem.n,
+        [
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content',
+            },
+            noText,
+          ),
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content/70',
+            },
+            formatTime(nextItem.play_long),
+          ),
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content/70',
+            },
+            formatFileSize(nextItem.s),
+          ),
+        ],
       ),
-      h(
-        'div',
-        {
-          class: 'text-xs text-base-content/60',
-        },
-        formatTime(nextItem.play_long),
-      ),
-      h(
-        'div',
-        {
-          class: 'text-xs text-base-content/60',
-        },
-        formatFileSize(nextItem.s),
-      ),
+
     ])
     const icon = ICON_PLAYLIST
     ctx.hud?.show({ title, icon, value })
