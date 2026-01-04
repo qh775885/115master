@@ -32,6 +32,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
@@ -39,16 +40,16 @@ import PlaySettings from './PlaySettings.vue'
 import ThumbnailSettings from './ThumbnailSettings.vue'
 import TransformSettings from './TransformSettings.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
   panel: {
-    root: 'grid grid-cols-3 gap-3 p-1 w-full max-w-2xl',
+    root: 'grid w-full max-w-2xl grid-cols-3 gap-3 p-1',
   },
   popup: [
     'p-2',
     'select-none',
   ],
-}
+})
 
 const buttonRef = shallowRef<HTMLElement>()
 const menuVisible = shallowRef(false)

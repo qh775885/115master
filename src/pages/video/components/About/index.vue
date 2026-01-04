@@ -42,25 +42,26 @@
 <script setup lang="ts">
 import { GM_info } from '$'
 import { computed } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
-    main: 'py-8 text-base-content/60 gap-4 text-center flex flex-col',
+    main: 'text-base-content/60 flex flex-col gap-4 py-8 text-center',
   },
-  title: 'text-2xl font-bold mb-4',
+  title: 'mb-4 text-2xl font-bold',
   // 文本样式
   text: {
     description: 'text-xs',
-    link: 'text-yellow-400 hover:text-yellow-300 transition-colors duration-200',
+    link: 'text-yellow-400 transition-colors duration-200 hover:text-yellow-300',
   },
   // 徽章样式
   badges: {
-    container: 'flex items-center justify-center gap-4 flex-wrap',
-    link: 'inline-block hover:scale-105 transition-transform duration-200',
+    container: 'flex flex-wrap items-center justify-center gap-4',
+    link: 'inline-block transition-transform duration-200 hover:scale-105',
     image: 'h-5',
   },
-}
+})
 
 const info = computed(() => {
   return {

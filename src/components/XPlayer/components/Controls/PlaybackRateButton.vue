@@ -33,14 +33,15 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, ref, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
-}
+})
 
 const NAME = '倍速'
 

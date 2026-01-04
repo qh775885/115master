@@ -55,32 +55,33 @@
 import { Icon } from '@iconify/vue'
 import { useElementHover, useThrottleFn, useTimeoutFn } from '@vueuse/core'
 import { computed, shallowRef, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import { getVolumeIcon } from '../../utils/icon'
 
 const { playerCore, hud, shortcuts } = usePlayerContext()
 
-const styles = computed(() => ({
+const styles = computed(() => clsx({
   root: [
     'flex items-center gap-2',
     'group',
     'w-10',
-    'transition-[width,padding] ease-[var(--app-ease-in-out-expo)] duration-500',
+    'transition-[width,padding] duration-500 ease-[var(--app-ease-in-out-expo)]',
     'data-[expended="true"]:w-40',
     'data-[expended="true"]:pl-2',
     'data-[expended="true"]:pr-6',
   ],
   btn: controlStyles.btn,
-  range: ['range range-2xs range-primary', 'transition-[width] ease-[var(--app-ease-in-out-expo)] duration-300', 'w-0 group-data-[expended="true"]:w-24'],
+  range: ['range range-2xs range-primary', 'transition-[width] duration-300 ease-[var(--app-ease-in-out-expo)]', 'w-0 group-data-[expended="true"]:w-24'],
   tooltip: [
     'tooltip tooltip-top',
     {
       'tooltip-open': playerCore?.value?.isSuspended,
     },
   ],
-  tooltipContent: 'tooltip-content py-2 px-4',
-  resumeBtn: 'cursor-pointer pointer-events-auto',
+  tooltipContent: 'tooltip-content px-4 py-2',
+  resumeBtn: 'pointer-events-auto cursor-pointer',
 }))
 
 const MUTE_NAME = '静音'

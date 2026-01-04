@@ -47,6 +47,7 @@ import { Icon } from '@iconify/vue'
 import { nextTick, useTemplateRef, watch } from 'vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
 import { ICON_CLOSE, ICON_PLAYLIST } from '../../../../icons'
+import { clsx } from '../../../../utils/clsx'
 import PlaylistItem from './item.vue'
 
 const props = defineProps<{
@@ -60,11 +61,11 @@ const emit = defineEmits<{
 }>()
 
 /** 样式常量定义 */
-const styles = {
+const styles = clsx({
   box: [
     '[--space:calc(var(--spacing)*4)]',
     'relative',
-    'w-[calc(100%-var(--space)*2)] h-[calc(100%-var(--space)*2)]',
+    'h-[calc(100%-var(--space)*2)] w-[calc(100%-var(--space)*2)]',
     'mx-auto mt-[var(--space)]',
     'bg-base-100',
     'rounded-3xl',
@@ -74,34 +75,34 @@ const styles = {
   ],
   playlist: {
     container: [
-      'relative flex flex-col text-white box-border h-full',
+      'relative box-border flex h-full flex-col text-white',
       '[--app-playlist-space:calc(var(--spacing)*4)]',
       '[--app-playlist-header-height:calc(var(--spacing)*16)]',
     ],
     header: {
       root: [
         'absolute inset-x-0 top-0 z-1',
-        'flex items-center justify-between flex-shrink-0',
+        'flex flex-shrink-0 items-center justify-between',
         'h-(--app-playlist-header-height)',
         'px-(--app-playlist-space) py-4',
         'text-base-content',
         'app-bg-gradient-glass',
       ],
-      title: 'flex items-center text-xl font-medium tracking-tight gap-2.5',
-      count: 'text-sm text-base-content/70 tracking-wide',
+      title: 'flex items-center gap-2.5 text-xl font-medium tracking-tight',
+      count: 'text-base-content/70 text-sm tracking-wide',
       close: 'btn btn-ghost btn-circle',
       closeIcon: 'size-6',
     },
     content: [
-      'flex flex-col gap-5 h-full',
+      'flex h-full flex-col gap-5',
       'h-[calc(100%-var(--app-playlist-header-height))]',
       'overflow-y-auto',
       'px-(--app-playlist-space) pt-[var(--app-playlist-header-height)]',
       '[&::-webkit-scrollbar-track]:mt-(--app-playlist-header-height)',
     ],
-    divider: 'divider w-1/3 mx-auto text-base-content/30',
+    divider: 'divider text-base-content/30 mx-auto w-1/3',
   },
-}
+})
 
 const playlistItemRefs
   = useTemplateRef<InstanceType<typeof PlaylistItemVue>[]>('playlistItemRefs')

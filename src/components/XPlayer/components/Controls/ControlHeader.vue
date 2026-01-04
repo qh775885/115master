@@ -25,6 +25,7 @@
 
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { useControlsMouseDetection } from '../../hooks/useControlsMouseDetection'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
@@ -38,20 +39,20 @@ defineSlots<{
 
 const { controls } = usePlayerContext()
 
-const styles = {
+const styles = clsx({
   root: [
     'relative',
     'transform-gpu',
   ],
   content: {
-    root: 'relative flex justify-between items-start p-6',
+    root: 'relative flex items-start justify-between p-6',
   },
   bg: [
-    'absolute inset-0 -bottom-[200%]',
+    'absolute inset-0 bottom-[-200%]',
     'bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.14)_15%,rgba(0,0,0,0.08)_35%,rgba(0,0,0,0.03)_60%,rgba(0,0,0,0)_100%)]',
     'pointer-events-none',
   ],
-}
+})
 
 const controlHeaderRef = shallowRef<HTMLDivElement | null>(null)
 

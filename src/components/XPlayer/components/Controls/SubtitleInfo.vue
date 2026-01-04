@@ -26,23 +26,24 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import SubtitleDisplay from '../SubtitleDisplay.vue'
 
 const { subtitles, controls, progressBar } = usePlayerContext()
 
-const styles = {
+const styles = clsx({
   root: [
-    'absolute left-5 bottom-20',
+    'absolute bottom-20 left-5',
     'inline-flex items-center gap-1.5 px-3 py-1.5',
     'rounded-full',
-    'text-sm text-base-content',
+    'text-base-content text-sm',
     'pointer-events-none',
     'bg-base-100/60',
   ],
   icon: 'size-5 opacity-80',
-}
+})
 
 /** 当前字幕 */
 const currentSubtitle = computed(() => {

@@ -16,22 +16,23 @@
 </template>
 
 <script setup lang="ts">
+import { clsx } from '../../../../utils/clsx'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
 /** 样式抽象 */
-const styles = {
+const styles = clsx({
   container:
-    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2 drop-shadow-xl/30',
+    'absolute top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 drop-shadow-xl/30',
   animation: {
     wrapper: 'inline-flex items-center justify-between gap-2.5',
-    dot: ['w-2.5 h-2.5 bg-white rounded-full', 'loading-dot-bounce'],
+    dot: ['h-2.5 w-2.5 rounded-full bg-white', 'loading-dot-bounce'],
     dot1: 'loading-dot-delay-1',
     dot2: 'loading-dot-delay-2',
     dot3: 'loading-dot-delay-3',
   },
-  speed: 'text-sm font-semibold text-base-content',
-}
+  speed: 'text-base-content text-sm font-semibold',
+})
 
 const { playerCore } = usePlayerContext()
 </script>

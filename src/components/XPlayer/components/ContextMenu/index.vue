@@ -47,6 +47,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
 import ShortcutsPopup from '../Shortcuts/ShortcutsPopup.vue'
@@ -56,12 +57,12 @@ defineSlots<{
   aboutContent: () => void
 }>()
 
-const styles = {
+const styles = clsx({
   container: 'menu w-40',
   menuItem: 'menu-item rounded-xl px-2',
   icon: 'size-5',
   shortcuts: 'ml-auto text-xs opacity-30',
-}
+})
 
 const { contextMenu, shortcuts } = usePlayerContext()
 </script>

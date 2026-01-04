@@ -66,6 +66,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import Popup from '../Popup/index.vue'
@@ -75,32 +76,32 @@ import { ACTION_GROUPS, EXPORT_FILE_PREFIX } from './shortcuts.const'
 defineProps<{ visible: boolean }>()
 defineEmits<{ 'update:visible': [value: boolean] }>()
 
-const styles = {
+const styles = clsx({
   root: [
-    'top-1/2! left-1/2! -translate-x-1/2! -translate-y-1/2! w-2xl p-0!',
+    'top-1/2! left-1/2! w-2xl -translate-x-1/2! -translate-y-1/2! p-0!',
     '[--group-title-height:calc(var(--spacing)*10)]',
   ],
-  container: 'relative flex flex-col overflow-hidden shadow-2xl max-h-[95vh]',
+  container: 'relative flex max-h-[95vh] flex-col overflow-hidden shadow-2xl',
   header: [
     'flex items-center justify-between px-5',
     'py-4',
-    'border-b border-base-content/5',
+    'border-base-content/5 border-b',
   ],
-  title: 'flex items-center gap-2 text-base font-semibold text-base-content',
+  title: 'text-base-content flex items-center gap-2 text-base font-semibold',
   close: [
     'btn btn-xs btn-ghost',
   ],
   content: 'flex-1 overflow-y-auto [&::-webkit-scrollbar-track]:mt-[calc(var(--header-height)+var(--group-title-height))]',
   groupWrapper: 'mb-0.5 last:mb-0',
   groupTitle: [
-    'sticky top-2 z-2 flex items-center gap-2.5 text-sm font-bold px-4 mt-2 mx-5 h-[var(--group-title-height)]',
+    'sticky top-2 z-2 mx-5 mt-2 flex h-[var(--group-title-height)] items-center gap-2.5 px-4 text-sm font-bold',
     'bg-neutral rounded-xl',
   ],
   groupContent: 'px-5 py-2',
-  footer: 'flex items-center justify-end gap-3 px-5 py-3 bg-base-200/30 border-t border-base-content/5',
+  footer: 'bg-base-200/30 border-base-content/5 flex items-center justify-end gap-3 border-t px-5 py-3',
   actions: 'flex items-center gap-2',
-  actionBtn: 'btn btn-sm gap-1.5 hover:scale-105 transition-transform',
-}
+  actionBtn: 'btn btn-sm gap-1.5 transition-transform hover:scale-105',
+})
 
 const { shortcuts } = usePlayerContext()
 const fileInputRef = shallowRef<HTMLInputElement>()

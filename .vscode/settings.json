@@ -57,19 +57,5 @@
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  "tailwindCSS.classAttributes": ["class", "ui"],
-  "tailwindCSS.experimental.classRegex": [
-    [
-      "[a-zA-Z0-9_]+\\s*\\.\\s*[a-zA-Z0-9_]+\\s*=\\s*\\[([^\\]]*)\\]",
-      "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
-    ],
-    [
-      "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*\\b[a-zA-Z0-9_]+\\s*:\\s*\\[([^\\]]*)\\]",
-      "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
-    ],
-    [
-      "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*?\\b[a-zA-Z0-9_]+\\s*:\\s*['\"]([^'\"]*?)['\"]",
-      "([^'\"]*?)"
-    ]
-  ]
+  "tailwindCSS.classFunctions": ["clsx"]
 }

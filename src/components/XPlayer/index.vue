@@ -83,6 +83,7 @@ import type { PlayerContext } from './hooks/usePlayerProvide'
 import type { XPlayerEmit, XPlayerProps } from './types'
 import { shallowRef, watch, watchEffect } from 'vue'
 import LoadingError from '../../components/LoadingError/index.vue'
+import { clsx } from '../../utils/clsx'
 import ContextMenu from './components/ContextMenu/index.vue'
 import ControlsBar from './components/Controls/ControlBar.vue'
 import ControlsHeader from './components/Controls/ControlHeader.vue'
@@ -118,17 +119,17 @@ defineSlots<{
   aboutContent: () => void
 }>()
 
-const styles = {
+const styles = clsx({
   root: 'relative bg-black',
   fullscreen: 'w-100vw h-100vh',
-  container: 'relative w-full h-full overflow-hidden',
-  videoPlayer: 'flex items-center justify-center w-full h-full',
+  container: 'relative h-full w-full overflow-hidden',
+  videoPlayer: 'flex h-full w-full items-center justify-center',
   error:
-    'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform',
   resumeContainer:
-    'absolute inset-0 flex justify-center items-center bg-black/90 z-2',
+    'absolute inset-0 z-2 flex items-center justify-center bg-black/90',
   resumeButton: 'btn',
-}
+})
 
 /** 根元素 */
 const rootRef = shallowRef<HTMLElement | null>(null)

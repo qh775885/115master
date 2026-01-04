@@ -9,13 +9,14 @@
 </template>
 
 <script setup lang="ts">
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import { formatTime } from '../../utils/time'
 
 const { playerCore } = usePlayerContext()
 
-const styles = {
+const styles = clsx({
   root: [
     controlStyles.text,
     'flex justify-center select-none',
@@ -28,5 +29,5 @@ const styles = {
     'app-font-time',
     '[&>span]:align-middle',
   ],
-}
+})
 </script>

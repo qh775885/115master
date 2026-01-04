@@ -16,6 +16,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { imageCache } from '../../utils/cache/imageCache'
+import { clsx } from '../../utils/clsx'
 import { blobToBase64, compressImage } from '../../utils/image'
 import { GMRequest } from '../../utils/request/gmRequst'
 import LoadingError from '../LoadingError/index.vue'
@@ -31,11 +32,11 @@ interface Props {
 const props = defineProps<Props>()
 
 /** 样式常量定义 */
-const styles = {
-  container: 'flex justify-center items-center w-full h-full',
-  image: 'w-full h-full object-cover rounded',
-  skeleton: 'skeleton w-full h-full rounded',
-}
+const styles = clsx({
+  container: 'flex h-full w-full items-center justify-center',
+  image: 'h-full w-full rounded object-cover',
+  skeleton: 'skeleton h-full w-full rounded',
+})
 
 const src = ref<string>()
 const loading = ref(false)

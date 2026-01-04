@@ -40,6 +40,7 @@
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { clsx } from '../../../../utils/clsx'
 import { ICONS } from '../../index.const'
 import Popup from '../Popup/index.vue'
 
@@ -52,16 +53,16 @@ defineEmits<{
   'update:visible': [value: boolean]
 }>()
 
-const styles = {
+const styles = clsx({
   // 根元素样式 - 居中显示，自适应高度
-  root: 'top-1/2! left-1/2! transform! -translate-x-1/2! -translate-y-1/2! w-lg max-h-2/3 p-0!',
+  root: 'top-1/2! left-1/2! max-h-2/3 w-lg -translate-x-1/2! -translate-y-1/2! transform! p-0!',
   // 容器样式
   container: {
-    main: 'rounded-xl flex flex-col',
+    main: 'flex flex-col rounded-xl',
     header:
-      'flex justify-between items-center px-4 py-4 rounded-t-xl',
-    headerTitle: 'text-base font-medium text-base-content',
-    content: 'overflow-y-auto max-h-96',
+      'flex items-center justify-between rounded-t-xl px-4 py-4',
+    headerTitle: 'text-base-content text-base font-medium',
+    content: 'max-h-96 overflow-y-auto',
     sectionsWrapper: 'space-y-6 text-sm',
   },
   // 章节样式
@@ -72,10 +73,10 @@ const styles = {
   // 关闭按钮样式
   closeButton: 'btn btn-ghost btn-circle btn-sm',
   // 默认内容样式
-  defaultContent: 'text-center text-base-content/60 py-8',
+  defaultContent: 'text-base-content/60 py-8 text-center',
   // 标题容器样式
-  titleContainer: 'flex items-center space-x-2 gap-2',
+  titleContainer: 'flex items-center gap-2 space-x-2',
   // 标题图标样式
   titleIcon: 'size-6',
-}
+})
 </script>

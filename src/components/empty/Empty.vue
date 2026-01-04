@@ -24,6 +24,7 @@
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { ICON_EMPTY } from '../../icons'
+import { clsx } from '../../utils/clsx'
 
 interface Props {
   /** 描述文本 */
@@ -55,10 +56,10 @@ defineSlots<{
 const iconName = computed(() => props.icon)
 
 /** 样式常量定义 */
-const styles = computed(() => ({
+const styles = computed(() => clsx({
   // 容器样式
   container: [
-    'flex flex-col items-center justify-center text-base-content/60',
+    'text-base-content/60 flex flex-col items-center justify-center',
     'animate-in fade-in duration-300',
     // 根据尺寸调整容器内边距
     {
@@ -84,7 +85,7 @@ const styles = computed(() => ({
   ],
   // 自定义图片样式
   customImage: [
-    'max-w-full h-auto align-middle opacity-60',
+    'h-auto max-w-full align-middle opacity-60',
     // 根据尺寸设置图片大小
     {
       'xs': 'w-8 h-8',
@@ -110,7 +111,7 @@ const styles = computed(() => ({
   ],
   // 描述文本样式
   description: [
-    'text-center font-medium leading-relaxed',
+    'text-center leading-relaxed font-medium',
     // 根据尺寸调整文字大小
     {
       'xs': 'text-xs',

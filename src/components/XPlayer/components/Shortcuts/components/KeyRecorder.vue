@@ -35,6 +35,7 @@
 import type { KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../../utils/clsx'
 import { usePlayerContext } from '../../../hooks/usePlayerProvide'
 import { ICONS } from '../../../index.const'
 import {
@@ -55,36 +56,36 @@ const emit = defineEmits<{
   'update:modelValue': [value: KeyBindingStr]
 }>()
 
-const styles = {
+const styles = clsx({
   base: [
     'relative flex items-center justify-center rounded-full',
-    'min-w-25 h-8 px-3',
+    'h-8 min-w-25 px-3',
     'shadow-sm',
-    'cursor-pointer select-none transition-all',
-    'border-[1px] border-base-content/15',
+    'cursor-pointer transition-all select-none',
+    'border-base-content/15 border-[1px]',
     'hover:border-base-content/50',
-    'focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20',
+    'focus:border-primary/60 focus:ring-primary/20 focus:ring-2 focus:outline-none',
     'group/recorder',
     'tooltip tooltip-bottom tooltip-error',
   ],
   recording: [
     'border-primary',
-    'bg-gradient-to-br from-primary/10 to-primary/5',
-    'shadow-md ring-2 ring-primary/30',
+    'from-primary/10 to-primary/5 bg-gradient-to-br',
+    'ring-primary/30 shadow-md ring-2',
   ],
   error: [
     'border-error/60',
-    'bg-gradient-to-br from-error/15 to-error/5',
+    'from-error/15 to-error/5 bg-gradient-to-br',
     'shadow-md',
   ],
-  kbd: 'text-xs font-semibold font-sans text-base-content/90 ',
-  placeholder: 'text-xs text-base-content/45',
+  kbd: 'text-base-content/90 font-sans text-xs font-semibold ',
+  placeholder: 'text-base-content/45 text-xs',
   remove: [
-    'absolute -right-1.5 -top-1.5 p-1',
+    'absolute -top-1.5 -right-1.5 p-1',
     'btn btn-xs btn-error btn-circle',
     'opacity-0 group-hover/recorder:opacity-100',
   ],
-}
+})
 
 const ctx = usePlayerContext()
 const containerRef = shallowRef<HTMLDivElement>()
