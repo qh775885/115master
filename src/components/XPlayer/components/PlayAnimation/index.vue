@@ -10,18 +10,19 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 
 /** 样式抽象 */
-const styles = {
+const styles = clsx({
   container: [
     'absolute inset-0 m-auto',
     'flex items-center justify-center',
-    'size-20 bg-black/30 rounded-full drop-shadow-xs/60',
+    'size-20 rounded-full bg-black/30 drop-shadow-xs/60',
   ],
   icon: 'size-[61.8%]',
-}
+})
 
 const { playerCore } = usePlayerContext()
 const visible = shallowRef(false)

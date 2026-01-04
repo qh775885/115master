@@ -12,6 +12,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
@@ -32,9 +33,9 @@ const LABELS = {
   playNext: '下一集',
 } satisfies Record<typeof props.type, string>
 
-const styles = {
+const styles = clsx({
   btn: controlStyles.btn,
-}
+})
 
 const ctx = usePlayerContext()
 

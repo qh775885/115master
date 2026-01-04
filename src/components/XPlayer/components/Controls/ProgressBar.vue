@@ -53,11 +53,12 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Thumbnail from '../Thumbnail/index.vue'
 
 /** 样式抽象 */
-const styles = {
+const styles = clsx({
   progressBar: {
     root: [
       'relative',
@@ -65,7 +66,7 @@ const styles = {
       'hidden',
       'data-[canplay=true]:block',
     ],
-    wrapper: 'py-4 cursor-pointer relative',
+    wrapper: 'relative cursor-pointer py-4',
     track:
       [
         'h-2',
@@ -80,11 +81,11 @@ const styles = {
   },
   thumb: {
     current:
-      'absolute h-full w-full bg-base-content/80 origin-left transition-transform duration-100 linear',
+      'bg-base-content/80 linear absolute h-full w-full origin-left transition-transform duration-100',
     dragging: 'transition-none',
-    hover: 'absolute h-full w-full bg-base-content/50 origin-left pointer-events-none',
+    hover: 'bg-base-content/50 pointer-events-none absolute h-full w-full origin-left',
   },
-}
+})
 
 const { progressBar, playerCore } = usePlayerContext()
 

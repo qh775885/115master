@@ -8,7 +8,7 @@
 
       <!-- 加载骨架 -->
       <template v-else-if="extInfo.isLoading.value || (!extInfo.isLoading.value && !extInfo.isReady.value)">
-        <div class="skeleton w-full h-full" />
+        <div class="skeleton h-full w-full" />
       </template>
 
       <!-- 空状态 -->
@@ -146,6 +146,7 @@ import { onMounted, ref, watch } from 'vue'
 import Empty from '../../../../components/empty/Empty.vue'
 import Image from '../../../../components/Image/index.vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
+import { clsx } from '../../../../utils/clsx'
 import { formatDate, formatDuration } from '../../../../utils/format'
 import { Jav, JavBus, JavDB } from '../../../../utils/jav'
 import { MissAV } from '../../../../utils/jav/missAV'
@@ -158,43 +159,43 @@ const javDB = new JavDB()
 const missAV = new MissAV()
 
 /** 样式常量定义 */
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
-    main: 'w-full px-20 h-24',
-    content: 'relative flex items-center gap-1 group h-full',
+    main: 'h-24 w-full px-20',
+    content: 'group relative flex h-full items-center gap-1',
   },
   // 状态样式
   states: {
-    error: 'flex items-center justify-center flex-1',
-    empty: 'flex items-center justify-center flex-1',
+    error: 'flex flex-1 items-center justify-center',
+    empty: 'flex flex-1 items-center justify-center',
   },
   // 封面样式
   cover: {
-    container: 'flex items-center justify-center w-36 h-24',
-    link: 'block w-full h-full',
+    container: 'flex h-24 w-36 items-center justify-center',
+    link: 'block h-full w-full',
   },
   // 主要内容样式
   main: {
-    container: 'flex-1 flex flex-col gap-2',
+    container: 'flex flex-1 flex-col gap-2',
   },
   // 标题样式
   title: {
-    container: 'text-md text-neutral-500 ml-2',
-    link: 'hover:underline line-clamp-1 hover:text-primary transition-colors',
+    container: 'text-md ml-2 text-neutral-500',
+    link: 'hover:text-primary line-clamp-1 transition-colors hover:underline',
   },
   // 内容样式
   content: {
-    container: 'flex flex-1 items-start gap-5 ml-2',
-    group: 'flex flex-col gap-0.5 min-w-32',
+    container: 'ml-2 flex flex-1 items-start gap-5',
+    group: 'flex min-w-32 flex-col gap-0.5',
   },
   // 项目样式
   item: {
     container: 'flex items-start gap-2 text-xs',
-    label: 'w-8 h-5 text-neutral-500 shrink-0',
-    value: 'flex flex-1 gap-2 flex-wrap text-neutral-500 line-clamp-1',
+    label: 'h-5 w-8 shrink-0 text-neutral-500',
+    value: 'line-clamp-1 flex flex-1 flex-wrap gap-2 text-neutral-500',
     link: 'hover:text-primary transition-colors hover:underline',
-    badge: 'bg-neutral-100 hover:bg-neutral-100 rounded px-1 py-[1px] text-xs',
+    badge: 'rounded bg-neutral-100 px-1 py-[1px] text-xs hover:bg-neutral-100',
   },
   // 次要信息样式
   secondary: 'opacity-40',
@@ -202,7 +203,7 @@ const styles = {
   meta: {
     avNumber: 'absolute right-4 bottom-2 text-xs text-neutral-300',
   },
-}
+})
 
 const extInfoRef = ref<HTMLElement>()
 const extInfoRefVisible = useElementVisibility(extInfoRef, {

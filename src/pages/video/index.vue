@@ -164,6 +164,7 @@ import { useLockFn } from '../../hooks/useLockFn'
 import { useParamsVideoPage } from '../../hooks/useParams'
 import { ICON_PLAYLIST, ICON_STAR, ICON_STAR_FILL } from '../../icons'
 import { subtitlePreference } from '../../utils/cache/subtitlePreference'
+import { clsx } from '../../utils/clsx'
 import { drive115 } from '../../utils/drive115'
 import { formatFileSize } from '../../utils/format'
 import { getAvNumber } from '../../utils/getNumber'
@@ -185,7 +186,7 @@ import { useDataSubtitles } from './data/useSubtitlesData'
 import { useDataThumbnails } from './data/useThumbnails'
 import { useDataVideoSources } from './data/useVideoSource'
 
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
     main: [
@@ -198,8 +199,8 @@ const styles = {
       '[--app-playlist-width:calc(100%*var(--app-playlist-ratio))]',
     ],
     showPlaylist: 'show-playlist',
-    pageMain: ['relative w-full h-screen overflow-hidden bg-black'],
-    pageFlow: 'flex flex-col gap-8 px-6 xl:px-36 py-8 w-full',
+    pageMain: ['relative h-screen w-full overflow-hidden bg-black'],
+    pageFlow: 'flex w-full flex-col gap-8 px-6 py-8 xl:px-36',
   },
   // 抽屉样式
   drawer: {
@@ -212,18 +213,18 @@ const styles = {
   // 播放器样式
   player: {
     container:
-      'relative w-full h-screen flex items-center justify-center transition-all duration-200 ease-in-out transform-gpu',
+      'relative flex h-screen w-full transform-gpu items-center justify-center transition-all duration-200 ease-in-out',
     containerFold: 'w-(--app-xplayer-width)!',
-    video: 'absolute m-auto w-full h-full overflow-hidden',
+    video: 'absolute m-auto h-full w-full overflow-hidden',
   },
   // 播放列表样式
   playlist: 'w-(--app-playlist-width)!',
   // 控制样式
   controls: {
     btn: controlRightStyles.btn,
-    iinaIcon: 'size-7 grayscale invert contrast-200',
+    iinaIcon: 'size-7 contrast-200 grayscale invert',
   },
-}
+})
 
 /** 日志 */
 const logger = appLogger.sub('Video')

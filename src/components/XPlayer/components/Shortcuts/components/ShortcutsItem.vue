@@ -36,6 +36,7 @@
 import type { Action, ActionKey, KeyBindings, KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { clsx } from '../../../../../utils/clsx'
 import { usePlayerContext } from '../../../hooks/usePlayerProvide'
 import { ICONS } from '../../../index.const'
 import {
@@ -56,7 +57,7 @@ const emit = defineEmits<{
   'reset': []
 }>()
 
-const styles = {
+const styles = clsx({
   row: [
     'group/row',
     'grid grid-cols-[110px_1fr_auto] items-start',
@@ -68,7 +69,7 @@ const styles = {
   ],
   rowWithConflict: 'pb-1',
   label: [
-    'text-sm text-base-content/75 truncate',
+    'text-base-content/75 truncate text-sm',
     'pt-1',
   ],
   keysWrapper: 'flex flex-col gap-1',
@@ -79,8 +80,8 @@ const styles = {
   reset: [
     'btn btn-sm btn-ghost btn-circle btn-error',
   ],
-  conflict: 'text-xs font-medium text-error',
-}
+  conflict: 'text-error text-xs font-medium',
+})
 
 const { shortcuts } = usePlayerContext()
 

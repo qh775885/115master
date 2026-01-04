@@ -57,6 +57,7 @@ import LoadingError from '../../../../components/LoadingError/index.vue'
 import { formatTime } from '../../../../components/XPlayer/utils/time'
 import { useSmartVideoCover } from '../../../../hooks/useVideoCover'
 import { ICON_STAR_FILL } from '../../../../icons'
+import { clsx } from '../../../../utils/clsx'
 import { formatFileSize } from '../../../../utils/format'
 
 const props = defineProps<{
@@ -72,7 +73,7 @@ const emit = defineEmits<{
 const PLAYLIST_VIDEO_COVER_NUM = 1
 
 /** 样式常量定义 */
-const styles = {
+const styles = clsx({
   item: {
     base: [
       'flex cursor-pointer break-words',
@@ -80,22 +81,22 @@ const styles = {
   },
   cover: {
     container: [
-      'relative flex items-center justify-center flex-shrink-0',
+      'relative flex flex-shrink-0 items-center justify-center',
       'overflow-hidden rounded-xl',
-      'w-50 h-28 aspect-video',
-      'before:content-[\'\'] before:absolute before:inset-0 before:bg-black before:rounded-xl',
+      'aspect-video h-28 w-50',
+      'before:absolute before:inset-0 before:rounded-xl before:bg-black before:content-[\'\']',
       'group/cover',
     ],
-    skeleton: 'relative skeleton w-full h-full rounded-xl',
+    skeleton: 'skeleton relative h-full w-full rounded-xl',
     imageError: 'relative!',
-    image: 'relative block w-full h-full object-contain',
+    image: 'relative block h-full w-full object-contain',
   },
   duration: {
     container: [
-      'absolute bottom-2 right-2 rounded-md',
+      'absolute right-2 bottom-2 rounded-md',
       'px-1.5 py-0.5',
       'backdrop-blur-md',
-      'text-xs bg-base-100/40 text-base-content/70',
+      'bg-base-100/40 text-base-content/70 text-xs',
       'font-medium',
       'tracking-tight',
       'app-font-time',
@@ -109,17 +110,17 @@ const styles = {
     container: [
       'absolute top-1.5 left-1.5 p-0.5',
     ],
-    icon: 'size-6 drop-shadow-xs/50 text-pink-600',
+    icon: 'size-6 text-pink-600 drop-shadow-xs/50',
   },
   progress: {
     container: [
-      'absolute bottom-0 right-0 w-full h-[0]',
+      'absolute right-0 bottom-0 h-[0] w-full',
       'bg-base-100/40',
       'transition-all duration-300 ease-[var(--app-ease-in-sine)]',
       'group-hover:h-[4px]',
     ],
     bar: [
-      'absolute top-0 left-0 w-0 h-full bg-base-content/70',
+      'bg-base-content/70 absolute top-0 left-0 h-full w-0',
       'app-shadow',
       'group-hover/cover:bg-base-content',
     ],
@@ -127,13 +128,13 @@ const styles = {
   info: {
     container: 'flex flex-col justify-between gap-1 px-4',
     title: [
-      'text-sm break-all leading-5 text-base-content/90 line-clamp-3',
+      'text-base-content/90 line-clamp-3 text-sm leading-5 break-all',
       'font-medium',
     ],
     titleActive: 'text-primary',
-    size: 'text-xs text-base-content/30 font-medium tracking-tight app-font-file-size',
+    size: 'text-base-content/30 app-font-file-size text-xs font-medium tracking-tight',
   },
-}
+})
 
 /** 根元素引用 */
 const rootRef = shallowRef<HTMLElement>()

@@ -44,7 +44,7 @@
               <!-- 音量控制 -->
               <VolumeControl />
             </ControlBox>
-            <ControlBox class="lg:flex hidden">
+            <ControlBox class="hidden lg:flex">
               <TimeDisplay />
             </ControlBox>
           </div>
@@ -94,6 +94,7 @@
 
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { useControlsMouseDetection } from '../../hooks/useControlsMouseDetection'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import AudioTrackButton from './AudioTrackButton.vue'
@@ -113,27 +114,27 @@ import VideoEnhanceSettings from './VideoEnhanceSettings.vue'
 import VolumeControl from './VolumeControl.vue'
 
 /** 样式抽象 */
-const styles = {
+const styles = clsx({
   controlBar: {
     main: [
-      'relative pointer-events-auto',
+      'pointer-events-auto relative',
       'transform-gpu',
     ],
     bg: [
-      'absolute inset-0 -top-[200%]',
+      'absolute inset-0 top-[-200%]',
       'bg-[linear-gradient(to_top,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.14)_15%,rgba(0,0,0,0.08)_35%,rgba(0,0,0,0.03)_60%,rgba(0,0,0,0)_100%)]',
       'pointer-events-none',
     ],
-    mainContent: 'relative flex flex-col px-6 pb-6 gap-y-2',
+    mainContent: 'relative flex flex-col gap-y-2 px-6 pb-6',
     mainBar: 'flex items-center gap-2',
     mainBarLeft: 'flex items-center gap-2',
     mainBarCenter: 'flex-1 px-6',
     mainBarRight: 'flex items-center gap-2',
-    subBar: 'flex justify-between items-center',
+    subBar: 'flex items-center justify-between',
     subBarLeft: 'flex items-center gap-2',
     subBarRight: 'flex items-center gap-2',
   },
-}
+})
 
 /** 视频播放器上下文 */
 const ctx = usePlayerContext()

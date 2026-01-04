@@ -8,15 +8,16 @@
 </template>
 
 <script setup lang="ts">
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
-const styles = {
+const styles = clsx({
   root: [
     'absolute inset-0 flex flex-col',
     'transition-all duration-500 ease-[var(--app-ease-out-cubic)]',
     'data-[mask="true"]:bg-base-100/50',
   ],
-}
+})
 
 const { progressBar } = usePlayerContext()
 </script>

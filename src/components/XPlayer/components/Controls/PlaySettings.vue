@@ -16,7 +16,7 @@
             @change="playSettings.toggleAutoPlay"
           >
           <a
-            class="btn btn-link btn-xs inline-flex text-base-content/30 tracking-wide"
+            class="btn btn-link btn-xs text-base-content/30 inline-flex tracking-wide"
             href="https://github.com/cbingb666/115master/discussions/206"
             target="_blank"
           >

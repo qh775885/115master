@@ -5,7 +5,9 @@
 </template>
 
 <script setup lang="ts">
-const styles = {
+import { clsx } from '../../../../utils/clsx'
+
+const styles = clsx({
   root: [
     'flex items-center',
     'px-1',
@@ -15,5 +17,5 @@ const styles = {
     'relative',
     'app-glass-border',
   ],
-}
+})
 </script>

@@ -44,7 +44,7 @@
           <Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon" />
           <template v-if="item.id !== -1">
             <SubtitleDisplay
-              class="flex-1 min-w-0"
+              class="min-w-0 flex-1"
               :label="item.label"
               :format="item.raw?.format"
               :source="item.value?.source"
@@ -83,18 +83,19 @@
 import type { Subtitle } from '../../types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 import SubtitleDisplay from '../SubtitleDisplay.vue'
 
-const styles = {
+const styles = clsx({
   menu: {
     ...controlStyles.menu,
     root: [
       controlStyles.menu.root,
-      'max-h-72 max-w-xl overflow-y-auto overflow-x-hidden !flex-nowrap',
+      'max-h-72 max-w-xl !flex-nowrap overflow-x-hidden overflow-y-auto',
     ],
     a: [
       controlStyles.menu.a,
@@ -102,12 +103,12 @@ const styles = {
       'w-full gap-1',
       'py-2',
     ],
-    label: [controlStyles.menu.label, 'w-xs line-clamp-2'],
+    label: [controlStyles.menu.label, 'line-clamp-2 w-xs'],
     action: ['btn btn-circle btn-ghost btn-xs flex-shrink-0'],
     actionIcon: ['size-5'],
   },
   btn: controlStyles.btn,
-}
+})
 
 const { subtitles, shortcuts, logger } = usePlayerContext()
 const menuVisible = shallowRef(false)

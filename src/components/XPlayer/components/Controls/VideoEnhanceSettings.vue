@@ -23,7 +23,7 @@
   >
     <div class="card card-sm">
       <div class="card-body">
-        <div class="flex justify-between items-center mb-2">
+        <div class="mb-2 flex items-center justify-between">
           <h3 class="card-title">
             视频色彩
           </h3>
@@ -35,7 +35,7 @@
             <Icon :icon="ICONS.ICON_RESTART" class="size-6" />
           </button>
         </div>
-        <div class="grid grid-rows-5 grid-flow-col gap-x-5 gap-y-2">
+        <div class="grid grid-flow-col grid-rows-5 gap-x-5 gap-y-2">
           <fieldset
             v-for="(value, key) in enhanceParams.values"
             :key="key"
@@ -46,7 +46,7 @@
             </legend>
             <input
               type="range"
-              class="range range-xs range-primary [--range-fill:0] w-full"
+              class="range range-xs range-primary w-full [--range-fill:0]"
               :value="value.value"
               :min="ENHANCE_PARAMS_CONFIG[key].min"
               :max="ENHANCE_PARAMS_CONFIG[key].max"
@@ -75,18 +75,19 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
   popup: [
     'p-2',
     'select-none',
   ],
-}
+})
 
 const buttonRef = shallowRef<HTMLElement>()
 const menuVisible = shallowRef(false)

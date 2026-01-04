@@ -29,6 +29,7 @@ import { Icon } from '@iconify/vue'
 import { useClipboard } from '@vueuse/core'
 import { computed } from 'vue'
 import { ICON_ERROR } from '../../icons'
+import { clsx } from '../../utils/clsx'
 import { MEDIA_ERROR_NAME } from '../XPlayer/index.const'
 
 const props = withDefaults(
@@ -84,10 +85,10 @@ function formatErrorMessage(message: string | Error | MediaError | unknown): str
 }
 
 /** 样式常量定义 */
-const styles = computed(() => ({
+const styles = computed(() => clsx({
   // 容器样式
   container: [
-    'flex flex-col items-center justify-center text-base-content/70',
+    'text-base-content/70 flex flex-col items-center justify-center',
     // 间距和内边距
     props.size === 'mini' ? 'gap-1' : 'gap-2',
     !props.noPadding && props.size !== 'mini' && 'p-2',
@@ -107,7 +108,7 @@ const styles = computed(() => ({
   ],
   // 文本样式
   text: [
-    'text-center m-0 select-text font-medium',
+    'm-0 text-center font-medium select-text',
     // 根据尺寸调整字体大小
     {
       mini: 'text-xs',

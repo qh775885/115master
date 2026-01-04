@@ -4,7 +4,7 @@
     <div>{{ fileInfo.error }}</div>
   </div>
   <div v-else-if="fileInfo.isLoading || (!fileInfo.isLoading && !fileInfo.isReady)" :class="styles.container.loading">
-    <div class="skeleton w-80 h-7 rounded-lg" />
+    <div class="skeleton h-7 w-80 rounded-lg" />
   </div>
   <div v-else :class="styles.container.main">
     <div :class="styles.fileInfo.container">
@@ -26,11 +26,11 @@
           @click="props.onMark"
         >
           <Icon
-            class="size-6 swap-off app-text-shadow-dark text-pink-600"
+            class="swap-off app-text-shadow-dark size-6 text-pink-600"
             :icon="ICON_STAR_FILL"
           />
           <Icon
-            class="size-6 swap-on app-text-shadow-dark"
+            class="swap-on app-text-shadow-dark size-6"
             :icon="ICON_STAR"
           />
         </button>
@@ -62,6 +62,7 @@ import type { useDataPlaylist } from '../../data/useDataPlaylist'
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
 import { ICON_STAR, ICON_STAR_FILL } from '../../../../icons'
+import { clsx } from '../../../../utils/clsx'
 import { formatFileSize } from '../../../../utils/format'
 
 const props = defineProps<{
@@ -77,30 +78,29 @@ const props = defineProps<{
   onMark: () => void
 }>()
 
-const styles = {
+const styles = clsx({
   /** 容器样式 */
   container: {
-    main: 'flex items-center gap-4 w-full mx-2',
+    main: 'mx-2 flex w-full items-center gap-4',
     error: 'text-red-400',
     loading: 'flex items-center',
   },
   /** 文件信息样式 */
   fileInfo: {
-    container: 'flex flex-col flex-1',
+    container: 'flex flex-1 flex-col',
     file: 'flex flex-wrap items-center gap-2 tracking-tight',
-    name: 'text-xl font-semibold text-base-content line-clamp-2 app-text-shadow-dark',
-    size: 'text-xs font-medium text-base-content whitespace-nowrap flex-shrink-0 app-text-shadow-dark tracking-wide',
+    name: 'text-base-content app-text-shadow-dark line-clamp-2 text-xl font-semibold',
+    size: 'text-base-content app-text-shadow-dark flex-shrink-0 text-xs font-medium tracking-wide whitespace-nowrap',
     path: {
       container: [
         'breadcrumbs',
-        'text-xs font-medium text-base-content',
+        'text-base-content text-xs font-medium',
         'tracking-wide',
         'app-text-shadow-dark',
       ],
     },
   },
-
-}
+})
 
 const path = computed(() => {
   return (props.playlist.state?.path ?? []).filter(

@@ -63,6 +63,7 @@ import type { ThumbnailFrame } from '../../types'
 import { refManualReset } from '@vueuse/core'
 import { computed, onUnmounted, shallowRef, toValue, watch } from 'vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
+import { clsx } from '../../../../utils/clsx'
 import { getImageResize } from '../../../../utils/image'
 import { boundary } from '../../../../utils/number'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
@@ -82,25 +83,25 @@ interface Props {
 /** props */
 const props = withDefaults(defineProps<Props>(), {})
 
-const styles = {
+const styles = clsx({
   root: ['absolute top-2', '[will-change:transform]'],
   image: {
     root: [
-      'relative flex items-center justify-center rounded-2xl overflow-hidden mb-2',
+      'relative mb-2 flex items-center justify-center overflow-hidden rounded-2xl',
       'bg-black',
       'box-content',
       'cursor-pointer',
-      'border-4 border-base-content',
+      'border-base-content border-4',
     ],
     loading:
-      'absolute loading loading-spinner size-12 m-auto rounded-full text-base-content/80',
+      'loading loading-spinner text-base-content/80 absolute m-auto size-12 rounded-full',
     error: 'absolute inset-0 flex items-center justify-center',
   },
   timeBox: {
     container:
-      'text-sm text-base-content text-center select-none app-font-time',
+      'text-base-content app-font-time text-center text-sm select-none',
   },
-}
+})
 
 /** 默认宽度 */
 const DEFAULT_WIDTH = 250

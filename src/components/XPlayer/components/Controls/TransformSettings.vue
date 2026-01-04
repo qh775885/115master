@@ -42,7 +42,7 @@
               :class="{ 'btn-primary': transform.flipX.value }"
               @click="transform.toggleFlipX"
             >
-              <div class="transform rotate-90">
+              <div class="rotate-90 transform">
                 <Icon :icon="ICONS.ICON_FLIP_X" class="size-4" />
               </div>
               水平

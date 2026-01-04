@@ -11,14 +11,15 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
-}
+})
 
 const { pictureInPicture, playerCore, shortcuts } = usePlayerContext()
 

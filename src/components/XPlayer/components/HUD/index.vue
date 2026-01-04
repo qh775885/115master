@@ -59,18 +59,19 @@
 import type { HudMessage } from './types'
 import { Icon } from '@iconify/vue'
 import { computed, isVNode, ref, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
 
-const styles = {
-  popup: 'left-6! top-6!  bg-base-100/50! backdrop-blur-sm! backdrop-saturate-120! backdrop-brightness-100!',
+const styles = clsx({
+  popup: 'bg-base-100/50! top-6!  left-6! backdrop-blur-sm! backdrop-brightness-100! backdrop-saturate-120!',
   wrap: 'flex items-center gap-2 px-4 py-2',
-  content: 'flex flex-col gap-1 flex-1 px-1',
+  content: 'flex flex-1 flex-col gap-1 px-1',
   icon: 'size-6',
   title: 'text-sm font-semibold',
   progress: 'progress progress-primary h-1 w-35',
-  value: 'text-sm font-semibold text-base-content/70',
-}
+  value: 'text-base-content/70 text-sm font-semibold',
+})
 
 /** 获取播放器上下文 */
 const { hud } = usePlayerContext()

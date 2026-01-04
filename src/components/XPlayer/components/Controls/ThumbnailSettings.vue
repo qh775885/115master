@@ -2,7 +2,7 @@
   <div class="card card-sm">
     <div class="card-body">
       <h3 class="card-title flex justify-between">
-        预览图 <span class="text-xs text-base-content/30 text-center font-normal tracking-wide">刷新后生效</span>
+        预览图 <span class="text-base-content/30 text-center text-xs font-normal tracking-wide">刷新后生效</span>
       </h3>
       <div>
         <!-- 采样间隔 -->

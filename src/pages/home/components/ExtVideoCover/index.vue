@@ -40,6 +40,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
 import { useSmartVideoCover } from '../../../../hooks/useVideoCover'
+import { clsx } from '../../../../utils/clsx'
 import 'photoswipe/style.css'
 
 const props = defineProps<{
@@ -53,33 +54,33 @@ const props = defineProps<{
 const FILELIST_VIDEO_COVER_NUM = 5
 
 /** 样式常量定义 */
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
-    main: 'w-full max-w-214 px-20 h-24 [content-visibility:auto]',
+    main: 'h-24 w-full max-w-214 px-20 [content-visibility:auto]',
     content:
-      'relative h-full flex items-center bg-base-300 rounded overflow-hidden',
+      'bg-base-300 relative flex h-full items-center overflow-hidden rounded',
   },
   // 状态样式
   states: {
-    error: 'flex items-center justify-center flex-1',
+    error: 'flex flex-1 items-center justify-center',
   },
   // 骨架样式
-  skeleton: 'skeleton w-full h-full rounded',
+  skeleton: 'skeleton h-full w-full rounded',
   // 视频封面
   cover: {
     container: [
-      'w-full h-full flex overflow-hidden select-none overflow-hidden',
+      'flex h-full w-full overflow-hidden select-none',
     ],
     thumbItem: [
-      'h-full aspect-video',
+      'aspect-video h-full',
       'overflow-hidden',
       'cursor-zoom-in no-underline',
-      'hover:opacity-90 transition-opacity',
+      'transition-opacity hover:opacity-90',
     ],
     thumbImage: ['h-full w-full object-contain object-center align-top'],
   },
-}
+})
 
 /** 根元素引用 */
 const rootRef = ref<HTMLElement>()

@@ -12,11 +12,12 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
-const styles = {
+const styles = clsx({
   mask: 'relative flex-1',
-}
+})
 
 const {
   fullscreen,

@@ -16,6 +16,8 @@
 </template>
 
 <script setup lang="ts">
+import { clsx } from '../../../utils/clsx'
+
 defineProps<{
   label: string
   format?: string
@@ -24,13 +26,13 @@ defineProps<{
   total: number
 }>()
 
-const styles = {
-  root: 'flex items-center gap-2 w-full text-base-content',
-  index: 'text-sm whitespace-nowrap w-12 flex-shrink-0 proportional-nums tracking-wide',
-  content: 'flex-1 min-w-0',
-  label: 'font-medium line-clamp-2 break-all',
-  meta: 'flex items-center gap-1.5 flex-shrink-0',
-  format: 'text-xs px-1.5 py-[1px] rounded-md bg-white/30 whitespace-nowrap',
-  source: 'text-xs px-1.5 py-[1px] rounded-md bg-white/30 whitespace-nowrap',
-}
+const styles = clsx({
+  root: 'text-base-content flex w-full items-center gap-2',
+  index: 'w-12 flex-shrink-0 text-sm tracking-wide whitespace-nowrap proportional-nums',
+  content: 'min-w-0 flex-1',
+  label: 'line-clamp-2 font-medium break-all',
+  meta: 'flex flex-shrink-0 items-center gap-1.5',
+  format: 'rounded-md bg-white/30 px-1.5 py-[1px] text-xs whitespace-nowrap',
+  source: 'rounded-md bg-white/30 px-1.5 py-[1px] text-xs whitespace-nowrap',
+})
 </script>

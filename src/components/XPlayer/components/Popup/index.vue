@@ -33,6 +33,7 @@ import {
   shallowRef,
   watch,
 } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { usePortal } from '../../hooks/usePortal'
 import { isInContainsTrigger, triggerSet } from './utils'
@@ -54,7 +55,7 @@ const emit = defineEmits<{
   'after-leave': []
 }>()
 
-const styles = {
+const styles = clsx({
   popup:
     [
       'relative',
@@ -67,7 +68,7 @@ const styles = {
       'data-[mild=true]:bg-base-100/90',
       'data-[mild=true]:backdrop-blur-3xl',
     ],
-}
+})
 
 interface Props {
   /** 是否显示 */
