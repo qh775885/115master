@@ -50,23 +50,26 @@
     "postcss"
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
-  "css.customData": [
-    ".vscode/tailwind.json"
-  ],
+  "css.customData": [".vscode/tailwind.json"],
   "files.associations": {
     "*.css": "tailwindcss"
   },
   "editor.quickSuggestions": {
     "strings": "on"
   },
-  "tailwindCSS.classAttributes": [
-    "class",
-    "ui"
-  ],
+  "tailwindCSS.classAttributes": ["class", "ui"],
   "tailwindCSS.experimental.classRegex": [
     [
-      "ui:\\s*{([^)]*)\\s*}",
-      "(?:'|\"|`)([^']*)(?:'|\"|`)"
+      "[a-zA-Z0-9_]+\\s*\\.\\s*[a-zA-Z0-9_]+\\s*=\\s*\\[([^\\]]*)\\]",
+      "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
+    ],
+    [
+      "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*\\b[a-zA-Z0-9_]+\\s*:\\s*\\[([^\\]]*)\\]",
+      "'([^']*?)'|\"([^\"]*?)\"|`([^`]*?)`"
+    ],
+    [
+      "\\b[a-zA-Z0-9_]+\\s*:\\s*\\{[^}]*?\\b[a-zA-Z0-9_]+\\s*:\\s*['\"]([^'\"]*?)['\"]",
+      "([^'\"]*?)"
     ]
   ]
 }

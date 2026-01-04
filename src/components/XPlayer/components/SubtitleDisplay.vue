@@ -9,7 +9,7 @@
         {{ format.toUpperCase() }}
       </span>
       <span v-if="source" :class="styles.source">
-        · {{ source }}
+        {{ source }}
       </span>
     </div>
   </div>
@@ -25,12 +25,12 @@ defineProps<{
 }>()
 
 const styles = {
-  root: 'flex items-center gap-2 w-full',
-  index: 'text-xs opacity-70 font-mono whitespace-nowrap w-12 flex-shrink-0',
+  root: 'flex items-center gap-2 w-full text-base-content',
+  index: 'text-sm whitespace-nowrap w-12 flex-shrink-0 proportional-nums tracking-wide',
   content: 'flex-1 min-w-0',
   label: 'font-medium line-clamp-2 break-all',
   meta: 'flex items-center gap-1.5 flex-shrink-0',
-  format: 'text-xs opacity-60 px-1.5 py-0.5 rounded bg-white/30 font-mono whitespace-nowrap',
-  source: 'text-xs opacity-70 font-mono whitespace-nowrap',
+  format: 'text-xs px-1.5 py-[1px] rounded-md bg-white/30 whitespace-nowrap',
+  source: 'text-xs px-1.5 py-[1px] rounded-md bg-white/30 whitespace-nowrap',
 }
 </script>

@@ -33,7 +33,14 @@ import SubtitleDisplay from '../SubtitleDisplay.vue'
 const { subtitles, controls, progressBar } = usePlayerContext()
 
 const styles = {
-  root: 'absolute left-5 bottom-20 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur-sm text-sm text-white shadow-lg pointer-events-none',
+  root: [
+    'absolute left-5 bottom-20',
+    'inline-flex items-center gap-1.5 px-3 py-1.5',
+    'rounded-full',
+    'text-sm text-base-content',
+    'pointer-events-none',
+    'bg-base-100/60',
+  ],
   icon: 'size-5 opacity-80',
 }
 

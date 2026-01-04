@@ -1,7 +1,7 @@
 <template>
   <button
     class="swap swap-rotate" :class="[styles.btn.root, { 'swap-active': !pictureInPicture.isPip.value }]"
-    :data-tip="pipTip" :disabled="playerCore?.type === PlayerCoreType.AvPlayer" @click="pictureInPicture.toggle"
+    :title="pipTip" :disabled="playerCore?.type === PlayerCoreType.AvPlayer" @click="pictureInPicture.toggle"
   >
     <Icon :icon="ICONS.ICON_PIP_EXIT" class="swap-off" :class="[styles.btn.icon]" />
     <Icon :icon="ICONS.ICON_PIP" class="swap-on" :class="[styles.btn.icon]" />

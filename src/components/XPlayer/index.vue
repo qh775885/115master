@@ -29,15 +29,14 @@
     <Controls>
       <ControlsHeader>
         <template #left>
-          <slot name="headerLeft" />
+          <slot name="headerLeft" v-bind="{ ctx }" />
+        </template>
+        <template #right>
+          <slot name="headerRight" v-bind="{ ctx }" />
         </template>
       </ControlsHeader>
       <SubtitleInfo />
-      <ControlsMask>
-        <ControlsRight>
-          <slot name="controlsRight" v-bind="{ ctx }" />
-        </ControlsRight>
-      </ControlsMask>
+      <ControlsMask />
       <ControlsBar />
     </Controls>
 
@@ -88,7 +87,6 @@ import ContextMenu from './components/ContextMenu/index.vue'
 import ControlsBar from './components/Controls/ControlBar.vue'
 import ControlsHeader from './components/Controls/ControlHeader.vue'
 import ControlsMask from './components/Controls/ControlMask.vue'
-import ControlsRight from './components/Controls/ControlsRight.vue'
 import Controls from './components/Controls/index.vue'
 import SubtitleInfo from './components/Controls/SubtitleInfo.vue'
 import HUD from './components/HUD/index.vue'
@@ -113,9 +111,9 @@ const emit = defineEmits<XPlayerEmit>()
 /** 插槽 */
 defineSlots<{
   /** 头部左侧插槽 */
-  headerLeft: () => void
-  /** 控制栏右侧插槽 */
-  controlsRight: (props: { ctx: PlayerContext }) => void
+  headerLeft: (props: { ctx: PlayerContext }) => void
+  /** 头部右侧插槽 */
+  headerRight: (props: { ctx: PlayerContext }) => void
   /** 关于内容插槽 */
   aboutContent: () => void
 }>()

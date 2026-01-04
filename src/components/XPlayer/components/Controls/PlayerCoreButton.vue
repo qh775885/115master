@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    data-tip="播放器核心"
+    title="播放器核心"
     :disabled="source?.current?.value?.type === 'hls' || source?.isSwitching?.value"
     @click="toggleVisible"
   >

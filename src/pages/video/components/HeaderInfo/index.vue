@@ -13,6 +13,27 @@
         <span :class="styles.fileInfo.name">
           {{ fileInfo.state?.file_name?.toUpperCase() }}
         </span>
+        <!-- 收藏按钮 -->
+        <button
+          v-if="fileInfo.isReady"
+          class="swap swap-flip btn-circle"
+          :class="[
+            {
+              'swap-active': !props.isMark,
+            },
+          ]"
+          :title="getActionNameTip(props.ctx, '收藏', 'toggleFavorite')"
+          @click="props.onMark"
+        >
+          <Icon
+            class="size-6 swap-off app-text-shadow-dark text-pink-600"
+            :icon="ICON_STAR_FILL"
+          />
+          <Icon
+            class="size-6 swap-on app-text-shadow-dark"
+            :icon="ICON_STAR"
+          />
+        </button>
         <!-- 文件大小 -->
         <span :class="styles.fileInfo.size">
           {{ formatFileSize(Number(fileInfo.state?.file_size)) }}
@@ -34,16 +55,26 @@
 </template>
 
 <script setup lang="ts">
+import type { ActionKey } from '../../../../components/XPlayer/components/Shortcuts/shortcuts.types'
+import type { PlayerContext } from '../../../../components/XPlayer/hooks/usePlayerProvide'
 import type { useDataFileInfo } from '../../data/useDataFileInfo'
 import type { useDataPlaylist } from '../../data/useDataPlaylist'
+import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { ICON_STAR, ICON_STAR_FILL } from '../../../../icons'
 import { formatFileSize } from '../../../../utils/format'
 
 const props = defineProps<{
+  /** 播放器上下文 */
+  ctx: PlayerContext
   /** 文件信息 */
   fileInfo: ReturnType<typeof useDataFileInfo>
   /** 播放列表 */
   playlist: ReturnType<typeof useDataPlaylist>
+  /** 收藏状态 */
+  isMark: boolean
+  /** 收藏按钮点击事件 */
+  onMark: () => void
 }>()
 
 const styles = {
@@ -56,17 +87,19 @@ const styles = {
   /** 文件信息样式 */
   fileInfo: {
     container: 'flex flex-col flex-1',
-    file: 'flex flex-wrap items-center gap-2',
-    name: 'font-bold text-base-content text-xl text-shadow-xs/60 line-clamp-2',
-    size: 'text-base-content/70 font-semibold text-shadow-xs/60 whitespace-nowrap flex-shrink-0',
+    file: 'flex flex-wrap items-center gap-2 tracking-tight',
+    name: 'text-xl font-semibold text-base-content line-clamp-2 app-text-shadow-dark',
+    size: 'text-xs font-medium text-base-content whitespace-nowrap flex-shrink-0 app-text-shadow-dark tracking-wide',
     path: {
-      container: ['breadcrumbs text-sm text-base-content/80'],
-    },
-    folder: {
-      btn: 'btn btn-sm btn-ghost btn-circle tooltip tooltip-bottom',
-      icon: 'size-4',
+      container: [
+        'breadcrumbs',
+        'text-xs font-medium text-base-content',
+        'tracking-wide',
+        'app-text-shadow-dark',
+      ],
     },
   },
+
 }
 
 const path = computed(() => {
@@ -77,5 +110,15 @@ const path = computed(() => {
 
 function handleOpenFolder(id: string) {
   window.open(`https://115.com/?cid=${id}&offset=0&tab=&mode=wangpan`, '_blank', 'noreferrer')
+}
+
+/** 获取播放列表按钮提示 */
+function getActionNameTip(
+  ctx: PlayerContext,
+  name: string,
+  actionKey: ActionKey,
+) {
+  const tip = ctx.shortcuts.getShortcutsTip(actionKey)
+  return `${name}${tip}`
 }
 </script>

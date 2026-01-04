@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    data-tip="设置"
+    title="设置"
     @click="toggleMenu"
   >
     <Icon
@@ -44,7 +44,10 @@ const styles = {
   panel: {
     root: 'grid grid-cols-3 gap-3 p-1 w-full max-w-2xl',
   },
-  popup: 'select-none',
+  popup: [
+    'p-2',
+    'select-none',
+  ],
 }
 
 const buttonRef = shallowRef<HTMLElement>()

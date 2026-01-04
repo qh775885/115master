@@ -25,7 +25,10 @@
           v-if="displayMessage.title"
           :class="styles.title"
         >
-          {{ displayMessage.title ?? '' }}
+          <component :is="displayMessage.title" v-if="isVNode(displayMessage.title)" />
+          <template v-else>
+            {{ displayMessage.title ?? '' }}
+          </template>
         </div>
 
         <!-- 进度条 -->
@@ -60,8 +63,8 @@ import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
 
 const styles = {
-  popup: 'left-4! top-4! shadow-xs/90',
-  wrap: 'flex items-center gap-2 px-2',
+  popup: 'left-6! top-6!  bg-base-100/50! backdrop-blur-sm! backdrop-saturate-120! backdrop-brightness-100!',
+  wrap: 'flex items-center gap-2 px-4 py-2',
   content: 'flex flex-col gap-1 flex-1 px-1',
   icon: 'size-6',
   title: 'text-sm font-semibold',

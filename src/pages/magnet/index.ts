@@ -46,7 +46,10 @@ export function registerMagnetTaskHandler() {
  */
 export function registerMagnetProtocolHandler() {
   if (navigator.registerProtocolHandler) {
-    navigator.registerProtocolHandler('magnet', '/web/lixian/master/magnet/?url=%s')
+    navigator.registerProtocolHandler(
+      'magnet',
+      '/web/lixian/master/magnet/?url=%s',
+    )
   }
   else {
     logger.error('此浏览器不支持注册协议处理程序')
@@ -75,7 +78,11 @@ export function magnetPage() {
     return
   }
   setMagnetTask(magnet)
-  const handle = window.open('https://115.com/?cid=0&offset=0&mode=wangpan', '_blank', 'width=1280,height=860')
+  const handle = window.open(
+    'https://115.com/?cid=0&offset=0&mode=wangpan',
+    '_blank',
+    'width=1280,height=860',
+  )
   if (handle) {
     handleOpenAfter()
   }

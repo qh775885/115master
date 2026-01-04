@@ -3,7 +3,6 @@
     :visible="contextMenu.visible.value"
     :x="contextMenu.position.value.x"
     :y="contextMenu.position.value.y"
-    :class="styles.popup"
     @update:visible="contextMenu.hide"
   >
     <ul :class="styles.container">
@@ -58,10 +57,9 @@ defineSlots<{
 }>()
 
 const styles = {
-  popup: 'p-0!',
-  container: 'menu w-48',
-  menuItem: 'menu-item rounded-lg',
-  icon: 'size-6',
+  container: 'menu w-40',
+  menuItem: 'menu-item rounded-xl px-2',
+  icon: 'size-5',
   shortcuts: 'ml-auto text-xs opacity-30',
 }
 

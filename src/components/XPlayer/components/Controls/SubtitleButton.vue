@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    :data-tip="subtitleTip"
+    :title="subtitleTip"
     :disabled="subtitles.loading.value || !subtitles.ready.value || subtitles.list.value?.length === 0"
     @click="toggleMenu"
   >
@@ -96,9 +96,14 @@ const styles = {
       controlStyles.menu.root,
       'max-h-72 max-w-xl overflow-y-auto overflow-x-hidden !flex-nowrap',
     ],
-    a: [controlStyles.menu.a, 'flex items-center py-2 w-full gap-2'],
+    a: [
+      controlStyles.menu.a,
+      'flex items-center',
+      'w-full gap-1',
+      'py-2',
+    ],
     label: [controlStyles.menu.label, 'w-xs line-clamp-2'],
-    action: ['btn btn-circle btn-xs btn-soft flex-shrink-0'],
+    action: ['btn btn-circle btn-ghost btn-xs flex-shrink-0'],
     actionIcon: ['size-5'],
   },
   btn: controlStyles.btn,

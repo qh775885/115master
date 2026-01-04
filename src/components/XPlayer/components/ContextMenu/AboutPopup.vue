@@ -2,6 +2,7 @@
   <Popup
     :visible="visible"
     :class="styles.root"
+    :mild="true"
     @update:visible="$emit('update:visible', $event)"
   >
     <div :class="styles.container.main">
@@ -14,7 +15,7 @@
           </h3>
         </div>
         <button :class="styles.closeButton" @click="$emit('update:visible', false)">
-          <Icon :icon="ICONS.ICON_CLOSE" class="size-4" />
+          <Icon :icon="ICONS.ICON_CLOSE" class="size-6" />
         </button>
       </div>
 
@@ -56,9 +57,9 @@ const styles = {
   root: 'top-1/2! left-1/2! transform! -translate-x-1/2! -translate-y-1/2! w-lg max-h-2/3 p-0!',
   // 容器样式
   container: {
-    main: 'bg-base-100 rounded-xl flex flex-col',
+    main: 'rounded-xl flex flex-col',
     header:
-      'flex justify-between items-center px-4 py-2 bg-base-200 rounded-t-xl',
+      'flex justify-between items-center px-4 py-4 rounded-t-xl',
     headerTitle: 'text-base font-medium text-base-content',
     content: 'overflow-y-auto max-h-96',
     sectionsWrapper: 'space-y-6 text-sm',
@@ -69,7 +70,7 @@ const styles = {
     content: 'px-6 py-4',
   },
   // 关闭按钮样式
-  closeButton: 'btn btn-ghost btn-circle btn-xs',
+  closeButton: 'btn btn-ghost btn-circle btn-sm',
   // 默认内容样式
   defaultContent: 'text-center text-base-content/60 py-8',
   // 标题容器样式

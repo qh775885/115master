@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="styles.btnText.root"
-    :data-tip="qualityTip"
+    :title="qualityTip"
     @click="toggleMenu"
   >
     <span>{{ currentQuality }}</span>

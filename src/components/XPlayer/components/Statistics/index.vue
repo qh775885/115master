@@ -2,6 +2,7 @@
   <Popup
     :class="styles.root"
     :visible="statistics.visible.value"
+    :mild="true"
   >
     <div :class="styles.container.main">
       <!-- 头部 -->
@@ -163,9 +164,9 @@ const styles = {
   titleIcon: 'size-6',
   // 容器样式
   container: {
-    main: 'bg-base-100 h-full rounded-xl flex flex-col',
+    main: 'h-full rounded-xl flex flex-col',
     header:
-      'flex justify-between items-center px-4 py-2 bg-base-200 rounded-t-xl',
+      'flex justify-between items-center px-4 py-4 rounded-t-xl',
     headerTitle: 'text-base font-medium text-base-content',
     content: 'overflow-y-auto flex-1 pb-5',
     sectionsWrapper: 'space-y-6 text-sm',
@@ -174,7 +175,7 @@ const styles = {
   section: {
     wrapper: 'stats-section',
     header: [
-      'sticky top-0 bg-base-100 py-2 px-6 text-base font-medium mb-2 text-base-content border-b border-base-content/10 shadow-sm',
+      'sticky top-0 py-2 px-6 text-base font-medium mb-2 text-base-content border-b border-base-content/10 shadow-sm',
       'flex items-baseline gap-2',
     ],
     headerDesc: 'text-base-content/60 text-xs',
