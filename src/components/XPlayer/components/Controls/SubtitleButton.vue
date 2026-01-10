@@ -44,31 +44,15 @@
           <Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon" />
           <template v-if="item.id !== -1">
             <SubtitleDisplay
-              class="min-w-0 flex-1"
               :label="item.label"
               :format="item.raw?.format"
               :source="item.value?.source"
               :subtitle-index="item.index"
               :total="subtitles.total.value"
+              :show-actions="true"
+              @view="viewSubtitle(item.value!)"
+              @download="downloadSubtitle(item.value!)"
             />
-            <button
-              v-if="item.value"
-              type="button"
-              :class="[styles.menu.action]"
-              :title="`查看 ${item.label}`"
-              @click.stop="viewSubtitle(item.value)"
-            >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_VIEW" />
-            </button>
-            <button
-              v-if="item.value"
-              type="button"
-              :class="[styles.menu.action]"
-              :title="`下载 ${item.label}`"
-              @click.stop="downloadSubtitle(item.value)"
-            >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_DOWNLOAD" />
-            </button>
           </template>
           <template v-else>
             <span :class="[styles.menu.label]">{{ item.label }}</span>
@@ -95,17 +79,19 @@ const styles = clsx({
     ...controlStyles.menu,
     root: [
       controlStyles.menu.root,
-      'max-h-72 max-w-xl !flex-nowrap overflow-x-hidden overflow-y-auto',
+      'max-h-80 max-w-xl !flex-nowrap',
+      'overflow-x-hidden overflow-y-auto',
+      '[&::-webkit-scrollbar-track]:my-6',
     ],
     a: [
       controlStyles.menu.a,
       'flex items-center',
-      'w-full gap-1',
-      'py-2',
+      'w-full gap-2',
+      'px-3 py-2',
+      'hover:bg-base-content/10',
+      'transition-colors',
     ],
-    label: [controlStyles.menu.label, 'line-clamp-2 w-xs'],
-    action: ['btn btn-circle btn-ghost btn-xs flex-shrink-0'],
-    actionIcon: ['size-5'],
+    label: 'text-base-content line-clamp-1 text-sm font-medium',
   },
   btn: controlStyles.btn,
 })
