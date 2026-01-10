@@ -35,6 +35,10 @@
               "
               v-model:auto-play="preferences.autoPlay"
               v-model:shortcuts-preference="preferences.shortcutsPreference"
+              v-model:long-press-playback-rate="preferences.longPressPlaybackRate"
+              v-model:seek-seconds="preferences.seekSeconds"
+              v-model:high-speed-seek-seconds="preferences.highSpeedSeekSeconds"
+              v-model:percentage-seek="preferences.percentageSeek"
               :class="[styles.player.video]"
               :style="{
                 aspectRatio,

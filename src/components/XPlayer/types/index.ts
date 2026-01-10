@@ -135,6 +135,14 @@ export interface XPlayerProps {
   thumbnailsSamplingInterval: number
   /** 快捷键偏好 */
   shortcutsPreference: ShortcutsPreference
+  /** 长按倍速 */
+  longPressPlaybackRate: number
+  /** 快进 / 后退 */
+  seekSeconds: number
+  /** 高速快进 / 后退 */
+  highSpeedSeekSeconds: number
+  /** 百分比快进 / 后退 */
+  percentageSeek: number
   /** 是否有上一集 */
   hasPrevious?: boolean
   /** 是否有下一集 */
@@ -188,6 +196,14 @@ export interface XPlayerEmit {
   'update:thumbnailsSamplingInterval': [number]
   /** 快捷键偏好 */
   'update:shortcutsPreference': [ShortcutsPreference]
+  /** 长按倍速 */
+  'update:longPressPlaybackRate': [number]
+  /** 快进 / 后退 */
+  'update:seekSeconds': [number]
+  /** 高速快进 / 后退 */
+  'update:highSpeedSeekSeconds': [number]
+  /** 百分比快进 / 后退 */
+  'update:percentageSeek': [number]
   /** 播放上一集 */
   'playPrevious': [PlayerContext]
   /** 播放下一集 */

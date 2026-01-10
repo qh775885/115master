@@ -7,11 +7,23 @@ import { ENHANCE_CONFIGS } from '../../hooks/useVideoEnhance'
 import {
   ACTION_GROUPS,
   ENHANCE_OFFSET,
-  FAST_JUMP_OFFSET,
-  HIGH_FAST_JUMP_OFFSET,
   VOLUME_OFFSET,
 } from './shortcuts.const'
 import { withGroup } from './shortcuts.utils'
+
+/** 获取快进秒数 (从偏好设置读取) */
+function getSeekSeconds(ctx: PlayerContext): number {
+  const seconds = ctx.rootPropsVm.seekSeconds.value
+  // 限制在 1-300 范围内
+  return Math.max(1, Math.min(300, seconds))
+}
+
+/** 获取高速快进秒数 (从偏好设置读取) */
+function getHighSeekSeconds(ctx: PlayerContext): number {
+  const seconds = ctx.rootPropsVm.highSpeedSeekSeconds.value
+  // 限制在 1-300 范围内
+  return Math.max(1, Math.min(300, seconds))
+}
 
 /** 播放/进度动作 */
 const PLAY_ACTION_MAP = withGroup({
@@ -39,7 +51,7 @@ const PLAY_ACTION_MAP = withGroup({
         ctx.hud?.showLongPressFastForward()
         return
       }
-      const value = FAST_JUMP_OFFSET
+      const value = getSeekSeconds(ctx)
       ctx.playerCore.value?.skip(value)
       ctx.hud?.showFastJumpHud(value)
     },
@@ -58,7 +70,7 @@ const PLAY_ACTION_MAP = withGroup({
     name: '后退',
     allowRepeat: true,
     keydown: (ctx) => {
-      const value = -FAST_JUMP_OFFSET
+      const value = -getSeekSeconds(ctx)
       ctx.playerCore.value?.skip(value)
       ctx.hud?.showFastJumpHud(value)
     },
@@ -71,7 +83,7 @@ const PLAY_ACTION_MAP = withGroup({
     name: '高速快进',
     allowRepeat: true,
     keydown: (ctx) => {
-      const value = HIGH_FAST_JUMP_OFFSET
+      const value = getHighSeekSeconds(ctx)
       ctx.playerCore.value?.skip(value)
       ctx.hud?.showFastJumpHud(value)
     },
@@ -84,17 +96,51 @@ const PLAY_ACTION_MAP = withGroup({
     name: '高速后退',
     allowRepeat: true,
     keydown: (ctx) => {
-      const value = -HIGH_FAST_JUMP_OFFSET
+      const value = -getHighSeekSeconds(ctx)
       ctx.playerCore.value?.skip(value)
       ctx.hud?.showFastJumpHud(value)
     },
   },
 
   /**
-   * 进度跳转
+   * 百分比快进
+   */
+  percentageFastForward: {
+    name: '百分比快进',
+    allowRepeat: true,
+    keydown: (ctx) => {
+      const percentage = ctx.rootPropsVm.percentageSeek.value
+      const duration = ctx.playerCore.value?.duration || 0
+      const seconds = (duration * percentage) / 100
+      const finalSeconds = seconds > 0 ? seconds : 1
+      console.log('[percentageFastForward]', { percentage, duration, seconds, finalSeconds })
+      ctx.playerCore.value?.skip(finalSeconds)
+      ctx.hud?.showFastJumpHud(percentage, true)
+    },
+  },
+
+  /**
+   * 百分比后退
+   */
+  percentageFastBackward: {
+    name: '百分比后退',
+    allowRepeat: true,
+    keydown: (ctx) => {
+      const percentage = ctx.rootPropsVm.percentageSeek.value
+      const duration = ctx.playerCore.value?.duration || 0
+      const seconds = (duration * percentage) / 100
+      const finalSeconds = seconds > 0 ? seconds : 1
+      console.log('[percentageFastBackward]', { percentage, duration, seconds, finalSeconds })
+      ctx.playerCore.value?.skip(-finalSeconds)
+      ctx.hud?.showFastJumpHud(-percentage, true)
+    },
+  },
+
+  /**
+   * 跳转
    */
   progress: {
-    name: '0-90% 进度跳转',
+    name: '0-90% 跳转',
     maxShortcuts: 10,
     keydown: (ctx, _event, action) => {
       const index = action.index
@@ -419,8 +465,7 @@ const OTHER_ACTION_MAP = withGroup({
   shortcuts: {
     name: '快捷键设置',
     keydown: (ctx) => {
-      ctx.contextMenu.showShortcuts.value
-      = !ctx.contextMenu.showShortcuts.value
+      ctx.contextMenu.openSettings('shortcuts')
     },
   },
 

@@ -1,5 +1,5 @@
 <template>
-  <div :class="[styles.row, conflictMessage && styles.rowWithConflict]">
+  <div :class="[styles.row]">
     <span :class="styles.label">
       {{ action.name }}
     </span>
@@ -60,27 +60,31 @@ const emit = defineEmits<{
 const styles = clsx({
   row: [
     'group/row',
+    'relative',
     'grid grid-cols-[110px_1fr_auto] items-start',
-    'gap-4 px-5 py-2.5',
-    'min-h-13',
-    'rounded-xl',
-    'transition-colors',
-    'hover:bg-base-200/70',
+    'gap-4 px-4 py-4',
+    'before:[""]',
+    'before:absolute',
+    'before:inset-x-4',
+    'before:inset-y-0',
+    'before:border-b-1',
+    'before:border-base-content/5',
+    'before:pointer-events-none',
+    'last:before:border-b-0',
   ],
-  rowWithConflict: 'pb-1',
   label: [
-    'text-base-content/75 truncate text-sm',
+    'text-base-content/90 truncate text-sm font-medium',
     'pt-1',
   ],
-  keysWrapper: 'flex flex-col gap-1',
+  keysWrapper: 'flex flex-col',
   keys: [
     'flex flex-wrap items-center',
-    'gap-3',
+    'gap-x-2 gap-y-2',
   ],
   reset: [
-    'btn btn-sm btn-ghost btn-circle btn-error',
+    'btn btn-xs btn-circle mt-0.5',
   ],
-  conflict: 'text-error text-xs font-medium',
+  conflict: 'text-error mt-1 text-xs font-medium',
 })
 
 const { shortcuts } = usePlayerContext()

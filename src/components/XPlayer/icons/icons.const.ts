@@ -96,3 +96,7 @@ export const ICON_IMPORT = 'material-symbols:download-rounded'
 export const ICON_RESET_ALL = 'material-symbols:restart-alt-rounded'
 // 倍速
 export const ICON_PLAYBACK_RATE = 'material-symbols:speed-outline-rounded'
+// 画质
+export const ICON_QUALITY = 'material-symbols:hd-rounded'
+// 加号
+export const ICON_PLUS = 'mdi:plus'

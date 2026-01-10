@@ -225,13 +225,15 @@ export function useHud(ctx: PlayerContext) {
     })
   }
 
-  /** 显示快进/后退HUD */
-  const showFastJumpHud = (value: number) => {
+  /** 显示快进 / 后退HUD */
+  const showFastJumpHud = (value: number, isPercent = false) => {
     /** 计算当前进度百分比 */
     const currentProgress = getCurrentProgressPercentage()
     const isForward = value > 0
-    const dirText = isForward ? '快进' : '后退'
-    const title = `${dirText} ${(value)}s`
+    const dirText = isForward ? '+' : '-'
+    const absValue = Math.abs(value)
+    /** 如果是百分比模式，value 已经是百分比值（例如 1），直接使用 */
+    const title = isPercent ? `${dirText}${absValue}%` : `${dirText}${(absValue)}s`
     const icon = isForward ? ICONS.ICON_FAST_FORWARD : ICONS.ICON_FAST_REWIND
 
     // 创建消息并添加进度信息
@@ -250,10 +252,11 @@ export function useHud(ctx: PlayerContext) {
 
   /** 显示长按快进HUD */
   const showLongPressFastForward = () => {
+    const rate = ctx.playbackRate.longPressRate
     /** 计算当前进度百分比 */
     const currentProgress = getCurrentProgressPercentage()
     show({
-      title: '快速播放',
+      title: `快速播放 ${rate.value}x`,
       icon: ICONS.ICON_ROCKET_LAUNCH,
       value: `${formatTime(ctx.playerCore.value?.currentTime || 0)}`,
       progress: {
