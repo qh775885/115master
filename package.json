@@ -74,7 +74,7 @@
     "@vitest/coverage-v8": "4.0.16",
     "@vitest/ui": "^4.0.16",
     "cross-env": "^7.0.3",
-    "daisyui": "^5.0.35",
+    "daisyui": "^5.5.14",
     "eslint": "^9.30.0",
     "eslint-plugin-format": "^1.0.1",
     "eslint-plugin-tailwindcss": "4.0.0-beta.0",

@@ -1,11 +1,9 @@
 <template>
   <div
     ref="containerRef"
-    :class="[
-      styles.base,
-      isRecording ? styles.recording : '',
-      error ? styles.error : '',
-    ]"
+    :class="[styles.base]"
+    :data-recording="isRecording"
+    :data-error="props.error"
     tabindex="0"
     @focus="handleStartRecording"
     @blur="handleStopRecording"
@@ -13,9 +11,8 @@
     @keyup.prevent="handleKeyUp"
   >
     <kbd v-if="displayValue" :class="styles.kbd">{{ displayValue }}</kbd>
-    <span v-else :class="styles.placeholder">
-      {{ isRecording ? '录制中...' : '新增快捷键' }}
-    </span>
+    <span v-else-if="isRecording" :class="styles.recordingText">录制中...</span>
+    <Icon v-else :class="styles.placeholder" :icon="ICONS.ICON_PLUS" />
     <button
       v-if="modelValue && !isRecording"
       :class="styles.remove" type="button"
@@ -58,32 +55,32 @@ const emit = defineEmits<{
 
 const styles = clsx({
   base: [
-    'relative flex items-center justify-center rounded-full',
-    'h-8 min-w-25 px-3',
-    'shadow-sm',
-    'cursor-pointer transition-all select-none',
-    'border-base-content/15 border-[1px]',
-    'hover:border-base-content/50',
-    'focus:border-primary/60 focus:ring-primary/20 focus:ring-2 focus:outline-none',
     'group/recorder',
+    'relative flex items-center justify-center',
+    'h-7 min-w-25 px-2',
+    'rounded-full',
+    'cursor-pointer select-none',
+    'text-xs',
+    'bg-base-content/10',
+    'border-base-content/11 border-1',
     'tooltip tooltip-bottom tooltip-error',
+    'transition-all',
+    'hover:border-base-content/50',
+    'data-[recording="true"]:border-primary/70',
+    'data-[recording="true"]:ring-3',
+    'data-[recording="true"]:ring-primary/30',
+    'data-[recording="true"]:bg-primary/90',
+    'data-[error="true"]:border-error/60',
+    'data-[error="true"]:bg-error/30',
   ],
-  recording: [
-    'border-primary',
-    'from-primary/10 to-primary/5 bg-gradient-to-br',
-    'ring-primary/30 shadow-md ring-2',
-  ],
-  error: [
-    'border-error/60',
-    'from-error/15 to-error/5 bg-gradient-to-br',
-    'shadow-md',
-  ],
-  kbd: 'text-base-content/90 font-sans text-xs font-semibold ',
-  placeholder: 'text-base-content/45 text-xs',
+  kbd: 'text-base-content/90 font-sans font-semibold ',
+  placeholder: 'text-base-content/30 size-4',
+  recordingText: 'text-base-content font-semibold',
   remove: [
-    'absolute -top-1.5 -right-1.5 p-1',
+    'absolute -top-2.5 -right-2 p-1',
     'btn btn-xs btn-error btn-circle',
-    'opacity-0 group-hover/recorder:opacity-100',
+    'opacity-0',
+    'group-hover/recorder:opacity-100',
   ],
 })
 

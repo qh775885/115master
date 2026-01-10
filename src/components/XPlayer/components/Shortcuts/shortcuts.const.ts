@@ -13,9 +13,6 @@ import type {
   KeyBindings,
   Platform,
 } from './shortcuts.types'
-import {
-  ICONS,
-} from '../../index.const'
 
 /** 导出配置文件名前缀 */
 export const EXPORT_FILE_PREFIX = `xplayer-shortcuts-config`
@@ -26,10 +23,10 @@ export const KEY_BINDING_SEPARATOR = '+'
 /** 视频色彩偏移 */
 export const ENHANCE_OFFSET = 10
 
-/** 快进/后退偏移 */
+/** 快进 / 后退偏移 */
 export const FAST_JUMP_OFFSET = 5
 
-/** 高速快进/后退偏移 */
+/** 高速快进 / 后退偏移 */
 export const HIGH_FAST_JUMP_OFFSET = 30
 
 /** 音量调整偏移 */
@@ -53,15 +50,15 @@ export const MULTI_LAYER_KEYS: Record<string, string> = {
 
 /** 动作分组定义 */
 export const ACTION_GROUPS = {
-  PLAY: { key: 'play', name: '播放 / 进度', icon: ICONS.ICON_PLAY },
-  SOUND: { key: 'sound', name: '声音', icon: ICONS.ICON_VOLUME_UP },
-  EPISODE: { key: 'episode', name: '播放列表 / 画质', icon: ICONS.ICON_PLAYLIST },
-  SUBTITLE: { key: 'subtitle', name: '字幕', icon: ICONS.ICON_SUBTITLES },
-  WINDOW: { key: 'window', name: '窗口', icon: ICONS.ICON_WINDOW },
-  TRANSFORM: { key: 'transform', name: '画面变换', icon: ICONS.ICON_TRANSFORM },
-  ENHANCE: { key: 'enhance', name: '视频色彩', icon: ICONS.ICON_COLOR_ADJUST },
-  EXTERNAL: { key: 'external', name: '扩展功能', icon: ICONS.ICON_EXTENSION_FEATURE },
-  OTHER: { key: 'other', name: '其他', icon: ICONS.ICON_OTHER },
+  PLAY: { key: 'play', name: '播放 / 进度' },
+  SOUND: { key: 'sound', name: '声音' },
+  EPISODE: { key: 'episode', name: '播放列表 / 画质' },
+  SUBTITLE: { key: 'subtitle', name: '字幕' },
+  WINDOW: { key: 'window', name: '窗口' },
+  TRANSFORM: { key: 'transform', name: '画面变换' },
+  ENHANCE: { key: 'enhance', name: '视频色彩' },
+  EXTERNAL: { key: 'external', name: '扩展功能' },
+  OTHER: { key: 'other', name: '其他' },
 } as const satisfies Record<string, ActionGroup>
 
 /** 修饰键 */
@@ -122,6 +119,8 @@ export const DEFAULT_ACTION_KEY_BINDINGS = {
   fastBackward: ['ArrowLeft', 'a'],
   highFastForward: ['ArrowUp', 'w'],
   highFastBackward: ['ArrowDown', 's'],
+  percentageFastForward: [],
+  percentageFastBackward: [],
   progress: ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'],
   playbackRateUp: [],
   playbackRateDown: [],

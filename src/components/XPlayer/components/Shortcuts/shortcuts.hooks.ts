@@ -25,6 +25,7 @@ import {
 import {
   getShortcutsTip as _getShortcutsTip,
   calculateAllConflicts,
+  isEditableElement,
   isSameKeyBinding,
   isSameKeyBindings,
   matchAction,
@@ -80,6 +81,10 @@ export function useShortcutsActionListener(
     if (recordState.isRecording.value)
       return
 
+    // 如果目标是可编辑元素，不处理快捷键
+    if (isEditableElement(event.target))
+      return
+
     const action = matchAction(
       event,
       mergedActionKeyBindings.value,
@@ -96,6 +101,10 @@ export function useShortcutsActionListener(
 
   function handleKeyup(event: KeyboardEvent) {
     if (recordState.isRecording.value)
+      return
+
+    // 如果目标是可编辑元素，不处理快捷键
+    if (isEditableElement(event.target))
       return
 
     const action = matchAction(

@@ -93,6 +93,7 @@ import SubtitleInfo from './components/Controls/SubtitleInfo.vue'
 import HUD from './components/HUD/index.vue'
 import Loading from './components/Loading/index.vue'
 import PlayAnimation from './components/PlayAnimation/index.vue'
+import { FAST_JUMP_OFFSET, HIGH_FAST_JUMP_OFFSET } from './components/Shortcuts/shortcuts.const'
 import Statistics from './components/Statistics/index.vue'
 import Subtitle from './components/Subtitle/index.vue'
 import { usePlayerProvide } from './hooks/usePlayerProvide'
@@ -104,6 +105,11 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
   onSubtitleChange: undefined,
   hlsConfig: () => ({}),
   avPlayerConfig: () => ({}),
+  quality: 0,
+  longPressPlaybackRate: 15,
+  seekSeconds: FAST_JUMP_OFFSET,
+  highSpeedSeekSeconds: HIGH_FAST_JUMP_OFFSET,
+  percentageSeek: 10,
 })
 
 /** 事件 */

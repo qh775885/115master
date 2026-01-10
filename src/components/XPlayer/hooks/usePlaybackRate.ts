@@ -9,6 +9,12 @@ export function usePlaybackRate(ctx: PlayerContext) {
   const MIN_RATE = 0.3
   /** 最大倍速 */
   const MAX_RATE = 15
+
+  /** 长按倍速 (从偏好设置读取) */
+  const longPressRate = computed(() => {
+    const rate = ctx.rootPropsVm.longPressPlaybackRate.value
+    return rate
+  })
   /** 预设的倍速选项 */
   const rateOptions = shallowRef([
     MIN_RATE,
@@ -69,7 +75,7 @@ export function usePlaybackRate(ctx: PlayerContext) {
     if (!ctx.playerCore.value || fastForward.value)
       return
     fastForward.value = true
-    set(MAX_RATE)
+    set(longPressRate.value)
     holdPlaybackRate.value = current.value
     if (ctx.playerCore.value.paused) {
       ctx.playerCore.value.play()
@@ -95,6 +101,7 @@ export function usePlaybackRate(ctx: PlayerContext) {
     up,
     down,
     downWithLowerLimit,
+    longPressRate,
     startLongPressFastForward,
     stopLongPressFastForward,
   }

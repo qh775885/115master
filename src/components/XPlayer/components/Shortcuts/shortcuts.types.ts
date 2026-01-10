@@ -56,7 +56,7 @@ export interface ActionGroup {
   /**
    * icon
    */
-  icon: string
+  icon?: string
 }
 
 /** 动作 */

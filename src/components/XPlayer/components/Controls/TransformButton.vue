@@ -2,17 +2,18 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    title="设置"
+    title="画面变换"
     @click="toggleMenu"
   >
     <Icon
-      class="transition-transform" :class="[
+      class="transition-transform"
+      :class="[
         styles.btn.icon,
         {
           'rotate-90': menuVisible,
         },
       ]"
-      :icon="ICONS.ICON_SETTINGS"
+      :icon="ICONS.ICON_TRANSFORM"
     />
   </button>
   <Popup
@@ -21,11 +22,7 @@
     placement="top"
     :class="[styles.popup]"
   >
-    <div :class="[styles.panel.root]">
-      <PlaySettings />
-      <ThumbnailSettings />
-      <TransformSettings />
-    </div>
+    <TransformSettings />
   </Popup>
 </template>
 
@@ -36,15 +33,10 @@ import { clsx } from '../../../../utils/clsx'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
-import PlaySettings from './PlaySettings.vue'
-import ThumbnailSettings from './ThumbnailSettings.vue'
 import TransformSettings from './TransformSettings.vue'
 
 const styles = clsx({
   ...controlStyles,
-  panel: {
-    root: 'grid w-full max-w-2xl grid-cols-3 gap-3 p-1',
-  },
   popup: [
     'p-2',
     'select-none',
