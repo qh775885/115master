@@ -1,4 +1,5 @@
 import antfu from '@antfu/eslint-config'
+import tailwind from 'eslint-plugin-tailwindcss'
 
 export default antfu({
   formatters: true,
@@ -40,5 +41,15 @@ export default antfu({
     'vue/block-order': ['error', {
       order: ['template', 'script', 'style'],
     }],
+  },
+}, ...tailwind.configs['flat/recommended'], {
+  settings: {
+    tailwindcss: {
+      // 必须配置这个 config 为 `{}`，否则无法执行。
+      config: {},
+    },
+  },
+  rules: {
+    'tailwindcss/no-custom-classname': 'off',
   },
 })

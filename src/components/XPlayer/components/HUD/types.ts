@@ -11,7 +11,7 @@ export interface HudMessageProgress {
 
 // HUD消息
 export interface HudMessage {
-  title?: string /** 标题 */
+  title?: string | VNode /** 标题 */
   value?: number | string | boolean | VNode /** 值 - 支持 JSX/VNode */
   icon?: string /** 图标 */
   iconClass?: string /** 图标类名 */

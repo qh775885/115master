@@ -3,10 +3,11 @@
     ref="buttonRef"
     :class="[styles.btnText.root]"
     :disabled="!playerCore?.canplay"
-    :data-tip="playbackRateTip"
+    :title="playbackRateTip"
     @click="toggleSpeedMenu"
   >
-    {{ buttonText }}
+    <Icon v-if="playbackRate.current.value === 1" :class="styles.btn.icon" :icon="ICONS.ICON_PLAYBACK_RATE" />
+    <span v-else>{{ buttonText }}</span>
   </button>
   <Popup
     v-model:visible="menuVisible"
@@ -30,14 +31,17 @@
 </template>
 
 <script setup lang="ts">
+import { Icon } from '@iconify/vue'
 import { computed, ref, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
+import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
-}
+})
 
 const NAME = '倍速'
 
@@ -48,9 +52,7 @@ const rateOptions = computed(() =>
 const menuVisible = shallowRef(false)
 const buttonRef = ref<HTMLElement>()
 const buttonText = computed(() => {
-  return playbackRate.current.value === 1
-    ? NAME
-    : `${playbackRate.current.value}X`
+  return `${playbackRate.current.value}X`
 })
 
 const playbackRateTip = computed(() => {

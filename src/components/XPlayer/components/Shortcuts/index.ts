@@ -12,5 +12,3 @@ export type * as Shortcuts from './shortcuts.types'
 
 // Utilities
 export * as shortcuts from './shortcuts.utils'
-
-export { default as ShortcutsPopup } from './ShortcutsPopup.vue'

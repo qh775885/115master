@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="[styles.btn.root]"
-    :data-tip="subtitleTip"
+    :title="subtitleTip"
     :disabled="subtitles.loading.value || !subtitles.ready.value || subtitles.list.value?.length === 0"
     @click="toggleMenu"
   >
@@ -44,31 +44,15 @@
           <Icon v-if="item.icon" :class="[styles.menu.icon]" :icon="item.icon" />
           <template v-if="item.id !== -1">
             <SubtitleDisplay
-              class="flex-1 min-w-0"
               :label="item.label"
               :format="item.raw?.format"
               :source="item.value?.source"
               :subtitle-index="item.index"
               :total="subtitles.total.value"
+              :show-actions="true"
+              @view="viewSubtitle(item.value!)"
+              @download="downloadSubtitle(item.value!)"
             />
-            <button
-              v-if="item.value"
-              type="button"
-              :class="[styles.menu.action]"
-              :title="`查看 ${item.label}`"
-              @click.stop="viewSubtitle(item.value)"
-            >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_VIEW" />
-            </button>
-            <button
-              v-if="item.value"
-              type="button"
-              :class="[styles.menu.action]"
-              :title="`下载 ${item.label}`"
-              @click.stop="downloadSubtitle(item.value)"
-            >
-              <Icon :class="[styles.menu.actionIcon]" :icon="ICONS.ICON_DOWNLOAD" />
-            </button>
           </template>
           <template v-else>
             <span :class="[styles.menu.label]">{{ item.label }}</span>
@@ -83,26 +67,34 @@
 import type { Subtitle } from '../../types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 import SubtitleDisplay from '../SubtitleDisplay.vue'
 
-const styles = {
+const styles = clsx({
   menu: {
     ...controlStyles.menu,
     root: [
       controlStyles.menu.root,
-      'max-h-72 max-w-xl overflow-y-auto overflow-x-hidden !flex-nowrap',
+      'max-h-80 max-w-xl !flex-nowrap',
+      'overflow-x-hidden overflow-y-auto',
+      '[&::-webkit-scrollbar-track]:my-6',
     ],
-    a: [controlStyles.menu.a, 'flex items-center py-2 w-full gap-2'],
-    label: [controlStyles.menu.label, 'w-xs line-clamp-2'],
-    action: ['btn btn-circle btn-xs btn-soft flex-shrink-0'],
-    actionIcon: ['size-5'],
+    a: [
+      controlStyles.menu.a,
+      'flex items-center',
+      'w-full gap-2',
+      'px-3 py-2',
+      'hover:bg-base-content/10',
+      'transition-colors',
+    ],
+    label: 'text-base-content line-clamp-1 text-sm font-medium',
   },
   btn: controlStyles.btn,
-}
+})
 
 const { subtitles, shortcuts, logger } = usePlayerContext()
 const menuVisible = shallowRef(false)

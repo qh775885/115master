@@ -1,11 +1,9 @@
 <template>
   <div
     ref="containerRef"
-    :class="[
-      styles.base,
-      isRecording ? styles.recording : '',
-      error ? styles.error : '',
-    ]"
+    :class="[styles.base]"
+    :data-recording="isRecording"
+    :data-error="props.error"
     tabindex="0"
     @focus="handleStartRecording"
     @blur="handleStopRecording"
@@ -13,9 +11,8 @@
     @keyup.prevent="handleKeyUp"
   >
     <kbd v-if="displayValue" :class="styles.kbd">{{ displayValue }}</kbd>
-    <span v-else :class="styles.placeholder">
-      {{ isRecording ? '录制中...' : '新增快捷键' }}
-    </span>
+    <span v-else-if="isRecording" :class="styles.recordingText">录制中...</span>
+    <Icon v-else :class="styles.placeholder" :icon="ICONS.ICON_PLUS" />
     <button
       v-if="modelValue && !isRecording"
       :class="styles.remove" type="button"
@@ -35,6 +32,7 @@
 import type { KeyBindingStr } from '../shortcuts.types'
 import { Icon } from '@iconify/vue'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../../utils/clsx'
 import { usePlayerContext } from '../../../hooks/usePlayerProvide'
 import { ICONS } from '../../../index.const'
 import {
@@ -55,36 +53,36 @@ const emit = defineEmits<{
   'update:modelValue': [value: KeyBindingStr]
 }>()
 
-const styles = {
+const styles = clsx({
   base: [
-    'relative flex items-center justify-center rounded-full',
-    'min-w-25 h-8 px-3',
-    'shadow-sm',
-    'cursor-pointer select-none transition-all',
-    'border-[1px] border-base-content/15',
-    'hover:border-base-content/50',
-    'focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/20',
     'group/recorder',
+    'relative flex items-center justify-center',
+    'h-7 min-w-25 px-2',
+    'rounded-full',
+    'cursor-pointer select-none',
+    'text-xs',
+    'bg-base-content/10',
+    'border-base-content/11 border-1',
     'tooltip tooltip-bottom tooltip-error',
+    'transition-all',
+    'hover:border-base-content/50',
+    'data-[recording="true"]:border-primary/70',
+    'data-[recording="true"]:ring-3',
+    'data-[recording="true"]:ring-primary/30',
+    'data-[recording="true"]:bg-primary/90',
+    'data-[error="true"]:border-error/60',
+    'data-[error="true"]:bg-error/30',
   ],
-  recording: [
-    'border-primary',
-    'bg-gradient-to-br from-primary/10 to-primary/5',
-    'shadow-md ring-2 ring-primary/30',
-  ],
-  error: [
-    'border-error/60',
-    'bg-gradient-to-br from-error/15 to-error/5',
-    'shadow-md',
-  ],
-  kbd: 'text-xs font-semibold font-sans text-base-content/90 ',
-  placeholder: 'text-xs text-base-content/45',
+  kbd: 'text-base-content/90 font-sans font-semibold ',
+  placeholder: 'text-base-content/30 size-4',
+  recordingText: 'text-base-content font-semibold',
   remove: [
-    'absolute -right-1.5 -top-1.5 p-1',
+    'absolute -top-2.5 -right-2 p-1',
     'btn btn-xs btn-error btn-circle',
-    'opacity-0 group-hover/recorder:opacity-100',
+    'opacity-0',
+    'group-hover/recorder:opacity-100',
   ],
-}
+})
 
 const ctx = usePlayerContext()
 const containerRef = shallowRef<HTMLDivElement>()

@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { ICON_COPY } from '../../../../../icons'
+import { clsx } from '../../../../../utils/clsx'
 import { useCopy } from '../hooks/useCopy'
 
 const props = defineProps<{
@@ -30,14 +31,14 @@ async function handleCopy() {
 }
 
 /** 样式常量定义 */
-const styles = {
+const styles = clsx({
   button: {
     base: 'btn btn-xs btn-ghost btn-circle transition-all duration-200 ease-in-out',
     normal: 'btn-neutral',
     success: 'btn-primary',
   },
-  text: 'whitespace-nowrap text-xs',
-}
+  text: 'text-xs whitespace-nowrap',
+})
 </script>
 
 <style scoped>

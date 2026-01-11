@@ -2,7 +2,7 @@
   <button
     ref="buttonRef"
     :class="styles.btnText.root"
-    :data-tip="qualityTip"
+    :title="qualityTip"
     @click="toggleMenu"
   >
     <span>{{ currentQuality }}</span>
@@ -37,13 +37,14 @@
 <script setup lang="ts">
 import type { VideoSource } from '../../types'
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
-}
+})
 
 const { source, shortcuts } = usePlayerContext()
 const menuVisible = shallowRef(false)

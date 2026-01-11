@@ -1,121 +1,70 @@
 <template>
   <div :class="styles.container.main">
-    <!-- Drawer 容器 -->
-    <div :class="styles.drawer.main">
-      <!-- Drawer toggle checkbox -->
-      <input
-        id="playlist-drawer"
-        type="checkbox"
-        :class="styles.drawer.toggle"
-        :checked="preferences.showPlaylist"
-        @change="togglePlaylist"
+    <!-- 主内容区域 -->
+    <div :class="styles.container.pageMain">
+      <div
+        :class="[
+          styles.player.container,
+          preferences.showPlaylist && styles.player.containerFold,
+        ]"
       >
-
-      <!-- Drawer content (主内容区域) -->
-      <div :class="styles.drawer.content">
-        <div :class="styles.container.pageMain">
-          <div
-            :class="[
-              styles.player.container,
-              preferences.showPlaylist && styles.player.containerFold,
-            ]"
-          >
-            <!-- 视频播放器 -->
-            <XPlayer
-              ref="xplayerRef"
-              v-model:show-playlist="preferences.showPlaylist"
-              v-model:volume="preferences.volume"
-              v-model:muted="preferences.muted"
-              v-model:playback-rate="preferences.playbackRate"
-              v-model:quality="preferences.quality"
-              v-model:auto-load-thumbnails="preferences.autoLoadThumbnails"
-              v-model:disabled-h-d-r="preferences.disabledHDR"
-              v-model:thumbnails-sampling-interval="
-                preferences.thumbnailsSamplingInterval
-              "
-              v-model:auto-play="preferences.autoPlay"
-              v-model:shortcuts-preference="preferences.shortcutsPreference"
-              :class="[styles.player.video]"
-              :style="{
-                aspectRatio,
-              }"
-              :sources="DataVideoSources.list"
-              :subtitles="DataSubtitles.state"
-              :last-time="DataHistory.lastTime.value"
-              :subtitles-loading="DataSubtitles.isLoading"
-              :subtitles-ready="DataSubtitles.isReady"
-              :shortcuts-ext="extShortcuts"
-              :has-previous="hasPrevious"
-              :has-next="hasNext"
-              :on-thumbnail-request="onThumbnailRequest"
-              :on-subtitle-change="handleSubtitleChange"
-              :on-timeupdate="handleTimeupdate"
-              :on-seeking="handleSeek"
-              :on-seeked="handleSeek"
-              :on-canplay="handleStartAutoBuffer"
-              :on-ended="handleVideoEnded"
-              @play-previous="playPrevious"
-              @play-next="playNext"
-            >
-              <template #headerLeft>
-                <HeaderInfo
-                  :file-info="DataFileInfo"
-                  :playlist="DataPlaylist"
-                />
-              </template>
-              <template #beforeSettings>
-                <!-- 播放模式按钮 -->
-                <PlayModeButton v-model="preferences.playMode" />
-              </template>
-              <template #controlsRight="{ ctx }">
-                <!-- 播放列表切换按钮 -->
-                <label
-                  for="playlist-drawer"
-                  :class="[
-                    styles.controls.btn.root,
-                    preferences.showPlaylist && 'btn-active btn-primary',
-                  ]"
-                  :data-tip="
-                    getActionNameTip(ctx, '播放列表', 'toggleShowSider')
-                  "
-                >
-                  <Icon
-                    :icon="ICON_PLAYLIST"
-                    :class="[styles.controls.btn.icon]"
-                  />
-                </label>
-
-                <!-- 收藏按钮 -->
-                <button
-                  v-if="DataFileInfo.isReady"
-                  class="swap swap-rotate"
-                  :class="[
-                    styles.controls.btn.root,
-                    {
-                      'swap-active': !DataMark.isMark.value,
-                    },
-                  ]"
-                  :data-tip="getActionNameTip(ctx, '收藏', 'toggleFavorite')"
-                  @click="handleMark"
-                >
-                  <Icon
-                    class="swap-off"
-                    :class="[styles.controls.btn.icon]"
-                    :icon="ICON_STAR_FILL"
-                  />
-                  <Icon
-                    class="swap-on"
-                    :class="[styles.controls.btn.icon]"
-                    :icon="ICON_STAR"
-                  />
-                </button>
-
+        <!-- 视频播放器 -->
+        <XPlayer
+          ref="xplayerRef"
+          v-model:show-playlist="preferences.showPlaylist"
+          v-model:volume="preferences.volume"
+          v-model:muted="preferences.muted"
+          v-model:playback-rate="preferences.playbackRate"
+          v-model:quality="preferences.quality"
+          v-model:auto-load-thumbnails="preferences.autoLoadThumbnails"
+          v-model:disabled-h-d-r="preferences.disabledHDR"
+          v-model:thumbnails-sampling-interval="
+            preferences.thumbnailsSamplingInterval
+          "
+          v-model:auto-play="preferences.autoPlay"
+          v-model:shortcuts-preference="preferences.shortcutsPreference"
+          v-model:long-press-playback-rate="preferences.longPressPlaybackRate"
+          v-model:seek-seconds="preferences.seekSeconds"
+          v-model:high-speed-seek-seconds="preferences.highSpeedSeekSeconds"
+          v-model:percentage-seek="preferences.percentageSeek"
+          :class="[styles.player.video]"
+          :style="{
+            aspectRatio,
+          }"
+          :sources="DataVideoSources.list"
+          :subtitles="DataSubtitles.state"
+          :last-time="DataHistory.lastTime.value"
+          :subtitles-loading="DataSubtitles.isLoading"
+          :subtitles-ready="DataSubtitles.isReady"
+          :shortcuts-ext="extShortcuts"
+          :has-previous="hasPrevious"
+          :has-next="hasNext"
+          :on-thumbnail-request="onThumbnailRequest"
+          :on-subtitle-change="handleSubtitleChange"
+          :on-timeupdate="handleTimeupdate"
+          :on-seeking="handleSeek"
+          :on-seeked="handleSeek"
+          :on-canplay="handleStartAutoBuffer"
+          :on-ended="handleVideoEnded"
+          @play-previous="playPrevious"
+          @play-next="playNext"
+        >
+          <template #headerLeft="{ ctx }">
+            <HeaderInfo
+              :file-info="DataFileInfo"
+              :playlist="DataPlaylist"
+              :ctx="ctx"
+              :is-mark="DataMark.isMark.value ?? false"
+              :on-mark="handleMark"
+            />
+          </template>
+          <template #headerRight="{ ctx }">
+            <div class="flex items-center gap-2">
+              <ControlBox v-if="isMac && DataFileInfo.isReady" @click="handleLocalPlay('iina')">
                 <!-- IINA 播放按钮 -->
                 <button
-                  v-if="isMac && DataFileInfo.isReady"
                   :class="styles.controls.btn.root"
-                  :data-tip="getActionNameTip(ctx, 'IINA 播放', 'playWithIINA')"
-                  @click="handleLocalPlay('iina')"
+                  :title="getActionNameTip(ctx, 'IINA 播放', 'playWithIINA')"
                 >
                   <img
                     :class="styles.controls.iinaIcon"
@@ -123,40 +72,59 @@
                     alt="IINA"
                   >
                 </button>
-              </template>
-              <template #aboutContent>
-                <About />
-              </template>
-            </XPlayer>
-          </div>
-        </div>
+              </ControlBox>
 
-        <!-- 页面下方内容 -->
-        <div v-if="PLUS_VERSION" :class="styles.container.pageFlow">
-          <!-- 电影信息 -->
-          <MovieInfo :movie-infos="DataMovieInfo" />
-        </div>
+              <ControlBox>
+                <!-- 播放列表切换按钮 -->
+                <button
+                  :class="styles.controls.btn.root"
+                  :title="getActionNameTip(ctx, '播放列表', 'toggleShowSider')"
+                  @click="togglePlaylist"
+                >
+                  <Icon
+                    :icon="ICON_PLAYLIST"
+                    :class="[styles.controls.btn.icon]"
+                  />
+                </button>
+              </ControlBox>
+            </div>
+          </template>
+          <template #beforeSettings>
+            <!-- 播放模式按钮 -->
+            <PlayModeButton v-model="preferences.playMode" />
+          </template>
+          <template #aboutContent>
+            <About />
+          </template>
+        </XPlayer>
       </div>
+    </div>
 
-      <!-- Drawer side (播放列表侧边栏) -->
-      <div :class="styles.drawer.side">
-        <!-- Drawer overlay -->
-        <label
-          for="playlist-drawer"
-          aria-label="close sidebar"
-          :class="styles.drawer.overlay"
-        />
+    <!-- 页面下方内容 -->
+    <div v-if="PLUS_VERSION" :class="styles.container.pageFlow">
+      <!-- 电影信息 -->
+      <MovieInfo :movie-infos="DataMovieInfo" />
+    </div>
 
-        <!-- 播放列表内容 -->
-        <Playlist
-          :class="styles.playlist"
-          :pick-code="params.pickCode.value"
-          :playlist="DataPlaylist"
-          :visible="preferences.showPlaylist"
-          @play="handleChangeVideo"
-          @close="handleClosePlaylist"
-        />
-      </div>
+    <!-- Overlay 遮罩 -->
+    <div
+      :data-visible="preferences.showPlaylist"
+      :class="styles.sidebar.overlay"
+      @click="handleClosePlaylist"
+    />
+
+    <!-- Playlist 侧边栏 -->
+    <div
+      :data-visible="preferences.showPlaylist"
+      :class="styles.sidebar.content"
+    >
+      <Playlist
+        :pick-code="params.pickCode.value"
+        :playlist="DataPlaylist"
+        :visible="preferences.showPlaylist"
+        @play="handleChangeVideo"
+        @close="handleClosePlaylist"
+      />
     </div>
   </div>
 </template>
@@ -170,6 +138,7 @@ import type {
 } from '../../components/XPlayer/components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
 import type XPlayerInstance from '../../components/XPlayer/index.vue'
+import type { LocalPlayer } from '../../types'
 import type { Subtitle, ThumbnailRequest } from '../../components/XPlayer/types'
 import type { Entity } from '../../utils/drive115'
 import { Icon } from '@iconify/vue'
@@ -177,6 +146,7 @@ import { useTitle } from '@vueuse/core'
 import { cloneDeep } from 'lodash'
 import { computed, h, nextTick, onMounted, ref, shallowRef, toValue } from 'vue'
 import iinaIcon from '../../assets/icons/iina-icon.png'
+import ControlBox from '../../components/XPlayer/components/Controls/ControlBox.vue'
 import { ACTION_GROUPS } from '../../components/XPlayer/components/Shortcuts/shortcuts.const'
 import XPlayer from '../../components/XPlayer/index.vue'
 import { controlRightStyles } from '../../components/XPlayer/styles/common'
@@ -186,6 +156,7 @@ import { useLockFn } from '../../hooks/useLockFn'
 import { useParamsVideoPage } from '../../hooks/useParams'
 import { ICON_PLAYLIST, ICON_STAR, ICON_STAR_FILL } from '../../icons'
 import { subtitlePreference } from '../../utils/cache/subtitlePreference'
+import { clsx } from '../../utils/clsx'
 import { drive115 } from '../../utils/drive115'
 import { formatFileSize } from '../../utils/format'
 import { getAvNumber } from '../../utils/getNumber'
@@ -209,7 +180,7 @@ import { useDataSubtitles } from './data/useSubtitlesData'
 import { useDataThumbnails } from './data/useThumbnails'
 import { useDataVideoSources } from './data/useVideoSource'
 
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
     main: [
@@ -220,34 +191,46 @@ const styles = {
       '[--app-playlist-ratio:calc(1-var(--app-xplayer-ratio))]',
       '[--app-xplayer-width:calc(100%*var(--app-xplayer-ratio))]',
       '[--app-playlist-width:calc(100%*var(--app-playlist-ratio))]',
+      'relative',
     ],
-    showPlaylist: 'show-playlist',
-    pageMain: ['relative w-full h-screen overflow-hidden'],
-    pageFlow: 'flex flex-col gap-8 px-6 xl:px-36 py-8 w-full',
-  },
-  // 抽屉样式
-  drawer: {
-    main: 'drawer drawer-end',
-    content: 'drawer-content',
-    side: 'drawer-side',
-    overlay: 'drawer-overlay',
-    toggle: 'drawer-toggle',
+    pageMain: ['relative h-screen w-full overflow-hidden bg-black'],
+    pageFlow: 'flex w-full flex-col gap-8 px-6 py-8 xl:px-36',
   },
   // 播放器样式
   player: {
     container:
-      'relative w-full h-screen flex items-center justify-center transition-all duration-200 ease-in-out transform-gpu',
-    containerFold: 'w-(--app-xplayer-width)!',
-    video: 'absolute m-auto w-full h-full overflow-hidden',
+      ['relative flex h-screen w-full transform-gpu items-center justify-center transition-all duration-200 ease-[var(--app-ease-in-out-cubic)] will-change-contents'],
+    containerFold: [
+      'w-(--app-xplayer-width)!',
+    ],
+    video: 'absolute m-auto h-full w-full overflow-hidden',
   },
-  // 播放列表样式
-  playlist: 'w-(--app-playlist-width)!',
+  // 侧边栏样式
+  sidebar: {
+    overlay: [
+      'fixed inset-0 z-10',
+      'bg-black/40',
+      'cursor-pointer',
+      'transition-opacity duration-300 ease-[var(--app-ease-in-out-sine)]',
+      'pointer-events-none opacity-0',
+      'data-[visible=true]:opacity-100',
+      'data-[visible=true]:pointer-events-auto',
+    ],
+    content: [
+      'fixed inset-y-0 right-0 z-20',
+      'w-(--app-playlist-width)',
+      'h-screen',
+      'transition-transform duration-300 ease-[var(--app-ease-out-cubic)]',
+      'translate-x-full',
+      'data-[visible=true]:translate-x-0',
+    ],
+  },
   // 控制样式
   controls: {
     btn: controlRightStyles.btn,
-    iinaIcon: 'size-8 grayscale invert contrast-200',
+    iinaIcon: 'size-7 contrast-200 grayscale invert',
   },
-}
+})
 
 /** 日志 */
 const logger = appLogger.sub('Video')
@@ -330,9 +313,11 @@ const ACTION_MAP: ActionMap = {
       await handleMark()
       const title = DataMark.isMark.value ? '已收藏' : '取消收藏'
       const icon = DataMark.isMark.value ? ICON_STAR_FILL : ICON_STAR
+      const iconClass = DataMark.isMark.value ? 'text-pink-600' : ''
       ctx.hud?.show({
         title,
         icon,
+        iconClass,
       })
     },
   },
@@ -555,29 +540,45 @@ async function playPreviousOrNext(ctx: PlayerContext, dir: number) {
     handleChangeVideo(nextItem)
     const no = nextIndex + 1
     const len = DataPlaylist.state?.data.length
-    const title = `播放列表 (${no}/${len})`
+    const noText = `(${no + 1}/${len})`
+    const title = h('div', {
+      class: 'text-sm font-semibold',
+    }, [
+      h('span', {
+        class: 'text-lg font-semibold',
+      }, nextItem.n),
+    ])
     const value = h('div', [
       h(
         'div',
         {
-          class: 'text-sm font-semibold',
+          class: 'flex items-center gap-2',
         },
-        nextItem.n,
+        [
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content',
+            },
+            noText,
+          ),
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content/70',
+            },
+            formatTime(nextItem.play_long),
+          ),
+          h(
+            'span',
+            {
+              class: 'text-xs text-base-content/70',
+            },
+            formatFileSize(nextItem.s),
+          ),
+        ],
       ),
-      h(
-        'div',
-        {
-          class: 'text-xs text-base-content/60',
-        },
-        formatTime(nextItem.play_long),
-      ),
-      h(
-        'div',
-        {
-          class: 'text-xs text-base-content/60',
-        },
-        formatFileSize(nextItem.s),
-      ),
+
     ])
     const icon = ICON_PLAYLIST
     ctx.hud?.show({ title, icon, value })

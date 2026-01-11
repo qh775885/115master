@@ -1,13 +1,23 @@
 <template>
   <div
     :class="styles.root"
+    :data-mask="progressBar.isLongPressDragging.value"
   >
     <slot />
   </div>
 </template>
 
 <script setup lang="ts">
-const styles = {
-  root: 'absolute inset-0 flex flex-col',
-}
+import { clsx } from '../../../../utils/clsx'
+import { usePlayerContext } from '../../hooks/usePlayerProvide'
+
+const styles = clsx({
+  root: [
+    'absolute inset-0 flex flex-col',
+    'transition-all duration-500 ease-[var(--app-ease-out-cubic)]',
+    'data-[mask="true"]:bg-base-100/50',
+  ],
+})
+
+const { progressBar } = usePlayerContext()
 </script>

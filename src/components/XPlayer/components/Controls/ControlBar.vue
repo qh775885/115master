@@ -1,10 +1,8 @@
 <template>
   <transition
-    enter-active-class="transition-all duration-200 ease-out"
-    leave-active-class="transition-all duration-200 ease-out"
+    enter-active-class="transition-all duration-300 ease-[var(--ease-in-cubic)]"
+    leave-active-class="transition-all duration-300 ease-[var(--ease-in-cubic)]"
     enter-from-class="opacity-0"
-    enter-to-class="opacity-100"
-    leave-from-class="opacity-100"
     leave-to-class="opacity-0"
   >
     <div
@@ -12,66 +10,81 @@
       ref="controlBarRef"
       :class="styles.controlBar.main"
     >
-      <!-- 背景渐变 -->
-      <div :class="[styles.controlBar.bg]" />
+      <div :class="styles.controlBar.bg" />
       <!-- 视频控制栏 -->
       <div
         :ref="controls.mainRef"
         :class="[styles.controlBar.mainContent]"
       >
-        <!-- 进度条 -->
-        <ProgressBar
-          :class="{
-            'opacity-0 pointer-events-none': !canplay,
-            'opacity-100 pointer-events-auto': canplay,
-          }"
-        />
+        <div :class="styles.controlBar.subBar">
+          <div :class="styles.controlBar.subBarLeft" />
+          <div :class="styles.controlBar.subBarRight" />
+        </div>
         <div
-          :class="[styles.controlBar.bar, {
-            [styles.controlBar.trivialize]: progressBar?.isLongPressDragging.value,
-          }]"
+          :class="[styles.controlBar.mainBar]"
         >
-          <div :class="styles.controlBar.left">
-            <!-- 上一集按钮 -->
-            <EpisodeButton
-              type="playPrevious"
-              :disabled="!rootProps.hasPrevious"
-              :on-click="handlePlayPrevious"
-            />
-            <!-- 播放按钮 -->
-            <PlayButton />
-            <!-- 下一集按钮 -->
-            <EpisodeButton
-              type="playNext"
-              :disabled="!rootProps.hasNext"
-              :on-click="handlePlayNext"
-            />
-            <!-- 音量控制 -->
-            <VolumeControl />
-            <!-- 时间显示 -->
-            <TimeDisplay />
+          <div :class="styles.controlBar.mainBarLeft">
+            <ControlBox>
+              <!-- 上一集按钮 -->
+              <EpisodeButton
+                type="playPrevious"
+                :disabled="!rootProps.hasPrevious"
+                :on-click="handlePlayPrevious"
+              />
+              <!-- 播放按钮 -->
+              <PlayButton />
+              <!-- 下一集按钮 -->
+              <EpisodeButton
+                type="playNext"
+                :disabled="!rootProps.hasNext"
+                :on-click="handlePlayNext"
+              />
+            </ControlBox>
+            <ControlBox>
+              <!-- 音量控制 -->
+              <VolumeControl />
+            </ControlBox>
+            <ControlBox class="hidden lg:flex">
+              <TimeDisplay />
+            </ControlBox>
           </div>
-          <div :class="styles.controlBar.right">
-            <!-- 画质控制 -->
-            <QualityButton />
-            <!-- 倍速控制 -->
-            <PlaybackRateButton />
-            <!-- 字幕控制 -->
-            <SubtitleButton />
-            <!-- 音频 Track -->
-            <AudioTrackButton />
-            <!-- 播放器核心 -->
-            <PlayerCoreButton />
-            <!-- [已禁用] 视频色彩 -->
-            <!-- <VideoEnhanceSettings /> -->
-            <!-- 扩展插槽（原调色按钮位置） -->
-            <slot name="beforeSettings" />
-            <!-- 设置 -->
-            <SettingsButton />
-            <!-- 画中画 -->
-            <PipButton />
-            <!-- 全屏控制 -->
-            <FullscreenButton />
+          <div :class="styles.controlBar.mainBarCenter">
+            <!-- 进度条 -->
+            <ProgressBar />
+          </div>
+          <div :class="styles.controlBar.mainBarRight">
+            <ControlBox>
+              <!-- 画质控制 -->
+              <QualityButton />
+              <!-- 播放器核心 -->
+              <PlayerCoreButton />
+            </ControlBox>
+
+            <ControlBox>
+              <!-- 倍速控制 -->
+              <PlaybackRateButton />
+            </ControlBox>
+
+            <ControlBox>
+              <!-- 音频 Track -->
+              <AudioTrackButton />
+              <!-- 字幕控制 -->
+              <SubtitleButton />
+            </ControlBox>
+
+            <ControlBox>
+              <!-- 扩展插槽（原调色按钮位置） -->
+              <slot name="beforeSettings" />
+              <!-- 画面变换 -->
+              <TransformButton />
+            </ControlBox>
+
+            <ControlBox>
+              <!-- 画中画 -->
+              <PipButton />
+              <!-- 全屏控制 -->
+              <FullscreenButton />
+            </ControlBox>
           </div>
         </div>
       </div>
@@ -81,9 +94,11 @@
 
 <script setup lang="ts">
 import { computed, shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { useControlsMouseDetection } from '../../hooks/useControlsMouseDetection'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import AudioTrackButton from './AudioTrackButton.vue'
+import ControlBox from './ControlBox.vue'
 import EpisodeButton from './EpisodeButton.vue'
 import FullscreenButton from './FullscreenButton.vue'
 import PipButton from './PipButton.vue'
@@ -92,10 +107,10 @@ import PlayButton from './PlayButton.vue'
 import PlayerCoreButton from './PlayerCoreButton.vue'
 import ProgressBar from './ProgressBar.vue'
 import QualityButton from './QualityButton.vue'
-import SettingsButton from './SettingsButton.vue'
 import SubtitleButton from './SubtitleButton.vue'
 import TimeDisplay from './TimeDisplay.vue'
-import VideoEnhanceSettings from './VideoEnhanceSettings.vue'
+import TransformButton from './TransformButton.vue'
+// import VideoEnhanceSettings from './VideoEnhanceSettings.vue'
 import VolumeControl from './VolumeControl.vue'
 
 /** 插槽定义 */
@@ -105,25 +120,32 @@ defineSlots<{
 }>()
 
 /** 样式抽象 */
-const styles = {
+const styles = clsx({
   controlBar: {
-    main: 'relative pointer-events-auto',
-    bg: [
-      'absolute inset-0 top-[-30px] pointer-events-none',
-      'bg-linear-to-t from-black/50 from-10% to-transparent',
+    main: [
+      'pointer-events-auto relative',
+      'transform-gpu',
     ],
-    mainContent: 'relative px-5 py-3',
-    bar: 'flex justify-between items-center',
-    trivialize: 'opacity-0 transition-all duration-200 ease-out',
-    left: 'flex items-center gap-2',
-    right: 'flex items-center gap-2',
+    bg: [
+      'absolute inset-0 top-[-200%]',
+      'bg-[linear-gradient(to_top,rgba(0,0,0,0.2)_0%,rgba(0,0,0,0.14)_15%,rgba(0,0,0,0.08)_35%,rgba(0,0,0,0.03)_60%,rgba(0,0,0,0)_100%)]',
+      'pointer-events-none',
+    ],
+    mainContent: 'relative flex flex-col gap-y-2 px-6 pb-6',
+    mainBar: 'flex items-center gap-2',
+    mainBarLeft: 'flex items-center gap-2',
+    mainBarCenter: 'flex-1 px-6',
+    mainBarRight: 'flex items-center gap-2',
+    subBar: 'flex items-center justify-between',
+    subBarLeft: 'flex items-center gap-2',
+    subBarRight: 'flex items-center gap-2',
   },
-}
+})
 
 /** 视频播放器上下文 */
 const ctx = usePlayerContext()
 
-const { controls, playerCore, progressBar, rootProps, rootEmit } = ctx
+const { controls, rootProps, rootEmit } = ctx
 
 /** 控制栏引用 */
 const controlBarRef = shallowRef<HTMLDivElement | null>(null)
@@ -133,11 +155,6 @@ useControlsMouseDetection(controlBarRef)
 /** 显示/隐藏控制栏 */
 const show = computed(() => {
   return controls.visible.value
-})
-
-/** 计算属性 */
-const canplay = computed(() => {
-  return playerCore.value?.canplay
 })
 
 /** 播放上一集 */

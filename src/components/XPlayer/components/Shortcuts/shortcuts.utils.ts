@@ -408,7 +408,7 @@ export function getShortcutsTip(
   if (!keyBindings.length)
     return ''
 
-  return ` (${keyBindings.map(formatKeyDisplay).join('/')})`
+  return `${keyBindings.map(formatKeyDisplay).join('/')}`
 }
 
 // ======================= Action =======================
@@ -443,6 +443,22 @@ export function matchAction(
 }
 
 // ======================= Misc =======================
+
+/**
+ * 检查目标元素是否是可编辑元素
+ * @param target 事件目标
+ * @returns 是否是可编辑元素
+ */
+export function isEditableElement(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement))
+    return false
+
+  const tagName = target.tagName.toLowerCase()
+  if (tagName === 'input' || tagName === 'textarea' || tagName === 'select')
+    return true
+
+  return target.isContentEditable
+}
 
 /**
  * 获取操作系统平台

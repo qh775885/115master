@@ -36,6 +36,14 @@ export interface PlayerPreferences {
   shortcutsPreference: ShortcutsPreference
   /** 播放模式 */
   playMode: PlayMode
+  /** 长按倍速 */
+  longPressPlaybackRate: number
+  /** 快进 / 后退 */
+  seekSeconds: number
+  /** 高速快进 / 后退 */
+  highSpeedSeekSeconds: number
+  /** 百分比快进 / 后退 */
+  percentageSeek: number
 }
 
 /** 默认偏好设置 */
@@ -48,11 +56,15 @@ const DEFAULT_PREFERENCES: PlayerPreferences = {
   disabledHDR: false,
   thumbnailsSamplingInterval: 60,
   autoPlay: true,
-  quality: 0,
   shortcutsPreference: {
     actionKeyBindings: {},
   },
   playMode: PlayMode.AUTO_NEXT,
+  quality: 0,
+  longPressPlaybackRate: 3,
+  seekSeconds: 5,
+  highSpeedSeekSeconds: 30,
+  percentageSeek: 10,
 }
 
 /**

@@ -53,5 +53,8 @@
   --noise: 0;
 }
 
+@import './ease.css';
 @import './ui-extend.css';
 @import './scrollbar.css';
+@import './app.css';
+@import './reset.css';

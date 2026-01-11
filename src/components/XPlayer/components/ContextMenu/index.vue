@@ -3,7 +3,6 @@
     :visible="contextMenu.visible.value"
     :x="contextMenu.position.value.x"
     :y="contextMenu.position.value.y"
-    :class="styles.popup"
     @update:visible="contextMenu.hide"
   >
     <ul :class="styles.container">
@@ -20,7 +19,7 @@
             :icon="item.icon"
             :class="styles.icon"
           />
-          <span>{{ item.label }}</span>
+          <span :class="styles.label">{{ item.label }}</span>
           <span v-if="item.actionKey" :class="styles.shortcuts">
             {{ shortcuts.getShortcutsTip(item.actionKey) }}
           </span>
@@ -39,31 +38,33 @@
     </template>
   </AboutPopup>
 
-  <!-- 快捷键弹窗 -->
-  <ShortcutsPopup
-    :visible="contextMenu.showShortcuts.value"
-    @update:visible="(val: boolean) => contextMenu.showShortcuts.value = val"
+  <!-- 偏好设置弹窗 -->
+  <PlayerSettingsPopup
+    :visible="contextMenu.showSettings.value"
+    :default-tab="contextMenu.defaultSettingsTab.value"
+    @update:visible="(val: boolean) => contextMenu.showSettings.value = val"
   />
 </template>
 
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
-import ShortcutsPopup from '../Shortcuts/ShortcutsPopup.vue'
+import PlayerSettingsPopup from '../Settings/PlayerSettingsPopup.vue'
 import AboutPopup from './AboutPopup.vue'
 
 defineSlots<{
   aboutContent: () => void
 }>()
 
-const styles = {
-  popup: 'p-0!',
-  container: 'menu w-48',
-  menuItem: 'menu-item rounded-lg',
-  icon: 'size-6',
-  shortcuts: 'ml-auto text-xs opacity-30',
-}
+const styles = clsx({
+  container: 'menu',
+  menuItem: 'menu-item rounded-xl px-3',
+  icon: 'size-5',
+  label: 'flex-1 text-sm font-medium',
+  shortcuts: 'ml-4 text-xs font-bold opacity-30',
+})
 
 const { contextMenu, shortcuts } = usePlayerContext()
 </script>

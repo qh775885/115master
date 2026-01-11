@@ -230,6 +230,7 @@ import PhotoSwipeLightbox from 'photoswipe/lightbox'
 import { computed, nextTick, ref, watch } from 'vue'
 import Empty from '../../../../components/empty/Empty.vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
+import { clsx } from '../../../../utils/clsx'
 import { formatDate, formatDuration } from '../../../../utils/format'
 import CopyButton from './components/CopyButton.vue'
 import 'photoswipe/style.css'
@@ -238,7 +239,7 @@ const props = defineProps<{
   movieInfos: ReturnType<typeof useDataMovieInfo>
 }>()
 
-const styles = {
+const styles = clsx({
   // 容器样式
   container: {
     main: 'relative flex flex-col',
@@ -253,32 +254,32 @@ const styles = {
   // Skeleton
   skeleton: {
     title: 'skeleton h-14 w-4/5',
-    avatar: 'skeleton w-15 h-15 rounded-full shrink-0',
+    avatar: 'skeleton h-15 w-15 shrink-0 rounded-full',
     name: 'skeleton h-4 w-20',
     contentLine: 'skeleton h-4 w-xs',
   },
   // 状态样式
   states: {
-    error: 'my-20 mx-auto',
-    empty: 'my-20 mx-auto',
+    error: 'mx-auto my-20',
+    empty: 'mx-auto my-20',
   },
   // 头部样式
   header: {
     container: 'mb-6',
-    title: 'text-xl font-bold break-words break-all text-base-content pr-36',
+    title: 'text-base-content pr-36 text-xl font-bold break-words break-all',
     titleText: '',
   },
   // 演员
   actors: {
     container: 'flex flex-wrap gap-2',
     item: 'relative w-fit',
-    content: 'flex items-center gap-3 no-underline w-full',
+    content: 'flex w-full items-center gap-3 no-underline',
     avatarWrapper: 'avatar relative',
     avatarContainer: 'w-18 rounded-full',
     avatarImage: 'rounded-full',
-    name: 'text-base text-base-content pr-2',
+    name: 'text-base-content pr-2 text-base',
     sexBadge: {
-      base: 'absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white text-xs rotate-45',
+      base: 'absolute -top-0.5 -right-0.5 flex h-4 w-4 rotate-45 items-center justify-center rounded-full text-xs text-white',
       female: 'bg-pink-400/80',
       male: 'bg-primary/80',
     },
@@ -288,18 +289,18 @@ const styles = {
     container: 'flex flex-col gap-3',
     item: 'flex gap-2 text-sm',
     label: 'text-base-content/50 min-w-10',
-    value: 'flex flex-wrap gap-2 items-center',
+    value: 'flex flex-wrap items-center gap-2',
     link: 'link',
     badge: 'badge badge-neutral rounded-full',
   },
   // 缩略图样式
   thumbnails: {
     container:
-      'grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9 gap-3',
+      'grid grid-cols-3 gap-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-9',
     item: 'aspect-square overflow-hidden hover:opacity-80',
     image: 'size-full object-cover',
   },
-}
+})
 
 const movieInfoThumb = ref<HTMLElement | null>(null)
 const lightbox = ref<PhotoSwipeLightbox | null>(null)

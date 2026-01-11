@@ -12,6 +12,7 @@
         v-show="visibleModel"
         ref="popupRef"
         :class="styles.popup"
+        :data-mild="props.mild"
         :style="style"
         v-bind="$attrs"
       >
@@ -32,6 +33,7 @@ import {
   shallowRef,
   watch,
 } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { usePortal } from '../../hooks/usePortal'
 import { isInContainsTrigger, triggerSet } from './utils'
@@ -45,6 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
   y: 0,
   outsideStopPropagation: false,
   allowPreventControlsClose: true,
+  mild: false,
 })
 
 const emit = defineEmits<{
@@ -52,10 +55,20 @@ const emit = defineEmits<{
   'after-leave': []
 }>()
 
-const styles = {
+const styles = clsx({
   popup:
-    'x-popup bg-base-100/90 rounded-2xl p-2 border border-neutral-950 relative overflow-hidden',
-}
+    [
+      'relative',
+      'x-popup',
+      'bg-base-100/75',
+      'backdrop-blur-sm backdrop-saturate-180',
+      'rounded-3xl',
+      'overflow-hidden',
+      'app-glass-border',
+      'data-[mild=true]:bg-base-100/90',
+      'data-[mild=true]:backdrop-blur-3xl',
+    ],
+})
 
 interface Props {
   /** 是否显示 */
@@ -74,6 +87,8 @@ interface Props {
   outsideStopPropagation?: boolean
   /** 允许阻止控制栏关闭 */
   allowPreventControlsClose?: boolean
+  /** 是否温和 */
+  mild?: boolean
 }
 
 const { container } = usePortal()

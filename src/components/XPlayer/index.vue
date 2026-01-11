@@ -29,15 +29,14 @@
     <Controls>
       <ControlsHeader>
         <template #left>
-          <slot name="headerLeft" />
+          <slot name="headerLeft" v-bind="{ ctx }" />
+        </template>
+        <template #right>
+          <slot name="headerRight" v-bind="{ ctx }" />
         </template>
       </ControlsHeader>
       <SubtitleInfo />
-      <ControlsMask>
-        <ControlsRight>
-          <slot name="controlsRight" v-bind="{ ctx }" />
-        </ControlsRight>
-      </ControlsMask>
+      <ControlsMask />
       <ControlsBar>
         <template #beforeSettings>
           <slot name="beforeSettings" v-bind="{ ctx }" />
@@ -88,16 +87,17 @@ import type { PlayerContext } from './hooks/usePlayerProvide'
 import type { XPlayerEmit, XPlayerProps } from './types'
 import { shallowRef, watch, watchEffect } from 'vue'
 import LoadingError from '../../components/LoadingError/index.vue'
+import { clsx } from '../../utils/clsx'
 import ContextMenu from './components/ContextMenu/index.vue'
 import ControlsBar from './components/Controls/ControlBar.vue'
 import ControlsHeader from './components/Controls/ControlHeader.vue'
 import ControlsMask from './components/Controls/ControlMask.vue'
-import ControlsRight from './components/Controls/ControlsRight.vue'
 import Controls from './components/Controls/index.vue'
 import SubtitleInfo from './components/Controls/SubtitleInfo.vue'
 import HUD from './components/HUD/index.vue'
 import Loading from './components/Loading/index.vue'
 import PlayAnimation from './components/PlayAnimation/index.vue'
+import { FAST_JUMP_OFFSET, HIGH_FAST_JUMP_OFFSET } from './components/Shortcuts/shortcuts.const'
 import Statistics from './components/Statistics/index.vue'
 import Subtitle from './components/Subtitle/index.vue'
 import { usePlayerProvide } from './hooks/usePlayerProvide'
@@ -109,6 +109,11 @@ const props = withDefaults(defineProps<XPlayerProps>(), {
   onSubtitleChange: undefined,
   hlsConfig: () => ({}),
   avPlayerConfig: () => ({}),
+  quality: 0,
+  longPressPlaybackRate: 15,
+  seekSeconds: FAST_JUMP_OFFSET,
+  highSpeedSeekSeconds: HIGH_FAST_JUMP_OFFSET,
+  percentageSeek: 10,
 })
 
 /** 事件 */
@@ -117,26 +122,26 @@ const emit = defineEmits<XPlayerEmit>()
 /** 插槽 */
 defineSlots<{
   /** 头部左侧插槽 */
-  headerLeft: () => void
-  /** 控制栏右侧插槽 */
-  controlsRight: (props: { ctx: PlayerContext }) => void
-  /** 控制栏底部设置按钮之前的插槽（原调色按钮位置） */
-  beforeSettings: (props: { ctx: PlayerContext }) => void
+  headerLeft: (props: { ctx: PlayerContext }) => void
+  /** 头部右侧插槽 */
+  headerRight: (props: { ctx: PlayerContext }) => void
   /** 关于内容插槽 */
   aboutContent: () => void
+  /** 控制栏底部设置按钮之前的插槽（原调色按钮位置） */
+  beforeSettings: (props: { ctx: PlayerContext }) => void
 }>()
 
-const styles = {
+const styles = clsx({
   root: 'relative bg-black',
   fullscreen: 'w-100vw h-100vh',
-  container: 'relative w-full h-full overflow-hidden',
-  videoPlayer: 'flex items-center justify-center w-full h-full',
+  container: 'relative h-full w-full overflow-hidden',
+  videoPlayer: 'flex h-full w-full items-center justify-center',
   error:
-    'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+    'absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform',
   resumeContainer:
-    'absolute inset-0 flex justify-center items-center bg-black/90 z-2',
+    'absolute inset-0 z-2 flex items-center justify-center bg-black/90',
   resumeButton: 'btn',
-}
+})
 
 /** 根元素 */
 const rootRef = shallowRef<HTMLElement | null>(null)

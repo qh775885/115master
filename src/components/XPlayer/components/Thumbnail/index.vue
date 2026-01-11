@@ -9,9 +9,6 @@
     <div
       :class="[
         styles.image.root,
-        {
-          [styles.image.pressing]: progressBar.isDragging.value,
-        },
       ]"
       :style="{
         width: `${thumbnailContainerSize.width}px`,
@@ -66,6 +63,7 @@ import type { ThumbnailFrame } from '../../types'
 import { refManualReset } from '@vueuse/core'
 import { computed, onUnmounted, shallowRef, toValue, watch } from 'vue'
 import LoadingError from '../../../../components/LoadingError/index.vue'
+import { clsx } from '../../../../utils/clsx'
 import { getImageResize } from '../../../../utils/image'
 import { boundary } from '../../../../utils/number'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
@@ -85,25 +83,25 @@ interface Props {
 /** props */
 const props = withDefaults(defineProps<Props>(), {})
 
-const styles = {
-  root: ['absolute top-0', '[will-change:transform]'],
+const styles = clsx({
+  root: ['absolute top-2', '[will-change:transform]'],
   image: {
     root: [
-      'relative flex items-center justify-center rounded-xl overflow-hidden mb-2',
-      'bg-black shadow-xs/30',
-      'cursor-pointer transition-all duration-550 ease-out',
-      'hover:scale-[1.02]',
+      'relative mb-2 flex items-center justify-center overflow-hidden rounded-2xl',
+      'bg-black',
+      'box-content',
+      'cursor-pointer',
+      'border-base-content border-4',
     ],
-    pressing: 'ring-4 ring-base-content/90',
     loading:
-      'absolute loading loading-spinner size-12 m-auto rounded-full text-base-content/80',
+      'loading loading-spinner text-base-content/80 absolute m-auto size-12 rounded-full',
     error: 'absolute inset-0 flex items-center justify-center',
   },
   timeBox: {
     container:
-      'text-sm py-0.5 text-neutral-300 subpixel-antialiased text-center select-none text-shadow-[0_0_1px_rgb(0_0_0_/0.5),0_0_2px_rgb(55_55_55_/0.7)]',
+      'text-base-content app-font-time text-center text-sm select-none',
   },
-}
+})
 
 /** 默认宽度 */
 const DEFAULT_WIDTH = 250
@@ -112,7 +110,7 @@ const DEFAULT_WIDTH = 250
 const DEFAULT_HEIGHT = ratioHeight(DEFAULT_WIDTH, 16, 9)
 
 /** context */
-const { rootProps, source, progressBar } = usePlayerContext()
+const { rootProps, source } = usePlayerContext()
 
 /** 绘制缩略图请求 */
 const { onThumbnailRequest } = rootProps

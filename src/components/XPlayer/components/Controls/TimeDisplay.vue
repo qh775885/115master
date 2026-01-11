@@ -1,29 +1,33 @@
 <template>
   <div
-    :class="[
-      styles.root,
-      {
-        'opacity-0': !playerCore?.canplay,
-        'opacity-100': playerCore?.canplay,
-      },
-    ]"
-    class="transition-opacity duration-200"
+    :class="styles.root"
+    :data-canplay="playerCore?.canplay"
   >
-    <span>{{ formatTime(playerCore?.currentTime) }}</span>
-    <span :class="styles.separator">/</span>
-    <span>{{ formatTime(playerCore?.duration) }}</span>
+    {{ formatTime(playerCore?.currentTime) }} /
+    {{ formatTime(playerCore?.duration) }}
   </div>
 </template>
 
 <script setup lang="ts">
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { controlStyles } from '../../styles/common'
 import { formatTime } from '../../utils/time'
 
 const { playerCore } = usePlayerContext()
 
-const styles = {
-  root: [controlStyles.text, 'flex items-center gap-1.5 select-none'],
-  separator: controlStyles.subtext,
-}
+const styles = clsx({
+  root: [
+    controlStyles.text,
+    'flex justify-center select-none',
+    'px-2',
+    'min-w-40',
+    'text-lg',
+    'text-base-content',
+    'tracking-tight',
+    'font-medium',
+    'app-font-time',
+    '[&>span]:align-middle',
+  ],
+})
 </script>

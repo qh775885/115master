@@ -25,7 +25,10 @@
           v-if="displayMessage.title"
           :class="styles.title"
         >
-          {{ displayMessage.title ?? '' }}
+          <component :is="displayMessage.title" v-if="isVNode(displayMessage.title)" />
+          <template v-else>
+            {{ displayMessage.title ?? '' }}
+          </template>
         </div>
 
         <!-- 进度条 -->
@@ -56,18 +59,19 @@
 import type { HudMessage } from './types'
 import { Icon } from '@iconify/vue'
 import { computed, isVNode, ref, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import Popup from '../Popup/index.vue'
 
-const styles = {
-  popup: 'left-4! top-4! shadow-xs/90',
-  wrap: 'flex items-center gap-2 px-2',
-  content: 'flex flex-col gap-1 flex-1 px-1',
+const styles = clsx({
+  popup: 'bg-base-100/50! top-6!  left-6! backdrop-blur-sm! backdrop-brightness-100! backdrop-saturate-120!',
+  wrap: 'flex items-center gap-2 px-4 py-2',
+  content: 'flex flex-1 flex-col gap-1 px-1',
   icon: 'size-6',
   title: 'text-sm font-semibold',
   progress: 'progress progress-primary h-1 w-35',
-  value: 'text-sm font-semibold text-base-content/70',
-}
+  value: 'text-base-content/70 text-sm font-semibold',
+})
 
 /** 获取播放器上下文 */
 const { hud } = usePlayerContext()

@@ -3,7 +3,7 @@
     ref="buttonRef"
     :class="[styles.btn.root]"
     :disabled="!playerCore?.canplay || playerCore?.type !== PlayerCoreType.AvPlayer"
-    data-tip="音频轨道"
+    title="音频轨道"
     @click="toggleVisible"
   >
     <Icon :class="[styles.btn.icon]" :icon="ICONS.ICON_AUDIO_TRACK" />
@@ -42,15 +42,16 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { shallowRef } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { PlayerCoreType } from '../../hooks/playerCore/types'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 import Popup from '../Popup/index.vue'
 
-const styles = {
+const styles = clsx({
   ...controlStyles,
-}
+})
 
 const { playerCore } = usePlayerContext()
 const menuVisible = shallowRef(false)

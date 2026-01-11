@@ -7,7 +7,7 @@
       },
     ]"
     :disabled="!playerCore?.canplay"
-    :data-tip="playTip"
+    :title="playTip"
     @click="playerCore?.togglePlay"
   >
     <Icon
@@ -26,16 +26,17 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue'
 import { computed } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 import { ICONS } from '../../index.const'
 import { controlStyles } from '../../styles/common'
 
-const styles = {
+const styles = clsx({
   btn: {
     ...controlStyles.btn,
-    root: [controlStyles.btn.root, 'before:ml-8'],
+    root: [controlStyles.btn.root],
   },
-}
+})
 
 const NAME = '播放/暂停'
 

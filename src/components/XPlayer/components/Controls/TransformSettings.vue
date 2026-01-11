@@ -1,5 +1,5 @@
 <template>
-  <div class="card card-sm bg-neutral-800">
+  <div class="card card-sm">
     <div class="card-body">
       <h3 class="card-title">
         旋转与翻转
@@ -42,7 +42,7 @@
               :class="{ 'btn-primary': transform.flipX.value }"
               @click="transform.toggleFlipX"
             >
-              <div class="transform rotate-90">
+              <div class="rotate-90 transform">
                 <Icon :icon="ICONS.ICON_FLIP_X" class="size-4" />
               </div>
               水平

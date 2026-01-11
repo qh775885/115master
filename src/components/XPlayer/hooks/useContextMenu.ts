@@ -5,6 +5,9 @@ import {
   ICONS,
 } from '../index.const'
 
+/** 设置标签页类型 */
+export type SettingsTab = 'play' | 'shortcuts'
+
 export interface ContextMenuItem {
   /**
    * ID
@@ -40,18 +43,21 @@ export function useContextMenu(ctx: PlayerContext) {
   const position = shallowRef({ x: 0, y: 0 })
   /** 关于弹窗显示状态 */
   const showAbout = ref(false)
-  /** 快捷键弹窗显示状态 */
-  const showShortcuts = ref(false)
+  /** 设置弹窗显示状态 */
+  const showSettings = ref(false)
+  /** 设置弹窗默认 tab */
+  const defaultSettingsTab = ref<SettingsTab>('play')
 
   /** 菜单项 */
   const menuItems: ContextMenuItem[] = [
     {
-      id: 'shortcuts',
-      label: '快捷键',
-      icon: ICONS.ICON_SHORTCUTS,
+      id: 'settings',
+      label: '偏好设置',
+      icon: ICONS.ICON_SETTINGS,
       actionKey: 'shortcuts',
       action: () => {
-        showShortcuts.value = true
+        defaultSettingsTab.value = 'play'
+        showSettings.value = true
         visible.value = false
       },
     },
@@ -100,6 +106,12 @@ export function useContextMenu(ctx: PlayerContext) {
     visible.value = false
   }
 
+  /** 打开设置弹窗 */
+  const openSettings = (tab: SettingsTab = 'play') => {
+    defaultSettingsTab.value = tab
+    showSettings.value = true
+  }
+
   /** 处理右键事件 */
   const handleContextMenu = (event: MouseEvent) => {
     event.preventDefault()
@@ -111,9 +123,11 @@ export function useContextMenu(ctx: PlayerContext) {
     position,
     menuItems,
     showAbout,
-    showShortcuts,
+    showSettings,
+    defaultSettingsTab,
     show,
     hide,
     handleContextMenu,
+    openSettings,
   }
 }

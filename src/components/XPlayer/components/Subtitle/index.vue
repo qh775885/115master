@@ -17,17 +17,19 @@
 import type { Subtitle } from '../../types'
 import { useElementBounding } from '@vueuse/core'
 import { computed, shallowRef, watch } from 'vue'
+import { clsx } from '../../../../utils/clsx'
 import { convertSrtToVtt } from '../../../../utils/subtitle/subtitleTool'
 import { usePlayerContext } from '../../hooks/usePlayerProvide'
 
-const styles = {
+const styles = clsx({
   container: 'absolute inset-0',
   content: [
-    'absolute left-1/2 bottom-[3%] max-w-[80%] mx-auto px-1',
-    'bg-black/75 whitespace-pre-wrap text-white text-center',
+    'absolute bottom-[3%] left-1/2 mx-auto max-w-[80%] px-6',
+    'bg-black/60 text-center whitespace-pre-wrap text-white',
     'transition-transform duration-200 ease-in-out',
+    'rounded-xl',
   ],
-}
+})
 
 const { subtitles, cssVar, refs, playerCore, logger } = usePlayerContext()
 /** 安全区域底部 */

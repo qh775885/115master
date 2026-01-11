@@ -1,15 +1,15 @@
 export const controlStyles = {
   btn: {
     root: [
-      'btn btn-link btn-circle tooltip',
+      'btn btn-link btn-circle',
       'text-base-content disabled:text-base-content/30',
       'hover:text-base-content/80',
     ],
-    icon: ['size-8', 'drop-shadow-xs/60'],
+    icon: ['size-7'],
   },
   btnText: {
     root: [
-      'btn btn-link text-base rounded-full tooltip px-1.5 font-semibold',
+      'btn btn-link text-base rounded-full px-1.5 font-semibold',
       'text-base-content disabled:text-base-content/30',
       'hover:text-base-content/80',
       'no-underline hover:no-underline!',
@@ -17,9 +17,9 @@ export const controlStyles = {
     ],
   },
   menu: {
-    root: 'menu p-0 min-w-32 gap-1',
-    a: 'rounded-lg',
-    active: 'menu-active',
+    root: 'menu p-2 min-w-32 gap-1',
+    a: 'rounded-xl',
+    active: 'menu-active bg-primary!',
     icon: 'size-6',
     label: 'text-base-content',
     desc: 'text-base-content/60',
@@ -30,7 +30,7 @@ export const controlStyles = {
 
 export const controlRightStyles = {
   btn: {
-    root: [controlStyles.btn.root, 'tooltip-left'],
+    root: [controlStyles.btn.root],
     icon: controlStyles.btn.icon,
   },
   btnText: {
