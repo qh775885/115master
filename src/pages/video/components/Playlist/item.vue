@@ -101,9 +101,6 @@ const styles = clsx({
       'tracking-tight',
       'app-font-time',
       'app-shadow',
-      'transition-all duration-300 ease-[var(--app-ease-in-sine)]',
-      'opacity-0',
-      'group-hover/cover:opacity-100',
     ],
   },
   mark: {
@@ -114,15 +111,12 @@ const styles = clsx({
   },
   progress: {
     container: [
-      'absolute right-0 bottom-0 h-[0] w-full',
+      'absolute right-0 bottom-0 h-[4px] w-full',
       'bg-base-100/40',
-      'transition-all duration-300 ease-[var(--app-ease-in-sine)]',
-      'group-hover:h-[4px]',
     ],
     bar: [
-      'bg-base-content/70 absolute top-0 left-0 h-full w-0',
+      'bg-base-content absolute top-0 left-0 h-full w-0',
       'app-shadow',
-      'group-hover/cover:bg-base-content',
     ],
   },
   info: {
