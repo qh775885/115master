@@ -71,7 +71,6 @@ const styles = clsx({
     'rounded-3xl',
     'overflow-hidden',
     'app-glass-border',
-    'pb-5',
   ],
   playlist: {
     container: [
@@ -99,6 +98,7 @@ const styles = clsx({
       'overflow-y-auto',
       'px-(--app-playlist-space) pt-[var(--app-playlist-header-height)]',
       '[&::-webkit-scrollbar-track]:mt-(--app-playlist-header-height)',
+      '[&::-webkit-scrollbar-track]:mb-6',
     ],
     divider: 'divider text-base-content/30 mx-auto w-1/3',
   },
