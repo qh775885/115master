@@ -138,7 +138,6 @@ import type {
 } from '../../components/XPlayer/components/Shortcuts/shortcuts.types'
 import type { PlayerContext } from '../../components/XPlayer/hooks/usePlayerProvide'
 import type XPlayerInstance from '../../components/XPlayer/index.vue'
-import type { LocalPlayer } from '../../types'
 import type { Subtitle, ThumbnailRequest } from '../../components/XPlayer/types'
 import type { Entity } from '../../utils/drive115'
 import { Icon } from '@iconify/vue'
